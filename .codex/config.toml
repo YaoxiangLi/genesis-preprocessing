@@ -1,0 +1,21 @@
+# Project defaults corresponding to .claude/settings.json.
+# Load this checkout as a trusted project, then restart Codex.
+approval_policy = "on-request"
+approvals_reviewer = "user"
+
+# Ordinary commands can read outside the project and write inside it.
+# Codex protects .git/, .codex/, and .agents/ even inside a writable workspace.
+# Explicit command allow rules in rules/default.rules can authorize execution
+# outside this sandbox, so this is not an absolute outside-write prohibition.
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+# No additional non-project writable roots. Runtime workspace roots still apply.
+writable_roots = []
+# Preserve Claude's /tmp and /private/tmp read exceptions and AGENTS.md's
+# authorization for creating and cleaning up temporary files.
+exclude_slash_tmp = false
+exclude_tmpdir_env_var = false
+# Network access needs approval unless an explicit command allow rule applies.
+# Claude's settings have no corresponding network sandbox.
+network_access = false

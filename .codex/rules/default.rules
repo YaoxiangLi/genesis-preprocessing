@@ -1,0 +1,157 @@
+# Initial translation of .claude/settings.json.
+# These are argument-prefix rules; Claude's command-string globs are not supported.
+# The strictest matching decision wins: forbidden > prompt > allow.
+# Allow rules can authorize unsandboxed execution, including outside writes and
+# network access. The broad entries below intentionally mirror Claude's allows.
+# Unmatched commands may run inside the sandbox; this is not an exhaustive list
+# of commands Codex may execute.
+#
+# Prefixes do not cover flags before subcommands, absolute executable paths,
+# aliases, or arbitrary indirect/script execution. Quoted remote command strings
+# may also fail to match the corresponding multi-argument SSH prefix.
+# AGENTS.md's Portal, /oak/, and SLURM resource limits remain instructions.
+# Other active rule files are merged; project rules do not clear user/system rules.
+
+# Deny: translate "*nextflow secrets*" for direct and common wrapped invocations.
+prefix_rule(
+    pattern = ["nextflow", "secrets"],
+    decision = "forbidden",
+    justification = "Nextflow secrets commands are denied by .claude/settings.json.",
+    match = ["nextflow secrets list", "nextflow secrets set EXAMPLE value"],
+    not_match = ["nextflow -version", "nextflow run main.nf"],
+)
+prefix_rule(
+    pattern = ["pixi", "run", "nextflow", "secrets"],
+    decision = "forbidden",
+    justification = "Preserve the Nextflow secrets denial through pixi.",
+    match = ["pixi run nextflow secrets list"],
+    not_match = ["pixi run nextflow -version"],
+)
+prefix_rule(
+    pattern = ["ssh", "sherlock", "nextflow", "secrets"],
+    decision = "forbidden",
+    justification = "Preserve the Nextflow secrets denial for an explicit Sherlock command.",
+    match = ["ssh sherlock nextflow secrets list"],
+    not_match = ["ssh sherlock nextflow -version"],
+)
+prefix_rule(
+    pattern = ["gh", "pr", "create"],
+    decision = "forbidden",
+    justification = "PR creation is denied by .claude/settings.json.",
+    match = ["gh pr create", "gh pr create --draft"],
+    not_match = ["gh pr view 123", "gh pr list"],
+)
+
+# Ask: preserve the direct command prefixes and common SLURM wrappers.
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "prompt",
+    justification = "Review before pushing commits to a remote.",
+    match = ["git push", "git push origin main"],
+    not_match = ["git status", "git diff"],
+)
+prefix_rule(
+    pattern = ["pixi", "run", "build-dockers"],
+    decision = "prompt",
+    justification = "Review before building Docker images.",
+    match = ["pixi run build-dockers"],
+    not_match = ["pixi run checks"],
+)
+prefix_rule(
+    pattern = [["sbatch", "srun", "scancel"]],
+    decision = "prompt",
+    justification = "Review SLURM actions; submissions must obey AGENTS.md's resource limits.",
+    match = [
+        "sbatch --time=00:05:00 --cpus-per-task=2 --mem=8G job.sh",
+        "srun --time=00:05:00 --cpus-per-task=2 --mem=8G hostname",
+        "scancel 123",
+    ],
+    not_match = ["squeue", "sinfo", "scontrol show job 123"],
+)
+prefix_rule(
+    pattern = ["pixi", "run", ["sbatch", "srun", "scancel"]],
+    decision = "prompt",
+    justification = "Preserve SLURM approval through pixi.",
+    match = ["pixi run sbatch job.sh", "pixi run srun hostname", "pixi run scancel 123"],
+    not_match = ["pixi run checks"],
+)
+prefix_rule(
+    pattern = ["ssh", "sherlock", ["sbatch", "srun", "scancel"]],
+    decision = "prompt",
+    justification = "Review Sherlock job submission, execution, or cancellation.",
+    match = ["ssh sherlock sbatch job.sh", "ssh sherlock srun hostname", "ssh sherlock scancel 123"],
+    not_match = ["ssh sherlock squeue", "ssh sherlock sinfo", "ssh sherlock ls /oak/stanford/groups/akundaje"],
+)
+
+# Allow: general tools. Arguments are unrestricted, as in Claude's settings.
+prefix_rule(
+    pattern = [[
+        "ls", "find", "grep", "rg", "cat", "head", "tail", "wc", "sort",
+        "comm", "diff", "file", "echo", "which", "mktemp", "ruff", "shellcheck",
+    ]],
+    decision = "allow",
+    match = ["cat AGENTS.md", "rg permissions .claude/settings.json", "ruff check .", "mktemp"],
+    not_match = ["python3 script.py", "ssh another-host hostname"],
+)
+prefix_rule(
+    pattern = ["sed", "-n"],
+    decision = "allow",
+)
+prefix_rule(
+    pattern = ["command", "-v"],
+    decision = "allow",
+)
+prefix_rule(
+    pattern = ["ty", "check"],
+    decision = "allow",
+)
+prefix_rule(
+    pattern = ["git", ["status", "diff", "log", "show", "branch"]],
+    decision = "allow",
+    match = ["git status --short", "git diff", "git log -5", "git show HEAD", "git branch"],
+    not_match = ["git push", "git reset --hard", "git stash drop"],
+)
+prefix_rule(
+    pattern = ["git", "stash", "list"],
+    decision = "allow",
+)
+prefix_rule(
+    pattern = ["pixi", ["--version", "info", "list", "install"]],
+    decision = "allow",
+    match = ["pixi --version", "pixi info", "pixi list", "pixi install"],
+    not_match = ["pixi run build-dockers", "pixi add package"],
+)
+prefix_rule(
+    pattern = ["nextflow", "-version"],
+    decision = "allow",
+)
+prefix_rule(
+    pattern = ["pixi", "run", [
+        "checks", "check-subprojects", "lint-nextflow", "lint-scripts", "lint-preview",
+    ]],
+    decision = "allow",
+    match = ["pixi run checks", "pixi run check-subprojects", "pixi run lint-scripts"],
+    not_match = ["pixi run pipeline", "pixi run build-dockers"],
+)
+prefix_rule(
+    pattern = ["pixi", "run", "poe", "checks"],
+    decision = "allow",
+)
+# Claude's "lookup*" matches task names with suffixes too. Codex only matches the
+# literal "lookup" argument here; add separate prefixes for any actual variants.
+prefix_rule(
+    pattern = ["pixi", "run", "lookup"],
+    decision = "allow",
+)
+prefix_rule(
+    pattern = ["ssh", "sherlock", ["squeue", "sinfo", "ls"]],
+    decision = "allow",
+    match = ["ssh sherlock squeue", "ssh sherlock sinfo", "ssh sherlock ls /oak/stanford/groups/akundaje"],
+    not_match = ["ssh sherlock sbatch job.sh", "ssh another-host ls"],
+)
+prefix_rule(
+    pattern = ["ssh", "sherlock", "scontrol", "show"],
+    decision = "allow",
+    match = ["ssh sherlock scontrol show job 123"],
+    not_match = ["ssh sherlock scontrol update JobId=123 TimeLimit=60"],
+)
