@@ -1,7 +1,14 @@
 # AGENTS.md
 
 ## Project Overview
-Code to process and analyze plant transcription factors.
+A nextflow pipeline to process and analyze plant transcription factors.
+
+### Environments
+The main project environment is managed by pixi. There are subprojects:
+- genesis_tools is a Python project managed by uv. It has software tools needed for some Processes in the main pipeline.
+- environments/DAP_SEQ_ALIGNMENT.yaml defines a conda environment used for alignment and indexing.
+- environments/DAP_SEQ_PEAKS.yaml defines a conda environment used for peak calling and intersection.
+- environments/DAP_SEQ_QC.yaml defines a conda environment used for QC.
 
 ### Compute resources
 The project is intended to be used locally on macOS or Linux, or on a SLURM cluster, specifically
@@ -50,8 +57,7 @@ Keep the two in sync: a boundary added here that is pattern-matchable belongs th
   instructions.
 - Do not run resource-intensive jobs on the login node.
 - Avoid adding new dependencies to environments.
-- Read-only IGVF Portal queries and downloads are permitted. Do not submit files or create, update,
-  or delete metadata on any Portal instance, including staging and sandbox.
+- Ask before pushing docker images.
 
 Keep this root instruction file compact. Put detailed component-specific guidance in nested
 `AGENTS.md` files when needed.

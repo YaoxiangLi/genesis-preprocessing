@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "Genesis DAP-seq pipeline",
+  "type": "object",
+  "required": [
+    "input"
+  ],
+  "properties": {
+    "input": {
+      "type": "string",
+      "description": "Exactly one sample TSV."
+    },
+    "references": {
+      "type": "string",
+      "description": "Compressed genomes and derived files."
+    },
+    "workspace": {
+      "type": "string",
+      "description": "Published output root."
+    },
+    "cpus": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "bwa_batch_size": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "bwa_seed_length": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "bwa_max_seed_occurrences": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "bwa_score_threshold": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

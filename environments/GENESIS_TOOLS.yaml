@@ -1,0 +1,12 @@
+name: genesis_tools
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - conda-forge::python=3.14.5
+  - conda-forge::python-freethreading
+  - conda-forge::pip>=26,<27
+  - pip:
+      - defopt==7.0.0
+      - -e ../genesis_tools/.

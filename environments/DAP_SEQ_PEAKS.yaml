@@ -1,0 +1,9 @@
+name: dap_seq_peaks
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - bioconda::macs3>=3.0.4,<4
+  - conda-forge::gzip>=1.13,<2
+  - bioconda::bedtools>=2.31.1,<3

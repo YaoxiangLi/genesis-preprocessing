@@ -1,0 +1,42 @@
+"""Expose typed functions as command-line tools with defopt."""
+
+from __future__ import annotations
+
+import subprocess
+import sys
+
+import defopt
+
+from .metadata import infer_metadata
+from .nh import add_nh
+from .quantification import (
+    finish_quantification,
+    mean_peak_rpkm,
+    prepare_quantification,
+    quantify_peaks,
+)
+from .samples import validate_sheet
+
+
+def main() -> None:
+    """Dispatch commands and report actionable validation errors."""
+    try:
+        defopt.run(
+            {
+                "validate-sheet": validate_sheet,
+                "metadata": infer_metadata,
+                "peak-rpm": quantify_peaks,
+                "peak-rpkm": mean_peak_rpkm,
+                "add-nh": add_nh,
+                "prepare-quantification": prepare_quantification,
+                "finish-quantification": finish_quantification,
+            },
+            cli_options="all",
+        )
+    except (OSError, ValueError, EOFError, subprocess.CalledProcessError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        raise SystemExit(1) from error
+
+
+if __name__ == "__main__":
+    main()

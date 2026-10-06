@@ -1,0 +1,12 @@
+name: dap_seq_qc
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - conda-forge::r-base=4.4
+  - bioconda::r-spp=1.16
+  - conda-forge::r-catools>=1.18,<2
+  - conda-forge::r-snow>=0.4,<1
+  - bioconda::samtools>=1.22,<2
+  - conda-forge::gawk>=5.3,<6

@@ -1,163 +1,210 @@
-# Plant DAP-seq processing
+# Genesis plant DAP-seq pipeline
 
-Each dataset has one `samples.tsv`, with one row per downloaded library, including
-controls. The shared `dap_seq_pipeline.sh` replaces the repeated command lists.
+Genesis is a Nextflow DSL2 pipeline for single-end and paired-end plant DAP-seq.
+It downloads libraries, derives reference indexes and chromosome sizes, aligns
+with bwa-mem2, runs SPP and alignment QC, generates deepTools coverage tracks,
+calls MACS3 peaks against each treatment's assigned control, and quantifies peaks.
 
-| Dataset | Layout | Samples | Samples with peak calls |
+| Sample sheet | Layout | Libraries | Treatments |
 | --- | --- | ---: | ---: |
-| 01-Arabidopsis_thaliana-GSE60141 | Single-end | 936 | 934 |
-| 15-Arabidopsis_lyrata-PRJNA1177479 | Paired-end | 405 | 378 |
-| 16-Arabidopsis_thaliana-PRJNA1177481 | Paired-end | 800 | 748 |
-| 24-Sorghum_bicolor-PRJNA1177471 | Paired-end | 142 | 134 |
+| `01-Arabidopsis_thaliana-GSE60141.tsv` | SE | 936 | 934 |
+| `15-Arabidopsis_lyrata-PRJNA1177479.tsv` | PE | 405 | 378 |
+| `16-Arabidopsis_thaliana-PRJNA1177481.tsv` | PE | 800 | 748 |
+| `24-Sorghum_bicolor-PRJNA1177471.tsv` | PE | 142 | 134 |
 
-## Order of operations
+The six-column sheets preserve the original sample IDs, URLs, and control
+assignments. The retired Bash pipeline and metadata script are available in Git
+history. Stock Bowtie 1 comparison modules remain available in `modules/`, but
+are not imported or run by the main workflow.
 
-1. **download**: Download FASTQs (`wget.sh`), verify gzip integrity, and count
-   first-read FASTQ lines (`countlines.sh`). Divide the line count by four for
-   the read count. Paired files share one sample row.
-2. **metadata**: Infer layout from the presence of a second FASTQ URL, sum the
-   second column of `chrom_sizes` for genome size, and inspect the first 100 reads
-   of each FASTQ to determine read length. Write `<sample_id>.metadata.tsv`.
-3. **map**: Trim and align reads (`map-*.sh`), sort BAMs, and index each BAM
-   (`samtools-index-*.sh`). Every sample gets a unique 36-base first-read
-   alignment for cross-correlation QC. The main alignment uses all best-stratum
-   alignments at the inferred read length. The historical `2x36mers` filenames
-   are retained for insert-length statistics; they do not specify the main
-   alignment's read length.
-4. **qc**: Run cross-correlation (`run_spp.sh`), alignment statistics
-   (`SAMstats-*.sh`), and paired insert-length distributions
-   (`PEInsertDistFromBAM-2x36mers.sh`).
-5. **tracks**: Generate total and strand-specific RPM coverage, plus strand-specific
-   5-prime counts (`makewiggle*.sh`, `make5pwiggle*.sh`), then convert each WIG
-   to bigWig (`wigtobigwig*.sh`).
-6. **peaks**: Run MACS2 with the control listed in each sample row (`macs2.sh`),
-   then gzip the narrowPeak output.
-7. **quantify**: Calculate RPM over each sample's called peaks
-   (`bedRPKMfromBAM.sh`). Rows with `control_sample = -` skip peaks and quantification.
+## Install and run
 
-Stages run across all selected samples before advancing. This ensures control
-BAMs exist before peak calling. QC, tracks, and peaks can each run after mapping;
-only quantification depends on peak calling.
-
-## Running
-
-Preview a dataset without accessing tools, reference files, or the network, and
-without creating output files:
+Install [Pixi](https://pixi.sh/), then install the project and its Python tools:
 
 ```bash
-bash dap_seq_pipeline.sh --dry-run 01-Arabidopsis_thaliana-GSE60141/samples.tsv
+pixi run install-all
 ```
 
-Run one dataset, or omit the sheet argument to run all four:
+Place each sheet's gzipped reference FASTA under `references/`, using the exact
+basename in `reference_fasta`. Reference genomes are not downloaded automatically.
+Nextflow builds missing chromosome-size files and bwa-mem2 indexes once per
+reference, and copies them back to that directory. The first resume after generating references can rerun downstream
+tasks as inputs move to their published cache paths; subsequent resumes reuse
+those task results. Existing nonempty size files
+and complete indexes are reused. Remove derived files and use a fresh work
+directory when replacing a reference; cached reference products are not checked
+against the FASTA's contents.
+
+Run exactly one sheet per invocation:
 
 ```bash
-bash dap_seq_pipeline.sh --threads 2 01-Arabidopsis_thaliana-GSE60141/samples.tsv
-bash dap_seq_pipeline.sh --threads 2
+# Default: local execution with micromamba/conda environments.
+pixi run pipeline 01-Arabidopsis_thaliana-GSE60141.tsv
+
+# Local Docker execution with the images recorded in .env.
+pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -profile local,docker
+
+# Continue a previous run using Nextflow's task cache.
+pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -profile local,docker -resume
+
+# Submit tasks from Sherlock using accessible container images.
+pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -profile sherlock,apptainer
 ```
 
-Use `--sample ID` with one sheet to process that sample and its assigned control.
-Use `--stage download|metadata|map|qc|tracks|peaks|quantify` to run a single stage with
-existing upstream outputs. Results go to `results/<dataset>/`, or
-`<root>/<dataset>/` when `--output-dir <root>` is supplied.
+Run through the root Pixi environment so Nextflow can find micromamba. An
+explicit `-profile` replaces the wrapper's `local,conda` default: choose an
+executor and a software environment together. `sherlock` uses SLURM and the
+`normal` queue; select another queue with `--slurm_queue`. Locally built images
+must be published with approval, or made available on the cluster, before
+Sherlock's Apptainer can use them. Cluster work, cache, reference, and output
+paths must be visible to compute nodes and writable by the user.
 
-The pipeline stops on command failures, validates sheets before running, and
-checks required tools and helper scripts before writing outputs. Downloads and
-BAM sorting use temporary destinations, removed on failure. Existing nonempty
-FASTQs are gzip-checked and reused; other selected stages rerun and may replace
-their outputs. There are no completion markers or automatic downstream skips.
-Use separate output roots for different reference or analysis configurations.
+Use `--references /absolute/path`, `--workspace /absolute/path`, and
+`-work-dir /absolute/path` to choose reference, published-output, and Nextflow
+work locations. Defaults are `references/`, `workspace/`, and `work/` in this
+repository. Separate workspace roots avoid sample-name collisions between runs.
+Nextflow retains intermediate FASTQs and BAMs under its work directory for
+caching; retain it for `-resume` and clean it only when those intermediates are
+no longer needed. `-with-trace trace.tsv`, `-with-report report.html`, and
+`-with-timeline timeline.html` provide execution records.
 
-## Dependencies and locations
+## Sample sheet
 
-The pipeline retains the original alignment options and tools, with read length
-and MACS2 genome size now inferred from inputs. It needs Python 3 for metadata,
-wget, gzip, the **NH-patched Bowtie 1** (`--sam-nh`), samtools, MACS2, wigToBigWig, R/SPP,
-and the original Python helpers, which are **not included in this repository**.
-The Python interpreter must support those helpers; their original interpreter
-was simply `python`. Ordinary Bowtie or Bowtie 2 is not a replacement for the
-patched executable. No tools are installed or reference indexes built automatically.
+The header and column order are fixed:
 
-Defaults reproduce the original Sherlock locations. Configure local installations
-or other cluster locations with these environment variables:
+```tsv
+sample_id	species	read1_url	read2_url	control_sample	reference_fasta
+treatment	Arabidopsis_thaliana	https://example.org/treatment.fastq.gz	-	control	TAIR10.fa.gz
+control	Arabidopsis_thaliana	https://example.org/control.fastq.gz	-	-	TAIR10.fa.gz
+```
 
-| Variable | Default / purpose |
-| --- | --- |
-| `GENOME_DIR` | `/oak/stanford/groups/akundaje/marinovg/genomes`; root for relative sheet reference paths |
-| `CODE_DIR` | `/oak/stanford/groups/akundaje/marinovg/code`; original Python helpers |
-| `PROGRAM_DIR` | `/oak/stanford/groups/akundaje/marinovg/programs`; original tool installations |
-| `LEGACY_PYTHON` | `python`; interpreter for helper scripts |
-| `METADATA_PYTHON` | `python3`; interpreter for the included metadata inference script |
-| `BOWTIE`, `SAMTOOLS`, `MACS2`, `WIG_TO_BIGWIG`, `RSCRIPT` | Override individual executables with absolute paths or names on PATH |
-| `SAMTOOLS_SORT_STYLE` | `legacy`; set `modern` when overriding samtools with a version supporting `sort -o` |
-| `SPP_SCRIPT` | `$HOME/code/spp/spp_package/run_spp.R` |
-| `RPM_SCRIPT` | `$HOME/code/bedRPKMfromBAM.py` |
-| `THREADS` | `2`; Bowtie and SPP thread count |
-| `OUTPUT_DIR` | `results/` beside the pipeline |
+Use `-` for an absent mate or control. A mate URL selects paired-end processing.
+Sample IDs must be unique within the sheet. Every assigned control must appear
+in the same sheet, have `control_sample = -`, and match the treatment's species,
+reference, and layout. Controls receive alignment, QC, and tracks; treatments
+also receive peaks and quantification. Multiple treatments can share a control.
+Validation completes before downloads start.
 
-Use absolute paths for script overrides and `PROGRAM_DIR`; executable overrides
-can also be names on PATH. Reference columns may be absolute or relative to
-`GENOME_DIR`. On Sherlock, run analysis on an
-allocated compute node; the pipeline does not submit jobs or impose scheduler
-resource limits. It writes to the output directory, so use an authorized destination.
+Reference names are gzipped FASTA basenames ending in `.fa.gz`, `.fasta.gz`, or
+`.fna.gz`. Identifiers and filenames may contain letters, digits, underscores,
+periods, and hyphens, with a letter, digit, or underscore first. Read URLs support
+HTTP, HTTPS, and absolute `file:///` URLs. Local FASTQs are declared and staged
+as task inputs, including mates with matching basenames in different folders.
 
-## Sample sheet fields
+## Analysis choices
 
-The header and column order are fixed. Use `-` for an absent mate or control.
-`sample_id` preserves the original output filename prefix;
-`read1_url` and `read2_url` preserve the original ENA download paths using
-HTTPS; `control_sample` preserves the exact control from the old MACS2 command.
-`bowtie_index`, `reference_fasta`, and `chrom_sizes` identify the reference inputs.
-Sample IDs must be unique and controls must appear in the same sheet, with the
-same layout and reference. Control rows must have `control_sample = -`. The unique
-first-read QC alignment always uses 36 bases.
+Both main and first-read QC alignments use **full reads**. Read length is inferred
+from up to the first 100 reads per mate and recorded as metadata; it is not a
+trimming instruction. Inspected reads must be nonempty, structurally valid, and
+uniform in length across mates. Downloads pass gzip integrity checks, first-read
+line counts must be divisible by four, and paired FASTQs must have equal line
+counts. Genome size is the sum of chromosome sizes derived from the FASTA.
 
-## Inferred metadata
+The main bwa-mem2 BAM retains primary mapped alignments, including **MAPQ 0**.
+`samtools view -F 2308` excludes unmapped, secondary, and supplementary records.
+There is no MAPQ threshold, NH weighting, or separate deduplication step in the
+bwa-mem2 alignment. QC aligns full first reads as an unpaired library. Each
+sample's alignment provenance records the bwa-mem2 version, layout, read length,
+flag exclusion, options, and QC input policy.
 
-`<sample_id>.metadata.tsv` has one row and the columns `sample_id`, `layout`,
-`genome_size`, `analysis_read_length`, `read1_reads_checked`, and
-`read2_reads_checked`. Layout is `SE` when `read2_url = -`, otherwise `PE`.
-Genome size is the sum of all chromosome lengths, used directly as MACS2 `-g`.
-Read length is the sequence length observed in the first 100 reads of each
-FASTQ. All inspected reads, including both mates, must have the same length.
-Files with fewer than 100 reads use all available reads; empty or malformed
-FASTQs and inconsistent lengths fail. Chromosome sizes must be positive integers
-with unique chromosome names. Metadata is written atomically after validation.
+BWA defaults are `-K 10000000 -k 19 -c 10000 -T 30`. Override them with
+`--bwa_batch_size`, `--bwa_seed_length`, `--bwa_max_seed_occurrences`, and
+`--bwa_score_threshold`; each must be a positive integer.
 
-Full runs infer metadata after downloading and before alignment. Standalone
-`map` and `peaks` stages load the saved metadata, or generate it from the FASTQs
-and chromosome sizes when missing. Run `--stage metadata` again after changing
-input files. Saved metadata lets peak calling run without retaining FASTQs.
-Dry runs do not inspect data files; command previews use `INFERRED_READ_LENGTH`
-and `INFERRED_GENOME_SIZE` placeholders.
+SPP uses the unmodified, vendored upstream `run_spp.R` revision
+[`6984a713aba0218b76bacc63f2fb5087425fd6a3`](https://github.com/kundajelab/phantompeakqualtools/blob/6984a713aba0218b76bacc63f2fb5087425fd6a3/run_spp.R),
+with shift range `-s=-0:2:400`, GNU awk, and the full-length first-read BAM.
+The provenance and differences from the historical Sherlock script are explained
+in [vendor/phantompeakqualtools/README.md](vendor/phantompeakqualtools/README.md).
+SPP scores can differ from the old workflow because of the aligner, read lengths,
+and upstream correlation-baseline changes.
 
-## Outputs and resolved gaps
+MACS3 uses `BAM` for SE and `BAMPE` for PE, the assigned control, inferred genome
+size, and its remaining defaults. deepTools produces total and strand-specific
+CPM coverage and strand-specific 5-prime counts at one-base resolution. PE
+libraries additionally receive first-read tracks. Tracks have no MAPQ filter.
+Strand CPM uses the total alignment count as its shared scaling denominator.
 
-Each sample produces downloaded FASTQs, `.fastq.lines`, `.metadata.tsv`, coordinate-sorted
-`.1x36mers.unique.bam` plus `.SE.a.bam` or `.PE.a.bam`, BAM indexes, SPP QC,
-SAMstats, WIG/bigWig tracks, and (for paired samples) insert-length statistics.
-Treatments also produce the MACS2 output family, compressed narrowPeak files,
-and `.MACS-2.1.0_peaks.RPM` quantification.
+Peak RPM counts overlapping retained primary **read ends**, dividing by all
+retained mapped read ends and multiplying by one million; paired ends count
+independently. Mean RPKM is the length-weighted average of deepTools' RPKM
+bedGraph over each peak, including uncovered bases as zero. Both score files
+preserve the narrowPeak rows and append one value. Mean coverage RPKM is a
+coverage statistic and differs from read-end RPM divided by peak length in kb.
+The standalone `genesis-tools peak-rpm` command also supports explicit NH
+fractional weighting when input alignments have valid NH tags.
 
-The old paired-end datasets referenced `.SE.a.bam` for their single-end tracks
-and indexing, but supplied no command creating it. Those tracks now use the
-existing unique 36-base first-read BAM and carry `.1x36mers.unique` names.
-Paired-end tracks and GSE60141 tracks retain their original names and options.
-The missing narrowPeak compression step is now explicit. Original SAMstats
-`-paired` arguments, including those on single-end BAMs, are preserved pending
-inspection of that external helper. No deduplication or other new analysis step
-has been added. The replaced command lists remain available in Git history.
+## Outputs and resources
+
+Published results live at `workspace/<species>/<sample_id>/`:
+
+- FASTQ line counts, metadata, and alignment provenance TSVs.
+- SPP TSV/PDF, samtools flagstat, idxstats, and alignment statistics; PE insert-length distributions.
+- CPM and 5-prime count bigWigs, including PE first-read tracks.
+- Treatment MACS3 outputs, including gzipped narrowPeak files.
+- Treatment `.peaks.RPM.tsv` and `.peaks.mean_RPKM.tsv` scores.
+
+**FASTQs, BAMs, BAM indexes, SAM exports, bedGraphs, and quantification
+intermediates are excluded from published results.** Derived reference files
+are published separately under the reference directory.
+
+Alignment, QC, and tracks default to two CPUs, 8 GB, and four hours, configurable
+with `--cpus`, `--memory`, and `--time`. Indexing defaults to one CPU, 32 GB, and
+eight hours, configurable with `--index_memory` and `--index_time`. Other modules
+declare their own resources. The `test` profile reduces configurable allocations
+to two CPUs, 2 GB, and five minutes; it does not select a sample subset or replace
+tools. For agent-submitted Sherlock validation, every task must explicitly stay
+within five minutes, two CPUs, and 8 GB. Run computation on allocated nodes.
+
+## Environments and Docker builds
+
+Pure tool environments are defined in `environments/*.yaml`; their matching
+Pixi manifests and locks support container builds. `genesis_tools/` is a typed
+Python 3.14.5 free-threading uv project. Its conda equivalent installs the local
+Python project; containers use the dedicated uv Dockerfile. Each Nextflow module
+declares its environment and reads its image from `.env` using nf-dotenv.
+
+Keep the original Docker discovery/build scripts and run them through Pixi:
+
+```bash
+pixi run build-dockers --no-push
+pixi run build-dockers --no-push -- dap_seq_alignment genesis_tools
+```
+
+Every build targets `linux/amd64` and `linux/arm64`. The original scripts default
+to pushing: always pass `--no-push` for local builds. Tags default to the latest
+Git tag (`0.1.0`); use `--tag` to override. The scripts update `.env` with image
+digests and preserve unrelated entries. Publishing images requires approval.
+The reference Dockerfiles and pinned base images are retained.
 
 ## Verification
 
 ```bash
-bash -n dap_seq_pipeline.sh
-shellcheck dap_seq_pipeline.sh
-python3 tests/verify_pipeline.py
+pixi run checks
+# Opt-in real-tool validation using existing local Docker images:
+pixi run validate-docker
+# Retain fixtures, full logs, traces, and intermediate outputs for inspection:
+pixi run validate-docker --keep
 ```
 
-The dependency-free verification script checks the four sheets and exercises
-single-end and paired-end workflows using temporary fake tools, including control
-ordering, failure propagation, and both samtools sort interfaces. Metadata checks
-cover chromosome sums, bounded read sampling, short files, empty or malformed
-inputs, mixed read lengths, and mismatched mates. It does not
-validate biological results or external helper compatibility.
+The default suite runs ShellCheck, Ruff, ty, quantification and mocked Docker
+build regressions, sample-sheet and metadata cases, and actual Nextflow SE/PE
+stub workflows. It checks control fan-out, per-reference generation and cache
+reuse, `-resume`, invalid inputs, and publication boundaries. Mock builds cover
+both architectures and `--no-push` without contacting Docker or a registry.
+
+Docker validation runs the real download/staging, indexing, bwa-mem2, samtools,
+SPP, deepTools, MACS3, bedtools, and Python tools on deterministic 75-base SE/PE
+fixtures with enriched regions and duplicated sequence. It checks nonempty peaks,
+finite positive scores, provenance, full read lengths, outputs, and resume.
+Validated on 2026-10-06 with the existing linux/arm64 images: all 45 initial
+tasks completed, each of the three treatments produced 200 peaks, and all 41
+tasks on the stable resume were cached. BAM inspection confirmed retained MAPQ 0
+alignments, full 75-base sequences, and unpaired first-read QC alignments. No
+FASTQs or BAMs appeared in published outputs. Tool logs contained no warnings.
+
+These small synthetic runs validate integration; comparisons of biological
+outputs on the full public datasets remain a separate validation task. Native
+macOS stub traces do not include task runtime metrics; Docker traces do.
+
+See [docs/nextflow-style.md](docs/nextflow-style.md) for module conventions.

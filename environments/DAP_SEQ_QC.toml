@@ -1,0 +1,16 @@
+[workspace]
+authors = ["Ted Brookings <ted.brookings@googlemail.com>"]
+channels = ["conda-forge", "bioconda", "nodefaults", "https://conda.anaconda.org/conda-forge", "https://conda.anaconda.org/bioconda"]
+name = "dap_seq_qc"
+platforms = ["linux-64", "osx-64", "osx-arm64", "linux-aarch64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+r-base = { version = "4.4.*", channel = "conda-forge" }
+r-spp = { version = "1.16.*", channel = "bioconda" }
+r-catools = { version = ">=1.18,<2", channel = "conda-forge" }
+r-snow = { version = ">=0.4,<1", channel = "conda-forge" }
+samtools = { version = ">=1.22,<2", channel = "bioconda" }
+gawk = { version = ">=5.3,<6", channel = "conda-forge" }

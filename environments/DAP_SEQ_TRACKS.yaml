@@ -1,0 +1,8 @@
+name: dap_seq_tracks
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - bioconda::deeptools>=3.5.6,<4
+  - bioconda::samtools>=1.22,<2
