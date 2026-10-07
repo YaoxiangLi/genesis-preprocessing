@@ -17,6 +17,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import zipfile
 from collections import Counter
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -443,6 +444,7 @@ def check_outputs(work: Path, *, docker: bool) -> None:
         "CHROM_SIZES": 2,
         "BWA_MEM2_INDEX": 2,
         "DOWNLOAD": 3,
+        "FASTQC": 7,
         "METADATA": 5,
         "BWA_MEM2_ALIGN": 5,
         "QC": 5,
@@ -494,6 +496,28 @@ def check_outputs(work: Path, *, docker: bool) -> None:
             assert provenance["qc_reads"] == "full_read1_unpaired"
             assert provenance["spp_reads"] == "read1_first_50bp_unpaired"
             assert provenance["bwa_options"] == "-K 10000000 -k 19 -c 10000 -T 30"
+        mates = ("read1", "read2") if layout == "PE" else ("read1",)
+        fastqc = folder / "qc" / "fastqc"
+        assert len(list(fastqc.glob("*_fastqc.html"))) == len(mates)
+        assert len(list(fastqc.glob("*_fastqc.zip"))) == len(mates)
+        assert len(list(fastqc.iterdir())) == 3 * len(mates)
+        for mate in mates:
+            stem = f"{sample}.{mate}_fastqc"
+            assert (fastqc / f"{stem}.html").stat().st_size > 0
+            assert (fastqc / f"{stem}.zip").stat().st_size > 0
+            if docker:
+                assert (fastqc / f"{sample}.{mate}.fastqc.version.txt").read_text().strip() == (
+                    "FastQC v0.12.1"
+                )
+                with zipfile.ZipFile(fastqc / f"{stem}.zip") as archive:
+                    assert archive.testzip() is None
+                    data = archive.read(f"{stem}/fastqc_data.txt").decode()
+                    assert data.startswith("##FastQC\t0.12.1")
+                    assert f"Filename\t{sample}.{mate}.fastq.gz" in data
+                    expected_reads = 6000 if sample.endswith("control") else 32000
+                    assert f"Total Sequences\t{expected_reads}\n" in data
+                    assert "Sequence length\t75\n" in data
+                    assert archive.read(f"{stem}/summary.txt")
         if sample.endswith("control"):
             assert not list(folder.glob("*.macs3*")) and not list(folder.glob("*.peaks.*.tsv"))
             continue
@@ -505,6 +529,31 @@ def check_outputs(work: Path, *, docker: bool) -> None:
             assert [line.rsplit("\t", 1)[0] for line in scores] == peaks
             assert all(math.isfinite(float(line.rsplit("\t", 1)[1])) for line in scores)
             assert any(float(line.rsplit("\t", 1)[1]) > 0 for line in scores) if docker else True
+    fastqc_tasks = [row for row in rows if row["name"].startswith("FASTQC ")]
+    expected_tags = {
+        f"FASTQC ({sample}:{mate})"
+        for sample, layout in SAMPLES.items()
+        for mate in (("read1", "read2") if layout == "PE" else ("read1",))
+    }
+    assert {row["name"] for row in fastqc_tasks} == expected_tags
+    if docker:
+        # Verify compressed bytes through serving, downloading, and FastQC staging.
+        for row in fastqc_tasks:
+            prefix = work / "work" / row["hash"]
+            folders = list(prefix.parent.glob(prefix.name + "*"))
+            assert len(folders) == 1
+            reads = list(folders[0].glob("*.fastq.gz"))
+            assert len(reads) == 1
+            read = reads[0]
+            sample, mate = read.name.removesuffix(".fastq.gz").rsplit(".", 1)
+            original = work / "inputs" / sample
+            if mate == "read2":
+                original /= "mate"
+            original /= "reads.fastq.gz"
+            assert (
+                hashlib.sha256(read.read_bytes()).digest()
+                == hashlib.sha256(original.read_bytes()).digest()
+            ), read
     # Inspect executed commands, so changes to workflow wiring cannot bypass assertions.
     for command in (work / "work").glob("*/*/.command.sh"):
         source = command.read_text()
@@ -531,20 +580,30 @@ def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
         for path in references.rglob("*")
         if path.is_file()
     }
+    fastqc_before = {
+        path: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (work / "published").glob("samples/output/*/*/qc/fastqc/*")
+    }
+    assert len(fastqc_before) == 21
     assert run_pipeline(work, sheet, docker=docker, resume=True).returncode == 0
     rows = trace_rows(work, "resume")
     names = {row["name"].split(" ")[0] for row in rows}
     assert not names.intersection({"CHROM_SIZES", "BWA_MEM2_INDEX"}), names
+    fastqc_tasks = [row for row in rows if row["name"].split(" ")[0] == "FASTQC"]
+    assert len(fastqc_tasks) == 7 and all(row["status"] == "CACHED" for row in fastqc_tasks)
     # Newly published references change staged input paths on the first resume.
     # A second resume must cache all downstream computation at those stable paths.
     downloads = [row for row in rows if row["name"].split(" ")[0] == "DOWNLOAD"]
     assert len(downloads) == 3 and all(row["status"] == "CACHED" for row in downloads)
     assert run_pipeline(work, sheet, docker=docker, resume=True, suffix="stable").returncode == 0
     rows = trace_rows(work, "stable")
-    for process in ("DOWNLOAD", "BWA_MEM2_ALIGN", "QUANTIFY"):
+    for process in ("DOWNLOAD", "FASTQC", "BWA_MEM2_ALIGN", "QUANTIFY"):
         tasks = [row for row in rows if row["name"].split(" ")[0] == process]
         assert tasks and all(row["status"] == "CACHED" for row in tasks), tasks
     assert before == {path: (path.stat().st_mtime_ns, path.read_bytes()) for path in before}
+    assert fastqc_before == {
+        path: hashlib.sha256(path.read_bytes()).hexdigest() for path in fastqc_before
+    }
 
 
 def check_failures(work: Path, sheet: Path) -> None:
@@ -578,6 +637,43 @@ def check_failures(work: Path, sheet: Path) -> None:
     assert "Supply exactly one" in (work / "output-multiple-sheets.log").read_text()
 
 
+def check_download_failures(work: Path, base_url: str) -> None:
+    """Empty or corrupt raw libraries must fail before reaching FastQC or alignment."""
+    for name, contents in {
+        "empty": gzip.compress(b"", mtime=0),
+        "corrupt": b"\x1f\x8b\x08\x00truncated",
+    }.items():
+        raw = work / "inputs" / f"{name}.fastq.gz"
+        raw.write_bytes(contents)
+        case = work / f"download-{name}"
+        case.mkdir()
+        (case / "references").symlink_to(work / "references", target_is_directory=True)
+        shutil.copyfile(work / "limits.config", case / "limits.config")
+        sheet = case / "samples.tsv"
+        write_sheet(
+            sheet,
+            [
+                {
+                    "sample_id": "bad_control",
+                    "species": "Plant_SE",
+                    "read1_url": f"{base_url}/{raw.name}",
+                    "read2_url": "-",
+                    "control_sample": "-",
+                    "reference_fasta": "se.fa.gz",
+                }
+            ],
+        )
+        assert run_pipeline(case, sheet, docker=True, expect_failure=True).returncode != 0
+        rows = trace_rows(case)
+        assert any(
+            row["name"].startswith("DOWNLOAD ") and row["status"] == "FAILED" for row in rows
+        ), rows
+        assert not any(row["name"].split(" ")[0] in {"FASTQC", "BWA_MEM2_ALIGN"} for row in rows), (
+            rows
+        )
+        assert raw.read_bytes() == contents
+
+
 def check_bams(work: Path) -> None:
     """Read real BAMs to verify MAPQ-zero retention, flags, and untrimmed sequences."""
     images = dict(
@@ -596,6 +692,8 @@ def check_bams(work: Path) -> None:
                     "docker",
                     "run",
                     "--rm",
+                    "-u",
+                    f"{os.getuid()}:{os.getgid()}",
                     "--network",
                     "none",
                     "-v",
@@ -648,13 +746,34 @@ def main() -> None:
         (work / "inputs").mkdir()
         with serve(work / "inputs", docker=args.docker) as base_url:
             sheet = create_fixture(work, base_url, docker=args.docker)
+            raw_before = {
+                str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in (work / "inputs").rglob("*.fastq.gz")
+            }
+            (work / "raw-input-sha256.json").write_text(json.dumps(raw_before, indent=2) + "\n")
             assert run_pipeline(work, sheet, docker=args.docker).returncode == 0
             check_outputs(work, docker=args.docker)
             if args.docker:
                 check_bams(work)
             check_resume(work, sheet, docker=args.docker)
-            if not args.docker:
+            assert raw_before == {
+                path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in raw_before
+            }
+            if args.docker:
+                check_download_failures(work, base_url)
+            else:
                 check_failures(work, sheet)
+        if args.docker:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "tests/verify_fastqc.py"),
+                    "--work",
+                    str(work / "fastqc-cases"),
+                ],
+                check=True,
+                timeout=900,
+            )
         label = "Real-tool Docker end-to-end" if args.docker else "Nextflow regression"
         print(f"{label} validation passed.", flush=True)
     finally:

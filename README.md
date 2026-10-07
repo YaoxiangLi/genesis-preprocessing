@@ -2,7 +2,7 @@
 
 Genesis is a Nextflow DSL2 pipeline for single-end and paired-end plant DAP-seq.
 It downloads libraries, derives reference indexes and chromosome sizes, aligns
-with bwa-mem2, runs SPP and alignment QC, generates deepTools coverage tracks,
+with bwa-mem2, inspects raw reads with FastQC, runs SPP and alignment QC, generates deepTools coverage tracks,
 calls MACS3 peaks against each treatment's assigned control, and quantifies peaks.
 
 | Sample sheet | Layout | Libraries | Treatments |
@@ -176,6 +176,8 @@ explicit NH fractional weighting when input alignments have valid NH tags.
 Published results live at `WORKSPACE/RUN_NAME/output/<species>/<sample_id>/`:
 
 - FASTQ line counts, metadata, and alignment provenance TSVs.
+- Raw-read FastQC HTML/ZIP pairs and version files in `qc/fastqc/`, named
+  `<sample_id>.read1_fastqc.*` (SE and PE) and `<sample_id>.read2_fastqc.*` (PE).
 - SPP TSV/PDF, samtools flagstat, idxstats, and alignment statistics; PE insert-length distributions.
 - CPM and 5-prime count bigWigs, including PE first-read tracks.
 - Treatment MACS3 outputs, including gzipped narrowPeak files.
@@ -183,6 +185,16 @@ Published results live at `WORKSPACE/RUN_NAME/output/<species>/<sample_id>/`:
 
 **FASTQs, BAMs, BAM indexes, and bedGraphs are excluded from published results.** Derived reference files
 are published separately under the reference directory.
+
+FastQC 0.12.1 reads each raw downloaded mate once on an independent branch,
+with one CPU, 1 GB task memory and a 512 MB Java heap. It
+neither trims nor changes reads and does not gate alignment on its quality labels.
+FastQC WARN/FAIL labels remain in the reports and do **not** reject a dataset:
+plant/assay-specific acceptance thresholds are UNSPECIFIED. Execution errors or
+missing reports still fail the workflow. Empty/corrupt gzip libraries are rejected
+by DOWNLOAD; FastQC itself is not a comprehensive FASTQ validator (for example,
+v0.12.1 accepts a short quality string). A successful report is not evidence of
+biological suitability.
 
 bwa-mem2 indexing and alignment size their own requests. Indexing reads the
 gzipped FASTA directly on one CPU, with 1 GB plus 32 bytes per reference base
@@ -217,6 +229,25 @@ Git tag (`0.1.0`); use `--tag` to override. The scripts update `.env` with image
 digests and preserve unrelated entries. Publishing images requires approval.
 The reference Dockerfiles and pinned base images are retained.
 
+FastQC uses its own `DAP_SEQ_FASTQC.yaml` and matching Pixi TOML/lock, leaving the
+R/SPP QC environment unchanged. On this local validation branch, `.env` pins
+`DAP_SEQ_FASTQC_IMAGE` to an immutable **local image ID**, built for linux/amd64.
+It is not a registry digest and cannot be pulled on another host or by Apptainer.
+No FastQC image has been pushed. To reproduce a local build from the committed lock
+(with Docker Buildx installed), bypass the existing wrapper's tag requirement:
+
+```bash
+docker build --provenance=false --platform linux/amd64 \
+  --build-arg ENV_NAME=DAP_SEQ_FASTQC -t genesis-validation/fastqc:0.12.1 \
+  -f dockers/pixi-yaml.Dockerfile environments
+# Obtain the immutable local ID; set only DAP_SEQ_FASTQC_IMAGE in .env to this ID.
+docker image inspect genesis-validation/fastqc:0.12.1 --format '{{.Id}}'
+```
+
+Remote use requires an explicitly authorized image publication and a registry
+digest, or the conda profile. Only linux/amd64 Docker execution has been validated
+on this branch; the lock also resolves linux-aarch64 and both macOS platforms.
+
 ## Verification
 
 ```bash
@@ -234,15 +265,23 @@ reuse, `-resume`, invalid inputs, and publication boundaries. Mock builds cover
 both architectures and `--no-push` without contacting Docker or a registry.
 
 Docker validation runs the real download/staging, indexing, bwa-mem2, samtools,
-SPP, deepTools, MACS3, and Python tools on deterministic 75-base SE/PE
+FastQC, SPP, deepTools, MACS3, and Python tools on deterministic 75-base SE/PE
 fixtures with enriched regions and duplicated sequence. It checks nonempty peaks,
 finite positive scores, provenance, read lengths (full, and 50 bases for SPP),
 outputs, and resume.
-Validated on 2026-10-06 with the existing linux/arm64 images: all 45 initial
-tasks completed, each of the three treatments produced 200 peaks, and all 41
-tasks on the stable resume were cached. BAM inspection confirmed retained MAPQ 0
-alignments, full 75-base sequences, and unpaired first-read QC alignments. No
-FASTQs or BAMs appeared in published outputs. Tool logs contained no warnings.
+FastQC coverage requires seven mate tasks, seven HTML/ZIP pairs, report contents,
+unchanged raw-read bytes, publication and cached reports on resume. Additional
+real-module cases cover advisory quality FAIL labels, empty input, a known
+short-quality parser limitation, malformed records and corrupt gzip. Run these
+focused cases independently with:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python tests/verify_fastqc.py --keep
+```
+
+The five-library fixture now expects 41 initial tasks and 37 tasks after reference
+reuse. Trace logs, not these counts alone, establish whether a particular run
+completed and cached successfully. Tool warnings are retained for inspection.
 
 These small synthetic runs validate integration; comparisons of biological
 outputs on the full public datasets remain a separate validation task. Native

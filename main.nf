@@ -5,6 +5,7 @@ include { VALIDATE_SHEET } from './modules/validate_sheet'
 include { CHROM_SIZES } from './modules/chrom_sizes'
 include { BWA_MEM2_INDEX } from './modules/bwa_mem2_index'
 include { DOWNLOAD } from './modules/download'
+include { FASTQC } from './modules/fastqc'
 include { METADATA } from './modules/metadata'
 include { BWA_MEM2_ALIGN } from './modules/bwa_mem2_align'
 include { QC } from './modules/qc'
@@ -78,6 +79,15 @@ workflow {
             tuple(meta.id, meta, mates.size() == 1 ? mates[0] : mates)
         }
     }
+    // Observe each raw mate independently; alignment continues to consume the original reads.
+    fastqcInputs = downloaded.flatMap { _id, meta, reads ->
+        def files = reads instanceof List ? reads : [reads]
+        files.collect { read ->
+            def mate = read.name.endsWith('.read2.fastq.gz') ? 'read2' : 'read1'
+            tuple(meta, mate, read)
+        }
+    }
+    FASTQC(fastqcInputs)
     metadataInputs = downloaded.map { _id, meta, reads -> tuple(meta.ref_id, meta, reads) }
         .combine(sizes_ch, by: 0)
         .map { _refId, meta, reads, _ref, path -> tuple(meta, reads, path) }
