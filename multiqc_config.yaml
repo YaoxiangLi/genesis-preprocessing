@@ -1,0 +1,31 @@
+# Preserve identities: default cleaning merges Genesis main/read1 samtools reports.
+fn_clean_sample_names: false
+run_modules:
+  - custom_content
+  - fastqc
+  - samtools
+module_order:
+  - custom_content
+  - fastqc
+  - samtools
+custom_content:
+  order:
+    - genesis_metadata
+# Raw parsed values, sources and plot data are part of the output contract.
+output_fn_name: multiqc_report.html
+data_dir_name: multiqc_data
+data_format: json
+make_data_dir: true
+data_dump_file: true
+data_dump_file_write_raw: true
+no_version_check: true
+no_ai: true
+show_analysis_time: false
+show_analysis_paths: false
+# Keep positive-count contigs visible; this is display configuration, not a QC cutoff.
+samtools_idxstats_fraction_cutoff: 0
+report_comment: >-
+  FastQC labels are advisory. Plant/assay biological acceptance thresholds are
+  UNSPECIFIED. Main and read1 alignment statistics are separate entries.
+  SPP aggregation is deferred: original per-library TSV/PDF reports are retained,
+  including NA estimates that the native phantompeakqualtools parser cannot handle.

@@ -9,6 +9,7 @@ include { FASTQC } from './modules/fastqc'
 include { METADATA } from './modules/metadata'
 include { BWA_MEM2_ALIGN } from './modules/bwa_mem2_align'
 include { QC } from './modules/qc'
+include { MULTIQC } from './modules/multiqc'
 include { TRACKS } from './modules/tracks'
 include { CALL_PEAKS } from './modules/call_peaks'
 include { QUANTIFY } from './modules/quantify'
@@ -116,6 +117,36 @@ workflow {
             tuple(meta, bam, bai, qcBam, qcBai, sppBam)
         }
     QC(qcInputs, resources, file(params.spp_script))
+    // Collect channels, not publishDir contents: wait for every library's QC and metadata.
+    multiqcFiles = FASTQC.out.reports.map { _meta, _mate, _html, zip -> zip }
+        .mix(QC.out.reports.map { _meta, reports -> reports })
+        .mix(METADATA.out.metadata.map { _meta, path -> path })
+        .flatten().collect().map { paths -> paths.sort { it.name } }
+    multiqcSamples = samples.map { meta ->
+        [id: meta.id, species: meta.species, ref_id: meta.ref_id,
+         reference_fasta: meta.reference_fasta, layout: meta.layout, control: meta.control]
+    }.collect().map { rows -> rows.sort { it.id } }
+    // Local Nextflow runs can have a null commitId. Git is needed only for provenance.
+    def gitSha = workflow.commitId ?: 'UNKNOWN'
+    def sourceStatus = 'UNKNOWN'
+    try {
+        def revision = ['git', '-C', projectDir.toString(), 'rev-parse', 'HEAD'].execute()
+        def revisionText = revision.text.trim()
+        if (revision.waitFor() == 0) {
+            gitSha = revisionText
+            def status = ['git', '-C', projectDir.toString(), 'status', '--porcelain',
+                          '--untracked-files=no'].execute()
+            def statusText = status.text.trim()
+            if (status.waitFor() == 0) sourceStatus = statusText ? 'dirty' : 'clean'
+        }
+    } catch (IOException ignored) {
+        log.warn('Git unavailable: MultiQC source provenance may be UNKNOWN')
+    }
+    def reportProvenance = [name: file(params.run_dir).name, git_sha: gitSha,
+                           source_status: sourceStatus, pipeline_version: workflow.manifest.version]
+    MULTIQC(multiqcFiles, multiqcSamples, reportProvenance,
+            file("${projectDir}/multiqc_config.yaml"),
+            file("${projectDir}/genesis_tools/src/genesis_tools/multiqc_reporting.py"))
     TRACKS(aligned, resources)
     treatments = mainBams.filter { meta, _bam, _bai -> meta.control != '-' }
         .map { meta, bam, bai -> tuple(meta.control, meta, bam, bai) }

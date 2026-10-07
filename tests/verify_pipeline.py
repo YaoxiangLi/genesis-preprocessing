@@ -445,6 +445,7 @@ def check_outputs(work: Path, *, docker: bool) -> None:
         "BWA_MEM2_INDEX": 2,
         "DOWNLOAD": 3,
         "FASTQC": 7,
+        "MULTIQC": 1,
         "METADATA": 5,
         "BWA_MEM2_ALIGN": 5,
         "QC": 5,
@@ -472,6 +473,45 @@ def check_outputs(work: Path, *, docker: bool) -> None:
             "alignments.bed",
             "indexed_peaks.bed",
         ), path
+    aggregate = published / "multiqc"
+    assert (aggregate / "multiqc_report.html").stat().st_size > 0
+    assert len(list(aggregate.glob("*.html"))) == 1
+    provenance = json.loads((aggregate / "multiqc_data/genesis_provenance.json").read_text())
+    assert provenance["run"]["name"] == "samples"
+    assert provenance["run"]["pipeline_version"] == "0.1.0"
+    assert len(provenance["run"]["git_sha"]) == 40
+    identities = {sample["id"]: sample for sample in provenance["samples"]}
+    assert set(identities) == set(SAMPLES)
+    assert (
+        identities["se_treatment"]["control"] == identities["se_second"]["control"] == "se_control"
+    )
+    if docker:
+        html = (aggregate / "multiqc_report.html").read_text()
+        assert provenance["run"]["git_sha"] in html
+        for section in ("fastqc", "samtools-stats", "samtools-flagstat", "samtools-idxstats"):
+            assert f'id="{section}"' in html, section
+        data = json.loads((aggregate / "multiqc_data/multiqc_data.json").read_text())
+        parsed = data["report_saved_raw_data"]
+        assert len(parsed["multiqc_fastqc"]) == 7
+        assert len(parsed["multiqc_samtools_stats"]) == 10
+        assert len(parsed["multiqc_samtools_flagstat"]) == 5
+        assert len(parsed["multiqc_samtools_idxstats"]) == 5
+        assert set(parsed["multiqc_genesis_metadata"]) == set(SAMPLES)
+        for sample, layout in SAMPLES.items():
+            reads = 6000 if sample.endswith("control") else 32000
+            assert parsed["multiqc_samtools_stats"][f"{sample}.qc.report.main.stats.txt"][
+                "raw_total_sequences"
+            ] == reads * (2 if layout == "PE" else 1)
+            assert (
+                parsed["multiqc_samtools_stats"][f"{sample}.qc.report.read1.stats.txt"][
+                    "raw_total_sequences"
+                ]
+                == reads
+            )
+            assert parsed["multiqc_samtools_flagstat"][f"{sample}.qc.report.flagstat.txt"][
+                "flagstat_total"
+            ] == reads * (2 if layout == "PE" else 1)
+            assert "chr1" in parsed["multiqc_samtools_idxstats"][f"{sample}.qc.report.idxstats.tsv"]
     for sample, layout in SAMPLES.items():
         folder = published / f"Plant_{layout}" / sample
         assert folder.is_dir(), folder
@@ -595,11 +635,21 @@ def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
     # A second resume must cache all downstream computation at those stable paths.
     downloads = [row for row in rows if row["name"].split(" ")[0] == "DOWNLOAD"]
     assert len(downloads) == 3 and all(row["status"] == "CACHED" for row in downloads)
+    multiqc_before = {
+        str(path.relative_to(work / "published")): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (work / "published/samples/output/multiqc").rglob("*")
+        if path.is_file()
+    }
     assert run_pipeline(work, sheet, docker=docker, resume=True, suffix="stable").returncode == 0
     rows = trace_rows(work, "stable")
-    for process in ("DOWNLOAD", "FASTQC", "BWA_MEM2_ALIGN", "QUANTIFY"):
+    for process in ("DOWNLOAD", "FASTQC", "MULTIQC", "BWA_MEM2_ALIGN", "QUANTIFY"):
         tasks = [row for row in rows if row["name"].split(" ")[0] == process]
         assert tasks and all(row["status"] == "CACHED" for row in tasks), tasks
+    assert multiqc_before == {
+        str(path.relative_to(work / "published")): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (work / "published/samples/output/multiqc").rglob("*")
+        if path.is_file()
+    }
     assert before == {path: (path.stat().st_mtime_ns, path.read_bytes()) for path in before}
     assert fastqc_before == {
         path: hashlib.sha256(path.read_bytes()).hexdigest() for path in fastqc_before
@@ -770,6 +820,24 @@ def main() -> None:
                     str(ROOT / "tests/verify_fastqc.py"),
                     "--work",
                     str(work / "fastqc-cases"),
+                ],
+                check=True,
+                timeout=900,
+            )
+        if args.docker:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "tests/verify_multiqc.py"),
+                    "--source",
+                    str(work / "published/samples/output"),
+                    "--manifest",
+                    str(
+                        work
+                        / "published/samples/output/multiqc/multiqc_data/genesis_provenance.json"
+                    ),
+                    "--work",
+                    str(work / "multiqc-cases"),
                 ],
                 check=True,
                 timeout=900,

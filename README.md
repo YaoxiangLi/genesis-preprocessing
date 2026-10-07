@@ -183,6 +183,30 @@ Published results live at `WORKSPACE/RUN_NAME/output/<species>/<sample_id>/`:
 - Treatment MACS3 outputs, including gzipped narrowPeak files.
 - Treatment `.peaks.RPM.tsv` and `.peaks.mean_RPKM.tsv` scores.
 
+A single run-level aggregate is published at
+`WORKSPACE/RUN_NAME/output/multiqc/multiqc_report.html`, with the complete
+`multiqc_data/` directory beside it. MultiQC 1.35 consumes FastQC ZIPs, samtools
+flagstat, both main/read1 samtools stats, idxstats, and Genesis metadata directly
+from completed workflow channels. Full report identifiers are preserved: main and
+read1 statistics, and R1/R2 FastQC, never share an entry. The aggregation fails if
+any required parser or expected sample is absent, even if MultiQC exits zero.
+
+The Genesis table and header include sample/control associations, species,
+reference ID, run name, Git SHA, source-tree status and pipeline version. SPP
+aggregation is explicitly deferred: the native phantompeakqualtools parser cannot
+handle Genesis's valid `NA` fallback rows. Per-library SPP TSV/PDF files remain
+available. Missing optional SPP/insert-size companion files do not prevent
+aggregation; PE insert-size metrics are already in samtools stats.
+
+`multiqc_data/` retains native JSON/parquet, source records, logs and configuration,
+plus `genesis_{fastqc,stats,flagstat,idxstats}.json` and `genesis_provenance.json`.
+MultiQC's idxstats parser exports mapped counts and reference lengths; original
+per-library TSVs also retain unmapped counts. No biological thresholds are imposed.
+The committed `multiqc_config.yaml` disables broad name cleaning and keeps
+positive-count contigs visible. Three renderer-only fields (gzip timestamp, UUID,
+and embedded creation date) are canonicalized for reproducible HTML; native JSON
+retains generation metadata. A stable resume caches the complete report/data set.
+
 **FASTQs, BAMs, BAM indexes, and bedGraphs are excluded from published results.** Derived reference files
 are published separately under the reference directory.
 
@@ -244,6 +268,12 @@ docker build --provenance=false --platform linux/amd64 \
 docker image inspect genesis-validation/fastqc:0.12.1 --format '{{.Id}}'
 ```
 
+MultiQC similarly has an isolated `DAP_SEQ_MULTIQC.yaml`/TOML/lock and a local
+linux/amd64 image ID in `DAP_SEQ_MULTIQC_IMAGE`. Build it with the same Dockerfile,
+using `--build-arg ENV_NAME=DAP_SEQ_MULTIQC` and tag
+`genesis-validation/multiqc:1.35`; record the resulting immutable local ID.
+Neither validation image has been published to a registry.
+
 Remote use requires an explicitly authorized image publication and a registry
 digest, or the conda profile. Only linux/amd64 Docker execution has been validated
 on this branch; the lock also resolves linux-aarch64 and both macOS platforms.
@@ -279,9 +309,14 @@ focused cases independently with:
 pixi run uv run --frozen --project genesis_tools python tests/verify_fastqc.py --keep
 ```
 
-The five-library fixture now expects 41 initial tasks and 37 tasks after reference
-reuse. Trace logs, not these counts alone, establish whether a particular run
-completed and cached successfully. Tool warnings are retained for inspection.
+The five-library fixture now expects 42 initial tasks and 38 tasks after reference
+reuse, including exactly one MULTIQC aggregation. Trace logs, not these counts alone, establish whether a particular run
+completed and cached successfully. Tool warnings are retained for inspection. MultiQC regressions require seven
+FastQC, ten samtools stats, five flagstat and five idxstats identities, with
+numerical read-count checks and report sections. They cover shared controls,
+optional missing SPP, duplicate identities, collision-prone names, missing required
+modules despite a zero tool exit, fresh deterministic HTML/metrics, and cached
+full output directories.
 
 These small synthetic runs validate integration; comparisons of biological
 outputs on the full public datasets remain a separate validation task. Native
