@@ -2,19 +2,13 @@
 
 from __future__ import annotations
 
-import subprocess
 import sys
 
 import defopt
 
 from .metadata import infer_metadata
 from .nh import add_nh
-from .quantification import (
-    finish_quantification,
-    mean_peak_rpkm,
-    prepare_quantification,
-    quantify_peaks,
-)
+from .quantification import mean_peak_rpkm, quantify, quantify_peaks
 from .samples import validate_sheet
 
 
@@ -28,12 +22,11 @@ def main() -> None:
                 "peak-rpm": quantify_peaks,
                 "peak-rpkm": mean_peak_rpkm,
                 "add-nh": add_nh,
-                "prepare-quantification": prepare_quantification,
-                "finish-quantification": finish_quantification,
+                "quantify": quantify,
             },
             cli_options="all",
         )
-    except (OSError, ValueError, EOFError, subprocess.CalledProcessError) as error:
+    except (OSError, ValueError, EOFError) as error:
         print(f"Error: {error}", file=sys.stderr)
         raise SystemExit(1) from error
 

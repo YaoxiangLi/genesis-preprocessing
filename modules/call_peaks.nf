@@ -7,7 +7,7 @@ process CALL_PEAKS {
     conda "environments/DAP_SEQ_PEAKS.yaml"
     container "${dotenv('DAP_SEQ_PEAKS_IMAGE')}"
     tag "${meta.id}"
-    publishDir "${params.workspace}/${meta.species}/${meta.id}", mode: 'copy',
+    publishDir "${params.run_dir}/output/${meta.species}/${meta.id}", mode: 'copy',
         pattern: '*.macs3*'
     input:
     tuple val(meta), path(bam), path(bai), path(control_bam), path(control_bai)

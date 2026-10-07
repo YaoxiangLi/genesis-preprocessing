@@ -3,7 +3,7 @@ name = "genesis-tools"
 version = "0.1.0"
 description = "Typed DAP-seq metadata and interval quantification tools"
 requires-python = ">=3.14"
-dependencies = ["defopt>=7,<8"]
+dependencies = ["defopt>=7,<8", "pysam>=0.24.1,<0.25"]
 
 [project.scripts]
 genesis-tools = "genesis_tools.cli:main"

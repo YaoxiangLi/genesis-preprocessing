@@ -7,7 +7,7 @@ process TRACKS {
     conda "environments/DAP_SEQ_TRACKS.yaml"
     container "${dotenv('DAP_SEQ_TRACKS_IMAGE')}"
     tag "${meta.id}"
-    publishDir "${params.workspace}/${meta.species}/${meta.id}", mode: 'copy',
+    publishDir "${params.run_dir}/output/${meta.species}/${meta.id}", mode: 'copy',
         pattern: '*.bw'
     input:
     tuple val(meta), path(bam), path(bai), path(qc_bam), path(qc_bai)

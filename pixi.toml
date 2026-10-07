@@ -18,8 +18,10 @@ shellcheck = ">=0.11,<0.12"
 micromamba = ">=2.5,<2.6"
 
 [tasks]
-pipeline = "bash scripts/run-pipeline.sh"
-install-all = "bash scripts/install-projects.sh"
-checks = "bash scripts/check-projects.sh"
-build-dockers = "bash scripts/build-dockers.sh"
+pipeline = { cmd = "scripts/run-pipeline.sh", description = "Run the pipeline on one sample sheet. Run with --help for usage." }
+install-all = { cmd = "scripts/install-projects.sh", description = "Install main project and sub-projects." }
+checks = { cmd = "scripts/check-projects.sh", description = "Run all checks." }
+build-dockers = { cmd = "scripts/build-dockers.sh", description = "Build all the dockers for the project." }
+get-latest-report = { cmd = "scripts/get-latest-report.sh", description = "Get the path to the most recent execution report. Optional argument: WORKSPACE." }
+watch-log = { cmd = "scripts/watch-log.sh", description = "Follow the log of a task, given its hash (e.g. ab/123456) or a log file. Optional second argument: WORKSPACE." }
 validate-docker = "uv run --frozen --project genesis_tools python tests/verify_pipeline.py --docker"

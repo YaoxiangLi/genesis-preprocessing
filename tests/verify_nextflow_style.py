@@ -10,7 +10,8 @@ import sys
 import tempfile
 from pathlib import Path
 
-from genesis_tools.quantification import finish_quantification, prepare_quantification
+import pysam
+from genesis_tools.quantification import quantify, quantify_peaks
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -46,76 +47,88 @@ elif name == "docker":
 """
 
 
+def write_bam(path: Path, records: str) -> None:
+    """Write SAM records under a fixed header to a BAM, as the aligner's output would be."""
+    sam = path.with_suffix(".sam")
+    header = "@HD\tVN:1.6\tSO:unsorted\n@SQ\tSN:chr1\tLN:1000\n@SQ\tSN:chrUn\tLN:500\n"
+    sam.write_text(header + records)
+    with (
+        pysam.AlignmentFile(str(sam)) as source,
+        pysam.AlignmentFile(str(path), "wb", template=source) as destination,
+    ):
+        for alignment in source:
+            destination.write(alignment)
+
+
+def scores(path: Path) -> list[float]:
+    return [float(line.rsplit("\t", 1)[1]) for line in path.read_text().splitlines()]
+
+
 def check_quantification(work: Path) -> None:
-    """Verify split counting retains MAPQ 0, NH fractions, and original rows."""
+    """Verify BAM counting retains MAPQ 0, NH fractions, overlap rules, and original rows."""
     sizes = work / "genome.chrom.sizes"
     sizes.write_text("chr1\t1000\n")
-    sam = work / "reads.sam"
-    sam.write_text(
+    bam = work / "reads.bam"
+    write_bam(
+        bam,
         "unique\t0\tchr1\t1\t0\t50M\t*\t0\t0\t*\t*\tNH:i:1\n"
         "multi\t0\tchr1\t21\t0\t50M\t*\t0\t0\t*\t*\tNH:i:2\n"
-        "multi\t256\tchr1\t221\t0\t50M\t*\t0\t0\t*\t*\tNH:i:2\n"
+        "multi\t256\tchr1\t221\t0\t50M\t*\t0\t0\t*\t*\tNH:i:2\n",
     )
     bed = work / "peaks.bed"
     bed.write_text("chr1\t0\t100\tfirst\nchr1\t0\t100\tduplicate\nchr1\t200\t300\tsecond\n")
-    prepare_quantification(
-        bed=bed,
-        sam=sam,
-        chrom_sizes=sizes,
-        output_dir=work,
-        weighting="NH",
-    )
-    details = json.loads((work / "quantification.json").read_text())
-    assert details["denominator"] == 2
-    assert (work / "alignments.bed").read_text().count("\n") == 3
-    reads = work / "reads.overlaps.tsv"
-    reads.write_text(
-        "chr1\t0\t50\t1\tchr1\t0\t100\t0\n"
-        "chr1\t20\t70\t0.5\tchr1\t0\t100\t0\n"
-        "chr1\t0\t50\t1\tchr1\t0\t100\t1\n"
-        "chr1\t20\t70\t0.5\tchr1\t0\t100\t1\n"
-        "chr1\t220\t270\t0.5\tchr1\t200\t300\t2\n"
-    )
-    coverage = work / "coverage.overlaps.tsv"
-    coverage.write_text(
-        "chr1\t0\t10\t2\tchr1\t0\t100\t0\n"
-        "chr1\t10\t40\t4\tchr1\t0\t100\t0\n"
-        "chr1\t0\t10\t2\tchr1\t0\t100\t1\n"
-        "chr1\t10\t40\t4\tchr1\t0\t100\t1\n"
-    )
+    coverage = work / "coverage.bedGraph"
+    coverage.write_text("chr1\t0\t10\t2\nchr1\t10\t40\t4\nchr1\t40\t1000\t0\n")
     rpm, rpkm = work / "rpm.tsv", work / "rpkm.tsv"
-    finish_quantification(
-        details=work / "quantification.json",
-        read_overlaps=reads,
-        coverage_overlaps=coverage,
+    quantify(
+        bed=bed,
+        bam=bam,
+        coverage=coverage,
+        chrom_sizes=sizes,
         rpm_output=rpm,
         rpkm_output=rpkm,
+        weighting="NH",
     )
-    assert [float(line.split("\t")[-1]) for line in rpm.read_text().splitlines()] == [
-        750000,
-        750000,
-        250000,
-    ]
-    assert [float(line.split("\t")[-1]) for line in rpkm.read_text().splitlines()] == [
-        1.4,
-        1.4,
-        0,
-    ]
-    assert [
-        line.rsplit("\t", 1)[0] for line in rpm.read_text().splitlines()
-    ] == bed.read_text().splitlines()
-    prepare_quantification(
+    # NH: the unique read and half the multimapper fall in the first peak; the denominator
+    # counts each read end once (2), so 1.5 / 2 and 0.5 / 2 per million.
+    assert scores(rpm) == [750000, 750000, 250000]
+    assert scores(rpkm) == [1.4, 1.4, 0]
+    assert [line.rsplit("\t", 1)[0] for line in rpm.read_text().splitlines()] == (
+        bed.read_text().splitlines()
+    )
+    # Primary: the secondary alignment is dropped; MAPQ 0 primaries count fully.
+    quantify(
         bed=bed,
-        sam=sam,
+        bam=bam,
+        coverage=coverage,
         chrom_sizes=sizes,
-        output_dir=work,
+        rpm_output=rpm,
+        rpkm_output=rpkm,
         weighting="primary",
     )
-    assert json.loads((work / "quantification.json").read_text())["denominator"] == 2
-    assert (work / "alignments.bed").read_text().splitlines() == [
-        "chr1\t0\t50\t1",
-        "chr1\t20\t70\t1",
-    ]
+    assert scores(rpm) == [1000000, 1000000, 0]
+    # Overlap edge cases, matching bedtools intersect on half-open intervals.
+    edges = work / "edges.bam"
+    write_bam(
+        edges,
+        # spans [95, 105): one base in each adjacent peak
+        "both\t0\tchr1\t96\t0\t10M\t*\t0\t0\t*\t*\n"
+        # spans [190, 200): ends exactly where the next peak starts
+        "touching\t0\tchr1\t191\t0\t10M\t*\t0\t0\t*\t*\n"
+        # deletion widens the reference span to [500, 520), inside the long peak
+        "deletion\t0\tchr1\t501\t0\t5M10D5M\t*\t0\t0\t*\t*\n"
+        "supplementary\t2048\tchr1\t1\t0\t10M\t*\t0\t0\t*\t*\n"
+        "unmapped\t4\t*\t0\t0\t*\t*\t0\t0\t*\t*\n"
+        "elsewhere\t0\tchrUn\t1\t0\t10M\t*\t0\t0\t*\t*\n",
+    )
+    regions = work / "edges.bed"
+    regions.write_text("chr1\t0\t100\nchr1\t100\t200\nchr1\t200\t300\nchr1\t300\t900\n")
+    output = work / "edges.tsv"
+    quantify_peaks(bed=regions, bam=edges, chrom_sizes=sizes, output=output, weighting="primary")
+    # Three retained read ends; chrUn is outside chrom sizes and is not counted anywhere.
+    # Scores are written with 12 significant digits.
+    expected = [float(f"{value:.12g}") for value in (1e6 / 3, 2e6 / 3, 0, 1e6 / 3)]
+    assert scores(output) == expected, scores(output)
 
 
 def check_builds(work: Path, bash: str) -> None:
@@ -224,7 +237,7 @@ def main() -> None:
             folder = work / f"builds-{index}"
             folder.mkdir()
             check_builds(folder, bash)
-    print("Nextflow style, split quantification, and mocked Docker build checks passed.")
+    print("Nextflow style, BAM quantification, and mocked Docker build checks passed.")
 
 
 if __name__ == "__main__":

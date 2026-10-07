@@ -44,12 +44,8 @@ def load_samples(sheet: Path, references: Path) -> list[dict[str, str]]:
                 parsed = urlparse(value)
                 if (
                     not URL.fullmatch(value)
-                    or parsed.scheme not in ("http", "https", "file")
-                    or (parsed.scheme != "file" and not parsed.netloc)
-                    or (
-                        parsed.scheme == "file"
-                        and (parsed.netloc or not parsed.path.startswith("/"))
-                    )
+                    or parsed.scheme not in ("http", "https")
+                    or not parsed.netloc
                 ):
                     raise ValueError(f"{sheet}:{number}: invalid {key}")
             rows.append(row)

@@ -1,18 +1,17 @@
-"""Modernized interval RPM/RPKM counting, using managed samtools and bedtools."""
+"""Peak read-end RPM and mean coverage RPKM, reading BAMs directly with pysam."""
 
 from __future__ import annotations
 
 import bz2
 import gzip
-import json
 import math
-import re
-import subprocess
-import tempfile
-from collections.abc import Iterable, Iterator
+from bisect import bisect_left
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, TextIO
+
+import pysam
 
 from .metadata import chromosome_sizes
 
@@ -36,144 +35,129 @@ def open_text(path: Path) -> TextIO:
     return path.open()
 
 
-def read_regions(path: Path, sizes: dict[str, int] | None = None) -> list[Region]:
-    """Read BED regions, preserving row order and rejecting invalid coordinates."""
-    regions: list[Region] = []
+def bed_lines(path: Path) -> Iterator[tuple[int, tuple[str, ...]]]:
+    """Yield numbered BED fields, skipping blank, comment, track, and browser lines."""
     with open_text(path) as stream:
         for number, line in enumerate(stream, 1):
             if not line.strip() or line.startswith(("#", "track ", "browser ")):
                 continue
-            fields = tuple(line.rstrip("\r\n").split("\t"))
-            if len(fields) < 3:
-                raise ValueError(f"{path}:{number}: expected at least three BED fields")
-            start, end = int(fields[1]), int(fields[2])
-            if start < 0 or end <= start:
-                raise ValueError(f"{path}:{number}: invalid BED interval")
-            if sizes is not None and (fields[0] not in sizes or end > sizes[fields[0]]):
-                raise ValueError(f"{path}:{number}: interval outside the reference")
-            regions.append(Region(fields, fields[0], start, end))
+            yield number, tuple(line.rstrip("\r\n").split("\t"))
+
+
+def read_regions(path: Path, sizes: dict[str, int] | None = None) -> list[Region]:
+    """Read BED regions, preserving row order and rejecting invalid coordinates."""
+    regions: list[Region] = []
+    for number, fields in bed_lines(path):
+        if len(fields) < 3:
+            raise ValueError(f"{path}:{number}: expected at least three BED fields")
+        start, end = int(fields[1]), int(fields[2])
+        if start < 0 or end <= start:
+            raise ValueError(f"{path}:{number}: invalid BED interval")
+        if sizes is not None and (fields[0] not in sizes or end > sizes[fields[0]]):
+            raise ValueError(f"{path}:{number}: interval outside the reference")
+        regions.append(Region(fields, fields[0], start, end))
     return regions
 
 
-def command_lines(command: list[str]) -> Iterator[str]:
-    """Stream checked command output, terminating the child on validation failure."""
-    with subprocess.Popen(command, stdout=subprocess.PIPE, text=True) as process:
-        if process.stdout is None:
-            raise RuntimeError("Subprocess stdout was not captured")
-        try:
-            yield from process.stdout
-            status = process.wait()
-            if status:
-                raise subprocess.CalledProcessError(status, command)
-        finally:
-            process.stdout.close()
-            if process.poll() is None:
-                process.terminate()
-                process.wait()
+class PeakIndex:
+    """Find peaks sharing at least one base with an interval, as bedtools intersect does.
+
+    Duplicate and overlapping peaks are reported separately, by their original row index.
+    """
+
+    def __init__(self, regions: list[Region]) -> None:
+        peaks: dict[str, list[tuple[int, int, int]]] = {}
+        for index, region in enumerate(regions):
+            peaks.setdefault(region.chromosome, []).append((region.start, region.end, index))
+        self._peaks = {chromosome: sorted(rows) for chromosome, rows in peaks.items()}
+        self._starts = {
+            chromosome: [start for start, _, _ in rows] for chromosome, rows in self._peaks.items()
+        }
+        self._longest = {
+            chromosome: max(end - start for start, end, _ in rows)
+            for chromosome, rows in self._peaks.items()
+        }
+
+    def overlaps(self, chromosome: str, start: int, end: int) -> Iterator[tuple[int, int]]:
+        """Yield (peak row index, overlap length) for peaks overlapping [start, end)."""
+        peaks = self._peaks.get(chromosome)
+        if peaks is None:
+            return
+        starts = self._starts[chromosome]
+        # A peak can only reach past start if it begins within the longest peak length of it.
+        first = bisect_left(starts, start - self._longest[chromosome] + 1)
+        last = bisect_left(starts, end)
+        for position in range(first, last):
+            peak_start, peak_end, index = peaks[position]
+            if peak_end > start:
+                yield index, min(end, peak_end) - max(start, peak_start)
 
 
-def reference_span(cigar: str) -> int:
-    """Compute the bounding reference span used by legacy pysam.fetch counting."""
-    operations = re.findall(r"(\d+)([MIDNSHP=X])", cigar)
-    if not operations or "".join(n + op for n, op in operations) != cigar:
-        raise ValueError(f"Invalid CIGAR: {cigar}")
-    span = sum(int(n) for n, op in operations if op in "MDN=X")
-    if span <= 0:
-        raise ValueError(f"CIGAR consumes no reference: {cigar}")
-    return span
-
-
-def weighted_alignments(
+def count_reads(
     bam: Path,
     sizes: dict[str, int],
-    destination: Path,
-    weighting: str,
-) -> float:
-    """Write bounding BED spans and return the legacy read-end denominator.
+    peaks: PeakIndex,
+    region_count: int,
+    weighting: Literal["NH", "primary"],
+    threads: int = 1,
+) -> tuple[list[float], float]:
+    """Sum alignment weights over peaks and return them with the read-end denominator.
 
-    NH mode weights each reported alignment by 1/NH, counting each multimapping
-    read end once in the denominator. Primary mode requires no NH tag and counts
-    one retained primary alignment per read end, including MAPQ 0. Paired ends
-    count independently, as in the historical invocation.
+    Each alignment covers its bounding reference span, as legacy pysam.fetch counting did.
+    NH mode weights each reported alignment by 1/NH, counting each multimapping read end once
+    in the denominator. Primary mode requires no NH tag and counts one retained primary
+    alignment per read end, including MAPQ 0. Paired ends count independently, as in the
+    historical invocation. Alignments on contigs absent from sizes are ignored.
     """
     if weighting not in ("NH", "primary"):
         raise ValueError(f"Unknown weighting mode: {weighting}")
+    counts = [0.0] * region_count
     unique = 0
     multimappers: set[tuple[str, int]] = set()
-    with destination.open("w") as stream:
-        for line in alignment_lines(bam):
-            fields = line.rstrip("\n").split("\t")
-            if len(fields) < 11:
-                raise ValueError("Malformed SAM alignment")
-            flag = int(fields[1])
+    with pysam.AlignmentFile(str(bam), threads=threads) as alignments:
+        for alignment in alignments.fetch(until_eof=True):
+            flag = alignment.flag
             if flag & 0x804 or (weighting == "primary" and flag & 0x100):
                 continue
-            chromosome = fields[2]
-            if chromosome not in sizes:
+            chromosome = alignment.reference_name
+            if chromosome is None or chromosome not in sizes:
                 continue
-            start = int(fields[3]) - 1
-            end = start + reference_span(fields[5])
+            start, end = alignment.reference_start, alignment.reference_end
+            if end is None or end <= start:
+                raise ValueError(f"Alignment consumes no reference: {alignment.query_name}")
             if start < 0 or end > sizes[chromosome]:
-                raise ValueError(f"Alignment outside reference: {fields[0]}")
+                raise ValueError(f"Alignment outside reference: {alignment.query_name}")
             nh = 1
             if weighting == "NH":
-                tags = [tag[5:] for tag in fields[11:] if tag.startswith("NH:i:")]
-                if len(tags) != 1 or int(tags[0]) < 1:
+                tag = alignment.get_tag("NH") if alignment.has_tag("NH") else None
+                if not isinstance(tag, int) or tag < 1:
                     raise ValueError("NH weighting requires a positive NH tag on every alignment")
-                nh = int(tags[0])
+                nh = tag
             if nh == 1:
                 unique += 1
             else:
                 mate = 1 if flag & 0x40 else 2 if flag & 0x80 else 0
-                multimappers.add((fields[0], mate))
-            stream.write(f"{chromosome}\t{start}\t{end}\t{1 / nh:.17g}\n")
-    return float(unique + len(multimappers))
+                multimappers.add((alignment.query_name or "", mate))
+            weight = 1 / nh
+            for index, _ in peaks.overlaps(chromosome, start, end):
+                counts[index] += weight
+    return counts, float(unique + len(multimappers))
 
 
-def indexed_regions(regions: list[Region], destination: Path) -> None:
-    """Write BED intervals with stable row indexes for duplicate and overlapping peaks."""
-    with destination.open("w") as stream:
-        for index, region in enumerate(regions):
-            stream.write(f"{region.chromosome}\t{region.start}\t{region.end}\t{index}\n")
-
-
-def overlap_sums(
-    lines: Iterable[str],
-    region_count: int,
-    *,
-    length_weighted: bool,
-) -> list[float]:
-    """Sum weights from bedtools output, using original peak row indexes."""
+def coverage_sums(coverage: Path, peaks: PeakIndex, region_count: int) -> list[float]:
+    """Sum bedGraph values over peaks, weighting each value by its overlap length."""
     sums = [0.0] * region_count
-    for line in lines:
-        fields = line.rstrip("\n").split("\t")
-        if len(fields) != 8:
-            raise ValueError("Expected four columns from each intersected BED file")
-        value = float(fields[3])
+    for number, fields in bed_lines(coverage):
+        if len(fields) != 4:
+            raise ValueError(f"{coverage}:{number}: expected four bedGraph fields")
+        start, end, value = int(fields[1]), int(fields[2]), float(fields[3])
+        if start < 0 or end <= start:
+            raise ValueError(f"{coverage}:{number}: invalid bedGraph interval")
         if not math.isfinite(value) or value < 0:
-            raise ValueError("Coverage and alignment weights must be finite and nonnegative")
-        index = int(fields[7])
-        if not 0 <= index < region_count:
-            raise ValueError("Invalid peak index")
-        if length_weighted:
-            overlap = min(int(fields[2]), int(fields[6])) - max(int(fields[1]), int(fields[5]))
-            if overlap <= 0:
-                raise ValueError("Intersected intervals must overlap")
-            value *= overlap
-        sums[index] += value
+            raise ValueError(f"{coverage}:{number}: coverage must be finite and nonnegative")
+        for index, overlap in peaks.overlaps(fields[0], start, end):
+            sums[index] += value * overlap
     return sums
-
-
-def interval_sums(
-    values: Path,
-    peaks: Path,
-    region_count: int,
-    *,
-    length_weighted: bool,
-) -> list[float]:
-    """Run bedtools and sum weights or overlap-length-weighted coverage."""
-    command = ["bedtools", "intersect", "-a", str(values), "-b", str(peaks), "-wa", "-wb"]
-    return overlap_sums(command_lines(command), region_count, length_weighted=length_weighted)
 
 
 def write_scores(regions: list[Region], scores: list[float], destination: Path) -> None:
@@ -188,6 +172,58 @@ def write_scores(regions: list[Region], scores: list[float], destination: Path) 
         partial.unlink(missing_ok=True)
 
 
+def read_end_rpm(
+    regions: list[Region],
+    bam: Path,
+    sizes: dict[str, int],
+    weighting: Literal["NH", "primary"],
+    threads: int,
+) -> list[float]:
+    """Read-end RPM for each region, rejecting a BAM with no retained read ends."""
+    counts, denominator = count_reads(
+        bam, sizes, PeakIndex(regions), len(regions), weighting, threads
+    )
+    if regions and denominator == 0:
+        raise ValueError("Cannot normalize peaks: no retained mapped read ends")
+    return [count * 1_000_000 / denominator for count in counts] if regions else []
+
+
+def mean_coverage(regions: list[Region], coverage: Path) -> list[float]:
+    """Length-weighted mean bedGraph value for each region, counting uncovered bases as zero."""
+    sums = coverage_sums(coverage, PeakIndex(regions), len(regions))
+    return [
+        total / (region.end - region.start) for region, total in zip(regions, sums, strict=True)
+    ]
+
+
+def quantify(
+    *,
+    bed: Path,
+    bam: Path,
+    coverage: Path,
+    chrom_sizes: Path,
+    rpm_output: Path,
+    rpkm_output: Path,
+    weighting: Literal["NH", "primary"] = "NH",
+    threads: int = 1,
+) -> None:
+    """Append read-end RPM and mean coverage RPKM to each original BED/narrowPeak row.
+
+    :param bed: Original plain, gzipped, or bzip2-compressed BED/narrowPeak.
+    :param bam: Coordinate-sorted BAM of retained alignments.
+    :param coverage: RPKM-normalized bedGraph generated by bamCoverage.
+    :param chrom_sizes: Chromosome sizes defining the counting reference.
+    :param rpm_output: Original BED rows with appended read-end RPM.
+    :param rpkm_output: Original BED rows with appended mean coverage RPKM.
+    :param weighting: NH fractional weighting or primary read-end counting.
+    :param threads: Threads for BAM decompression.
+    """
+    sizes = chromosome_sizes(chrom_sizes)
+    regions = read_regions(bed, sizes)
+    write_scores(regions, read_end_rpm(regions, bam, sizes, weighting, threads), rpm_output)
+    write_scores(regions, mean_coverage(regions, coverage), rpkm_output)
+
+
 def quantify_peaks(
     *,
     bed: Path,
@@ -196,33 +232,23 @@ def quantify_peaks(
     output: Path,
     weighting: Literal["NH", "primary"] = "NH",
     normalization: Literal["RPM", "RPKM"] = "RPM",
+    threads: int = 1,
 ) -> None:
     """Append legacy read-end RPM or RPKM scores to BED/narrowPeak rows.
 
     :param bed: Plain, gzipped, or bzip2-compressed BED/narrowPeak input.
-    :param bam: Input BAM, read using samtools on PATH.
+    :param bam: Input BAM or SAM.
     :param chrom_sizes: Chromosome sizes defining the counting reference.
     :param output: BED-like output with an appended score.
     :param weighting: NH fractional counting, or explicit primary-alignment counting.
     :param normalization: Read-end RPM, or read-end RPM divided by peak length in kb.
+    :param threads: Threads for BAM decompression.
     """
     if normalization not in ("RPM", "RPKM"):
         raise ValueError(f"Unknown normalization: {normalization}")
     sizes = chromosome_sizes(chrom_sizes)
     regions = read_regions(bed, sizes)
-    if not regions:
-        write_scores([], [], output)
-        return
-    with tempfile.TemporaryDirectory(prefix="genesis-rpm-") as temporary:
-        work = Path(temporary)
-        values = work / "alignments.bed"
-        peaks = work / "peaks.bed"
-        denominator = weighted_alignments(bam, sizes, values, weighting)
-        if denominator == 0:
-            raise ValueError("Cannot normalize peaks: no retained mapped read ends")
-        indexed_regions(regions, peaks)
-        counts = interval_sums(values, peaks, len(regions), length_weighted=False)
-    scores = [count * 1_000_000 / denominator for count in counts]
+    scores = read_end_rpm(regions, bam, sizes, weighting, threads)
     if normalization == "RPKM":
         scores = [
             score * 1000 / (region.end - region.start)
@@ -239,116 +265,4 @@ def mean_peak_rpkm(*, bed: Path, coverage: Path, output: Path) -> None:
     :param output: BED-like output with an appended mean RPKM value.
     """
     regions = read_regions(bed)
-    if not regions:
-        write_scores([], [], output)
-        return
-    with tempfile.TemporaryDirectory(prefix="genesis-rpkm-") as temporary:
-        peaks = Path(temporary) / "peaks.bed"
-        indexed_regions(regions, peaks)
-        sums = interval_sums(coverage, peaks, len(regions), length_weighted=True)
-    scores = [
-        total / (region.end - region.start) for region, total in zip(regions, sums, strict=True)
-    ]
-    write_scores(regions, scores, output)
-
-
-def alignment_lines(path: Path) -> Iterator[str]:
-    """Read exported SAM directly, or stream a BAM through managed samtools."""
-    if path.suffix == ".sam":
-        with path.open() as stream:
-            for line in stream:
-                if line.startswith(("@HD\t", "@SQ\t", "@RG\t", "@PG\t", "@CO\t")):
-                    continue
-                yield line
-    else:
-        yield from command_lines(["samtools", "view", str(path)])
-
-
-def prepare_quantification(
-    *,
-    bed: Path,
-    sam: Path,
-    chrom_sizes: Path,
-    output_dir: Path,
-    weighting: Literal["NH", "primary"] = "NH",
-) -> None:
-    """Prepare weighted BEDs and original peak rows without external tools.
-
-    :param bed: Original compressed or plain BED/narrowPeak.
-    :param sam: SAM exported by the alignment environment.
-    :param chrom_sizes: Chromosome sizes.
-    :param output_dir: Directory for alignments.bed, indexed_peaks.bed, and quantification.json.
-    :param weighting: NH fractional weighting or primary read-end counting.
-    """
-    if sam.suffix != ".sam":
-        raise ValueError("Preparation requires an exported .sam file")
-    sizes = chromosome_sizes(chrom_sizes)
-    regions = read_regions(bed, sizes)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    denominator = weighted_alignments(sam, sizes, output_dir / "alignments.bed", weighting)
-    indexed_regions(regions, output_dir / "indexed_peaks.bed")
-    details = {"denominator": denominator, "regions": [list(region.fields) for region in regions]}
-    (output_dir / "quantification.json").write_text(json.dumps(details) + "\n")
-
-
-def read_details(path: Path) -> tuple[list[Region], float]:
-    """Validate the preparation artifact and restore original BED fields."""
-    payload = json.loads(path.read_text())
-    if not isinstance(payload, dict):
-        raise ValueError("Quantification details must be an object")
-    denominator = payload.get("denominator")
-    if (
-        not isinstance(denominator, (int, float))
-        or isinstance(denominator, bool)
-        or not math.isfinite(denominator)
-        or denominator < 0
-    ):
-        raise ValueError("Invalid read-end denominator")
-    rows = payload.get("regions")
-    if not isinstance(rows, list):
-        raise ValueError("Quantification details require regions")
-    regions: list[Region] = []
-    for row in rows:
-        if not isinstance(row, list) or len(row) < 3:
-            raise ValueError("Expected at least three BED fields")
-        fields: list[str] = []
-        for value in row:
-            if not isinstance(value, str):
-                raise ValueError("BED fields must be strings")
-            fields.append(value)
-        start, end = int(fields[1]), int(fields[2])
-        if start < 0 or end <= start:
-            raise ValueError("Invalid BED interval")
-        regions.append(Region(tuple(fields), fields[0], start, end))
-    return regions, float(denominator)
-
-
-def finish_quantification(
-    *,
-    details: Path,
-    read_overlaps: Path,
-    coverage_overlaps: Path,
-    rpm_output: Path,
-    rpkm_output: Path,
-) -> None:
-    """Append RPM and mean coverage RPKM using exported intersection files.
-
-    :param details: Validated quantification.json from preparation.
-    :param read_overlaps: Weighted read/peak intersections from bedtools.
-    :param coverage_overlaps: RPKM bedGraph/peak intersections from bedtools.
-    :param rpm_output: Original BED rows with appended read-end RPM.
-    :param rpkm_output: Original BED rows with appended mean coverage RPKM.
-    """
-    regions, denominator = read_details(details)
-    if regions and denominator == 0:
-        raise ValueError("Cannot normalize peaks: no retained mapped read ends")
-    with read_overlaps.open() as stream:
-        counts = overlap_sums(stream, len(regions), length_weighted=False)
-    with coverage_overlaps.open() as stream:
-        totals = overlap_sums(stream, len(regions), length_weighted=True)
-    rpm = [count * 1_000_000 / denominator for count in counts]
-    rpkm = [
-        total / (region.end - region.start) for region, total in zip(regions, totals, strict=True)
-    ]
-    write_scores(regions, rpm, rpm_output)
-    write_scores(regions, rpkm, rpkm_output)
+    write_scores(regions, mean_coverage(regions, coverage), output)

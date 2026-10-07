@@ -27,6 +27,9 @@ ENV UV_TOOL_BIN_DIR=/usr/local/bin
 COPY uv.lock /opt/$ENV_NAME/
 COPY pyproject.toml /opt/$ENV_NAME/
 COPY .python-version /opt/$ENV_NAME/
+# A "+gil" request selects a regular (not free-threaded) CPython, but uv cannot download for it;
+# install the plain version first so the request has an interpreter to select.
+RUN  uv python install "$(sed 's/+gil$//' .python-version)"
 RUN  uv sync --locked --no-dev --no-install-project
 # RUN --mount=type=cache,target=/root/.cache/uv \
 #     --mount=type=bind,source=uv.lock,target=uv.lock \

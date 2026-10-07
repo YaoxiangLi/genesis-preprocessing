@@ -7,10 +7,10 @@ process QC {
     conda "environments/DAP_SEQ_QC.yaml"
     container "${dotenv('DAP_SEQ_QC_IMAGE')}"
     tag "${meta.id}"
-    publishDir "${params.workspace}/${meta.species}/${meta.id}", mode: 'copy',
+    publishDir "${params.run_dir}/output/${meta.species}/${meta.id}", mode: 'copy',
         pattern: '*.qc.report.*'
     input:
-    tuple val(meta), path(bam), path(bai), path(qc_bam), path(qc_bai)
+    tuple val(meta), path(bam), path(bai), path(qc_bam), path(qc_bai), path(spp_bam)
     val resources
     path spp_script
     output:
@@ -31,9 +31,23 @@ process QC {
     mkdir qc-bin
     ln -s "\$(command -v gawk)" qc-bin/awk
     export PATH="\$PWD/qc-bin:\$PATH"
-    Rscript "${spp_script}" -c='${qc_bam}' \
+    # run_spp.R crashes when no fragment-length peak stands out (e.g. little enrichment). Record an
+    # NA result from what it logged rather than failing the run; any other failure is still fatal.
+    if ! Rscript "${spp_script}" -c='${spp_bam}' \
         -p=${task.cpus} -rf -s=-0:2:400 \
-        '-savp=${meta.id}.qc.report.spp.pdf' '-out=${meta.id}.qc.report.spp.tsv'
+        '-savp=${meta.id}.qc.report.spp.pdf' '-out=${meta.id}.qc.report.spp.tsv' > spp.log 2>&1; then
+        cat spp.log >&2
+        grep -q '^Top 3 estimates for fragment length NA' spp.log || exit 1
+        awk -v OFS='\t' -v name='${spp_bam}' '
+            /^done[.] read [0-9]+ fragments/ {reads = \$3}
+            /^Phantom peak location/ {phantom = \$NF}
+            /^Phantom peak Correlation/ {phantom_cc = \$NF}
+            /^Minimum cross-correlation shift/ {min_shift = \$NF}
+            /^Minimum cross-correlation value/ {min_cc = \$NF}
+            END {print name, reads, "NA", "NA", phantom, phantom_cc, min_shift, min_cc, "NA", "NA", "NA"}
+        ' spp.log > '${meta.id}.qc.report.spp.tsv'
+    fi
+    cat spp.log
     """
     stub:
     """

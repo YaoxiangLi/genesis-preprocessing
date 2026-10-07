@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import functools
 import gzip
 import hashlib
+import http.server
 import json
 import math
 import os
@@ -14,8 +16,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from collections import Counter
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from genesis_tools.metadata import chromosome_sizes, infer_metadata, inspect_read_length
@@ -92,12 +96,21 @@ def check_wrapper(work: Path) -> None:
         "WRAPPER_LOG": str(work / "wrapper.json"),
     }
     wrapper = ROOT / "scripts/run-pipeline.sh"
-    for options, profile in [
-        ([], "local,conda"),
-        (["-profile", "local,docker", "-with-trace", "trace.tsv"], "local,docker"),
+    default_profile = subprocess.run(
+        [str(ROOT / "scripts/get-default-profile.sh")],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=10,
+    ).stdout.strip()
+    workspace = work / "wrapper-workspace"
+    for options, extra, profile, run_name in [
+        ([], [], default_profile, "wrapper"),
+        (["-p", "local,conda", "-n", "named"], [], "local,conda", "named"),
+        ([], ["-profile", "local,docker", "-with-trace", "trace.tsv"], "local,docker", "wrapper"),
     ]:
         result = subprocess.run(
-            ["bash", str(wrapper), str(sheet), *options],
+            [str(wrapper), "-w", str(workspace), *options, str(sheet), *extra],
             env=env,
             capture_output=True,
             text=True,
@@ -107,18 +120,33 @@ def check_wrapper(work: Path) -> None:
         assert result.returncode == 0, result.stderr
         arguments = json.loads((work / "wrapper.json").read_text())
         assert arguments[arguments.index("--input") + 1] == str(sheet)
+        assert arguments[arguments.index("--workspace") + 1] == str(workspace)
+        assert arguments[arguments.index("--run_name") + 1] == run_name
+        assert arguments.count("-profile") == 1
         assert arguments[arguments.index("-profile") + 1] == profile
+        assert (workspace / run_name).is_dir()
+    usage = subprocess.run(
+        [str(wrapper), "--help"], capture_output=True, text=True, check=False, timeout=10
+    )
+    assert usage.returncode == 0 and usage.stdout.startswith("Usage:"), usage.stderr
     before = (work / "wrapper.json").read_bytes()
-    for options in ([str(sheet)], ["--input", str(sheet)], ["--input=" + str(sheet)]):
+    for options in (
+        [str(sheet)],
+        ["--input", str(sheet)],
+        ["--input=" + str(sheet)],
+        ["--workspace", str(workspace)],
+    ):
         result = subprocess.run(
-            ["bash", str(wrapper), str(sheet), *options],
+            [str(wrapper), "-w", str(workspace), str(sheet), *options],
             env=env,
             capture_output=True,
             text=True,
             check=False,
             timeout=10,
         )
-        assert result.returncode == 2 and "exactly one" in result.stderr
+        assert result.returncode == 2 and (
+            "exactly one" in result.stderr or "-w/--workspace" in result.stderr
+        ), result.stderr
         assert (work / "wrapper.json").read_bytes() == before
 
 
@@ -175,6 +203,7 @@ def check_sheets(work: Path) -> None:
         ),
         ([good, {**control, "reference_fasta": "missing.fa.gz"}], "reference missing"),
         ([{**control, "read1_url": "https://example.org/a'bad"}], "invalid read1_url"),
+        ([{**control, "read1_url": "file:///tmp/a.gz"}], "invalid read1_url"),
         ([{**control, "sample_id": "bad;id"}], "unsafe sample_id"),
         ([], "no samples"),
     ]
@@ -243,7 +272,30 @@ def check_metadata(work: Path) -> None:
         rejected(lambda: chromosome_sizes(sizes), diagnostic)
 
 
-def create_fixture(work: Path) -> Path:
+class QuietHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format: str, *args: object) -> None:
+        pass
+
+
+@contextmanager
+def serve(folder: Path, *, docker: bool) -> Iterator[str]:
+    """Serve fixture reads over HTTP; yield the base URL that tasks should use."""
+    # Docker Desktop forwards host.docker.internal to the host's loopback, but on Linux it maps
+    # to the bridge gateway, so the server must listen beyond loopback there.
+    host = "0.0.0.0" if docker and sys.platform.startswith("linux") else "127.0.0.1"
+    handler = functools.partial(QuietHandler, directory=str(folder))
+    server = http.server.ThreadingHTTPServer((host, 0), handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        name = "host.docker.internal" if docker else "127.0.0.1"
+        yield f"http://{name}:{server.server_address[1]}"
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def create_fixture(work: Path, base_url: str, *, docker: bool) -> Path:
     """Make deterministic full-length SE/PE libraries with enrichment and multimappers."""
     generator = random.Random(60141)
     sequence = "".join(generator.choices("ACGT", k=2000000))
@@ -285,8 +337,8 @@ def create_fixture(work: Path) -> Path:
             {
                 "sample_id": sample,
                 "species": f"Plant_{layout}",
-                "read1_url": (folder / "reads.fastq.gz").as_uri(),
-                "read2_url": (mate_folder / "reads.fastq.gz").as_uri() if layout == "PE" else "-",
+                "read1_url": f"{base_url}/{sample}/reads.fastq.gz",
+                "read2_url": f"{base_url}/{sample}/mate/reads.fastq.gz" if layout == "PE" else "-",
                 "control_sample": "-" if control else f"{prefix}_control",
                 "reference_fasta": f"{prefix}.fa.gz",
             }
@@ -294,7 +346,14 @@ def create_fixture(work: Path) -> Path:
     sheet = work / "samples.tsv"
     write_sheet(sheet, rows)
     config = work / "limits.config"
-    config.write_text("executor.cpus = 4\nexecutor.memory = '8 GB'\n")
+    limits = "executor.cpus = 4\nexecutor.memory = '8 GB'\n"
+    if docker:
+        # Linux Docker only resolves host.docker.internal with an explicit host-gateway mapping.
+        limits += (
+            "docker.runOptions = '-u $(id -u):$(id -g) "
+            "--add-host=host.docker.internal:host-gateway'\n"
+        )
+    config.write_text(limits)
     return sheet
 
 
@@ -330,6 +389,9 @@ def run_pipeline(
         str(work / "limits.config"),
         "-with-trace",
         str(work / f"trace-{suffix}.tsv"),
+        # Small batches exercise several DOWNLOAD tasks, including a partial final batch.
+        "--download_batch_size",
+        "2",
         "-ansi-log",
         "false",
     ]
@@ -380,18 +442,25 @@ def check_outputs(work: Path, *, docker: bool) -> None:
         "VALIDATE_SHEET": 1,
         "CHROM_SIZES": 2,
         "BWA_MEM2_INDEX": 2,
-        "DOWNLOAD": 5,
+        "DOWNLOAD": 3,
         "METADATA": 5,
         "BWA_MEM2_ALIGN": 5,
         "QC": 5,
         "TRACKS": 5,
         "CALL_PEAKS": 3,
-        "BAM_TO_SAM": 3,
-        "PREPARE_QUANTIFICATION": 3,
-        "INTERSECT_PEAKS": 3,
         "QUANTIFY": 3,
     }, counts
-    published = work / "published"
+    reports = list((work / "published" / "samples" / "trace").glob("execution_report_*.html"))
+    assert len(reports) == 1, reports
+    latest = subprocess.run(
+        [str(ROOT / "scripts/get-latest-report.sh"), str(work / "published")],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=10,
+    ).stdout.strip()
+    assert latest == str(reports[0]), latest
+    published = work / "published" / "samples" / "output"
     for path in published.rglob("*"):
         assert not path.name.endswith(
             (".fastq", ".fastq.gz", ".bam", ".bai", ".sam", ".bedGraph")
@@ -423,6 +492,7 @@ def check_outputs(work: Path, *, docker: bool) -> None:
             assert provenance["read_length"] == "75"
             assert provenance["mapq_filter"] == "none" and provenance["flag_exclude"] == "2308"
             assert provenance["qc_reads"] == "full_read1_unpaired"
+            assert provenance["spp_reads"] == "read1_first_50bp_unpaired"
             assert provenance["bwa_options"] == "-K 10000000 -k 19 -c 10000 -T 30"
         if sample.endswith("control"):
             assert not list(folder.glob("*.macs3*")) and not list(folder.glob("*.peaks.*.tsv"))
@@ -441,13 +511,16 @@ def check_outputs(work: Path, *, docker: bool) -> None:
         assert "bowtie " not in source and "--sam-nh" not in source
         assert "--minMappingQuality" not in source
         if "bwa-mem2 mem" in source:
-            assert source.count("bwa-mem2 mem") == 2
-            assert "samtools view -u -F 2308 -" in source and " -q " not in source
+            # Main and QC/track alignments use full reads; only the SPP input is cut, to 50 bp.
+            assert source.count("bwa-mem2 mem") == 3
+            assert source.count("samtools view -u -F 2308 -") == 3 and " -q " not in source
             assert "trimfastq" not in source and "head " not in source
+            assert source.count("substr($0, 1, bases)") == 1 and "-v bases=50 " in source
         if "macs3 callpeak" in source:
             assert "_control.primary.bam" in source
         if "Rscript" in source:
             assert "-s=-0:2:400" in source and "qc-bin/awk" in source
+            assert ".spp.bam'" in source
 
 
 def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
@@ -465,7 +538,7 @@ def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
     # Newly published references change staged input paths on the first resume.
     # A second resume must cache all downstream computation at those stable paths.
     downloads = [row for row in rows if row["name"].split(" ")[0] == "DOWNLOAD"]
-    assert len(downloads) == 5 and all(row["status"] == "CACHED" for row in downloads)
+    assert len(downloads) == 3 and all(row["status"] == "CACHED" for row in downloads)
     assert run_pipeline(work, sheet, docker=docker, resume=True, suffix="stable").returncode == 0
     rows = trace_rows(work, "stable")
     for process in ("DOWNLOAD", "BWA_MEM2_ALIGN", "QUANTIFY"):
@@ -540,8 +613,10 @@ def check_bams(work: Path) -> None:
             records = [line.split("\t") for line in result.stdout.splitlines()]
             assert records and any(fields[4] == "0" for fields in records), bam
             assert all(not int(fields[1]) & 2308 for fields in records), bam
-            assert all(len(fields[9]) == 75 for fields in records), bam
-            if bam.name.endswith(".qc.bam"):
+            # Only the SPP alignment uses read 1 cut to 50 bp; the others keep all 75 bases.
+            length = 50 if bam.name.endswith(".spp.bam") else 75
+            assert all(len(fields[9]) == length for fields in records), bam
+            if bam.name.endswith((".qc.bam", ".spp.bam")):
                 assert all(not int(fields[1]) & 1 for fields in records), bam
 
 
@@ -570,14 +645,16 @@ def main() -> None:
             check_wrapper(work)
             check_sheets(work)
             check_metadata(work)
-        sheet = create_fixture(work)
-        assert run_pipeline(work, sheet, docker=args.docker).returncode == 0
-        check_outputs(work, docker=args.docker)
-        if args.docker:
-            check_bams(work)
-        check_resume(work, sheet, docker=args.docker)
-        if not args.docker:
-            check_failures(work, sheet)
+        (work / "inputs").mkdir()
+        with serve(work / "inputs", docker=args.docker) as base_url:
+            sheet = create_fixture(work, base_url, docker=args.docker)
+            assert run_pipeline(work, sheet, docker=args.docker).returncode == 0
+            check_outputs(work, docker=args.docker)
+            if args.docker:
+                check_bams(work)
+            check_resume(work, sheet, docker=args.docker)
+            if not args.docker:
+                check_failures(work, sheet)
         label = "Real-tool Docker end-to-end" if args.docker else "Nextflow regression"
         print(f"{label} validation passed.", flush=True)
     finally:

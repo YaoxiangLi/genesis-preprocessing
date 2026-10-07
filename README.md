@@ -38,35 +38,58 @@ against the FASTA's contents.
 Run exactly one sheet per invocation:
 
 ```bash
-# Default: local execution with micromamba/conda environments.
-pixi run pipeline 01-Arabidopsis_thaliana-GSE60141.tsv
+# Show wrapper options.
+pixi run pipeline --help
 
-# Local Docker execution with the images recorded in .env.
-pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -profile local,docker
+
+# Run test data with default profile: inferred from the environment (see below).
+pixi run pipeline test-Sorghum_bicolor-PRJNA1177471.tsv
+
+# Local execution with micromamba/conda environments.
+pixi run pipeline -p local,conda 15-Arabidopsis_lyrata-PRJNA1177479.tsv
 
 # Continue a previous run using Nextflow's task cache.
-pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -profile local,docker -resume
+pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -resume
 
 # Submit tasks from Sherlock using accessible container images.
-pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -profile sherlock,apptainer
+pixi run pipeline -p sherlock,apptainer 15-Arabidopsis_lyrata-PRJNA1177479.tsv
 ```
 
-Run through the root Pixi environment so Nextflow can find micromamba. An
-explicit `-profile` replaces the wrapper's `local,conda` default: choose an
-executor and a software environment together. `sherlock` uses SLURM and the
+Run through the root Pixi environment so Nextflow can find micromamba. Without
+`-p`/`--profile` (or a Nextflow `-profile`), `scripts/get-default-profile.sh`
+chooses `sherlock,apptainer` where `sbatch` exists, else `local,docker` where
+`docker` exists, else `local,conda`. Choose an executor and a software
+environment together. `sherlock` uses SLURM and the
 `normal` queue; select another queue with `--slurm_queue`. Locally built images
 must be published with approval, or made available on the cluster, before
 Sherlock's Apptainer can use them. Cluster work, cache, reference, and output
 paths must be visible to compute nodes and writable by the user.
 
-Use `--references /absolute/path`, `--workspace /absolute/path`, and
-`-work-dir /absolute/path` to choose reference, published-output, and Nextflow
-work locations. Defaults are `references/`, `workspace/`, and `work/` in this
-repository. Separate workspace roots avoid sample-name collisions between runs.
-Nextflow retains intermediate FASTQs and BAMs under its work directory for
-caching; retain it for `-resume` and clean it only when those intermediates are
-no longer needed. `-with-trace trace.tsv`, `-with-report report.html`, and
-`-with-timeline timeline.html` provide execution records.
+Each run lives in `WORKSPACE/RUN_NAME/`, where `RUN_NAME` defaults to the sheet's
+basename without `.tsv` (override with `-n`/`--run-name`). The default workspace,
+from `scripts/get-default-workspace.sh`, is `$SCRATCH/workspace` when `$SCRATCH`
+is set and `workspace/` in this repository otherwise; override it with
+`-w`/`--workspace`. A run folder contains:
+
+- `work/`: the Nextflow work directory.
+- `output/`: published results.
+- `trace/`: timestamped execution report, timeline, trace, and DAG files.
+- `.nextflow.log` and `.nextflow/`: the wrapper launches Nextflow from the run
+  folder, so `-resume` uses that run's history.
+
+Use `--references /absolute/path` to choose the reference location (default
+`references/` in this repository). Relative paths in Nextflow arguments resolve
+against the run folder. Nextflow retains intermediate FASTQs and BAMs under its
+work directory for caching; retain it for `-resume` and clean it only when those
+intermediates are no longer needed. Task scripts run with `bash -euxo pipefail`,
+so each task's `.command.log` records the commands it ran.
+
+```bash
+# Path to the most recent execution report (optional argument: WORKSPACE).
+pixi run get-latest-report
+# Follow a task's log by the hash Nextflow prints, hiding `set -x` lines.
+pixi run watch-log ab/123456
+```
 
 ## Sample sheet
 
@@ -87,33 +110,45 @@ Validation completes before downloads start.
 
 Reference names are gzipped FASTA basenames ending in `.fa.gz`, `.fasta.gz`, or
 `.fna.gz`. Identifiers and filenames may contain letters, digits, underscores,
-periods, and hyphens, with a letter, digit, or underscore first. Read URLs support
-HTTP, HTTPS, and absolute `file:///` URLs. Local FASTQs are declared and staged
-as task inputs, including mates with matching basenames in different folders.
+periods, and hyphens, with a letter, digit, or underscore first. Read URLs must
+be HTTP or HTTPS. Reads are downloaded in batches of `--download_batch_size`
+samples (default 8), one batch at a time; mates with matching basenames are fine.
 
 ## Analysis choices
 
-Both main and first-read QC alignments use **full reads**. Read length is inferred
+Main and first-read QC alignments use **full reads**; only SPP's input is cut
+(see below). Read length is inferred
 from up to the first 100 reads per mate and recorded as metadata; it is not a
 trimming instruction. Inspected reads must be nonempty, structurally valid, and
-uniform in length across mates. Downloads pass gzip integrity checks, first-read
+uniform in length across mates. Remote reads are fetched with parallel aria2c
+connections and fully decompressed with bgzip, which checks gzip integrity; first-read
 line counts must be divisible by four, and paired FASTQs must have equal line
 counts. Genome size is the sum of chromosome sizes derived from the FASTA.
 
 The main bwa-mem2 BAM retains primary mapped alignments, including **MAPQ 0**.
 `samtools view -F 2308` excludes unmapped, secondary, and supplementary records.
 There is no MAPQ threshold, NH weighting, or separate deduplication step in the
-bwa-mem2 alignment. QC aligns full first reads as an unpaired library. Each
-sample's alignment provenance records the bwa-mem2 version, layout, read length,
-flag exclusion, options, and QC input policy.
+bwa-mem2 alignment. QC aligns full first reads as an unpaired library, used for
+first-read statistics and tracks. A third alignment, for SPP only, uses first
+reads cut to their first 50 bases (`--spp_read_length`). Each sample's alignment
+provenance records the bwa-mem2 version, layout, read length, flag exclusion,
+options, and the QC and SPP read policies.
 
 BWA defaults are `-K 10000000 -k 19 -c 10000 -T 30`. Override them with
 `--bwa_batch_size`, `--bwa_seed_length`, `--bwa_max_seed_occurrences`, and
 `--bwa_score_threshold`; each must be a positive integer.
+Parameters are validated against `nextflow_schema.json` (nf-schema) before any
+task runs, and parameters that differ from the defaults are logged at startup.
 
 SPP uses the unmodified, vendored upstream `run_spp.R` revision
 [`6984a713aba0218b76bacc63f2fb5087425fd6a3`](https://github.com/kundajelab/phantompeakqualtools/blob/6984a713aba0218b76bacc63f2fb5087425fd6a3/run_spp.R),
-with shift range `-s=-0:2:400`, GNU awk, and the full-length first-read BAM.
+with shift range `-s=-0:2:400`, GNU awk, and first reads cut to 50 bases
+before alignment, as in ENCODE's cross-correlation QC. With full-length reads as
+long as the fragments (e.g. 151-base reads of ~140-base DAP-seq fragments), the
+read-length phantom peak hides the fragment peak and SPP cannot estimate a
+fragment length. Cutting before alignment, not after, puts the phantom peak at
+the cut length, so NSC and RSC keep their usual meaning. If SPP still finds no
+fragment peak, QC records a row with `NA` estimates instead of failing.
 The provenance and differences from the historical Sherlock script are explained
 in [vendor/phantompeakqualtools/README.md](vendor/phantompeakqualtools/README.md).
 SPP scores can differ from the old workflow because of the aligner, read lengths,
@@ -131,12 +166,14 @@ independently. Mean RPKM is the length-weighted average of deepTools' RPKM
 bedGraph over each peak, including uncovered bases as zero. Both score files
 preserve the narrowPeak rows and append one value. Mean coverage RPKM is a
 coverage statistic and differs from read-end RPM divided by peak length in kb.
-The standalone `genesis-tools peak-rpm` command also supports explicit NH
-fractional weighting when input alignments have valid NH tags.
+A single `QUANTIFY` task reads the BAM with pysam and the bedGraph directly,
+with no SAM or BED intermediates; overlaps follow `bedtools intersect` (at least
+one shared base). The standalone `genesis-tools peak-rpm` command also supports
+explicit NH fractional weighting when input alignments have valid NH tags.
 
 ## Outputs and resources
 
-Published results live at `workspace/<species>/<sample_id>/`:
+Published results live at `WORKSPACE/RUN_NAME/output/<species>/<sample_id>/`:
 
 - FASTQ line counts, metadata, and alignment provenance TSVs.
 - SPP TSV/PDF, samtools flagstat, idxstats, and alignment statistics; PE insert-length distributions.
@@ -144,23 +181,26 @@ Published results live at `workspace/<species>/<sample_id>/`:
 - Treatment MACS3 outputs, including gzipped narrowPeak files.
 - Treatment `.peaks.RPM.tsv` and `.peaks.mean_RPKM.tsv` scores.
 
-**FASTQs, BAMs, BAM indexes, SAM exports, bedGraphs, and quantification
-intermediates are excluded from published results.** Derived reference files
+**FASTQs, BAMs, BAM indexes, and bedGraphs are excluded from published results.** Derived reference files
 are published separately under the reference directory.
 
-Alignment, QC, and tracks default to two CPUs, 8 GB, and four hours, configurable
-with `--cpus`, `--memory`, and `--time`. Indexing defaults to one CPU, 32 GB, and
-eight hours, configurable with `--index_memory` and `--index_time`. Other modules
-declare their own resources. The `test` profile reduces configurable allocations
-to two CPUs, 2 GB, and five minutes; it does not select a sample subset or replace
-tools. For agent-submitted Sherlock validation, every task must explicitly stay
+bwa-mem2 indexing and alignment size their own requests. Indexing reads the
+gzipped FASTA directly on one CPU, with 1 GB plus 32 bytes per reference base
+(it peaks near 28) and one hour plus an hour per Gbp. Alignment uses eight CPUs,
+memory from the genome size, and one hour plus an hour per GB of compressed
+reads. Both retry twice with doubled, then tripled, requests when killed for
+memory or walltime. QC and tracks default to two CPUs, 8 GB, and four hours,
+configurable with `--cpus`, `--memory`, and `--time`. Other modules declare their
+own resources. The `local` profile caps requests at the machine's CPUs and memory.
+The `test` profile caps every task at two CPUs, 2 GB, and five minutes; it does
+not select a sample subset or replace tools. For agent-submitted Sherlock validation, every task must explicitly stay
 within five minutes, two CPUs, and 8 GB. Run computation on allocated nodes.
 
 ## Environments and Docker builds
 
 Pure tool environments are defined in `environments/*.yaml`; their matching
 Pixi manifests and locks support container builds. `genesis_tools/` is a typed
-Python 3.14.5 free-threading uv project. Its conda equivalent installs the local
+Python 3.14.5 uv project that reads BAMs with pysam. Its conda equivalent installs the local
 Python project; containers use the dedicated uv Dockerfile. Each Nextflow module
 declares its environment and reads its image from `.env` using nf-dotenv.
 
@@ -194,9 +234,10 @@ reuse, `-resume`, invalid inputs, and publication boundaries. Mock builds cover
 both architectures and `--no-push` without contacting Docker or a registry.
 
 Docker validation runs the real download/staging, indexing, bwa-mem2, samtools,
-SPP, deepTools, MACS3, bedtools, and Python tools on deterministic 75-base SE/PE
+SPP, deepTools, MACS3, and Python tools on deterministic 75-base SE/PE
 fixtures with enriched regions and duplicated sequence. It checks nonempty peaks,
-finite positive scores, provenance, full read lengths, outputs, and resume.
+finite positive scores, provenance, read lengths (full, and 50 bases for SPP),
+outputs, and resume.
 Validated on 2026-10-06 with the existing linux/arm64 images: all 45 initial
 tasks completed, each of the three treatments produced 200 peaks, and all 41
 tasks on the stable resume were cached. BAM inspection confirmed retained MAPQ 0

@@ -14,7 +14,6 @@ environments:
     - url: https://conda.anaconda.org/conda-forge/
     packages:
       linux-64:
-      - conda: https://conda.anaconda.org/bioconda/linux-64/bedtools-2.31.1-h13024bc_3.tar.bz2
       - conda: https://conda.anaconda.org/bioconda/linux-64/macs3-3.0.5-py313hfeada96_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/aws-c-auth-0.10.4-h4610da3_2.conda
@@ -107,7 +106,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2026c-h151e31d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zarr-3.4.0-pyhc364b38_0.conda
       linux-aarch64:
-      - conda: https://conda.anaconda.org/bioconda/linux-aarch64/bedtools-2.31.1-h63bafd0_3.tar.bz2
       - conda: https://conda.anaconda.org/bioconda/linux-aarch64/macs3-3.0.5-py312h2c93283_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/_openmp_mutex-4.5-20_gnu.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-aarch64/aws-c-auth-0.10.4-h31aafc4_2.conda
@@ -201,7 +199,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2026c-h151e31d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zarr-3.4.0-pyhc364b38_0.conda
       osx-64:
-      - conda: https://conda.anaconda.org/bioconda/osx-64/bedtools-2.31.1-hbb299f0_3.tar.bz2
       - conda: https://conda.anaconda.org/bioconda/osx-64/macs3-3.0.5-py312h616936a_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/anndata-0.13.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/annotated-types-0.8.0-pyhd8ed1ab_0.conda
@@ -288,7 +285,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/yaml-0.2.5-had63097_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/zstd-1.5.7-hbc1a06c_7.conda
       osx-arm64:
-      - conda: https://conda.anaconda.org/bioconda/osx-arm64/bedtools-2.31.1-he85ad4a_3.tar.bz2
       - conda: https://conda.anaconda.org/bioconda/osx-arm64/macs3-3.0.5-py312h8615eaa_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/anndata-0.13.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/annotated-types-0.8.0-pyhd8ed1ab_0.conda
@@ -375,18 +371,6 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/yaml-0.2.5-h74c22ad_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.7-hf451053_7.conda
 packages:
-- conda: https://conda.anaconda.org/bioconda/linux-64/bedtools-2.31.1-h13024bc_3.tar.bz2
-  sha256: d8b7aef31be37da761a87e1263ea00d62b67134b546f018067786aa6d3dccfac
-  md5: 99c4e90e82db906439e00beafb343d16
-  depends:
-  - bzip2 >=1.0.8,<2.0a0
-  - libgcc >=13
-  - liblzma >=5.6.3,<6.0a0
-  - libstdcxx >=13
-  - libzlib >=1.3.1,<2.0a0
-  license: MIT
-  size: 1607626
-  timestamp: 1733852519791
 - conda: https://conda.anaconda.org/bioconda/linux-64/macs3-3.0.5-py313hfeada96_0.conda
   sha256: 0b3441422fd27bf714fa052512dcdf83b9756cb192bf316e2b30ec56a74cb415
   md5: 38de9ff9f0318287ed43be9e676e5b08
@@ -407,18 +391,6 @@ packages:
   license_family: BSD
   size: 2864256
   timestamp: 1791070648601
-- conda: https://conda.anaconda.org/bioconda/linux-aarch64/bedtools-2.31.1-h63bafd0_3.tar.bz2
-  sha256: 394f09590bcbacb74f089ca2834874fa7c2e247b0597921f96cd92c0e26faeec
-  md5: 86edf6032c9351a31cbe2aaf139db067
-  depends:
-  - bzip2 >=1.0.8,<2.0a0
-  - libgcc >=13
-  - liblzma >=5.6.3,<6.0a0
-  - libstdcxx >=13
-  - libzlib >=1.3.1,<2.0a0
-  license: MIT
-  size: 1518813
-  timestamp: 1734059720252
 - conda: https://conda.anaconda.org/bioconda/linux-aarch64/macs3-3.0.5-py312h2c93283_0.conda
   sha256: 9944122d4bbccddb964aa67c002b136744ff6a8bddff04d55a13ba2af6d8b846
   md5: dc2b7034ffa9b2133aad215bd8c655dc
@@ -438,17 +410,6 @@ packages:
   license_family: BSD
   size: 2782069
   timestamp: 1791070092482
-- conda: https://conda.anaconda.org/bioconda/osx-64/bedtools-2.31.1-hbb299f0_3.tar.bz2
-  sha256: 2e121af16a83ffd673075a629544e6d6e810901a6a3ee2233e6c7f70f1c0691f
-  md5: 14117a0fac7ea77047ccb2d396e05d16
-  depends:
-  - bzip2 >=1.0.8,<2.0a0
-  - libcxx >=18
-  - liblzma >=5.6.3,<6.0a0
-  - libzlib >=1.3.1,<2.0a0
-  license: MIT
-  size: 783078
-  timestamp: 1733985003853
 - conda: https://conda.anaconda.org/bioconda/osx-64/macs3-3.0.5-py312h616936a_0.conda
   sha256: d19c3e3842a8fd0c6ee4683e56562b083c78f0563bd134178477dd73a25fe316
   md5: 203014284b38cf8f1bf3936e3a21aeeb
@@ -468,17 +429,6 @@ packages:
   license_family: BSD
   size: 2535860
   timestamp: 1791071945171
-- conda: https://conda.anaconda.org/bioconda/osx-arm64/bedtools-2.31.1-he85ad4a_3.tar.bz2
-  sha256: cd11a800ed5e388ad21e2648f022cb376bbce887795c02427b84caa8b10cdd6c
-  md5: 098e54e6b442c7c65be261cae3c7aa0b
-  depends:
-  - bzip2 >=1.0.8,<2.0a0
-  - libcxx >=18
-  - liblzma >=5.6.3,<6.0a0
-  - libzlib >=1.3.1,<2.0a0
-  license: MIT
-  size: 760457
-  timestamp: 1733961836717
 - conda: https://conda.anaconda.org/bioconda/osx-arm64/macs3-3.0.5-py312h8615eaa_0.conda
   sha256: 9c50170eab8f1cf9d79431a79ac40bf21e96192300811d2ed54b3e5e90bf0484
   md5: c7236d82f4f39755fc67745a9d4172d0
