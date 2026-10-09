@@ -17,3 +17,7 @@ uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_bench
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_benchmark_spec.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_atac.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_metro.py"
+
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_execution.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_supported_atac.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_deployment.py"

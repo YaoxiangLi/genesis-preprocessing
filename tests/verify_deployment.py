@@ -1,0 +1,69 @@
+"""Parse every deployment profile and verify local defaults regardless of host tools."""
+
+from __future__ import annotations
+
+import os
+import subprocess
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def main() -> None:
+    with tempfile.TemporaryDirectory(prefix="genesis-profile-") as temporary:
+        folder = Path(temporary)
+        for name in ("sbatch", "qsub", "docker"):
+            script = folder / name
+            script.write_text("#!/bin/sh\nexit 0\n")
+            script.chmod(0o755)
+        default = subprocess.check_output(
+            [str(ROOT / "scripts/get-default-profile.sh")],
+            env={**os.environ, "PATH": f"{folder}:{os.environ['PATH']}"},
+            text=True,
+        ).strip()
+        assert default == "local,docker"
+        for profile, executor, runtime in [
+            ("local,docker", "local", "docker"),
+            ("sherlock,apptainer", "slurm", "apptainer"),
+            ("nersc", "slurm", "podman"),
+            ("slurm,apptainer", "slurm", "apptainer"),
+            ("pbspro,apptainer", "pbspro", "apptainer"),
+            ("lsf,apptainer", "lsf", "apptainer"),
+            ("sge,apptainer", "sge", "apptainer"),
+        ]:
+            output = subprocess.check_output(
+                [
+                    "nextflow",
+                    "-C",
+                    str(ROOT / "conf/atac.config"),
+                    "config",
+                    str(ROOT / "workflows"),
+                    "-profile",
+                    profile,
+                    "-flat",
+                ],
+                text=True,
+                timeout=30,
+            )
+            assert f"process.executor = '{executor}'" in output
+            assert f"{runtime}.enabled = true" in output
+            if profile == "nersc":
+                assert "executor.queueSize = 15" in output
+                assert "executor.pollInterval = '5 min'" in output
+        wrapper = ROOT / "scripts/nersc-podman.sh"
+        fake = folder / "podman-hpc"
+        fake.write_text('#!/bin/sh\nprintf "%s\\n" "$@"\n')
+        fake.chmod(0o755)
+        output = subprocess.check_output(
+            [str(wrapper), "podman", "info", "two words"],
+            env={**os.environ, "PATH": f"{folder}:{os.environ['PATH']}"},
+            text=True,
+        )
+        assert output.splitlines() == ["info", "two words"]
+        assert not (folder / "podman").exists()
+    print("PASS: local default, seven parsed deployment profiles and scoped Podman-HPC adapter")
+
+
+if __name__ == "__main__":
+    main()
