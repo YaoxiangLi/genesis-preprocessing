@@ -64,6 +64,13 @@ keeps unresolved problems visible for human review.
 [Execution guide](docs/usage/execution.md) ·
 [Static execution map](docs/images/genesis_execution.svg)
 
+Published datasets can also enter an explicit offline curation workflow: artifact
+validation, a searchable local registry, versioned QC policies and accountable
+metadata/QC/export review. Reviewed exports contain manifests and provenance;
+ordinary processing remains usable without curation approval.
+
+[Curation guide](docs/usage/curation.md)
+
 ## Create workflow figures
 
 ```bash

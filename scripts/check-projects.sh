@@ -7,7 +7,8 @@ uv run --frozen --project "$root/genesis_tools" ruff check \
 uv run --frozen --project "$root/genesis_tools" ruff format --check \
     --config "$root/genesis_tools/pyproject.toml" "$root/genesis_tools" "$root/tests"
 uv run --frozen --project "$root/genesis_tools" ty check --project "$root/genesis_tools"
-uv run --frozen --project "$root/genesis_tools" ty check --project "$root/genesis_tools" "$root/tests"
+uv run --frozen --project "$root/genesis_tools" ty check --project "$root/genesis_tools" \
+    --extra-search-path "$root/tests" "$root/tests"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_nextflow_style.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_multiqc.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_build_tags.py"
@@ -22,3 +23,6 @@ uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_execu
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_supported_atac.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_deployment.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_schematics.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_curation.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_curation_artifacts.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_curation_adapters.py"

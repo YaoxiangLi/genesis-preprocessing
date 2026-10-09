@@ -243,9 +243,27 @@ def reconcile(folder: Path, job: str, note: str, confirmed_stopped: bool) -> Non
         event(db, job, "HUMAN_RECONCILIATION", note)
 
 
-def serve(folder: Path, port: int) -> None:
+def serve(folder: Path, port: int, registry: Path | None = None) -> None:
     class Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self) -> None:
+            if registry and self.path.startswith("/reports/"):
+                from ..curation.status_page import report
+
+                try:
+                    body = report(registry, self.path)
+                except ValueError, OSError, sqlite3.Error:
+                    self.send_error(404)
+                    return
+                self.send_response(200)
+                self.send_header("Content-Type", "application/octet-stream")
+                self.send_header(
+                    "Content-Disposition", 'attachment; filename="approved-report.html"'
+                )
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
             if self.path != "/":
                 self.send_error(404)
                 return
@@ -278,7 +296,17 @@ def serve(folder: Path, port: int) -> None:
                     )
                     + "</tr>"
                 )
-            body = (content + "</table></html>").encode()
+            content += "</table>"
+            if registry:
+                from ..curation.status_page import summary
+
+                try:
+                    content += summary(registry, folder)
+                except ValueError, OSError, sqlite3.Error:
+                    content += (
+                        "<p>Curation registry unavailable; execution status is independent.</p>"
+                    )
+            body = (content + "</html>").encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
@@ -296,6 +324,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="action", required=True)
     commands.add_parser("doctor")
+    from ..curation import commands as curation_commands
+
+    curation_commands.configure(commands)
     from ..schematics.render import configure
     from ..schematics.render import execute as schematic
 
@@ -314,7 +345,11 @@ def main() -> None:
             child.add_argument("--confirmed-stopped", action="store_true")
         if name == "serve":
             child.add_argument("--port", type=int, default=8765)
+            child.add_argument("--registry", type=Path)
     args = parser.parse_args()
+    if hasattr(args, "curation_handler"):
+        curation_commands.execute(args)
+        return
     if args.action == "schematic":
         try:
             schematic(args)
@@ -383,7 +418,7 @@ def main() -> None:
     elif args.action == "reconcile":
         reconcile(folder, args.job, args.note, args.confirmed_stopped)
     elif args.action == "serve":
-        serve(folder, args.port)
+        serve(folder, args.port, args.registry)
 
 
 if __name__ == "__main__":

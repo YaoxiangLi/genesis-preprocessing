@@ -134,6 +134,11 @@ firewall rules, Docker groups or scheduler services are changed. Local paths and
 raw task logs can contain sensitive metadata; protect campaign and work folders
 according to the dataset's access requirements.
 
+For optional scientific review, use a separate controller-local
+[curation registry](curation.md). `serve --registry /local/catalog` adds read-only
+curation summaries and approved report downloads. Execution `resolve` and
+`reconcile` retain their existing meanings; neither approves scientific quality.
+
 References: [Nextflow executors](https://www.nextflow.io/docs/latest/executor.html),
 [NERSC Nextflow](https://docs.nersc.gov/jobs/workflow/nextflow/),
 [NERSC containers](https://docs.nersc.gov/development/containers/),
