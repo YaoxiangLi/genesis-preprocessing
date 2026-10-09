@@ -63,6 +63,12 @@ def execute(
         if not original.is_file() or "__pycache__" in original.parts:
             continue
         relative = original.relative_to(source)
+        if (
+            relative.parts[0] != "genesis_tools"
+            or (len(relative.parts) > 2 and relative.parts[1] not in {"atac", "benchmark"})
+            or (len(relative.parts) == 2 and relative.name != "__init__.py")
+        ):
+            continue
         wanted.add(relative)
         target = staged / relative
         target.parent.mkdir(parents=True, exist_ok=True)

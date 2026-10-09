@@ -57,7 +57,10 @@ def acquire(library: dict[str, Any]) -> None:
                     raise ValueError("Downloaded FASTQ checksum does not match the manifest")
                 paths.append(path)
                 evidence.append({"lane": lane["lane_id"], "mate": mate, "sha256": checksum})
-            counts += sum(1 for _ in paired(paths[0], paths[1]))
+            lane_count = sum(1 for _ in paired(paths[0], paths[1]))
+            if lane_count == 0:
+                raise ValueError("FASTQ lane contains no paired records")
+            counts += lane_count
             for source, target in zip(paths, (first, second), strict=True):
                 with source.open("rb") as stream:
                     shutil.copyfileobj(stream, target, 1024 * 1024)

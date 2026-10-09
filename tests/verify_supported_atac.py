@@ -2,18 +2,56 @@
 
 from __future__ import annotations
 
+import gzip
+import hashlib
 import json
+import os
 import tempfile
 from pathlib import Path
 
 import pysam
 from genesis_tools.atac.fragments import select
 from genesis_tools.atac.inputs import identifier
+from genesis_tools.atac.stages import acquire
+
+
+def check_acquisition(root: Path) -> None:
+    previous = Path.cwd()
+    try:
+        for name, contents in {
+            "valid": [b"@read/1\nACGT\n+\nIIII\n", b"@read/2\nACGT\n+\nIIII\n"],
+            "empty": [b"", b""],
+            "truncated": [b"@read/1\nACGT\n+\nIIII\n", b"@read/2\nACGT\n+\n"],
+            "corrupt": [b"not gzip", b"not gzip"],
+        }.items():
+            folder = root / name
+            folder.mkdir()
+            paths = [folder / "source1.gz", folder / "source2.gz"]
+            for path, content in zip(paths, contents, strict=True):
+                path.write_bytes(content if name == "corrupt" else gzip.compress(content, mtime=0))
+            before = [p.read_bytes() for p in paths]
+            lane = {"lane_id": "one"}
+            for mate, path in zip(("read1", "read2"), paths, strict=True):
+                lane[mate] = str(path)
+                lane[mate + "_sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            os.chdir(folder)
+            try:
+                acquire({"lanes": [lane]})
+            except ValueError, OSError, EOFError:
+                assert name != "valid"
+            else:
+                assert name == "valid", name
+                assert (folder / "raw_R1.fastq.gz").read_bytes() == before[0]
+                assert (folder / "raw_R2.fastq.gz").read_bytes() == before[1]
+            assert before == [p.read_bytes() for p in paths]
+    finally:
+        os.chdir(previous)
 
 
 def main() -> None:
     with tempfile.TemporaryDirectory(prefix="genesis-fragments-") as temporary:
         root = Path(temporary)
+        check_acquisition(root)
         sam = root / "input.sam"
         lines = [
             "@HD\tVN:1.6\tSO:unsorted",
