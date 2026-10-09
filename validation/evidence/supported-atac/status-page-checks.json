@@ -1,0 +1,17 @@
+[
+  {
+    "method": "GET",
+    "path": "/",
+    "status": 200
+  },
+  {
+    "method": "GET",
+    "path": "/campaign.json",
+    "status": 404
+  },
+  {
+    "method": "POST",
+    "path": "/",
+    "status": 501
+  }
+]
