@@ -67,6 +67,7 @@ process ATAC_ADAPTERS {
     tuple val(meta), path(read1), path(read2)
     output:
     tuple val(meta), path('analysis_R1.fastq.gz'), path('analysis_R2.fastq.gz'), emit: reads
+    path 'adapters.json'
     script:
     def command = meta.adapter_r1 == '-' ?
         "ln -s '${read1}' analysis_R1.fastq.gz; ln -s '${read2}' analysis_R2.fastq.gz; printf '%s\\n' '{\"policy\":\"none\"}' > adapters.json" :
@@ -127,11 +128,12 @@ process ATAC_FRAGMENTS {
 process ATAC_PEAKS {
     tag "${meta.library_id}"
     container params.images.peaks
-    publishDir "${params.outdir}/${meta.library_id}/peaks", mode: 'copy', pattern: 'atac*'
+    publishDir "${params.outdir}/${meta.library_id}/peaks", mode: 'copy', pattern: '{atac*,macs3.version.txt}'
     input:
     tuple val(meta), path(bam)
     output:
     tuple val(meta), path('atac_peaks.narrowPeak'), emit: peaks
+    path 'macs3.version.txt'
     script:
     """
     macs3 callpeak -t '${bam}' -f BAMPE -g ${meta.reference.genome_size} -q 0.01 --keep-dup all -n atac

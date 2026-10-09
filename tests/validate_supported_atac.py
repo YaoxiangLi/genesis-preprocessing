@@ -7,6 +7,7 @@ import csv
 import gzip
 import json
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -16,6 +17,51 @@ from genesis_tools.atac.run import execute, prepare
 from genesis_tools.benchmark.fixture import create
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def verify_adapters(folder: Path) -> None:
+    """Check paired adapter removal, raw-read preservation and report publication."""
+    folder.mkdir()
+    raw = {}
+    for mate, base in ((1, "A"), (2, "C")):
+        sequence = base * 40 + "AGATCGGAAGAGC"
+        path = folder / f"raw_R{mate}.fastq.gz"
+        path.write_bytes(
+            gzip.compress(f"@read/{mate}\n{sequence}\n+\n{'I' * len(sequence)}\n".encode(), mtime=0)
+        )
+        raw[path] = digest(path)
+    image = json.loads((ROOT / "conf/atac-images.json").read_text())["cutadapt"]
+    config = folder / "test.config"
+    config.write_text(
+        f"params.images = [cutadapt: '{image}']\n"
+        f"params.outdir = '{folder}/output'\n"
+        "process.executor = 'local'\nprocess.cpus = 1\nprocess.memory = '1 GB'\n"
+        "docker.enabled = true\ndocker.runOptions = '-u $(id -u):$(id -g)'\n"
+        f"trace.enabled = true\ntrace.file = '{folder}/trace.tsv'\n"
+        "trace.fields = 'name,status,exit,realtime,peak_rss,workdir'\n"
+    )
+    workflow = folder / "test.nf"
+    workflow.write_text(
+        "nextflow.enable.dsl = 2\n"
+        f"include {{ ATAC_ADAPTERS }} from '{ROOT}/modules/atac/processes'\n"
+        "workflow {\n  ATAC_ADAPTERS(Channel.of(tuple("
+        "[library_id:'adapter-test', adapter_r1:'AGATCGGAAGAGC', adapter_r2:'AGATCGGAAGAGC'],"
+        f"file('{folder}/raw_R1.fastq.gz'),file('{folder}/raw_R2.fastq.gz'))))\n}}\n"
+    )
+    subprocess.run(
+        ["nextflow", "-C", str(config), "run", str(workflow), "-w", str(folder / "work")],
+        cwd=folder,
+        check=True,
+    )
+    trace = list(csv.DictReader((folder / "trace.tsv").open(), delimiter="\t"))
+    assert len(trace) == 1 and trace[0]["status"] == "COMPLETED"
+    work = Path(trace[0]["workdir"])
+    for mate, base in ((1, "A"), (2, "C")):
+        with gzip.open(work / f"analysis_R{mate}.fastq.gz", "rt") as stream:
+            assert stream.read().splitlines() == [f"@read/{mate}", base * 40, "+", "I" * 40]
+    report = json.loads((folder / "output/adapter-test/qc/adapters.json").read_text())
+    assert report["read_counts"]["input"] == report["read_counts"]["output"] == 1
+    assert raw == {path: digest(path) for path in raw}
 
 
 def main() -> None:
@@ -102,6 +148,8 @@ def main() -> None:
     }
     for library in ("first", "second"):
         reports = output / library / "qc"
+        assert json.loads((reports / "adapters.json").read_text()) == {"policy": "none"}
+        assert "macs3 3.0.5" in (output / library / "peaks/macs3.version.txt").read_text()
         assert len(list((reports / "fastqc").glob("*.zip"))) == 2
         modules = json.loads((reports / "multiqc_data/required-modules.json").read_text())
         assert set(modules.values()) == {2} and len(modules) == 4
@@ -148,6 +196,7 @@ def main() -> None:
     else:
         raise AssertionError("Changed run inputs accepted")
     assert (run / "inputs/first.json").read_bytes() == original
+    verify_adapters(folder / "adapter-test")
     print(
         "PASS: two libraries, technical lanes, 21 cached tasks twice; "
         "raw/scientific outputs unchanged; changed helpers invalidate tasks"
