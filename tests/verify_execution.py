@@ -64,6 +64,7 @@ def main() -> None:
             ("healthy", "a", 0),
             ("invalid", "b", 2),
             ("temporary", "a", 75),
+            ("badinput", "b", 0),
         ]:
             jobs.append(
                 {
@@ -71,7 +72,9 @@ def main() -> None:
                     "worker": worker,
                     "payload": {
                         "git_sha": sha,
-                        "inputs": inputs,
+                        "inputs": [{"path": str(source), "sha256": "0" * 64}]
+                        if name == "badinput"
+                        else inputs,
                         "argv": [sys.executable, "-c", f"raise SystemExit({code})"],
                     },
                 }
@@ -92,6 +95,7 @@ def main() -> None:
         assert status["temporary"]["state"] == "NEEDS_REVIEW", status
         assert status["temporary"]["attempt"] == 3, status
         assert status["invalid"]["attempt"] == 1, status
+        assert status["badinput"]["reason"] == "Worker input checksum mismatch", status
         resolve(folder, "invalid", "Input investigation completed; retry requested")
         with patch("genesis_tools.execution.controller.request", side_effect=ConnectionError):
             tick(folder)

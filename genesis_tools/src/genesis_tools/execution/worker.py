@@ -101,7 +101,10 @@ def execute(folder: Path) -> None:
                     check=False,
                 ).returncode
             reason = "completed" if code == 0 else "command failed; inspect worker logs"
-        except OSError, ValueError, subprocess.SubprocessError:
+        except ValueError as error:
+            # Fixed verification messages above contain no external command output.
+            reason = str(error)
+        except OSError, subprocess.SubprocessError:
             # Do not copy external error text, which may contain credentials, into the status page.
             reason = "checkout, input verification, or execution failed; inspect the worker"
         finally:
