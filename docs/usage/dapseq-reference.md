@@ -274,36 +274,17 @@ Git tag (`0.1.0`); use `--tag` to override. The scripts update `.env` with image
 digests and preserve unrelated entries. Publishing images requires approval.
 The reference Dockerfiles and pinned base images are retained.
 
-FastQC uses its own `DAP_SEQ_FASTQC.yaml` and matching Pixi TOML/lock, leaving the
-R/SPP QC environment unchanged. On this local validation branch, `.env` pins
-`DAP_SEQ_FASTQC_IMAGE` to an immutable **local image ID**, built for linux/amd64.
-It is not a registry digest and cannot be pulled on another host or by Apptainer.
-No FastQC image has been pushed. To reproduce a local build from the committed lock
-(with Docker Buildx installed), bypass the existing wrapper's tag requirement:
-
-```bash
-docker build --provenance=false --platform linux/amd64 \
-  --build-arg ENV_NAME=DAP_SEQ_FASTQC -t genesis-validation/fastqc:0.12.1 \
-  -f dockers/pixi-yaml.Dockerfile environments
-# Obtain the immutable local ID; set only DAP_SEQ_FASTQC_IMAGE in .env to this ID.
-docker image inspect genesis-validation/fastqc:0.12.1 --format '{{.Id}}'
-```
-
-MultiQC similarly has an isolated `DAP_SEQ_MULTIQC.yaml`/TOML/lock and a local
-linux/amd64 image ID in `DAP_SEQ_MULTIQC_IMAGE`. Build it with the same Dockerfile,
-using `--build-arg ENV_NAME=DAP_SEQ_MULTIQC` and tag
-`genesis-validation/multiqc:1.35`; record the resulting immutable local ID.
-Neither validation image has been published to a registry.
-
-Remote use requires an explicitly authorized image publication and a registry
-digest, or the conda profile. Only linux/amd64 Docker execution has been validated
-on this branch; the lock also resolves linux-aarch64 and both macOS platforms.
+FastQC and MultiQC use separate environments. Docker defaults pin publicly
+available Biocontainers images by registry digest: FastQC 0.12.1 and MultiQC 1.35.
+They can be pulled on a fresh Linux server without rebuilding or publishing an
+image. The committed environment locks remain available for explicit local builds
+or the conda profile. Only Linux amd64 Docker execution has been validated here.
 
 ## Verification
 
 ```bash
 pixi run checks
-# Opt-in real-tool validation using existing local Docker images:
+# Real-tool Docker validation:
 pixi run validate-docker
 # Retain fixtures, full logs, traces, and intermediate outputs for inspection:
 pixi run validate-docker --keep
