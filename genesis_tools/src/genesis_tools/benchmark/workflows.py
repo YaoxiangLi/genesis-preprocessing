@@ -20,6 +20,10 @@ from .spec import sha256, write_json
 
 def validate_options(plan: dict[str, Any]) -> None:
     spec = plan["spec"]
+    if spec["comparison"] != "workflow-configured":
+        raise ValueError(
+            "Implemented raw workflow adapters require workflow-configured comparison scope"
+        )
     workflow = spec["workflow"]
     options = workflow["parameters"]
     allowed = {
@@ -364,6 +368,8 @@ def one(runtime: Runtime, lib: dict[str, Any], rep: int) -> dict[str, Any]:
 
 def workflow(runtime: Runtime) -> list[dict[str, Any]]:
     validate_options(runtime.plan)
+    if runtime.resume:
+        verify_workflow_outputs(runtime.out)
     results = []
     if runtime.plan["spec"]["performance"]["random_order"]:
         raise ValueError("Randomized workflow scheduling is not supported by this adapter")
@@ -407,3 +413,27 @@ def verify_effective_commands(spec: dict[str, Any], scripts: dict[str, Any]) -> 
         effective_mapq = int(cutoff[1]) if cutoff else 0
         if effective_mapq != spec["parameters"]["mapq"][0]:
             raise ValueError("Alignment command did not apply the declared MAPQ policy")
+
+
+def verify_workflow_outputs(out: Path) -> None:
+    """Nextflow cache existence alone cannot certify unchanged scientific products."""
+    records = [out / "results.json", *sorted((out / "invocations").glob("*.json"))]
+    expected = {}
+    for previous in records:
+        if not previous.is_file():
+            continue
+        value = json.loads(previous.read_text())
+        for arm in value.get("results", []):
+            for library in arm.get("libraries", {}).values():
+                for filename, checksum in library.get("artifacts", {}).items():
+                    if filename in expected and expected[filename] != checksum:
+                        raise ValueError(
+                            "Scientific output history contains inconsistent checksums"
+                        )
+                    expected[filename] = checksum
+    for filename, checksum in expected.items():
+        path = Path(filename)
+        if not path.is_file() or sha256(path) != checksum:
+            raise ValueError(
+                "Workflow cached scientific artifact changed; use a fresh output directory"
+            )

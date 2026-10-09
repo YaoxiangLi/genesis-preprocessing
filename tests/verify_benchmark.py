@@ -18,6 +18,7 @@ from genesis_tools.benchmark.metrics import (
     intersection,
     ranks,
     tn5_cuts,
+    tss_enrichment,
 )
 from genesis_tools.benchmark.reads import paired, subset
 from genesis_tools.benchmark.spec import identifier, public_url
@@ -113,6 +114,28 @@ def bam_checks(root: Path) -> None:
     assert empty["metrics"]["fragments_FRiP_own"]["value"] == 0
     assert empty["metrics"]["peak_jaccard"]["value"] is None
     assert alignment_identity(source, root) == alignment_identity(root / "q0-False.bam", root)
+    tss_header = pysam.AlignmentHeader.from_dict({"SQ": [{"SN": "chr1", "LN": 5000}]})
+    tss_bam = root / "tss.bam"
+    with pysam.AlignmentFile(str(tss_bam), "wb", header=tss_header) as stream:
+        for name, start in [("flank", 296), ("center", 2296)]:
+            for mate in range(2):
+                read = pysam.AlignedSegment(tss_header)
+                read.query_name = name
+                read.flag = 99 if mate == 0 else 147
+                read.reference_id = 0
+                read.reference_start = start + mate * 50
+                read.cigarstring = "50M"
+                read.query_sequence = "A" * 50
+                stream.write(read)
+    tss = root / "tss.tsv"
+    tss.write_text("chr1\t2300\t+\nchr1\t100\t+\n")
+    score = tss_enrichment(tss_bam, tss, {"chr1": 5000}, root)
+    assert score["profile"][2000] == 1 and sum(score["profile"][:100]) == 2
+    assert score["metric"]["value"] == 100.0 and score["edge_excluded_TSS"] == 1
+    tss.write_text("chr1\t2300\t-\n")
+    reverse = tss_enrichment(tss_bam, tss, {"chr1": 5000}, root)
+    assert reverse["metric"]["value"] == 100.0
+    assert reverse["profile"] == score["profile"][::-1]
     broken = root / "broken.bam"
     broken.write_bytes(b"not a BAM")
     rejects(

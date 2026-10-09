@@ -182,7 +182,7 @@ def peaks(runtime: Runtime, folder: Path, lib: dict[str, Any], bams: dict[str, P
 
 
 def spp(runtime: Runtime, folder: Path, lib: dict[str, Any], bam: Path) -> dict[str, Any]:
-    target = folder / lib["id"] / "spp"
+    target = folder / lib["id"] / "spp-result"
     target.mkdir(parents=True, exist_ok=True)
     repo = Path(__file__).resolve().parents[4]
     driver = repo / "benchmarks" / "spp.sh"

@@ -7,10 +7,12 @@ import json
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
+from unittest.mock import patch
 
+from genesis_tools.benchmark.runner import spp
 from genesis_tools.benchmark.runtime import Runtime, fetch
 from genesis_tools.benchmark.spec import load, sha256
-from genesis_tools.benchmark.workflows import verify_effective_commands
+from genesis_tools.benchmark.workflows import verify_effective_commands, verify_workflow_outputs
 
 TOML = """schema_version = 1
 id = "tiny"
@@ -140,6 +142,61 @@ def main() -> None:
         artifact.write_text('{"changed":true}')
         assert not resumed.cached(task, [root / "ref.fa"], {"policy": "explicit"})
         rejects(lambda: Runtime(load(manifest), out, resume=False))
+        artifact.unlink()
+        assert not resumed.cached(task, [root / "ref.fa"], {"policy": "explicit"})
+        rejects(lambda: runtime.seal(task, [], [artifact], {}))
+        rejects(
+            lambda: runtime.command(
+                "intentional-failure", ["/bin/sh", "-c", "echo diagnostic >&2; exit 7"], out, []
+            )
+        )
+        logs = list((out / "commands" / "intentional-failure").glob("*/run.json"))
+        assert len(logs) == 1
+        failure = json.loads(logs[0].read_text())
+        assert failure["exit_status"] == 7 and failure["status"] == "FAILED"
+        assert (logs[0].parent / "stderr").read_text() == "diagnostic\n"
+
+        filtered = out / "arm" / "library" / "spp"
+        filtered.mkdir(parents=True)
+        bam = filtered / "selected.bam"
+        bam.write_bytes(b"fixture")
+        runtime.seal(filtered, [root / "ref.fa"], [bam], {"stage": "filter"})
+        runtime.resume = True
+
+        def score(
+            _label: str, _command: list[str], cwd: Path, _inputs: list[Path], *, image: str
+        ) -> None:
+            assert image == "qc"
+            (cwd / "spp.tsv").write_text("sample\t10\t100\t0.1\t50\t0.05\t0\t0.01\t2\t1\t0\n")
+            (cwd / "spp.pdf").write_bytes(b"fixture")
+
+        with patch.object(runtime, "command", side_effect=score) as command:
+            spp(runtime, out / "arm", {"id": "library"}, bam)
+            assert runtime.cached(filtered, [root / "ref.fa"], {"stage": "filter"}), (
+                "SPP scoring overwrote filtering cache"
+            )
+            spp(runtime, out / "arm", {"id": "library"}, bam)
+            assert command.call_count == 1, "SPP scoring failed stable resume"
+        wf = root / "workflow"
+        wf.mkdir()
+        product = wf / "peaks.bed"
+        product.write_text("chr1\t0\t10\n")
+        (wf / "results.json").write_text(
+            json.dumps(
+                {
+                    "results": [
+                        {"libraries": {"sample": {"artifacts": {str(product): sha256(product)}}}}
+                    ]
+                }
+            )
+        )
+        verify_workflow_outputs(wf)
+        (wf / "invocations").mkdir()
+        (wf / "invocations" / "1.json").write_text((wf / "results.json").read_text())
+        product.write_text("chr1\t0\t20\n")
+        rejects(lambda: verify_workflow_outputs(wf))
+        (wf / "results.json").write_text('{"status":"FAILED"}')
+        rejects(lambda: verify_workflow_outputs(wf))
         dataset["status"] = "NEEDS_REFERENCE"
         dataset["reason"] = "Exact reference missing"
         datafile.write_text(json.dumps(dataset))
