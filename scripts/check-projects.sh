@@ -11,4 +11,5 @@ uv run --frozen --project "$root/genesis_tools" ty check --project "$root/genesi
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_nextflow_style.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_multiqc.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_build_tags.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_reference_cache.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_pipeline.py"
