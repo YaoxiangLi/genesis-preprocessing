@@ -7,9 +7,9 @@ implicitly join channels. FastQC observes each raw mate independently. SPP uses
 a separate shortened-read alignment and is not currently parsed into MultiQC.
 The chapter labels are reading guides, not synchronization barriers.
 
-The architecture map distinguishes implemented DAP-seq processing from planned
-ATAC, barcode, pseudobulk and multiome work. Dashed lines and explicit text mark
-planned functionality. Biological replicates are not implicitly pooled.
+The architecture map distinguishes implemented DAP-seq processing, experimental
+bulk ATAC, tested pseudobulk/multiome contracts and planned barcode processing.
+Dashed lines and explicit text mark work outside the implemented DAP workflow. Biological replicates are not implicitly pooled.
 
 Edit `render_metro.py` to update station labels, data dependencies and layout, then
 run `python docs/diagrams/render_metro.py`. It uses only Python's standard library

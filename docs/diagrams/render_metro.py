@@ -128,18 +128,18 @@ for animated,name in [(False,'genesis_metro_map.svg'),(True,'genesis_metro_map_a
 
 road_nodes=[
  ('manifest',150,220,'Sample manifest','Implemented • library/control IDs','reads','implemented'),
- ('reference_registry',450,220,'Reference registry','Planned • versioned identities','reference','planned'),
+ ('reference_registry',450,220,'Reference registry','Tested schema • versioned identities','reference','planned'),
  ('acquisition',150,380,'Acquisition + QC','Implemented • raw reads retained','reads','implemented'),
  ('dap',530,370,'DAP-seq','Implemented • validated fixtures','reads','implemented'),
  ('dap_outputs',890,370,'Peaks + quantification','Implemented • per treatment','reads','implemented'),
- ('bulk_atac',530,490,'Bulk ATAC','Planned • isolated prototype','future','planned'),
- ('bulk_outputs',890,490,'Fragments + ATAC QC','Planned • explicit assay policy','future','planned'),
+ ('bulk_atac',530,490,'Bulk ATAC','Experimental • synthetic PE','future','planned'),
+ ('bulk_outputs',890,490,'Fragments + ATAC QC','Experimental • known-answer QC','future','planned'),
  ('single_cell',530,610,'sc/snATAC','Planned • protocol-aware barcodes','future','planned'),
- ('cells',890,610,'Fragments + cell metadata','Planned • replicate boundaries','future','planned'),
- ('multiome',150,690,'Multiome identity','Planned • linked modalities','future','planned'),
+ ('cells',890,610,'Fragments + cell metadata','Specified • replicate boundaries','future','planned'),
+ ('multiome',150,690,'Multiome identity','Tested contract • linked modalities','future','planned'),
  ('rna',530,715,'RNA modality','External route • separate QC','future','planned'),
- ('pseudobulk',1230,610,'Pseudobulks','Planned • cell type × replicate','future','planned'),
- ('models',1230,400,'Model-ready outputs','Planned • reference + provenance','future','planned'),
+ ('pseudobulk',1230,610,'Pseudobulks','Tested contract • type × replicate','future','planned'),
+ ('models',1230,400,'Model-ready outputs','Specified • model-specific export','future','planned'),
  ('reports',1230,220,'QC + provenance','Implemented for DAP-seq','qc','implemented')]
 road_edges=[
  ('reads',[(150,220),(150,380)],'Validated study/library inputs','implemented'),
@@ -160,7 +160,7 @@ road_edges=[
  ('reference',[(450,370),(450,490),(530,490)],'Registry identity feeds bulk ATAC','planned'),
  ('reference',[(450,490),(450,610),(530,610)],'Registry identity feeds scATAC','planned')]
 road_notes=[
- 'Solid routes: implemented in the validation branch. Dashed routes: planned contracts or future processing; no production readiness is implied.',
+ 'Solid routes: implemented in the validation branch. Dashed routes: experimental, specified or planned; no production readiness is implied.',
  'Biological replicates remain separate. Technical merges require explicit metadata. RNA and ATAC retain modality-specific QC and inclusion.',
  'Plant biological acceptance thresholds remain UNSPECIFIED. Exact Sorghum reference and the inventory workbook remain external prerequisites.']
 (OUT/'genesis_architecture_metro_map.svg').write_text(document('GENESIS / ARCHITECTURE','Implementation status • assay-specific science • traceable model inputs',road_nodes,road_edges,[(48,350,'01  SHARED INFRASTRUCTURE'),(440,520,'02  ASSAY-SPECIFIC ROUTES'),(1030,400,'03  MODEL-FACING CONTRACTS')],road_notes,roadmap=True))

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 870" role="img" aria-labelledby="title description">
 <title id="title">GENESIS / ARCHITECTURE</title>
-<desc id="description">Implementation status • assay-specific science • traceable model inputs. Routes show data dependencies, not timing. Solid routes: implemented in the validation branch. Dashed routes: planned contracts or future processing; no production readiness is implied. Biological replicates remain separate. Technical merges require explicit metadata. RNA and ATAC retain modality-specific QC and inclusion. Plant biological acceptance thresholds remain UNSPECIFIED. Exact Sorghum reference and the inventory workbook remain external prerequisites.</desc>
+<desc id="description">Implementation status • assay-specific science • traceable model inputs. Routes show data dependencies, not timing. Solid routes: implemented in the validation branch. Dashed routes: experimental, specified or planned; no production readiness is implied. Biological replicates remain separate. Technical merges require explicit metadata. RNA and ATAC retain modality-specific QC and inclusion. Plant biological acceptance thresholds remain UNSPECIFIED. Exact Sorghum reference and the inventory workbook remain external prerequisites.</desc>
 <style>
     svg{--bg:#fbfcfe;--text:#172c3d;--muted:#536779;--panel:#eef2f6;--white:#fff;background:var(--bg);font-family:Arial,Helvetica,sans-serif}
     .title{font-size:31px;font-weight:700;letter-spacing:1px;fill:var(--text)}
@@ -48,10 +48,10 @@
 <circle class="station" cx="150" cy="220" r="8" stroke="#087f8c"/>
 <text class="label" text-anchor="middle" x="150" y="252">Sample manifest</text>
 <text class="detail" text-anchor="middle" x="150" y="270">Implemented • library/control IDs</text></g>
-<g id="reference_registry"><title>Reference registry: Planned • versioned identities; planned</title>
+<g id="reference_registry"><title>Reference registry: Tested schema • versioned identities; planned</title>
 <circle class="station" cx="450" cy="220" r="8" stroke="#4169b1"/>
 <text class="label" text-anchor="middle" x="450" y="252">Reference registry</text>
-<text class="detail" text-anchor="middle" x="450" y="270">Planned • versioned identities</text></g>
+<text class="detail" text-anchor="middle" x="450" y="270">Tested schema • versioned identities</text></g>
 <g id="acquisition"><title>Acquisition + QC: Implemented • raw reads retained; implemented</title>
 <circle class="station" cx="150" cy="380" r="8" stroke="#087f8c"/>
 <text class="label" text-anchor="middle" x="150" y="412">Acquisition + QC</text>
@@ -64,44 +64,44 @@
 <circle class="station" cx="890" cy="370" r="8" stroke="#087f8c"/>
 <text class="label" text-anchor="middle" x="890" y="402">Peaks + quantification</text>
 <text class="detail" text-anchor="middle" x="890" y="420">Implemented • per treatment</text></g>
-<g id="bulk_atac"><title>Bulk ATAC: Planned • isolated prototype; planned</title>
+<g id="bulk_atac"><title>Bulk ATAC: Experimental • synthetic PE; planned</title>
 <circle class="station" cx="530" cy="490" r="8" stroke="#81909f"/>
 <text class="label" text-anchor="middle" x="530" y="522">Bulk ATAC</text>
-<text class="detail" text-anchor="middle" x="530" y="540">Planned • isolated prototype</text></g>
-<g id="bulk_outputs"><title>Fragments + ATAC QC: Planned • explicit assay policy; planned</title>
+<text class="detail" text-anchor="middle" x="530" y="540">Experimental • synthetic PE</text></g>
+<g id="bulk_outputs"><title>Fragments + ATAC QC: Experimental • known-answer QC; planned</title>
 <circle class="station" cx="890" cy="490" r="8" stroke="#81909f"/>
 <text class="label" text-anchor="middle" x="890" y="522">Fragments + ATAC QC</text>
-<text class="detail" text-anchor="middle" x="890" y="540">Planned • explicit assay policy</text></g>
+<text class="detail" text-anchor="middle" x="890" y="540">Experimental • known-answer QC</text></g>
 <g id="single_cell"><title>sc/snATAC: Planned • protocol-aware barcodes; planned</title>
 <circle class="station" cx="530" cy="610" r="8" stroke="#81909f"/>
 <text class="label" text-anchor="middle" x="530" y="642">sc/snATAC</text>
 <text class="detail" text-anchor="middle" x="530" y="660">Planned • protocol-aware barcodes</text></g>
-<g id="cells"><title>Fragments + cell metadata: Planned • replicate boundaries; planned</title>
+<g id="cells"><title>Fragments + cell metadata: Specified • replicate boundaries; planned</title>
 <circle class="station" cx="890" cy="610" r="8" stroke="#81909f"/>
 <text class="label" text-anchor="middle" x="890" y="642">Fragments + cell metadata</text>
-<text class="detail" text-anchor="middle" x="890" y="660">Planned • replicate boundaries</text></g>
-<g id="multiome"><title>Multiome identity: Planned • linked modalities; planned</title>
+<text class="detail" text-anchor="middle" x="890" y="660">Specified • replicate boundaries</text></g>
+<g id="multiome"><title>Multiome identity: Tested contract • linked modalities; planned</title>
 <circle class="station" cx="150" cy="690" r="8" stroke="#81909f"/>
 <text class="label" text-anchor="middle" x="150" y="722">Multiome identity</text>
-<text class="detail" text-anchor="middle" x="150" y="740">Planned • linked modalities</text></g>
+<text class="detail" text-anchor="middle" x="150" y="740">Tested contract • linked modalities</text></g>
 <g id="rna"><title>RNA modality: External route • separate QC; planned</title>
 <circle class="station" cx="530" cy="715" r="8" stroke="#81909f"/>
 <text class="label" text-anchor="middle" x="530" y="747">RNA modality</text>
 <text class="detail" text-anchor="middle" x="530" y="765">External route • separate QC</text></g>
-<g id="pseudobulk"><title>Pseudobulks: Planned • cell type × replicate; planned</title>
+<g id="pseudobulk"><title>Pseudobulks: Tested contract • type × replicate; planned</title>
 <circle class="station" cx="1230" cy="610" r="8" stroke="#81909f"/>
 <text class="label" text-anchor="middle" x="1230" y="642">Pseudobulks</text>
-<text class="detail" text-anchor="middle" x="1230" y="660">Planned • cell type × replicate</text></g>
-<g id="models"><title>Model-ready outputs: Planned • reference + provenance; planned</title>
+<text class="detail" text-anchor="middle" x="1230" y="660">Tested contract • type × replicate</text></g>
+<g id="models"><title>Model-ready outputs: Specified • model-specific export; planned</title>
 <circle class="station" cx="1230" cy="400" r="8" stroke="#81909f"/>
 <text class="label" text-anchor="middle" x="1230" y="432">Model-ready outputs</text>
-<text class="detail" text-anchor="middle" x="1230" y="450">Planned • reference + provenance</text></g>
+<text class="detail" text-anchor="middle" x="1230" y="450">Specified • model-specific export</text></g>
 <g id="reports"><title>QC + provenance: Implemented for DAP-seq; implemented</title>
 <circle class="station" cx="1230" cy="220" r="8" stroke="#9260b7"/>
 <text class="label" text-anchor="middle" x="1230" y="252">QC + provenance</text>
 <text class="detail" text-anchor="middle" x="1230" y="270">Implemented for DAP-seq</text></g>
 <path d="M42 770 H1438" stroke="var(--panel)" stroke-width="2"/>
-<text class="note" x="48" y="797">Solid routes: implemented in the validation branch. Dashed routes: planned contracts or future processing; no production readiness is implied.</text>
+<text class="note" x="48" y="797">Solid routes: implemented in the validation branch. Dashed routes: experimental, specified or planned; no production readiness is implied.</text>
 <text class="note" x="48" y="820">Biological replicates remain separate. Technical merges require explicit metadata. RNA and ATAC retain modality-specific QC and inclusion.</text>
 <text class="note" x="48" y="843">Plant biological acceptance thresholds remain UNSPECIFIED. Exact Sorghum reference and the inventory workbook remain external prerequisites.</text>
 <metadata>Genesis diagram schema 1; workflow SHA256 c02389565606086b80228b52abd556cee7a3dba79f7e2f92eedda8164dfb2c5d; animation is schematic.</metadata>
