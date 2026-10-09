@@ -9,7 +9,6 @@ import html
 import http.server
 import json
 import re
-import shlex
 import shutil
 import sqlite3
 import subprocess
@@ -89,38 +88,11 @@ def initialize(folder: Path, manifest: Path) -> None:
 def request(
     worker: dict[str, Any], action: str, attempt: str, payload: dict[str, Any] | None = None
 ) -> dict[str, Any]:
-    command = [
-        worker["python"],
-        "-m",
-        "genesis_tools.execution.worker",
-        action,
-        str(Path(worker["root"]) / attempt),
-    ]
-    options: dict[str, Any] = {}
-    if worker["transport"] == "ssh":
-        command = [
-            "ssh",
-            "-oBatchMode=yes",
-            "-oStrictHostKeyChecking=yes",
-            "-oForwardAgent=no",
-            "-oConnectTimeout=10",
-            worker["host"],
-            shlex.join(command),
-        ]
-    else:
-        options["cwd"] = worker["repo"]
-    result = subprocess.run(
-        command,
-        input=json.dumps(payload) if payload else None,
-        text=True,
-        capture_output=True,
-        check=False,
-        timeout=30,
-        **options,
+    from .transport import request as worker_request
+
+    return worker_request(
+        worker, "genesis_tools.execution.worker", action, Path(worker["root"]) / attempt, payload
     )
-    if result.returncode:
-        raise ConnectionError("Worker communication failed; check authentication and worker logs")
-    return json.loads(result.stdout)
 
 
 def tick(folder: Path) -> None:

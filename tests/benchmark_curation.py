@@ -24,6 +24,7 @@ def main() -> None:
     if not 1 <= args.libraries <= 10000 or not 1 <= args.batch_size <= 100:
         raise ValueError("Bounded benchmark: 1–10000 libraries, batches of 1–100")
     started = time.perf_counter()
+    startup_rusage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     imported_seconds = 0.0
     with tempfile.TemporaryDirectory(prefix="genesis-catalog-benchmark-") as temporary:
         root = Path(temporary)
@@ -79,6 +80,21 @@ def main() -> None:
             "fts5": fts,
             "total_seconds": time.perf_counter() - started,
             "process_peak_rss_platform_units": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            "startup_rusage_maxrss": startup_rusage,
+            "process_vm_hwm_kib": next(
+                (
+                    int(line.split()[1])
+                    for line in Path("/proc/self/status").read_text().splitlines()
+                    if line.startswith("VmHWM:")
+                ),
+                None,
+            )
+            if Path("/proc/self/status").exists()
+            else None,
+            "memory_limitation": (
+                "RUSAGE_SELF can retain a pre-exec launcher high-water value on Linux; "
+                "VmHWM describes this process image, never whole-host RAM"
+            ),
             "rss_unit": "KiB on Linux; bytes on macOS; process only",
             "database_bytes": sum(p.stat().st_size for p in directory.glob("registry.sqlite*")),
         }

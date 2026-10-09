@@ -58,6 +58,12 @@ def bindings(
         "manifest": row["manifest"],
         "metadata": fingerprint(loads(row["metadata"])),
     }
+    if db.execute("PRAGMA user_version").fetchone()[0] >= 3:
+        source = db.execute(
+            "SELECT source_bundle FROM metadata_heads WHERE dataset=?", (dataset,)
+        ).fetchone()
+        if source:
+            result["source_bundle"] = source[0]
     if category in {"qc", "eligibility"}:
         result.update(validation=row["validation"], assessment=row["assessment"])
     if category == "eligibility":
@@ -77,6 +83,32 @@ def effective(
     decision = latest(db, dataset, category)
     if not decision:
         return "UNREVIEWED"
+    if (
+        category == "metadata"
+        and decision["data"]["target"]
+        and decision["data"]["action"] == "approve"
+    ):
+        proposal = store.get(db, "proposal", decision["data"]["target"])
+        if proposal["schema_version"] == 2:
+            head = db.execute(
+                "SELECT source_bundle,canonical_revision FROM metadata_heads WHERE dataset=?",
+                (dataset,),
+            ).fetchone()
+            if head and head[1]:
+                revision = store.get(db, "metadata_revision", head[1])["data"]
+                row = store.current(db, dataset)
+                if (
+                    revision["decision"] == decision["version"]
+                    and revision["source_bundle"] == head[0]
+                    and revision["manifest_version"] == row["manifest"]
+                    and revision["metadata_version"] == fingerprint(loads(row["metadata"]))
+                ):
+                    return "APPROVED"
+            return (
+                "PENDING_APPLY"
+                if decision["data"]["bindings"] == bindings(db, dataset, category)
+                else "STALE"
+            )
     if decision["data"]["bindings"] != bindings(db, dataset, category, export_profile):
         return "STALE"
     return {"approve": "APPROVED", "reject": "REJECTED", "request-info": "REQUEST_INFO"}[
@@ -132,9 +164,18 @@ def check_evidence(db: sqlite3.Connection, dataset: str, evidence: list[dict[str
         )
     row = store.current(db, dataset)
     manifest = store.get(db, "manifest", row["manifest"])["data"]
+    sources = list(manifest["sources"])
+    if db.execute("PRAGMA user_version").fetchone()[0] >= 3:
+        head = db.execute(
+            "SELECT source_bundle FROM metadata_heads WHERE dataset=?", (dataset,)
+        ).fetchone()
+        if head and head[0]:
+            bundle = store.get(db, "source_bundle", head[0])["data"]
+            if bundle["manifest_version"] == row["manifest"]:
+                sources.extend(bundle["sources"])
     permitted = {
         (source["data"]["worker"], source["data"]["location"], source["data"]["sha256"])
-        for source in manifest["sources"]
+        for source in sources
     }
     permitted.update(
         (a["worker"], a["path"], a["sha256"]) for a in manifest["artifacts"] if a["sha256"]
@@ -148,7 +189,7 @@ def check_evidence(db: sqlite3.Connection, dataset: str, evidence: list[dict[str
             source = next(
                 (
                     s["data"]
-                    for s in manifest["sources"]
+                    for s in sources
                     if (
                         s["data"]["location"] == item["location"]
                         and s["data"]["worker"] == item["worker"]
@@ -180,7 +221,7 @@ def check_evidence(db: sqlite3.Connection, dataset: str, evidence: list[dict[str
 def submit(directory: Path, proposal: dict[str, Any]) -> dict[str, Any]:
     validate(proposal, "proposal")
     data = proposal["data"]
-    if set(data["changes"]) - DESCRIPTIVE:
+    if proposal["schema_version"] == 1 and set(data["changes"]) - DESCRIPTIVE:
         raise ValueError(
             "Only descriptive metadata can be revised; scientific inputs remain immutable"
         )
@@ -188,6 +229,10 @@ def submit(directory: Path, proposal: dict[str, Any]) -> dict[str, Any]:
         row = store.current(db, data["dataset_id"])
         if row["manifest"] != data["manifest_version"]:
             raise ValueError("Proposal targets a stale manifest")
+        if proposal["schema_version"] == 2:
+            from .harmonize import check_proposal
+
+            check_proposal(db, proposal)
         check_evidence(db, row["id"], data["evidence"])
         store.put(db, proposal, row["id"])
     return proposal
@@ -217,9 +262,14 @@ def decide(
         if target:
             if category != "metadata":
                 raise ValueError("Only metadata review accepts a proposal target")
-            proposal = store.get(db, "proposal", target)["data"]
+            proposed_record = store.get(db, "proposal", target)
+            proposal = proposed_record["data"]
             if proposal["dataset_id"] != dataset or proposal["manifest_version"] != row["manifest"]:
                 raise ValueError("Proposal targets a different/stale dataset")
+            if proposed_record["schema_version"] == 2:
+                from .harmonize import check_proposal
+
+                check_proposal(db, proposed_record)
         if action == "approve":
             check_evidence(db, dataset, evidence)
             if category == "qc":
@@ -229,7 +279,7 @@ def decide(
                 issues = exclusions(db, dataset, export_profile, require_eligibility=False)
                 if issues:
                     raise ValueError("Dataset is not eligible: " + "; ".join(issues))
-            if proposal:
+            if proposal and proposed_record["schema_version"] == 1:
                 metadata = {**loads(row["metadata"]), **proposal["changes"]}
                 db.execute(
                     "UPDATE datasets SET metadata=? WHERE id=?", (canonical(metadata), dataset)
@@ -331,6 +381,14 @@ def reviewed_export(
                     if decision["data"]["target"]:
                         proposals.append(store.get(db, "proposal", decision["data"]["target"]))
             metadata = loads(row["metadata"])
+            metadata_head = (
+                db.execute(
+                    "SELECT source_bundle,canonical_revision FROM metadata_heads WHERE dataset=?",
+                    (dataset,),
+                ).fetchone()
+                if db.execute("PRAGMA user_version").fetchone()[0] >= 3
+                else None
+            )
             curation.append(
                 {
                     "dataset_id": dataset,
@@ -341,6 +399,17 @@ def reviewed_export(
                     if row["assessment"]
                     else None,
                     "proposals": proposals,
+                    "source_bundle": store.get(db, "source_bundle", metadata_head[0])
+                    if metadata_head and metadata_head[0]
+                    else None,
+                    "metadata_revision": store.get(db, "metadata_revision", metadata_head[1])
+                    if metadata_head and metadata_head[1]
+                    else None,
+                    "invocations": [
+                        store.get(db, "invocation", p["data"]["invocation"])
+                        for p in proposals
+                        if p["data"].get("invocation")
+                    ],
                 }
             )
             state = status(db, dataset)

@@ -104,7 +104,8 @@ pixi run genesis validate manifest bundle.json --scan --level full --worker work
 ```
 
 Without `--scan`, this validates only the JSON contract and content digests.
-Record schemas ship in `genesis_tools/contracts/schemas/records-v1.json`.
+Record schemas ship in `genesis_tools/contracts/schemas/records-v1.json` and
+`records-v2.json`.
 `contracts.records` provides typed manifest, finding, measurement, proposal,
 assessment and decision records. Unknown versions, extra contract fields, malformed
 types, duplicate JSON keys, NaN and stale nested hashes are rejected. Flexible
@@ -161,8 +162,9 @@ from the controller's shortened worker-attempt directory prefix. Supply
 
 The registry models entities/relations, worker-qualified locations, exact reference
 versions in manifests, immutable scientific records and attempt observations.
-Invocation/deployment provenance contracts can be imported with `--record`; there
-is no provider or deployment operation in this milestone. Sequencing files stay
+Invocation/deployment provenance contracts can be imported with `--record`.
+The optional [provider](ai-providers.md) and [model-service](llm-deployment.md) commands
+write richer version 2 provenance through the same registry. Sequencing files stay
 outside SQLite. Catalog facts describe observations, not continuous filesystem
 monitoring: revalidate before consuming artifacts that might have changed.
 
@@ -294,3 +296,130 @@ omitting these commands and `serve --registry`; scientific execution is unaffect
 See the [implementation brief](../curation/IMPLEMENTATION_BRIEF.md) and
 [validation report](../../validation/reports/curation-foundations-validation.md)
 for scope, exact checks and unrun live scenarios.
+
+## Evidence-backed metadata harmonization
+
+Ingest local UTF-8 JSON objects/arrays, CSV, TSV or text excerpts against an existing
+dataset. Input files are limited to 2 MiB each and new bundles to 16 MiB. Accession
+retrieval is bounded and restricted to fixed ENA and NCBI GEO APIs; arbitrary URLs,
+redirects, executable supplements and automatic paper downloads are not accepted.
+Sources retain exact text, location, digest and retrieval time. Inaccessible papers
+supply no evidence. Re-ingestion preserves earlier snapshots and the most restrictive
+source classification; conflicting sources stay visible.
+
+```bash
+pixi run genesis metadata ingest /local/catalog DATASET_ID \
+  --source source-metadata.json --source paper-excerpt.txt --classification local-only
+# Optional public metadata retrieval, explicitly involving network access:
+pixi run genesis metadata ingest /local/catalog DATASET_ID \
+  --accession SRR123456 --classification public
+
+# Deterministic extraction, no AI required:
+pixi run genesis metadata propose /local/catalog DATASET_ID --output proposal-v2.json
+# Or explicitly select a configured provider:
+pixi run genesis metadata propose /local/catalog DATASET_ID \
+  --config /local/providers.json --provider private --output model-proposal.json
+pixi run genesis metadata diff /local/catalog DATASET_ID --target PROPOSAL_VERSION
+```
+
+Fields include organism/taxon, cultivar/genotype, tissue, developmental stage,
+treatment, assay/protocol, layout/chemistry, biological replicate, technical lane,
+accession and reference/control proposals. DAP TF identity/source organism is
+separate from assayed DNA organism/genotype and native/amplified DNA context.
+No tissue-specific TF activity is inferred. `ATAC-seq`, `GRO-seq`, `GRO-cap` and
+vague 5-prime terms alone do not establish the necessary library/protocol distinctions.
+Missing treatment is `unknown`, never automatically `untreated`.
+
+Deterministic structured fields take precedence; models cannot overwrite a known
+value or hide a source conflict. Each candidate includes its original value,
+proposed value, `known|unknown|not_applicable|conflicting` status, exact source
+version/JSON-pointer or line locator/quoted span, short rationale and vocabulary
+version. The small packaged plant lookup preserves unrecognized author terms with
+no ontology ID; invented IDs are rejected. Self-reported confidence is separate
+from empirical accuracy (no calibration is claimed).
+
+Every proposed value needs a quote found at its locator in the saved source.
+This verifies evidence existence, not the biological interpretation. Contradictory
+structured sources yield a null conflicting candidate. For curator resolution,
+copy the proposal's `data.fields` to `{"fields":[...]}`, edit the value/status,
+rationale and exact evidence, then use `metadata propose --fields curated-fields.json`.
+Use supported vocabulary IDs or null, never fabricate an identifier.
+
+Approve the exact proposal with a fresh review token and its recorded evidence.
+For version 2 proposals, approval and apply are deliberately separate:
+
+```bash
+# Save {"evidence": proposal.data.evidence} as evidence.json after inspecting it.
+pixi run genesis review show /local/catalog DATASET_ID
+pixi run genesis review approve /local/catalog DATASET_ID --category metadata \
+  --target PROPOSAL_VERSION --token CURRENT_TOKEN --reason 'Explain the evidence review' \
+  --evidence evidence.json
+pixi run genesis metadata apply /local/catalog DATASET_ID --target PROPOSAL_VERSION \
+  --output canonical-metadata-v1.json
+```
+
+Approval is `PENDING_APPLY` until apply succeeds; reviewed exports exclude it.
+Apply creates an immutable `metadata_revision`, updates the catalog's canonical
+metadata and emits a `compiled_inputs` description referencing the exact original
+assay, lanes and reference. It is a manifest for constructing a new campaign, not
+an automatically executable replacement sample sheet. Scientific inputs are copied
+verbatim; reference/control proposals remain descriptive. Existing executed sheets,
+campaigns and raw accession records are never rewritten. Reassess QC and review
+eligibility after metadata changes. Source/manifest changes or concurrent reviews
+invalidate stale proposals/approvals. Repeating an unchanged apply is idempotent.
+
+Legacy version 1 manual proposals keep their documented behavior: `review approve`
+applies their limited descriptive changes directly. Version 1 hashes and history
+remain readable. New rich proposals use version 2 and require explicit apply.
+The registry migrates through schema 3; stored source bundles/revisions/invocations
+are included with reviewed catalog provenance. Shared-account identity limitations
+and explicit individual review still apply.
+
+## Failure diagnosis
+
+Collect a small explicit selection of logs from an approved run/work root:
+
+```bash
+pixi run genesis ai diagnose /local/catalog --root /scratch/atac-run \
+  --log .nextflow.log --log work/ab/task/.command.err \
+  --facts diagnostic-facts.json --dataset DATASET_ID --output diagnosis.json
+# Optional explanation, with the same deterministic classifier:
+pixi run genesis ai diagnose /local/catalog --root /scratch/atac-run \
+  --log .nextflow.log --config /local/providers.json --provider private
+```
+
+`--facts` is optional JSON containing observed `worker_state`, `exit_code`,
+`oom_kill`, `resource_evidence`, `qc_concern`, `tool_exception`, and campaign/job/attempt
+identifiers where available. Unknown facts should be omitted. For example,
+`{"worker_state":"FAILED","exit_code":137}` remains unknown: 137 alone does not
+prove OOM. Confirmed OOM requires a collected resource-evidence hash and an OOM
+signature. State `RUNNING`, `STARTING` or `UNKNOWN` always prevents classification
+as a safely retryable terminal failure.
+
+Remote evidence uses `--worker-config worker.json --worker-id worker-A`, the existing
+local/SSH worker fields and optional `diagnostic_roots`. The selected root must be
+inside the node's approved roots. No recursive traversal/upload occurs. At most
+16 explicitly named logs, each with at most its final 64 KiB, are retained; hashes
+refer to retained redacted snapshots, not uncollected full files. Oversized files
+are marked partial. Credentials and common secret patterns are redacted.
+
+Categories cover temporary network/exit-75 errors, access, missing inputs, checksum
+mismatch, malformed manifests, measured resource exhaustion, reference mismatch,
+tool defects, biological QC concerns and unknown causes. Optional model explanations
+and hypotheses are separate from deterministic category/facts. A model outage does
+not prevent deterministic diagnosis, worker polling or ordinary processing.
+
+Results propose a typed action (`inspect`, `renew-auth-manually`,
+`reacquire-and-verify`, `retry-same-config`, `propose-resource-change`,
+`propose-metadata-correction`, `escalate`), evidence, uncertainty, preconditions and
+expected effect. **Diagnosis never executes that action.** It cannot change MAPQ,
+duplicates, adapters, references, peak thresholds, controls, QC approval or credentials.
+Recollect evidence and compare `target_version` before an action. Existing bounded
+exit-75 retries and conservative UNKNOWN reconciliation remain authoritative.
+Changed resources/inputs need an explicitly versioned replacement campaign linked
+to the original, not an edited campaign JSON or an assumption that `resolve` applies it.
+
+Run `pixi run uv run --frozen --project genesis_tools python tests/evaluate_metadata.py`
+for the separate synthetic metadata evaluation. The fixture split and reported field,
+evidence/conflict/abstention counts test software; they do not establish real curation
+accuracy. Human correction rates and live-provider comparisons remain unmeasured.

@@ -1,8 +1,10 @@
-# Curation foundations specification
+# Curation and hybrid-LLM implementation specification
 
 Baseline: `bb16baca5d9bb09bfff8825fc537fcb125809c07`, clean `main` at audit.
-This specification implements the agreed Prompts 0–3 in the existing repository.
-No provider, serving, automatic metadata extraction, or diagnostic agent is in this milestone.
+The foundations milestone implemented Prompts 0–3. The subsequent authorized
+extension implements Prompts 4–8 in this same checkout and publishes reviewed
+commits directly to main. Acceptance is offline first; production services, real
+API calls and GPU/SSH launches are not part of implementation acceptance.
 
 ## Boundaries and ownership
 
@@ -22,11 +24,12 @@ a versioned export profile are independent. A reviewer cannot waive corruption.
 Missing evidence is unknown, never zero. Plant biological thresholds remain
 UNSPECIFIED. Policies assess immutable measurements without rerunning sequencing.
 
-All core curation works offline, without models, credentials or GPUs. Future LLMs
+All core curation works offline, without models, credentials or GPUs. Optional LLMs
 may propose evidence-backed changes; deterministic validation and accountable human
 review remain authoritative. No hidden chain-of-thought is collected. Logs, metadata
 and proposed changes are untrusted data. No production runs, model downloads, public
-services, credentials, sudo, firewall changes, commits or pushes are authorized here.
+services, credentials, sudo or firewall changes are authorized by implementation.
+The user separately authorized reviewable commits and direct publication to main.
 
 ## Implementation decisions
 
@@ -79,5 +82,32 @@ The final implementation and evidence are described in the
 [validation report](../../validation/reports/curation-foundations-validation.md).
 The pinned full suite passed after recovering exact cached Nextflow plugins.
 Installed-wheel acceptance, real BAM/bigWig validation and a 10,000-library,
-100,000-location synthetic catalog were exercised. New provider, AI curation,
-model-serving and diagnostic-agent work remains outside this milestone.
+100,000-location synthetic catalog were exercised. That report describes the foundations milestone only. The extension adds a
+standard-library provider, separately deployed digest-pinned vLLM containers,
+field-evidence curation, bounded read-only assistance and deterministic diagnosis.
+Its separate validation report records offline acceptance and unrun live checks.
+
+
+## Extension contracts and operational boundaries
+
+- Preserve version 1 bytes/hashes and review behavior. Version 2 adds rich invocation,
+  source bundle, proposal, metadata revision, model inspection, deployment and diagnosis
+  envelopes. Registry schema 3 adds projections and indexes via transactional migration.
+- Rich proposal approval and application are separate. Source/manifest/canonical
+  changes invalidate decisions; reviewers use authenticated local OS identity.
+- One provider adapter supports disabled, mock and explicitly configured live modes.
+  Endpoints/models/capabilities are probed, output validated locally, budgets enforced,
+  egress classified and secrets redacted. Model aliases/unknown costs stay explicit.
+- Model service ownership is independent of processing jobs. Reuse local/SSH transport,
+  exact reviewed plans, node-local reservations and detached supervision. No shared
+  worker database or filesystem is assumed. UNKNOWN retains reservations.
+- Deployment applies only after explicit exact-plan authorization and fresh resource,
+  revision, license and runtime checks. No model/GPU/service is selected automatically.
+  Containers/serving clients stay outside core Python; use loopback and owned SSH tunnels.
+- Metadata extraction precedes optional model proposals. Source snapshots and exact
+  field locators remain authoritative evidence; JSON correctness is not biological truth.
+  Control/reference proposals never alter executed or compiled scientific choices.
+- Diagnosis only proposes typed next steps. It does not run retries, shell, SQL, repair,
+  policy changes or approval. Existing worker retry/reconciliation semantics remain.
+- The README contains complete workflows, with a runnable offline tutorial. Synthetic
+  evaluation, fake HTTP and lifecycle simulations remain distinct from live acceptance.

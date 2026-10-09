@@ -93,16 +93,25 @@ def execute(args: argparse.Namespace) -> tuple[Any, int]:
             }, 0
         if args.operation == "diff":
             row = store.current(db, args.dataset)
-            proposal = store.get(db, "proposal", args.target)["data"]
+            proposed = store.get(db, "proposal", args.target)
+            proposal = proposed["data"]
             if proposal["dataset_id"] != args.dataset:
                 raise ValueError("Proposal belongs to another dataset")
             current = loads(row["metadata"])
+            stale = proposal["manifest_version"] != row["manifest"]
+            if proposed["schema_version"] == 2:
+                from .harmonize import check_proposal
+
+                try:
+                    check_proposal(db, proposed)
+                except ValueError:
+                    stale = True
             return {
                 "changes": {
                     key: {"before": current.get(key), "after": value}
                     for key, value in proposal["changes"].items()
                 },
-                "stale": proposal["manifest_version"] != row["manifest"],
+                "stale": stale,
                 "token": review.token(db, args.dataset),
             }, 0
         return {

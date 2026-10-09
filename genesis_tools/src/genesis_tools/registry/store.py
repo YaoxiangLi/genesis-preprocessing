@@ -15,7 +15,7 @@ from typing import Any
 
 from ..contracts.records import canonical, fingerprint, identity, loads, now, record, validate
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 MIGRATIONS = {
     1: [
         "CREATE TABLE meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)",
@@ -90,6 +90,12 @@ MIGRATIONS = {
             "CREATE TRIGGER immutable_decisions_delete BEFORE DELETE ON "
             "decisions BEGIN SELECT RAISE(ABORT,'immutable decision'); END"
         ),
+    ],
+    3: [
+        "CREATE TABLE metadata_heads (dataset TEXT PRIMARY KEY REFERENCES datasets(id),"
+        "source_bundle TEXT,canonical_revision TEXT)",
+        "CREATE INDEX records_kind_version ON records(kind,version)",
+        "CREATE TABLE service_heads (id TEXT PRIMARY KEY,plan TEXT NOT NULL,state TEXT NOT NULL)",
     ],
 }
 

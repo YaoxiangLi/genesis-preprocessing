@@ -30,6 +30,10 @@ def configure(parser: argparse.ArgumentParser) -> None:
             )
         if name in {"show", "history"}:
             child.add_argument("dataset")
+        if name == "show":
+            child.add_argument(
+                "--kind", help="Read an immutable record: interpret DATASET as its version hash"
+            )
         if name in {"search", "history"}:
             child.add_argument("--limit", type=int, default=100)
             child.add_argument(
@@ -141,6 +145,8 @@ def execute(args: argparse.Namespace) -> tuple[Any, int]:
         if args.operation == "history":
             return store.history(db, args.dataset, limit=args.limit, after=args.after), 0
         if args.operation == "show":
+            if args.kind:
+                return store.get(db, args.kind, args.dataset), 0
             row = store.current(db, args.dataset)
             return {
                 "dataset": row,

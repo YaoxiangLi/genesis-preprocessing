@@ -92,12 +92,14 @@ def dump(path: Path, value: object, *, immutable: bool = False) -> None:
 
 
 @lru_cache
-def schema() -> dict[str, Any]:
-    return loads(files(__package__).joinpath("schemas/records-v1.json").read_text())
+def schema(version: int = 1) -> dict[str, Any]:
+    if version not in {1, 2}:
+        raise ValueError("Unsupported contract version")
+    return loads(files(__package__).joinpath(f"schemas/records-v{version}.json").read_text())
 
 
 @lru_cache
-def validator(kind: str) -> Validator:
+def validator(kind: str, version: int = 1) -> Validator:
     checker = Draft202012Validator.TYPE_CHECKER.redefine(
         "integer", lambda _checker, value: type(value) is int
     ).redefine(
@@ -107,19 +109,22 @@ def validator(kind: str) -> Validator:
         ),
     )
     cls = validators.extend(Draft202012Validator, type_checker=checker)
-    if kind not in schema()["$defs"]:
+    if kind not in schema(version)["$defs"]:
         raise ValueError("Unsupported record kind")
-    return cls({"$defs": schema()["$defs"], "$ref": "#/$defs/" + kind})
+    return cls({"$defs": schema(version)["$defs"], "$ref": "#/$defs/" + kind})
 
 
 def validate(value: object, kind: str | None = None) -> dict[str, Any]:
     if not isinstance(value, dict) or type(value.get("schema_version")) is not int:
         raise ValueError("A versioned record object is required")
-    if value["schema_version"] != 1 or (kind and value.get("kind") != kind):
+    if value["schema_version"] not in {1, 2} or (kind and value.get("kind") != kind):
         raise ValueError("Unsupported record version or kind")
     if not isinstance(value.get("kind"), str):
         raise ValueError("A record kind is required")
-    errors = sorted(validator(value["kind"]).iter_errors(value), key=lambda e: str(e.json_path))
+    errors = sorted(
+        validator(value["kind"], value["schema_version"]).iter_errors(value),
+        key=lambda e: str(e.json_path),
+    )
     if errors:
         raise ValueError(f"Contract violation at {errors[0].json_path}: {errors[0].message}")
 
@@ -145,8 +150,8 @@ def validate(value: object, kind: str | None = None) -> dict[str, Any]:
     return value
 
 
-def record(kind: str, data: dict[str, Any], key: str) -> dict[str, Any]:
-    result = {"schema_version": 1, "kind": kind, "id": key, "data": data}
+def record(kind: str, data: dict[str, Any], key: str, *, version: int = 1) -> dict[str, Any]:
+    result = {"schema_version": version, "kind": kind, "id": key, "data": data}
     result["version"] = fingerprint(result)
     return validate(result, kind)
 
