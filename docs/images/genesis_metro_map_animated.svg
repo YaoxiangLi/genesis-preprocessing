@@ -49,8 +49,8 @@
 <path class="flow" style="animation-delay:-1s" d="M 830 330 L 931 330 Q 945 330 945 344 L 945 676 Q 945 690 959 690 L 1060 690"/>
 <path id="route-14" class="line" stroke="#438362" d="M 1060 690 L 1391 690 Q 1405 690 1405 676 L 1405 344 Q 1405 330 1391 330 L 1290 330"><title>Coverage and chromosome bounds support quantification</title></path>
 <path class="flow" style="animation-delay:-2s" d="M 1060 690 L 1391 690 Q 1405 690 1405 676 L 1405 344 Q 1405 330 1391 330 L 1290 330"/>
-<path id="route-15" class="line" stroke="#9260b7" d="M 600 510 L 499 510 Q 485 510 485 496 L 485 134 Q 485 120 499 120 L 1391 120 Q 1405 120 1405 134 L 1405 166 Q 1405 180 1391 180 L 1290 180"><title>Metadata joins run-level reporting</title></path>
-<path class="flow" style="animation-delay:-3s" d="M 600 510 L 499 510 Q 485 510 485 496 L 485 134 Q 485 120 499 120 L 1391 120 Q 1405 120 1405 134 L 1405 166 Q 1405 180 1391 180 L 1290 180"/>
+<path id="route-15" class="line" stroke="#9260b7" d="M 600 510 L 499 510 Q 485 510 485 496 L 485 119 Q 485 105 499 105 L 1391 105 Q 1405 105 1405 119 L 1405 166 Q 1405 180 1391 180 L 1290 180"><title>Metadata joins run-level reporting</title></path>
+<path class="flow" style="animation-delay:-3s" d="M 600 510 L 499 510 Q 485 510 485 496 L 485 119 Q 485 105 499 105 L 1391 105 Q 1405 105 1405 119 L 1405 166 Q 1405 180 1391 180 L 1290 180"/>
 <g id="samples"><title>Sample sheet: SE / PE + controls</title>
 <circle class="station" cx="140" cy="330" r="9" stroke="#087f8c"/>
 <text class="label" text-anchor="middle" x="140" y="290">Sample sheet</text>

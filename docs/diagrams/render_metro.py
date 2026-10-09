@@ -120,7 +120,7 @@ DAP_EDGES = [
     edge("spp", [(830,330),(945,330),(945,510),(830,510)], "Separate shortened-read alignment feeds SPP"),
     edge("tracks", [(830,330),(945,330),(945,690),(1060,690)], "Full-read coverage"),
     edge("tracks", [(1060,690),(1405,690),(1405,330),(1290,330)], "Coverage and chromosome bounds support quantification"),
-    edge("qc", [(600,510),(485,510),(485,120),(1405,120),(1405,180),(1290,180)], "Metadata joins run-level reporting"),
+    edge("qc", [(600,510),(485,510),(485,105),(1405,105),(1405,180),(1290,180)], "Metadata joins run-level reporting"),
 ]
 ATAC_NODES = [
     ("reads",140,330,"Raw PE mates","Synthetic adapter-free","reads"),

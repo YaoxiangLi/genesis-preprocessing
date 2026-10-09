@@ -54,8 +54,8 @@ def main() -> None:
         sys.executable,
         str(ROOT / "experimental/atac/verify_outputs.py"),
         str(published),
-        "plastid",
         "mitochondria",
+        "plastid",
     )
     trace = workflow / "trace.tsv"
     fresh = list(csv.DictReader(trace.open(), delimiter="\t"))
