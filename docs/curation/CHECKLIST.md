@@ -30,7 +30,8 @@ checkpoints do not imply those passed.
 - [x] Add synthetic gold cases, fake HTTP, lifecycle and complete offline CLI scenarios.
 - [x] Complete full regressions, installed-wheel acceptance and documentation checks.
 - [x] Record exact extension validation evidence and limitations.
-- [ ] Publish tested implementation and complete README to GitHub main and verify it.
+- [x] Publish tested implementation and complete README to GitHub main and verify it.
 
 Extension evidence: [validation report](../../validation/reports/hybrid-llm-validation.md).
+Publication: [verified GitHub commit and content hashes](../../validation/evidence/hybrid-llm/publication.json).
 Live API/GPU/SSH acceptance remains NOT RUN; opt-in acceptance runners are included.
