@@ -49,6 +49,7 @@ process FRAGMENTS {
     input:
     path bam
     path driver
+    val organelles
     output:
     path 'usable.bam', emit: bam
     path 'fragments.json', emit: fragments
@@ -56,7 +57,7 @@ process FRAGMENTS {
     path 'usable.*.txt', emit: qc
     script:
     """
-    python '${driver}' --bam '${bam}' --mapq ${params.mapq} --organelles '${params.organelles}'
+    python '${driver}' --bam '${bam}' --mapq ${params.mapq} --organelles '${organelles.join(',')}'
     """
 }
 
@@ -150,20 +151,22 @@ workflow {
     assert params.adapter_policy == 'none-synthetic-adapter-free', 'Explicit adapter-free synthetic policy required'
     assert params.mapq != null && params.mapq.toInteger() >= 0, 'Explicit MAPQ required'
     assert params.genome_size != null && params.genome_size.toLong() > 0, 'Exact fixture genome size required'
-    assert params.organelles ==~ /[A-Za-z0-9_.:,\-]*/, 'Invalid organellar list'
+    assert params.organelles instanceof String, 'Supply --organelles NONE or a comma-separated contig list; empty flags are invalid'
+    assert params.organelles ==~ /[A-Za-z0-9_.:,\-]+/, 'Invalid organellar list'
+    def organelles = params.organelles == 'NONE' ? [] : params.organelles.tokenize(',')
     assert params.outdir, 'Output directory required'
     def read1 = file(params.read1, checkIfExists: true)
     def read2 = file(params.read2, checkIfExists: true)
     RAW_FASTQC(Channel.of(tuple('R1', read1), tuple('R2', read2)))
     ALIGN_AND_MARK(read1, read2, file(params.fasta, checkIfExists: true))
-    FRAGMENTS(ALIGN_AND_MARK.out.bam, file("${projectDir}/metrics.py"))
+    FRAGMENTS(ALIGN_AND_MARK.out.bam, file("${projectDir}/metrics.py"), organelles)
     PEAKS(FRAGMENTS.out.bam)
     ENRICHMENT(FRAGMENTS.out.fragments, PEAKS.out.peaks, file(params.tss, checkIfExists: true),
                file("${projectDir}/metrics.py"), file("${projectDir}/enrichment.py"))
     reports = RAW_FASTQC.out.reports.mix(ALIGN_AND_MARK.out.qc).mix(FRAGMENTS.out.qc).flatten().collect()
     REPORT(reports, ENRICHMENT.out, file("${projectDir}/multiqc_config.yaml"), file("${projectDir}/verify_multiqc.py"))
     def settings = [source_sha: params.source_sha, nextflow: nextflow.version.toString(),
-        mapq: params.mapq, organelles: params.organelles, adapter_policy: params.adapter_policy,
+        mapq: params.mapq, organelles: organelles, adapter_policy: params.adapter_policy,
         duplicate_policy: 'mark_then_exclude', tn5_offsets: [4, -5], genome_size: params.genome_size,
         plant_thresholds: 'UNSPECIFIED', scope: 'experimental synthetic PE fixture']
     PROVENANCE(read1, read2, file(params.fasta), file(params.tss),
