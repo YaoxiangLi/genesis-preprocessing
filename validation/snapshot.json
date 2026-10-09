@@ -244,6 +244,153 @@
           "published_sha256": "969ee40071d1696fe780fa79892a526678f68f7f388d974a3cf43301c1dcc1b6"
         }
       ]
+    },
+    {
+      "date": "2026-10-09",
+      "code_revision": "bad67391acda37a53f584b7ded9cbdf27096aa2b",
+      "scope": "Supported PE bulk ATAC and local-first execution; remote live deployment remains unverified",
+      "files": [
+        {
+          "path": "reports/supported-atac-execution-validation.md",
+          "published_sha256": "e23766a091cb73fbc2191623c6ff51cd151df91438a6062534de929e0f91b019"
+        },
+        {
+          "path": "design/adr-supported-atac-execution.md",
+          "published_sha256": "5b2e74d8b484317318f64b762f807d32f69665d3e8d3a8feec11c63a78aa102d"
+        },
+        {
+          "path": "evidence/supported-atac/README.md",
+          "published_sha256": "06e5a70cb5239bd8c6e249eedb5503553683b983392e13e5c3d5217e9d4e9115"
+        },
+        {
+          "path": "evidence/supported-atac/adapter-counts.json",
+          "published_sha256": "3db473e83538e797c7c48b37c4b737b825692cdec08afb61e0d03b7bb6fc222e"
+        },
+        {
+          "path": "evidence/supported-atac/adapter-known-answer.json",
+          "published_sha256": "edef65f124f4f9651ce4e9ebc619666ae14b70cdd5d05894b966a28155ebbeef"
+        },
+        {
+          "path": "evidence/supported-atac/adapter-sensitivity.tsv",
+          "published_sha256": "26bb49aba7f72b826f4ceef23909151e8992b5df9db1d449f0c3eb8a9447017c"
+        },
+        {
+          "path": "evidence/supported-atac/campaign-status.json",
+          "published_sha256": "2763758662e459623e2ad7b844f705edf614913fac1376fb7c34655e5e66326f"
+        },
+        {
+          "path": "evidence/supported-atac/changed-files.txt",
+          "published_sha256": "ed6826937ddd6e4d0a3fac3670033adad7d099ca76e10cda3ccf8cf8911f69d3"
+        },
+        {
+          "path": "evidence/supported-atac/checked-source.json",
+          "published_sha256": "688f59d7aae772be0645835927b028ddede91135489bcd3f9909451c4bc2057e"
+        },
+        {
+          "path": "evidence/supported-atac/commands.json",
+          "published_sha256": "83e713987ee959b45c9f467595f9e6fb020a4af1b51c8654acca1f4dbc0171d2"
+        },
+        {
+          "path": "evidence/supported-atac/dap-portable-comparison.json",
+          "published_sha256": "7df43ee77393243a0b5047816c5181accfe36b07988372a030b9bc65c83a1031"
+        },
+        {
+          "path": "evidence/supported-atac/diagram-browser-checks.json",
+          "published_sha256": "ff3e4ba2f0324e994bfb2603c904abee1775a665d82eac65484ca454b9df303e"
+        },
+        {
+          "path": "evidence/supported-atac/fastqc-flags.tsv",
+          "published_sha256": "c373d56d049bc6e5fb3d51f2e266b96a748911106fba10ba753ddfb7bf572449"
+        },
+        {
+          "path": "evidence/supported-atac/implementation-commits.tsv",
+          "published_sha256": "4ab3459299341b1afcc487b0fc54566252241ba73fe90f5b175ea1da69efc8b4"
+        },
+        {
+          "path": "evidence/supported-atac/public-eager-migration-trace.tsv",
+          "published_sha256": "54deeb43c3cf077498d288bfd4ecbba7f281aa3b1bdd9f45a002cc9572ec5f06"
+        },
+        {
+          "path": "evidence/supported-atac/public-fresh-trace.tsv",
+          "published_sha256": "579ba7d939356c9fb9bbe357bcf8fbd1e421ebc0baa06ac10c7dffd08af93eca"
+        },
+        {
+          "path": "evidence/supported-atac/public-input-checksums.json",
+          "published_sha256": "754c4e73958effd8b6a84c2edbccf8d3e9bad7a463151c945edd9ab5f6cb5eef"
+        },
+        {
+          "path": "evidence/supported-atac/public-output-inspection.json",
+          "published_sha256": "4e3e4ecbe032c008bc853ef82b3dbc8394303163a5145daee54ea6cf9954a181"
+        },
+        {
+          "path": "evidence/supported-atac/public-qc-summary.json",
+          "published_sha256": "74574c435b4e2e12d9fd5926c2499aa6f55eed70ef5ec5b36c7f49c91353d7e7"
+        },
+        {
+          "path": "evidence/supported-atac/public-resume-acceptance.json",
+          "published_sha256": "1b039af3a28a5128e0d82df3a06beed4c167fc36067765f44f1cfd6e8ebfd715"
+        },
+        {
+          "path": "evidence/supported-atac/public-scientific-before.json",
+          "published_sha256": "cf3c8bc9f8e5fe1c2106f37d0e458586eb79d54e57d2c66423015af267cc24ee"
+        },
+        {
+          "path": "evidence/supported-atac/public-stable-2-trace.tsv",
+          "published_sha256": "3853e9575c541d67061aa3243650f5fb7f77b692ecbd44d6cd6a2437dc466412"
+        },
+        {
+          "path": "evidence/supported-atac/public-stable-3-trace.tsv",
+          "published_sha256": "c54d41347abf95092e5aa30767a03184e4287e05a2652ad83dc8b9a90298cf8f"
+        },
+        {
+          "path": "evidence/supported-atac/reference-rebuild-comparison.json",
+          "published_sha256": "62c7df8e3d567efc1c7d41ee0cc5aa545236aa0a92c37ca67bb94e245add894a"
+        },
+        {
+          "path": "evidence/supported-atac/retained-disk.json",
+          "published_sha256": "df7d35dc3d32afe4f566d8585ccb8b1ad95f2c039706f1fffa539f45e37a315c"
+        },
+        {
+          "path": "evidence/supported-atac/scaling.json",
+          "published_sha256": "f0e4aeee7a4d65503a39053aea640a81ec10c7d2d2005141dd9713d9de92e9b0"
+        },
+        {
+          "path": "evidence/supported-atac/source-cache-defect.json",
+          "published_sha256": "6e51b4ce2ce78b088f8d6e04640feb736631f84e18b039f950cdf0ef77e8cb9d"
+        },
+        {
+          "path": "evidence/supported-atac/status-page-checks.json",
+          "published_sha256": "42cc1bbeaabe3cc2473d02420a672e63c07bba857ca96e384fb8e0be01a964e3"
+        },
+        {
+          "path": "evidence/supported-atac/versions.json",
+          "published_sha256": "5cb9ea07d43f881e62a3f877a222a162d0ca43a5c041a697825a162bd1ebd10a"
+        },
+        {
+          "path": "reproduce/supported-atac/README.md",
+          "published_sha256": "5200027f73a133d90230dc307e618bd3b88dc7aec449de90f748bc819432d4f7"
+        },
+        {
+          "path": "reproduce/supported-atac/downloads.json",
+          "published_sha256": "f617c0afaf2913e8c118b6370591421e5287644805a0f3a3c7264c7a3a912b35"
+        },
+        {
+          "path": "reproduce/supported-atac/public_inputs.py",
+          "published_sha256": "a0e1990d5248abef963e5f24db73690b1d13effa181078429150dfa244e90916"
+        },
+        {
+          "path": "reproduce/supported-atac/references.json",
+          "published_sha256": "671c969e5c1deed2c9a56719235676845abebae5822ac7a14551dac7b301649f"
+        },
+        {
+          "path": "reproduce/supported-atac/samples.tsv",
+          "published_sha256": "bd13a3723f36f1f24099b203cf4a9450d08a492d2c1cecd677f6d380d29642c9"
+        },
+        {
+          "path": "reproduce/supported-atac/scale_fragments.py",
+          "published_sha256": "28fc498849f331a55510ff5a5588142c9c1257572b031c4ee6501c705e48144d"
+        }
+      ]
     }
   ]
 }

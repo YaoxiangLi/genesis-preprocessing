@@ -78,5 +78,5 @@ inputs, pinned software and common metrics. Changes to scientific policy remain
 separate experiments until their results justify a default change.
 
 [Benchmark guide](benchmarks/README.md) ·
-[Validation reports](validation/reports/) ·
+[Validation results](validation/reports/supported-atac-execution-validation.md) ·
 [Diagram sources](docs/diagrams/README.md)

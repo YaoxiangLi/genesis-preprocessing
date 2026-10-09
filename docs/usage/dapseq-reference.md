@@ -159,7 +159,7 @@ fragment length. Cutting before alignment, not after, puts the phantom peak at
 the cut length, so NSC and RSC keep their usual meaning. If SPP still finds no
 fragment peak, QC records a row with `NA` estimates instead of failing.
 The provenance and differences from the historical Sherlock script are explained
-in [vendor/phantompeakqualtools/README.md](vendor/phantompeakqualtools/README.md).
+in [vendor/phantompeakqualtools/README.md](../../vendor/phantompeakqualtools/README.md).
 SPP scores can differ from the old workflow because of the aligner, read lengths,
 and upstream correlation-baseline changes.
 
@@ -331,5 +331,5 @@ See [docs/nextflow-style.md](../../docs/nextflow-style.md) for module convention
 Use `pixi run benchmark` for explicit sensitivity experiments and pinned raw-ATAC
 workflow comparisons. The default synthetic fixtures run without dataset downloads;
 real plant candidate plans remain blocked until reference and input identity are
-resolved. See [benchmark commands, contracts and limitations](benchmarks/README.md).
+resolved. See [benchmark commands, contracts and limitations](../../benchmarks/README.md).
 Production scientific defaults are unchanged.

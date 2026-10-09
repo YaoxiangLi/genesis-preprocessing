@@ -1,13 +1,16 @@
-# Validation study snapshot
+# Validation studies
 
 This directory publishes the validation workspace's audit, design, reports and
-small deterministic contract fixtures as of 2026-10-09. The integrated executable
-code is in this repository. The experimental synthetic PE ATAC prototype is now
-available under [experimental/atac](../experimental/atac/README.md); its original
-validation branch remains preserved. See the [integration and map validation](reports/atac-maps-validation.md)
-for the subsequent integration evidence.
+small deterministic contract fixtures as of 2026-10-09. The current supported
+paired-end bulk ATAC workflow is validated on synthetic fixtures and small
+Arabidopsis and maize subsets. Its predecessor remains under `experimental/atac/`
+for historical benchmark reproduction.
 
-Start with the [benchmark validation](reports/benchmark-validation.md),
+Start with the [bulk ATAC and execution validation](reports/supported-atac-execution-validation.md),
+[compact evidence](evidence/supported-atac/README.md), and
+[reproduction instructions](reproduce/supported-atac/README.md).
+
+Earlier studies include the [benchmark validation](reports/benchmark-validation.md),
 [overall validation](reports/GENESIS_PREPROCESSING_VALIDATION.md),
 [benchmark design](design/benchmark-spec.md), and
 [model-ready pseudobulk contract](design/scatac-pseudobulk-spec.md).
@@ -15,7 +18,8 @@ Start with the [benchmark validation](reports/benchmark-validation.md),
 Reports retain their original observation dates, tested commit IDs and limitations.
 Statements that work was local/unpushed describe the state at the time of testing;
 this snapshot is now published on the fork. No unresolved biological claim becomes
-validated by publication. Exact-reference and real-data blockers remain open.
+validated by publication. The exact Sorghum DAP reference and metadata workbook
+remain outstanding; public ATAC subset validation does not resolve those blockers.
 
 Raw logs, BAMs, FASTQs, downloaded data and generated outputs remain in the original
 workspace under `results/` and `scratch/`; links to those locations are workspace
