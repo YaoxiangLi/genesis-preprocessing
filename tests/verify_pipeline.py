@@ -842,6 +842,7 @@ def main() -> None:
     runs = ROOT / "tests" / ".runs"
     runs.mkdir(exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="docker-" if args.docker else "regression-", dir=runs))
+    passed = False
     try:
         assert (
             hashlib.sha256(
@@ -905,8 +906,9 @@ def main() -> None:
             )
         label = "Real-tool Docker end-to-end" if args.docker else "Nextflow regression"
         print(f"{label} validation passed.", flush=True)
+        passed = True
     finally:
-        if args.keep:
+        if args.keep or not passed:
             print(f"Artifacts retained: {work}", flush=True)
         else:
             shutil.rmtree(work)
