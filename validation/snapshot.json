@@ -232,5 +232,18 @@
       "workspace_sha256": "6cc23b7ba16440bcd1898b5c691893d6ff5c612ba4cf4eeb5bb54334f7731f6b",
       "published_sha256": "6cc23b7ba16440bcd1898b5c691893d6ff5c612ba4cf4eeb5bb54334f7731f6b"
     }
+  ],
+  "updates": [
+    {
+      "date": "2026-10-09",
+      "code_revision": "47aa6a16e9c3b4114cbec19efb03e4a00ca5f9e1",
+      "files": [
+        {
+          "path": "reports/atac-maps-validation.md",
+          "workspace_sha256": "969ee40071d1696fe780fa79892a526678f68f7f388d974a3cf43301c1dcc1b6",
+          "published_sha256": "969ee40071d1696fe780fa79892a526678f68f7f388d974a3cf43301c1dcc1b6"
+        }
+      ]
+    }
   ]
 }
