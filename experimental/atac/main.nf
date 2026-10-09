@@ -53,6 +53,8 @@ process FRAGMENTS {
     output:
     path 'usable.bam', emit: bam
     path 'fragments.json', emit: fragments
+    path 'fragments.bed', emit: bed
+    path 'cuts.bedgraph', emit: cuts
     path 'metrics.json', emit: metrics
     path 'usable.*.txt', emit: qc
     script:
