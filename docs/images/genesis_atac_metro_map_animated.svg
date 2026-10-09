@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 870" role="img" aria-labelledby="title description">
 <title id="title">GENESIS / BULK ATAC</title>
-<desc id="description">Experimental synthetic PE workflow · explicit policies · no plant pass/fail thresholds. Duplicate marking measures reads; analysis then excludes marked duplicates and explicitly named organelles. BAMPE peaks use unshifted fragments. Tn5 cut sites are a separate output. TSS scoring is a toy diagnostic. One synthetic library; no trimming, replicate pooling or IDR. FASTQs and BAMs stay intermediate.</desc>
+<desc id="description">Paired-end plant libraries · explicit policies · separate biological replicates. Duplicate marking measures duplication. The sample sheet explicitly selects retention or exclusion. BAMPE peaks use unshifted fragments. Cut sites use +4 / −5 shifts; TSS profiles use strand-aware windows. Adapter handling is explicit. No biological replicate pooling or automatic plant QC thresholds.</desc>
 <style>
     svg{--bg:#fbfcfe;--text:#172c3d;--muted:#536779;--panel:#e2e8ef;background:var(--bg);font-family:Arial,Helvetica,sans-serif}
     .title{font-size:32px;font-weight:700;letter-spacing:1px;fill:var(--text)}
@@ -18,87 +18,83 @@
     </style>
 <rect width="1480" height="870" fill="var(--bg)"/>
 <text class="title" x="48" y="52">GENESIS / BULK ATAC</text>
-<text class="subtitle" x="48" y="85">Experimental synthetic PE workflow · explicit policies · no plant pass/fail thresholds</text>
-<path id="route-0" class="line" stroke="#087f8c" d="M 140 330 L 600 330"><title>Align, mark duplicates, then apply explicit fragment policy</title></path>
-<path class="flow" style="animation-delay:-0s" d="M 140 330 L 600 330"/>
-<path id="route-1" class="line" stroke="#ce6030" d="M 600 330 L 1060 330"><title>Unshifted usable fragments feed BAMPE peaks and enrichment</title></path>
-<path class="flow" style="animation-delay:-1s" d="M 600 330 L 1060 330"/>
-<path id="route-2" class="line" stroke="#9260b7" d="M 140 330 L 241 330 Q 255 330 255 316 L 255 194 Q 255 180 269 180 L 356 180 Q 370 180 384 180 L 1290 180"><title>Raw mate FastQC reports</title></path>
-<path class="flow" style="animation-delay:-2s" d="M 140 330 L 241 330 Q 255 330 255 316 L 255 194 Q 255 180 269 180 L 356 180 Q 370 180 384 180 L 1290 180"/>
-<path id="route-3" class="line" stroke="#9260b7" d="M 370 330 L 471 330 Q 485 330 485 316 L 485 194 Q 485 180 499 180 L 1290 180"><title>Raw samtools metrics</title></path>
-<path class="flow" style="animation-delay:-3s" d="M 370 330 L 471 330 Q 485 330 485 316 L 485 194 Q 485 180 499 180 L 1290 180"/>
-<path id="route-4" class="line" stroke="#9260b7" d="M 600 330 L 701 330 Q 715 330 715 316 L 715 194 Q 715 180 729 180 L 1290 180"><title>Usable samtools metrics</title></path>
-<path class="flow" style="animation-delay:-4s" d="M 600 330 L 701 330 Q 715 330 715 316 L 715 194 Q 715 180 729 180 L 1290 180"/>
-<path id="route-5" class="line" stroke="#ce6030" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 556 Q 715 570 729 570 L 931 570 Q 945 570 945 556 L 945 344 Q 945 330 959 330 L 1060 330"><title>Fragments and peaks jointly feed enrichment</title></path>
-<path class="flow" style="animation-delay:-5s" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 556 Q 715 570 729 570 L 931 570 Q 945 570 945 556 L 945 344 Q 945 330 959 330 L 1060 330"/>
-<path id="route-6" class="line" stroke="#9260b7" d="M 1060 330 L 1161 330 Q 1175 330 1175 316 L 1175 194 Q 1175 180 1189 180 L 1290 180"><title>Report waits for enrichment completion</title></path>
-<path class="flow" style="animation-delay:-6s" d="M 1060 330 L 1161 330 Q 1175 330 1175 316 L 1175 194 Q 1175 180 1189 180 L 1290 180"/>
-<path id="route-7" class="line" stroke="#4169b1" d="M 1290 180 L 1391 180 Q 1405 180 1405 194 L 1405 316 Q 1405 330 1391 330 L 1290 330"><title>Provenance completes after the report</title></path>
-<path class="flow" style="animation-delay:-7s" d="M 1290 180 L 1391 180 Q 1405 180 1405 194 L 1405 316 Q 1405 330 1391 330 L 1290 330"/>
-<path id="route-8" class="line" stroke="#4169b1" d="M 140 690 L 241 690 Q 255 690 255 676 L 255 344 Q 255 330 269 330 L 370 330"><title>Exact reference feeds alignment</title></path>
-<path class="flow" style="animation-delay:-8s" d="M 140 690 L 241 690 Q 255 690 255 676 L 255 344 Q 255 330 269 330 L 370 330"/>
-<path id="route-9" class="line" stroke="#4169b1" d="M 370 510 L 471 510 Q 485 510 485 496 L 485 344 Q 485 330 499 330 L 600 330"><title>Explicit MAPQ, organelles and duplicate policy</title></path>
-<path class="flow" style="animation-delay:-9s" d="M 370 510 L 471 510 Q 485 510 485 496 L 485 344 Q 485 330 499 330 L 600 330"/>
-<path id="route-10" class="line" stroke="#438362" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 496 Q 715 510 701 510 L 600 510"><title>Separate shifted cut-site representation</title></path>
-<path class="flow" style="animation-delay:-10s" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 496 Q 715 510 701 510 L 600 510"/>
-<path id="route-11" class="line" stroke="#9260b7" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 676 Q 715 690 729 690 L 830 690"><title>Usable fragment distributions and complexity</title></path>
-<path class="flow" style="animation-delay:-11s" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 676 Q 715 690 729 690 L 830 690"/>
-<path id="route-12" class="line" stroke="#4169b1" d="M 1060 690 L 1161 690 Q 1175 690 1175 676 L 1175 344 Q 1175 330 1161 330 L 1060 330"><title>Explicit TSS positions support diagnostic enrichment</title></path>
-<path class="flow" style="animation-delay:-0s" d="M 1060 690 L 1161 690 Q 1175 690 1175 676 L 1175 344 Q 1175 330 1161 330 L 1060 330"/>
-<g id="reads"><title>Raw PE mates: Synthetic adapter-free</title>
+<text class="subtitle" x="48" y="85">Paired-end plant libraries · explicit policies · separate biological replicates</text>
+<path id="route-0" class="line" stroke="#087f8c" d="M 140 330 L 830 330"><title>Acquire, apply adapter policy, align and select fragments</title></path>
+<path class="flow" style="animation-delay:-0s" d="M 140 330 L 830 330"/>
+<path id="route-1" class="line" stroke="#ce6030" d="M 830 330 L 1290 330"><title>Unshifted fragments feed BAMPE peaks and enrichment</title></path>
+<path class="flow" style="animation-delay:-1s" d="M 830 330 L 1290 330"/>
+<path id="route-2" class="line" stroke="#9260b7" d="M 140 330 L 241 330 Q 255 330 255 316 L 255 194 Q 255 180 241 180 L 154 180 Q 140 180 154 180 L 1290 180"><title>FastQC on each raw mate</title></path>
+<path class="flow" style="animation-delay:-2s" d="M 140 330 L 241 330 Q 255 330 255 316 L 255 194 Q 255 180 241 180 L 154 180 Q 140 180 154 180 L 1290 180"/>
+<path id="route-3" class="line" stroke="#9260b7" d="M 600 330 L 701 330 Q 715 330 715 316 L 715 194 Q 715 180 729 180 L 1290 180"><title>Raw samtools metrics</title></path>
+<path class="flow" style="animation-delay:-3s" d="M 600 330 L 701 330 Q 715 330 715 316 L 715 194 Q 715 180 729 180 L 1290 180"/>
+<path id="route-4" class="line" stroke="#9260b7" d="M 830 330 L 931 330 Q 945 330 945 316 L 945 194 Q 945 180 959 180 L 1290 180"><title>Usable samtools metrics</title></path>
+<path class="flow" style="animation-delay:-4s" d="M 830 330 L 931 330 Q 945 330 945 316 L 945 194 Q 945 180 959 180 L 1290 180"/>
+<path id="route-5" class="line" stroke="#9260b7" d="M 1290 330 L 1391 330 Q 1405 330 1405 316 L 1405 194 Q 1405 180 1391 180 L 1290 180"><title>Report includes enrichment completion</title></path>
+<path class="flow" style="animation-delay:-5s" d="M 1290 330 L 1391 330 Q 1405 330 1405 316 L 1405 194 Q 1405 180 1391 180 L 1290 180"/>
+<path id="route-6" class="line" stroke="#4169b1" d="M 370 690 L 471 690 Q 485 690 485 676 L 485 344 Q 485 330 499 330 L 600 330"><title>Checksum-identified reference index</title></path>
+<path class="flow" style="animation-delay:-6s" d="M 370 690 L 471 690 Q 485 690 485 676 L 485 344 Q 485 330 499 330 L 600 330"/>
+<path id="route-7" class="line" stroke="#9260b7" d="M 830 330 L 729 330 Q 715 330 715 344 L 715 496 Q 715 510 701 510 L 600 510"><title>Separate organellar counts before exclusion</title></path>
+<path class="flow" style="animation-delay:-7s" d="M 830 330 L 729 330 Q 715 330 715 344 L 715 496 Q 715 510 701 510 L 600 510"/>
+<path id="route-8" class="line" stroke="#438362" d="M 830 330 L 931 330 Q 945 330 945 344 L 945 496 Q 945 510 931 510 L 830 510"><title>Shifted cut sites remain separate from fragment peaks</title></path>
+<path class="flow" style="animation-delay:-8s" d="M 830 330 L 931 330 Q 945 330 945 344 L 945 496 Q 945 510 931 510 L 830 510"/>
+<path id="route-9" class="line" stroke="#9260b7" d="M 1060 330 L 1161 330 Q 1175 330 1175 344 L 1175 676 Q 1175 690 1161 690 L 1060 690"><title>Compare independently called library peaks</title></path>
+<path class="flow" style="animation-delay:-9s" d="M 1060 330 L 1161 330 Q 1175 330 1175 344 L 1175 676 Q 1175 690 1161 690 L 1060 690"/>
+<path id="route-10" class="line" stroke="#4169b1" d="M 1290 690 L 1391 690 Q 1405 690 1405 676 L 1405 344 Q 1405 330 1391 330 L 1290 330"><title>Annotation defines strand-aware TSS windows</title></path>
+<path class="flow" style="animation-delay:-10s" d="M 1290 690 L 1391 690 Q 1405 690 1405 676 L 1405 344 Q 1405 330 1391 330 L 1290 330"/>
+<g id="ATAC_ACQUIRE"><title>Raw reads: Verified PE lanes</title>
 <circle class="station" cx="140" cy="330" r="9" stroke="#087f8c"/>
-<text class="label" text-anchor="middle" x="140" y="290">Raw PE mates</text>
-<text class="detail" text-anchor="middle" x="140" y="313">Synthetic adapter-free</text></g>
-<g id="ALIGN_AND_MARK"><title>Align + mark: bwa-mem2 / samtools</title>
+<text class="label" text-anchor="middle" x="140" y="290">Raw reads</text>
+<text class="detail" text-anchor="middle" x="140" y="313">Verified PE lanes</text></g>
+<g id="ATAC_ADAPTERS"><title>Adapter policy: Explicit per library</title>
 <circle class="station" cx="370" cy="330" r="9" stroke="#087f8c"/>
-<text class="label" text-anchor="middle" x="370" y="290">Align + mark</text>
-<text class="detail" text-anchor="middle" x="370" y="313">bwa-mem2 / samtools</text></g>
-<g id="FRAGMENTS"><title>Filter + fragments: Explicit MAPQ / contigs</title>
+<text class="label" text-anchor="middle" x="370" y="290">Adapter policy</text>
+<text class="detail" text-anchor="middle" x="370" y="313">Explicit per library</text></g>
+<g id="ATAC_ALIGN"><title>Align + mark: bwa-mem2 / samtools</title>
 <circle class="station" cx="600" cy="330" r="9" stroke="#087f8c"/>
-<text class="label" text-anchor="middle" x="600" y="290">Filter + fragments</text>
-<text class="detail" text-anchor="middle" x="600" y="313">Explicit MAPQ / contigs</text></g>
-<g id="PEAKS"><title>MACS3 BAMPE: Unshifted fragments</title>
-<circle class="station" cx="830" cy="330" r="9" stroke="#ce6030"/>
-<text class="label" text-anchor="middle" x="830" y="290">MACS3 BAMPE</text>
-<text class="detail" text-anchor="middle" x="830" y="313">Unshifted fragments</text></g>
-<g id="ENRICHMENT"><title>Enrichment: Fragment FRiP + toy TSS</title>
+<text class="label" text-anchor="middle" x="600" y="290">Align + mark</text>
+<text class="detail" text-anchor="middle" x="600" y="313">bwa-mem2 / samtools</text></g>
+<g id="ATAC_FRAGMENTS"><title>Fragments: MAPQ / duplicates</title>
+<circle class="station" cx="830" cy="330" r="9" stroke="#087f8c"/>
+<text class="label" text-anchor="middle" x="830" y="290">Fragments</text>
+<text class="detail" text-anchor="middle" x="830" y="313">MAPQ / duplicates</text></g>
+<g id="ATAC_PEAKS"><title>MACS3 peaks: Unshifted BAMPE</title>
 <circle class="station" cx="1060" cy="330" r="9" stroke="#ce6030"/>
-<text class="label" text-anchor="middle" x="1060" y="290">Enrichment</text>
-<text class="detail" text-anchor="middle" x="1060" y="313">Fragment FRiP + toy TSS</text></g>
-<g id="PROVENANCE"><title>Provenance: Inputs + policies + SHA</title>
-<circle class="station" cx="1290" cy="330" r="9" stroke="#4169b1"/>
-<text class="label" text-anchor="middle" x="1290" y="290">Provenance</text>
-<text class="detail" text-anchor="middle" x="1290" y="313">Inputs + policies + SHA</text></g>
-<g id="RAW_FASTQC"><title>FastQC × 2: One task per mate</title>
-<circle class="station" cx="370" cy="180" r="9" stroke="#9260b7"/>
-<text class="label" text-anchor="middle" x="370" y="140">FastQC × 2</text>
-<text class="detail" text-anchor="middle" x="370" y="163">One task per mate</text></g>
-<g id="REPORT"><title>MultiQC: Raw + usable QC</title>
+<text class="label" text-anchor="middle" x="1060" y="290">MACS3 peaks</text>
+<text class="detail" text-anchor="middle" x="1060" y="313">Unshifted BAMPE</text></g>
+<g id="ATAC_ENRICHMENT"><title>Enrichment: FRiP + TSS profile</title>
+<circle class="station" cx="1290" cy="330" r="9" stroke="#ce6030"/>
+<text class="label" text-anchor="middle" x="1290" y="290">Enrichment</text>
+<text class="detail" text-anchor="middle" x="1290" y="313">FRiP + TSS profile</text></g>
+<g id="ATAC_FASTQC"><title>FastQC × 2: Raw mates unchanged</title>
+<circle class="station" cx="140" cy="180" r="9" stroke="#9260b7"/>
+<text class="label" text-anchor="middle" x="140" y="140">FastQC × 2</text>
+<text class="detail" text-anchor="middle" x="140" y="163">Raw mates unchanged</text></g>
+<g id="ATAC_REPORT"><title>MultiQC: Raw + usable QC</title>
 <circle class="station" cx="1290" cy="180" r="9" stroke="#9260b7"/>
 <text class="label" text-anchor="middle" x="1290" y="140">MultiQC</text>
 <text class="detail" text-anchor="middle" x="1290" y="163">Raw + usable QC</text></g>
-<g id="reference"><title>Exact FASTA: Explicit assembly</title>
-<circle class="station" cx="140" cy="690" r="9" stroke="#4169b1"/>
-<text class="label" text-anchor="middle" x="140" y="650">Exact FASTA</text>
-<text class="detail" text-anchor="middle" x="140" y="673">Explicit assembly</text></g>
-<g id="organelles"><title>Analysis policy: Mark, then exclude dup.</title>
-<circle class="station" cx="370" cy="510" r="9" stroke="#4169b1"/>
-<text class="label" text-anchor="middle" x="370" y="470">Analysis policy</text>
-<text class="detail" text-anchor="middle" x="370" y="493">Mark, then exclude dup.</text></g>
-<g id="cuts"><title>Tn5 cut sites: +4 / −5 convention</title>
-<circle class="station" cx="600" cy="510" r="9" stroke="#438362"/>
-<text class="label" text-anchor="middle" x="600" y="470">Tn5 cut sites</text>
-<text class="detail" text-anchor="middle" x="600" y="493">+4 / −5 convention</text></g>
-<g id="complexity"><title>Fragment QC: Lengths / NRF / PBC</title>
-<circle class="station" cx="830" cy="690" r="9" stroke="#9260b7"/>
-<text class="label" text-anchor="middle" x="830" y="650">Fragment QC</text>
-<text class="detail" text-anchor="middle" x="830" y="673">Lengths / NRF / PBC</text></g>
-<g id="tss"><title>TSS positions: BED0 + strand</title>
-<circle class="station" cx="1060" cy="690" r="9" stroke="#4169b1"/>
-<text class="label" text-anchor="middle" x="1060" y="650">TSS positions</text>
-<text class="detail" text-anchor="middle" x="1060" y="673">BED0 + strand</text></g>
+<g id="ATAC_REFERENCE"><title>Exact reference: FASTA SHA256 + index</title>
+<circle class="station" cx="370" cy="690" r="9" stroke="#4169b1"/>
+<text class="label" text-anchor="middle" x="370" y="650">Exact reference</text>
+<text class="detail" text-anchor="middle" x="370" y="673">FASTA SHA256 + index</text></g>
+<g id="organelles"><title>Organelle counts: Mitochondria / plastids</title>
+<circle class="station" cx="600" cy="510" r="9" stroke="#9260b7"/>
+<text class="label" text-anchor="middle" x="600" y="470">Organelle counts</text>
+<text class="detail" text-anchor="middle" x="600" y="493">Mitochondria / plastids</text></g>
+<g id="ATAC_TRACKS"><title>Tn5 cut sites: BEDGraph + bigWig</title>
+<circle class="station" cx="830" cy="510" r="9" stroke="#438362"/>
+<text class="label" text-anchor="middle" x="830" y="470">Tn5 cut sites</text>
+<text class="detail" text-anchor="middle" x="830" y="493">BEDGraph + bigWig</text></g>
+<g id="replicates"><title>Library comparison: Replicates stay separate</title>
+<circle class="station" cx="1060" cy="690" r="9" stroke="#9260b7"/>
+<text class="label" text-anchor="middle" x="1060" y="650">Library comparison</text>
+<text class="detail" text-anchor="middle" x="1060" y="673">Replicates stay separate</text></g>
+<g id="tss"><title>TSS positions: Versioned annotation</title>
+<circle class="station" cx="1290" cy="690" r="9" stroke="#4169b1"/>
+<text class="label" text-anchor="middle" x="1290" y="650">TSS positions</text>
+<text class="detail" text-anchor="middle" x="1290" y="673">Versioned annotation</text></g>
 <path d="M48 762 H1432" stroke="var(--panel)" stroke-width="2"/>
-<text class="note" x="48" y="798">Duplicate marking measures reads; analysis then excludes marked duplicates and explicitly named organelles.</text>
-<text class="note" x="48" y="823">BAMPE peaks use unshifted fragments. Tn5 cut sites are a separate output. TSS scoring is a toy diagnostic.</text>
-<text class="note" x="48" y="848">One synthetic library; no trimming, replicate pooling or IDR. FASTQs and BAMs stay intermediate.</text>
-<metadata>Genesis diagram schema 2; experimental/atac/main.nf SHA256 9297dda6e6bc17915160682f4f5508b2dd2f61925b992cc67910831d71c9e408; schematic animation.</metadata></svg>
+<text class="note" x="48" y="798">Duplicate marking measures duplication. The sample sheet explicitly selects retention or exclusion.</text>
+<text class="note" x="48" y="823">BAMPE peaks use unshifted fragments. Cut sites use +4 / −5 shifts; TSS profiles use strand-aware windows.</text>
+<text class="note" x="48" y="848">Adapter handling is explicit. No biological replicate pooling or automatic plant QC thresholds.</text>
+<metadata>Genesis diagram schema 2; workflows/atac.nf SHA256 9e7b4d2b0b71f7c95f3508449bf7793c5f69d7942dda81cde443053d03b0e16e; modules/atac/processes.nf SHA256 67a12a236390baa8d5e6c3425f07ac3d14287270eaf8082f3f11784621f41af9; schematic animation.</metadata></svg>

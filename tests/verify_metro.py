@@ -21,7 +21,7 @@ def main() -> None:
             [sys.executable, str(ROOT / "docs/diagrams/render_metro.py"), "--output-dir", folder],
             check=True,
         )
-        assert len(list(out.glob("*.svg"))) == 5
+        assert len(list(out.glob("*.svg"))) == 7
         for generated in out.glob("*.svg"):
             source = ROOT / "docs/images" / generated.name
             assert generated.read_bytes() == source.read_bytes(), f"Stale map: {source}"
@@ -37,7 +37,7 @@ def main() -> None:
             assert "prefers-color-scheme:dark" in text
         for stem, workflow in [
             ("genesis", "main.nf"),
-            ("genesis_atac", "experimental/atac/main.nf"),
+            ("genesis_atac", "modules/atac/processes.nf"),
         ]:
             static = ET.parse(out / f"{stem}_metro_map.svg").getroot()
             animated = ET.parse(out / f"{stem}_metro_map_animated.svg").getroot()
@@ -49,7 +49,7 @@ def main() -> None:
             code = (ROOT / workflow).read_text()
             expected = (
                 set(re.findall(r"process (\w+)\s*\{", code))
-                if "experimental" in workflow
+                if "atac" in workflow
                 else set(re.findall(r"include\s*\{\s*(\w+)\s*\}\s*from './modules/", code))
             )
             stations = {g.attrib["id"] for g in static.findall("s:g", NS)}
@@ -58,7 +58,7 @@ def main() -> None:
                 hashlib.sha256(code.encode()).hexdigest()
                 in (out / f"{stem}_metro_map.svg").read_text()
             )
-    print("PASS: five deterministic accessible maps; actual DAP/ATAC process coverage")
+    print("PASS: seven deterministic accessible maps; actual DAP/ATAC process coverage")
 
 
 if __name__ == "__main__":

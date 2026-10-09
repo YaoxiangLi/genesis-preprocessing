@@ -126,42 +126,61 @@ DAP_EDGES = [
     edge("qc", [(600,510),(485,510),(485,105),(1405,105),(1405,180),(1290,180)], "Metadata joins run-level reporting"),
 ]
 ATAC_NODES = [
-    ("reads",140,330,"Raw PE mates","Synthetic adapter-free","reads"),
-    ("ALIGN_AND_MARK",370,330,"Align + mark","bwa-mem2 / samtools","reads"),
-    ("FRAGMENTS",600,330,"Filter + fragments","Explicit MAPQ / contigs","reads"),
-    ("PEAKS",830,330,"MACS3 BAMPE","Unshifted fragments","peaks"),
-    ("ENRICHMENT",1060,330,"Enrichment","Fragment FRiP + toy TSS","peaks"),
-    ("PROVENANCE",1290,330,"Provenance","Inputs + policies + SHA","reference"),
-    ("RAW_FASTQC",370,180,"FastQC × 2","One task per mate","qc"),
-    ("REPORT",1290,180,"MultiQC","Raw + usable QC","qc"),
-    ("reference",140,690,"Exact FASTA","Explicit assembly","reference"),
-    ("organelles",370,510,"Analysis policy","Mark, then exclude dup.","reference"),
-    ("cuts",600,510,"Tn5 cut sites","+4 / −5 convention","tracks"),
-    ("complexity",830,690,"Fragment QC","Lengths / NRF / PBC","qc"),
-    ("tss",1060,690,"TSS positions","BED0 + strand","reference"),
+    ("ATAC_ACQUIRE",140,330,"Raw reads","Verified PE lanes","reads"),
+    ("ATAC_ADAPTERS",370,330,"Adapter policy","Explicit per library","reads"),
+    ("ATAC_ALIGN",600,330,"Align + mark","bwa-mem2 / samtools","reads"),
+    ("ATAC_FRAGMENTS",830,330,"Fragments","MAPQ / duplicates","reads"),
+    ("ATAC_PEAKS",1060,330,"MACS3 peaks","Unshifted BAMPE","peaks"),
+    ("ATAC_ENRICHMENT",1290,330,"Enrichment","FRiP + TSS profile","peaks"),
+    ("ATAC_FASTQC",140,180,"FastQC × 2","Raw mates unchanged","qc"),
+    ("ATAC_REPORT",1290,180,"MultiQC","Raw + usable QC","qc"),
+    ("ATAC_REFERENCE",370,690,"Exact reference","FASTA SHA256 + index","reference"),
+    ("organelles",600,510,"Organelle counts","Mitochondria / plastids","qc"),
+    ("ATAC_TRACKS",830,510,"Tn5 cut sites","BEDGraph + bigWig","tracks"),
+    ("replicates",1060,690,"Library comparison","Replicates stay separate","qc"),
+    ("tss",1290,690,"TSS positions","Versioned annotation","reference"),
 ]
 ATAC_EDGES = [
-    edge("reads",[(140,330),(600,330)],"Align, mark duplicates, then apply explicit fragment policy"),
-    edge("peaks",[(600,330),(1060,330)],"Unshifted usable fragments feed BAMPE peaks and enrichment"),
-    edge("qc",[(140,330),(255,330),(255,180),(370,180),(1290,180)],"Raw mate FastQC reports"),
-    edge("qc",[(370,330),(485,330),(485,180),(1290,180)],"Raw samtools metrics"),
-    edge("qc",[(600,330),(715,330),(715,180),(1290,180)],"Usable samtools metrics"),
-    edge("peaks",[(600,330),(715,330),(715,570),(945,570),(945,330),(1060,330)],"Fragments and peaks jointly feed enrichment"),
-    edge("qc",[(1060,330),(1175,330),(1175,180),(1290,180)],"Report waits for enrichment completion"),
-    edge("reference",[(1290,180),(1405,180),(1405,330),(1290,330)],"Provenance completes after the report"),
-    edge("reference",[(140,690),(255,690),(255,330),(370,330)],"Exact reference feeds alignment"),
-    edge("reference",[(370,510),(485,510),(485,330),(600,330)],"Explicit MAPQ, organelles and duplicate policy"),
-    edge("tracks",[(600,330),(715,330),(715,510),(600,510)],"Separate shifted cut-site representation"),
-    edge("qc",[(600,330),(715,330),(715,690),(830,690)],"Usable fragment distributions and complexity"),
-    edge("reference",[(1060,690),(1175,690),(1175,330),(1060,330)],"Explicit TSS positions support diagnostic enrichment"),
+    edge("reads",[(140,330),(830,330)],"Acquire, apply adapter policy, align and select fragments"),
+    edge("peaks",[(830,330),(1290,330)],"Unshifted fragments feed BAMPE peaks and enrichment"),
+    edge("qc",[(140,330),(255,330),(255,180),(140,180),(1290,180)],"FastQC on each raw mate"),
+    edge("qc",[(600,330),(715,330),(715,180),(1290,180)],"Raw samtools metrics"),
+    edge("qc",[(830,330),(945,330),(945,180),(1290,180)],"Usable samtools metrics"),
+    edge("qc",[(1290,330),(1405,330),(1405,180),(1290,180)],"Report includes enrichment completion"),
+    edge("reference",[(370,690),(485,690),(485,330),(600,330)],"Checksum-identified reference index"),
+    edge("qc",[(830,330),(715,330),(715,510),(600,510)],"Separate organellar counts before exclusion"),
+    edge("tracks",[(830,330),(945,330),(945,510),(830,510)],"Shifted cut sites remain separate from fragment peaks"),
+    edge("qc",[(1060,330),(1175,330),(1175,690),(1060,690)],"Compare independently called library peaks"),
+    edge("reference",[(1290,690),(1405,690),(1405,330),(1290,330)],"Annotation defines strand-aware TSS windows"),
+]
+CONTROL_NODES = [
+    ("inputs",140,330,"Datasets","Exact references + policy","reads"),
+    ("controller",370,330,"Controller","Queue + durable status","reads"),
+    ("local",830,180,"Local Linux","Default Docker execution","reads"),
+    ("scheduler",830,330,"Cluster scheduler","Slurm / PBS / LSF / SGE","reference"),
+    ("ssh",830,510,"SSH workers","Existing verified access","tracks"),
+    ("outputs",1290,330,"Results","QC + provenance","peaks"),
+    ("monitor",1060,690,"Monitor","Read-only status page","qc"),
+    ("review",370,690,"Human review","Investigate + retry","spp"),
+    ("retry",600,180,"Bounded retries","Confirmed transient errors","qc"),
+]
+CONTROL_EDGES = [
+    edge("reads",[(140,330),(370,330),(485,330),(485,180),(830,180)],"Default local execution"),
+    edge("reference",[(370,330),(830,330)],"Native scheduler submits tasks to managed compute nodes"),
+    edge("tracks",[(370,330),(485,330),(485,510),(830,510)],"Independent Linux workers run isolated datasets over existing SSH"),
+    edge("reads",[(830,180),(1175,180),(1175,330),(1290,330)],"Local results"),
+    edge("reference",[(830,330),(1290,330)],"Cluster results"),
+    edge("tracks",[(830,510),(1175,510),(1175,330),(1290,330)],"Worker results"),
+    edge("qc",[(1290,330),(1405,330),(1405,690),(1060,690),(370,690)],"Status and unresolved issues flow to human review"),
+    edge("spp",[(370,690),(255,690),(255,330),(370,330)],"Explicit resolution returns confirmed failed datasets to the queue"),
 ]
 ROAD_NODES = [
     ("manifest",140,330,"Manifest","Biological library IDs","reads"),
     ("acquisition",370,330,"Acquisition + QC","Original reads retained","reads"),
     ("dap",600,180,"DAP-seq","Implemented","reads"),
     ("dap_outputs",1060,180,"Peaks + quantification","Per treatment","reads"),
-    ("bulk_atac",600,330,"Bulk ATAC","Available experimental","tracks"),
-    ("bulk_outputs",1060,330,"Fragments + ATAC QC","Synthetic PE validated","tracks"),
+    ("bulk_atac",600,330,"Bulk ATAC","Paired-end libraries","tracks"),
+    ("bulk_outputs",1060,330,"Fragments + ATAC QC","Separate biological replicates","tracks"),
     ("single_cell",600,510,"sc/snATAC","Planned barcode route","future"),
     ("cells",1060,510,"Cells + fragments","Specified contract","future"),
     ("pseudobulk",1290,510,"Pseudobulks","Type × replicate","future"),
@@ -172,7 +191,7 @@ ROAD_NODES = [
 ]
 ROAD_EDGES = [
     edge("reads",[(140,330),(370,330),(485,330),(485,180),(600,180),(1060,180)],"Implemented DAP route"),
-    edge("tracks",[(370,330),(600,330),(1060,330)],"Available experimental bulk ATAC route"),
+    edge("tracks",[(370,330),(600,330),(1060,330)],"Paired-end libraries bulk ATAC route"),
     edge("future",[(370,330),(485,330),(485,510),(600,510),(1060,510),(1290,510)],"Planned barcode processing and pseudobulk",True),
     edge("reference",[(140,180),(255,180),(255,330),(370,330)],"Versioned registry contract",True),
     edge("future",[(140,690),(600,690),(945,690),(945,510),(1060,510)],"Modality-specific QC with shared annotation provenance",True),
@@ -193,12 +212,12 @@ def main() -> None:
           "Controls receive QC and tracks; treatments receive peaks and quantification. FASTQs and BAMs stay intermediate.",
           "Routes summarize data dependencies, not runtime. Crossings without a station do not join channels."],
          ["main.nf"]),
-        ("_atac", "GENESIS / BULK ATAC", "Experimental synthetic PE workflow · explicit policies · no plant pass/fail thresholds",
+        ("_atac", "GENESIS / BULK ATAC", "Paired-end plant libraries · explicit policies · separate biological replicates",
          ATAC_NODES, ATAC_EDGES,
-         ["Duplicate marking measures reads; analysis then excludes marked duplicates and explicitly named organelles.",
-          "BAMPE peaks use unshifted fragments. Tn5 cut sites are a separate output. TSS scoring is a toy diagnostic.",
-          "One synthetic library; no trimming, replicate pooling or IDR. FASTQs and BAMs stay intermediate."],
-         ["experimental/atac/main.nf"]),
+         ["Duplicate marking measures duplication. The sample sheet explicitly selects retention or exclusion.",
+          "BAMPE peaks use unshifted fragments. Cut sites use +4 / −5 shifts; TSS profiles use strand-aware windows.",
+          "Adapter handling is explicit. No biological replicate pooling or automatic plant QC thresholds."],
+         ["workflows/atac.nf", "modules/atac/processes.nf"]),
     ]:
         for animated, suffix in [(False, ""), (True, "_animated")]:
             (out / f"genesis{assay}_metro_map{suffix}.svg").write_text(
@@ -206,11 +225,19 @@ def main() -> None:
     (out / "genesis_architecture_metro_map.svg").write_text(document(
         "GENESIS / ARCHITECTURE", "Available assay routes and future contracts · biological replicates remain separate",
         ROAD_NODES, ROAD_EDGES,
-        ["Solid: available processing, with ATAC explicitly experimental. Dashed: contracts or planned integration.",
+        ["Solid: available assay processing. Dashed: contracts or planned integration.",
          "RNA and ATAC retain separate QC and inclusion decisions. No implicit biological replicate pooling.",
          "Plant biological thresholds remain UNSPECIFIED. Barcode processing and model export are not production workflows."],
-        ["main.nf", "experimental/atac/main.nf"]))
-    print("Rendered 5 Genesis SVG maps")
+        ["main.nf", "workflows/atac.nf"]))
+    for animated, suffix in [(False, ""), (True, "_animated")]:
+        (out / f"genesis_execution{suffix}.svg").write_text(document(
+            "GENESIS / RUN AND REVIEW", "Start on one Linux server. Add managed clusters or independent workers when needed.",
+            CONTROL_NODES, CONTROL_EDGES,
+            ["Authentication stays under site control. No keys, permissions or cluster services are changed by Genesis.",
+             "Healthy datasets continue. Failed datasets enter review; unreachable workers are never blindly resubmitted.",
+             "Cluster profiles require site validation. Monitoring reports problems; people resolve data and scientific questions."],
+            ["conf/execution.config"], animated))
+    print("Rendered 7 Genesis SVG maps")
 
 
 if __name__ == "__main__":
