@@ -55,7 +55,9 @@ organelle lists explicitly declare none. Do not omit known organellar contigs.
 
 All local inputs are hashed before execution. Reference index tasks use deep
 content caching. Changes to a run's sheet or registry require a new output
-folder, preserving earlier results. The two-stage cache used by DAP-seq is
+folder, preserving earlier results. Task helpers are retained in immutable
+source bundles with an explicit SHA256 cache input; changing helper code
+invalidates affected tasks. The two-stage cache used by DAP-seq is
 separate; ATAC indexes remain in their Nextflow work directory.
 
 ## Analysis and metrics

@@ -9,6 +9,7 @@ import json
 import shutil
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from genesis_tools.atac.inputs import FIELDS, digest
 from genesis_tools.atac.run import execute, prepare
@@ -81,7 +82,15 @@ def main() -> None:
         writer.writerows(rows)
     before = {str(p): digest(p) for p in fixture.rglob("*") if p.is_file()}
     run = folder / "run"
-    assert execute(sheet, registry, run) == 0
+    checkout = folder / "checkout"
+    for name in ("conf", "workflows", "modules/atac", "genesis_tools/src"):
+        shutil.copytree(ROOT / name, checkout / name, ignore=shutil.ignore_patterns("__pycache__"))
+
+    def invoke(*, resume: bool = False) -> int:
+        with patch("genesis_tools.atac.run.ROOT", checkout):
+            return execute(sheet, registry, run, resume=resume)
+
+    assert invoke() == 0
     output = run / "output"
     trace = list(csv.DictReader((output / "trace.tsv").open(), delimiter="\t"))
     assert len(trace) == 21 and all(r["status"] == "COMPLETED" for r in trace), trace
@@ -104,11 +113,31 @@ def main() -> None:
     assert len(comparisons) == 1 and comparisons[0]["peak_bp_jaccard"] == 1
     assert not comparisons[0]["same_biological_replicate"]
     for repetition in (1, 2):
-        assert execute(sheet, registry, run, resume=True) == 0
+        assert invoke(resume=True) == 0
         trace = list(csv.DictReader((output / "trace.tsv").open(), delimiter="\t"))
         assert len(trace) == 21 and all(r["status"] == "CACHED" for r in trace), trace
         shutil.copy2(output / "trace.tsv", folder / f"resume-{repetition}-trace.tsv")
         assert scientific == {p: digest(Path(p)) for p in scientific}
+    # Only the isolated checkout is changed. Production helpers and inputs stay untouched.
+    previous_identity = json.loads((run / "provenance.json").read_text())["source_bundle_sha256"]
+    helper = checkout / "genesis_tools/src/genesis_tools/atac/stages.py"
+    old_source = helper.read_bytes()
+    helper.write_bytes(old_source + b"\n# Isolated helper revision for cache invalidation.\n")
+    assert invoke(resume=True) == 0
+    changed_identity = json.loads((run / "provenance.json").read_text())["source_bundle_sha256"]
+    assert previous_identity != changed_identity
+    old_bundle = run / "inputs" / f"code-{previous_identity}"
+    assert (old_bundle / "genesis_tools/atac/stages.py").read_bytes() == old_source
+    trace = list(csv.DictReader((output / "trace.tsv").open(), delimiter="\t"))
+    helpers = {"ATAC_ACQUIRE", "ATAC_FRAGMENTS", "ATAC_ENRICHMENT", "ATAC_REPORT"}
+    assert all(r["status"] == "COMPLETED" for r in trace if r["name"].split()[0] in helpers)
+    assert sum(r["name"].split()[0] in helpers for r in trace) == 8
+    shutil.copy2(output / "trace.tsv", folder / "changed-helper-trace.tsv")
+    assert scientific == {p: digest(Path(p)) for p in scientific}
+    assert invoke(resume=True) == 0
+    trace = list(csv.DictReader((output / "trace.tsv").open(), delimiter="\t"))
+    assert len(trace) == 21 and all(r["status"] == "CACHED" for r in trace)
+    shutil.copy2(output / "trace.tsv", folder / "changed-helper-stable-trace.tsv")
     assert before == {p: digest(Path(p)) for p in before}
     original = (run / "inputs/first.json").read_bytes()
     sheet.write_text(sheet.read_text().replace("\t30\t", "\t10\t"))
@@ -121,7 +150,7 @@ def main() -> None:
     assert (run / "inputs/first.json").read_bytes() == original
     print(
         "PASS: two libraries, technical lanes, 21 cached tasks twice; "
-        "raw/scientific outputs unchanged"
+        "raw/scientific outputs unchanged; changed helpers invalidate tasks"
     )
     if not args.keep:
         shutil.rmtree(folder)

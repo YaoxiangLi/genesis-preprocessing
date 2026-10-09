@@ -8,6 +8,7 @@ process ATAC_ACQUIRE {
     input:
     tuple val(meta), path(manifest), path(localReads, stageAs: 'inputs??/*')
     path code
+    val sourceHash
     output:
     tuple val(meta), path('raw_R1.fastq.gz'), path('raw_R2.fastq.gz'), emit: reads
     tuple val(meta), path('acquisition.json'), emit: provenance
@@ -110,6 +111,7 @@ process ATAC_FRAGMENTS {
     input:
     tuple val(meta), path(bam), path(manifest)
     path code
+    val sourceHash
     output:
     tuple val(meta), path('usable.bam'), emit: bam
     tuple val(meta), path('fragments.bed.gz'), path('fragments.bed.gz.tbi'), path('chrom.sizes'), emit: fragments
@@ -144,6 +146,7 @@ process ATAC_ENRICHMENT {
     input:
     tuple val(meta), path(bam), path(fragments), path(sizes), path(peaks), path(tss, stageAs: 'tss.bed')
     path code
+    val sourceHash
     output:
     tuple val(meta), path('enrichment.json'), emit: metrics
     script:
@@ -159,6 +162,7 @@ process ATAC_REPORT {
     input:
     tuple val(meta), path(reports)
     path code
+    val sourceHash
     output:
     tuple val(meta), path('multiqc_report.html'), path('multiqc_data'), emit: report
     script:

@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 
@@ -46,19 +48,9 @@ def prepare(sheet: Path, registry: Path, run_dir: Path) -> Path:
     return manifest
 
 
-def execute(
-    sheet: Path,
-    registry: Path,
-    out: Path,
-    profile: str = "local,docker",
-    config: Path | None = None,
-    resume: bool = False,
-) -> int:
-    sheet, registry, out = sheet.resolve(), registry.resolve(), out.resolve()
-    manifest = prepare(sheet, registry, out)
-    source = ROOT / "genesis_tools/src"
-    staged = out / "inputs/code"
-    wanted = set()
+def source_bundle(source: Path, destination: Path) -> tuple[Path, str]:
+    """Keep immutable task source and use its content identity as an explicit cache input."""
+    files = {}
     for original in sorted(source.rglob("*")):
         if not original.is_file() or "__pycache__" in original.parts:
             continue
@@ -69,14 +61,37 @@ def execute(
             or (len(relative.parts) == 2 and relative.name != "__init__.py")
         ):
             continue
-        wanted.add(relative)
-        target = staged / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        if not target.exists() or target.read_bytes() != original.read_bytes():
-            target.write_bytes(original.read_bytes())
-    for target in staged.rglob("*"):
-        if target.is_file() and target.relative_to(staged) not in wanted:
-            target.unlink()
+        files[relative] = original.read_bytes()
+    checksums = {str(p): hashlib.sha256(data).hexdigest() for p, data in files.items()}
+    identity = hashlib.sha256(json.dumps(checksums, sort_keys=True).encode()).hexdigest()
+    staged = destination / f"code-{identity}"
+    destination.mkdir(parents=True, exist_ok=True)
+    if not staged.exists():
+        with tempfile.TemporaryDirectory(prefix="source-", dir=destination) as temporary:
+            for relative, data in files.items():
+                target = Path(temporary) / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(data)
+            Path(temporary).rename(staged)
+    actual = {str(p.relative_to(staged)): digest(p) for p in staged.rglob("*") if p.is_file()}
+    if actual != checksums:
+        raise ValueError(
+            "Retained task source is corrupted; preserve this run and use a new directory"
+        )
+    return staged, identity
+
+
+def execute(
+    sheet: Path,
+    registry: Path,
+    out: Path,
+    profile: str = "local,docker",
+    config: Path | None = None,
+    resume: bool = False,
+) -> int:
+    sheet, registry, out = sheet.resolve(), registry.resolve(), out.resolve()
+    manifest = prepare(sheet, registry, out)
+    staged, source_digest = source_bundle(ROOT / "genesis_tools/src", out / "inputs")
     args = ["nextflow", "-C", str(ROOT / "conf/atac.config")]
     if config:
         args[2] += "," + str(config.resolve())
@@ -89,6 +104,8 @@ def execute(
         str(manifest),
         "--source",
         str(staged),
+        "--source_digest",
+        source_digest,
         "--outdir",
         str(out / "output"),
         "-w",
@@ -101,6 +118,7 @@ def execute(
             ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
         ).strip(),
         "manifest_sha256": digest(manifest),
+        "source_bundle_sha256": source_digest,
         "profile": profile,
         "config_sha256": digest(config.resolve()) if config else None,
         "containers": json.loads((ROOT / "conf/atac-images.json").read_text()),
