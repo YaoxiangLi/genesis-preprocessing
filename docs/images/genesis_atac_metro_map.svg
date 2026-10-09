@@ -24,13 +24,14 @@
 <path id="route-2" class="line" stroke="#9260b7" d="M 140 330 L 241 330 Q 255 330 255 316 L 255 194 Q 255 180 269 180 L 356 180 Q 370 180 384 180 L 1290 180"><title>Raw mate FastQC reports</title></path>
 <path id="route-3" class="line" stroke="#9260b7" d="M 370 330 L 471 330 Q 485 330 485 316 L 485 194 Q 485 180 499 180 L 1290 180"><title>Raw samtools metrics</title></path>
 <path id="route-4" class="line" stroke="#9260b7" d="M 600 330 L 701 330 Q 715 330 715 316 L 715 194 Q 715 180 729 180 L 1290 180"><title>Usable samtools metrics</title></path>
-<path id="route-5" class="line" stroke="#9260b7" d="M 1060 330 L 1161 330 Q 1175 330 1175 316 L 1175 194 Q 1175 180 1189 180 L 1290 180"><title>Report waits for enrichment completion</title></path>
-<path id="route-6" class="line" stroke="#4169b1" d="M 1290 180 L 1391 180 Q 1405 180 1405 194 L 1405 316 Q 1405 330 1391 330 L 1290 330"><title>Provenance completes after the report</title></path>
-<path id="route-7" class="line" stroke="#4169b1" d="M 140 690 L 241 690 Q 255 690 255 676 L 255 344 Q 255 330 269 330 L 370 330"><title>Exact reference feeds alignment</title></path>
-<path id="route-8" class="line" stroke="#4169b1" d="M 370 510 L 471 510 Q 485 510 485 496 L 485 344 Q 485 330 499 330 L 600 330"><title>Explicit MAPQ, organelles and duplicate policy</title></path>
-<path id="route-9" class="line" stroke="#438362" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 496 Q 715 510 701 510 L 600 510"><title>Separate shifted cut-site representation</title></path>
-<path id="route-10" class="line" stroke="#9260b7" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 676 Q 715 690 729 690 L 830 690"><title>Usable fragment distributions and complexity</title></path>
-<path id="route-11" class="line" stroke="#4169b1" d="M 1060 690 L 1161 690 Q 1175 690 1175 676 L 1175 344 Q 1175 330 1161 330 L 1060 330"><title>Explicit TSS positions support diagnostic enrichment</title></path>
+<path id="route-5" class="line" stroke="#ce6030" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 556 Q 715 570 729 570 L 931 570 Q 945 570 945 556 L 945 344 Q 945 330 959 330 L 1060 330"><title>Fragments and peaks jointly feed enrichment</title></path>
+<path id="route-6" class="line" stroke="#9260b7" d="M 1060 330 L 1161 330 Q 1175 330 1175 316 L 1175 194 Q 1175 180 1189 180 L 1290 180"><title>Report waits for enrichment completion</title></path>
+<path id="route-7" class="line" stroke="#4169b1" d="M 1290 180 L 1391 180 Q 1405 180 1405 194 L 1405 316 Q 1405 330 1391 330 L 1290 330"><title>Provenance completes after the report</title></path>
+<path id="route-8" class="line" stroke="#4169b1" d="M 140 690 L 241 690 Q 255 690 255 676 L 255 344 Q 255 330 269 330 L 370 330"><title>Exact reference feeds alignment</title></path>
+<path id="route-9" class="line" stroke="#4169b1" d="M 370 510 L 471 510 Q 485 510 485 496 L 485 344 Q 485 330 499 330 L 600 330"><title>Explicit MAPQ, organelles and duplicate policy</title></path>
+<path id="route-10" class="line" stroke="#438362" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 496 Q 715 510 701 510 L 600 510"><title>Separate shifted cut-site representation</title></path>
+<path id="route-11" class="line" stroke="#9260b7" d="M 600 330 L 701 330 Q 715 330 715 344 L 715 676 Q 715 690 729 690 L 830 690"><title>Usable fragment distributions and complexity</title></path>
+<path id="route-12" class="line" stroke="#4169b1" d="M 1060 690 L 1161 690 Q 1175 690 1175 676 L 1175 344 Q 1175 330 1161 330 L 1060 330"><title>Explicit TSS positions support diagnostic enrichment</title></path>
 <g id="reads"><title>Raw PE mates: Synthetic adapter-free</title>
 <circle class="station" cx="140" cy="330" r="9" stroke="#087f8c"/>
 <text class="label" text-anchor="middle" x="140" y="290">Raw PE mates</text>
