@@ -86,4 +86,4 @@
 <text class="note" x="48" y="798">Duplicate marking measures duplication. The sample sheet explicitly selects retention or exclusion.</text>
 <text class="note" x="48" y="823">BAMPE peaks use unshifted fragments. Cut sites use +4 / −5 shifts; TSS profiles use strand-aware windows.</text>
 <text class="note" x="48" y="848">Adapter handling is explicit. No biological replicate pooling or automatic plant QC thresholds.</text>
-<metadata>Genesis diagram schema 2; workflows/atac.nf SHA256 f052313a31eb00119046b6c3976e160a48bf69b7396f2e38e90203a42eb39f9a; modules/atac/processes.nf SHA256 04197fcb7af86a059d48b92f962ff939da01ed2c9cc8d01c94269abba448e23d; schematic animation.</metadata></svg>
+<metadata>Genesis diagram schema 2; workflows/atac.nf SHA256 69e481774f2ba0f1345a9e0a958ff07654f90e76abe7b03d2c447e1553f9d948; modules/atac/processes.nf SHA256 04197fcb7af86a059d48b92f962ff939da01ed2c9cc8d01c94269abba448e23d; schematic animation.</metadata></svg>

@@ -3,7 +3,7 @@ nextflow.enable.dsl = 2
 include { ATAC_ACQUIRE; ATAC_REFERENCE; ATAC_FASTQC; ATAC_ADAPTERS; ATAC_ALIGN; ATAC_FRAGMENTS; ATAC_PEAKS; ATAC_ENRICHMENT; ATAC_REPORT; ATAC_TRACKS } from '../modules/atac/processes'
 
 workflow {
-    def plan = new groovy.json.JsonSlurper().parse(file(params.manifest).toFile())
+    def plan = new groovy.json.JsonSlurperClassic().parseText(file(params.manifest).text)
     def code = file(params.source)
     def libraries = Channel.fromList(plan.libraries)
     def manifests = libraries.map { meta -> tuple(meta, file(meta.manifest), meta.lanes.collectMany { lane -> [lane.read1, lane.read2] }.findAll { !it.startsWith('https://') }.collect { file(it) }) }
