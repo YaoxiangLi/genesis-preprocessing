@@ -18,6 +18,8 @@ shellcheck = ">=0.11,<0.12"
 micromamba = ">=2.5,<2.6"
 
 [tasks]
+pipeline-atac = { cmd = "scripts/run-atac-prototype.sh", description = "Experimental synthetic PE ATAC; --help lists required policies." }
+validate-atac = "uv run --frozen --project genesis_tools python tests/verify_atac.py --docker"
 benchmark = { cmd = "uv run --frozen --project genesis_tools python -m genesis_tools.benchmark", description = "Plan, run and compare explicit plant benchmark experiments." }
 pipeline = { cmd = "scripts/run-pipeline.sh", description = "Run the pipeline on one sample sheet. Run with --help for usage." }
 install-all = { cmd = "scripts/install-projects.sh", description = "Install main project and sub-projects." }
