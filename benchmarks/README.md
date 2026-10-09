@@ -30,7 +30,9 @@ originals: every changed input or policy defines a new campaign/output directory
 
 Generate a raw ATAC fixture using `fixture --assay bulk-ATAC --adapter genesis-atac`
 (or `nfcore-atac`) with `--checkout /absolute/path/to/pinned/checkout` and `--out`.
-The Genesis prototype commit is `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`;
+The original Genesis prototype commit is `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`.
+It is also integrated under `experimental/atac/`: use `--checkout "$PWD"` from
+a clean committed checkout to benchmark the integrated entry point;
 the nf-core checkout is `1a1dbe52ffbd82256c941a032b0e22abbd925b8a`.
 Container locks are in `locks/`. Local image IDs are immutable but require that
 exact local image or an independently verified exported image on another host;

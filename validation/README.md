@@ -2,8 +2,10 @@
 
 This directory publishes the validation workspace's audit, design, reports and
 small deterministic contract fixtures as of 2026-10-09. The integrated executable
-code is in this repository; experimental ATAC code remains on
-[`validation/bulk-atac-prototype`](https://github.com/YaoxiangLi/genesis-preprocessing/tree/validation/bulk-atac-prototype).
+code is in this repository. The experimental synthetic PE ATAC prototype is now
+available under [experimental/atac](../experimental/atac/README.md); its original
+validation branch remains preserved. See the [integration and map validation](reports/atac-maps-validation.md)
+for the subsequent integration evidence.
 
 Start with the [benchmark validation](reports/benchmark-validation.md),
 [overall validation](reports/GENESIS_PREPROCESSING_VALIDATION.md),
@@ -21,7 +23,8 @@ evidence references and are not hosted here. Local absolute paths in provenance
 are historical paths, not runnable paths for a new checkout. Generate portable
 benchmark fixtures using the [benchmark guide](../benchmarks/README.md).
 Scheduler state and the unsent questions draft are intentionally excluded.
-`snapshot.json` records source and published content checksums; Markdown repository
+`snapshot.json` records source and published content checksums for the original snapshot;
+subsequent validation additions are recorded separately in `updates`. Markdown repository
 links are adjusted for this directory's location. Small contract fixtures preserve
 the workspace's relative `fixtures/` and `design/` relationship.
 
