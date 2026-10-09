@@ -112,9 +112,7 @@ def bam_checks(root: Path) -> None:
     )
     assert empty["metrics"]["fragments_FRiP_own"]["value"] == 0
     assert empty["metrics"]["peak_jaccard"]["value"] is None
-    assert alignment_identity(source, root) == alignment_identity(
-        root / "q0-False.bam", root
-    )
+    assert alignment_identity(source, root) == alignment_identity(root / "q0-False.bam", root)
     broken = root / "broken.bam"
     broken.write_bytes(b"not a BAM")
     rejects(
@@ -173,9 +171,7 @@ def main() -> None:
         path = Path(tmp) / "result.json"
         path.write_text(json.dumps(compare(empty, empty), allow_nan=False))
         assert json.loads(path.read_text())["unmatched_current_peaks"]["value"] == 0
-    print(
-        "PASS: independent interval/rank/undefined-value/cut-coordinate and identifier tests"
-    )
+    print("PASS: independent interval/rank/undefined-value/cut-coordinate and identifier tests")
 
 
 if __name__ == "__main__":

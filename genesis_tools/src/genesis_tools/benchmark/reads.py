@@ -83,6 +83,8 @@ def subset(
         "input_templates": count,
         "selected_templates": len(selected),
         "seed": seed,
-        "method": ("lowest SHA256(seed, record index, canonical template name); "
-                   "original record order retained"),
+        "method": (
+            "lowest SHA256(seed, record index, canonical template name); "
+            "original record order retained"
+        ),
     }

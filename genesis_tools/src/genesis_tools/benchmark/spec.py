@@ -126,7 +126,12 @@ def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
         raise ValueError("Only DAP-seq and bulk-ATAC are implemented")
     if spec["adapter"] not in {"postalign", "genesis-atac", "nfcore-atac"}:
         raise ValueError("Unsupported adapter")
-    if spec["comparison"] not in {"matched-stage", "workflow-native", "workflow-matched"}:
+    if spec["comparison"] not in {
+        "matched-stage",
+        "workflow-native",
+        "workflow-matched",
+        "workflow-configured",
+    }:
         raise ValueError("Explicit comparison mode is required")
     if type(spec["seed"]) is not int:
         raise ValueError("seed must be an integer")
@@ -140,10 +145,14 @@ def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
     parameters = spec["parameters"]
     keys(
         parameters,
-        {"mapq", "duplicates", "keep_dup", "qvalue", "spp", "quantify"},
+        {"mapq", "duplicates", "keep_dup", "qvalue", "spp", "quantify", "template_cap"},
         {"mapq", "duplicates", "keep_dup", "qvalue", "spp", "quantify"},
         "parameters",
     )
+    if "template_cap" in parameters:
+        positive(parameters["template_cap"], "template_cap")
+        if spec["adapter"] == "postalign":
+            raise ValueError("Raw template subsampling is a separate upstream experiment")
     if not isinstance(parameters["mapq"], list) or not parameters["mapq"]:
         raise ValueError("mapq must be a nonempty list")
     if any(type(q) is not int or q < 0 or q > 254 for q in parameters["mapq"]):
@@ -226,10 +235,14 @@ def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
         workflow = spec.get("workflow", {})
         keys(
             workflow,
-            {"checkout", "git_sha", "config", "config_sha256", "parameters"},
-            {"checkout", "git_sha", "parameters"},
+            {"checkout", "git_sha", "container_lock", "container_lock_sha256", "parameters"},
+            {"checkout", "git_sha", "parameters", "container_lock", "container_lock_sha256"},
             "workflow",
         )
+        lock_path = (path.parent / workflow["container_lock"]).resolve()
+        if not lock_path.is_file() or sha256(lock_path) != workflow["container_lock_sha256"]:
+            raise ValueError("Workflow container lock missing or checksum mismatch")
+        workflow["container_lock"] = str(lock_path)
         checkout = (path.parent / workflow["checkout"]).resolve()
         spec["workflow"] = dict(workflow, checkout=str(checkout))
         if not re.fullmatch(r"[0-9a-f]{40}", workflow["git_sha"]):
@@ -278,6 +291,10 @@ def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
         {k: result[k] for k in ("spec", "dataset_sha256", "arms")}
         | {"recipe": result["source"]["recipe_sha256"]}
     )
+    if spec["adapter"] != "postalign" and dataset["status"] == "READY":
+        from .workflows import validate_options
+
+        validate_options(result)
     return result
 
 
@@ -296,8 +313,9 @@ def validate_dataset(dataset: dict[str, Any], assets: dict[str, Any], spec: dict
         "plastid",
         "tss",
         "annotation_release",
+        "gtf",
     }
-    keys(ref, rkeys, rkeys - {"tss", "annotation_release"}, "reference")
+    keys(ref, rkeys, rkeys - {"tss", "annotation_release", "gtf"}, "reference")
     if not SHA.fullmatch(ref["fasta_content_sha256"]):
         raise ValueError("Decompressed FASTA SHA256 required")
     positive(ref["genome_size"], "genome_size")
@@ -306,7 +324,7 @@ def validate_dataset(dataset: dict[str, Any], assets: dict[str, Any], spec: dict
             raise ValueError(
                 "Explicit organellar contig lists required (empty only if known absent)"
             )
-    for key in ("fasta", "chrom_sizes", "tss"):
+    for key in ("fasta", "chrom_sizes", "tss", "gtf"):
         if key in ref and ref[key] not in assets:
             raise ValueError(f"Missing reference asset {key}")
     if not dataset["libraries"]:

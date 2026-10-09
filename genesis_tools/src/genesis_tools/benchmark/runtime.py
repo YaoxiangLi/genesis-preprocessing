@@ -239,6 +239,8 @@ def fetch(plan: dict[str, Any]) -> None:
         if shutil.disk_usage(target.parent).free < asset["bytes"]:
             raise ValueError("Insufficient free disk for download")
         temporary = target.with_suffix(target.suffix + ".partial")
+        if temporary.exists():
+            raise ValueError("Existing partial download preserved: " + str(temporary))
         try:
             with (
                 urllib.request.urlopen(asset["url"], timeout=30) as response,

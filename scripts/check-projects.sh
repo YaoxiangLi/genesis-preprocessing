@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root=$(cd -- "$(dirname -- "$0")/.." && pwd)
-shellcheck "$root"/scripts/*.sh
+shellcheck "$root"/scripts/*.sh "$root"/benchmarks/*.sh
 uv run --frozen --project "$root/genesis_tools" ruff check \
     --config "$root/genesis_tools/pyproject.toml" "$root/genesis_tools" "$root/tests"
 uv run --frozen --project "$root/genesis_tools" ruff format --check \
@@ -13,3 +13,5 @@ uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_multi
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_build_tags.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_reference_cache.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_pipeline.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_benchmark.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_benchmark_spec.py"

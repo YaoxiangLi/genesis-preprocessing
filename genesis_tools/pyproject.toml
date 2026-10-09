@@ -24,3 +24,6 @@ select = ["E", "F", "I", "UP", "B", "ANN"]
 [tool.ty.terminal]
 error-on-warning = true
 
+
+[tool.setuptools.package-data]
+genesis_tools = ["benchmark/report.html"]

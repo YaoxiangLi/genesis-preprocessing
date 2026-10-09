@@ -10,6 +10,7 @@ from pathlib import Path
 
 from genesis_tools.benchmark.runtime import Runtime, fetch
 from genesis_tools.benchmark.spec import load, sha256
+from genesis_tools.benchmark.workflows import verify_effective_commands
 
 TOML = """schema_version = 1
 id = "tiny"
@@ -45,6 +46,22 @@ def rejects(function: Callable[[], object]) -> None:
 
 
 def main() -> None:
+    policy = {
+        "adapter": "nfcore-atac",
+        "parameters": {"qvalue": 0.01, "keep_dup": "all", "mapq": [1]},
+        "workflow": {"parameters": {"narrow_peak": True}},
+    }
+    commands = {
+        "A:MACS2_CALLPEAK (lib)": {"command": "macs2 callpeak -q 0.01 --keep-dup all -f BAMPE"},
+        "A:MULTIQC_CUSTOM_PEAKS (lib)": {"command": "irrelevant"},
+        "A:BAMTOOLS_FILTER (lib)": {"command": "samtools view -q 1 -F 1024"},
+    }
+    verify_effective_commands(policy, commands)
+    wrong = copy.deepcopy(commands)
+    wrong["A:MACS2_CALLPEAK (lib)"]["command"] += " --broad"
+    rejects(lambda: verify_effective_commands(policy, wrong))
+    wrong["A:MACS2_CALLPEAK (lib)"]["command"] = "macs2 callpeak -q 0.05 --keep-dup all -f BAMPE"
+    rejects(lambda: verify_effective_commands(policy, wrong))
     with tempfile.TemporaryDirectory() as temp:
         root = Path(temp)
         (root / "ref.fa").write_text(">chr1\n" + "A" * 1000 + "\n")
