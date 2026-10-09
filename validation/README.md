@@ -10,6 +10,9 @@ Start with the [bulk ATAC and execution validation](reports/supported-atac-execu
 [compact evidence](evidence/supported-atac/README.md), and
 [reproduction instructions](reproduce/supported-atac/README.md).
 
+The [schematic CLI validation](reports/schematic-cli-validation.md) covers the
+offline figure generator, bundled artwork and browser checks.
+
 Earlier studies include the [benchmark validation](reports/benchmark-validation.md),
 [overall validation](reports/GENESIS_PREPROCESSING_VALIDATION.md),
 [benchmark design](design/benchmark-spec.md), and

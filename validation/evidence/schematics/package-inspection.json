@@ -1,0 +1,7 @@
+{
+  "wheel": "results/schematics/dist-publish/genesis_tools-0.1.0-py3-none-any.whl",
+  "sha256": "8c23b755347d15a2af37c1573a00c066e54ae3c39a9f95a200842afe6e477915",
+  "asset_count": 23,
+  "isolated_render_matches": true,
+  "python": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:25:55) [GCC 14.3.0]"
+}

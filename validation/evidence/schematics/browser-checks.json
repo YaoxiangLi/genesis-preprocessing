@@ -1,0 +1,92 @@
+[
+  {
+    "errors": [],
+    "first": null,
+    "second": null,
+    "display": null,
+    "reduced": false,
+    "stages": 11,
+    "workflow": "dap",
+    "dark": false
+  },
+  {
+    "errors": [],
+    "first": "0px",
+    "second": "-19.076px",
+    "display": "inline",
+    "reduced": false,
+    "stages": 11,
+    "workflow": "dap",
+    "dark": true
+  },
+  {
+    "errors": [],
+    "first": "0px",
+    "second": "0px",
+    "display": "none",
+    "reduced": true,
+    "stages": 11,
+    "workflow": "dap",
+    "dark": true
+  },
+  {
+    "errors": [],
+    "first": null,
+    "second": null,
+    "display": null,
+    "reduced": false,
+    "stages": 13,
+    "workflow": "atac",
+    "dark": false
+  },
+  {
+    "errors": [],
+    "first": "0px",
+    "second": "-18.2026px",
+    "display": "inline",
+    "reduced": false,
+    "stages": 13,
+    "workflow": "atac",
+    "dark": true
+  },
+  {
+    "errors": [],
+    "first": "0px",
+    "second": "0px",
+    "display": "none",
+    "reduced": true,
+    "stages": 13,
+    "workflow": "atac",
+    "dark": true
+  },
+  {
+    "errors": [],
+    "first": null,
+    "second": null,
+    "display": null,
+    "reduced": false,
+    "stages": 9,
+    "workflow": "execution",
+    "dark": false
+  },
+  {
+    "errors": [],
+    "first": "0px",
+    "second": "-19.0684px",
+    "display": "inline",
+    "reduced": false,
+    "stages": 9,
+    "workflow": "execution",
+    "dark": true
+  },
+  {
+    "errors": [],
+    "first": "0px",
+    "second": "0px",
+    "display": "none",
+    "reduced": true,
+    "stages": 9,
+    "workflow": "execution",
+    "dark": true
+  }
+]

@@ -391,6 +391,45 @@
           "published_sha256": "28fc498849f331a55510ff5a5588142c9c1257572b031c4ee6501c705e48144d"
         }
       ]
+    },
+    {
+      "date": "2026-10-09",
+      "code_revision": "e0b71e452493de99474bc226993ca01d546fb32f",
+      "scope": "Offline botanical schematic CLI, artwork licenses, browser and package validation",
+      "files": [
+        {
+          "path": "reports/schematic-cli-validation.md",
+          "published_sha256": "0b1e3743115505ad2a697756dbf2691de563e6b5c8848cfa4ee73d7bcd84ca17"
+        },
+        {
+          "path": "design/adr-workflow-schematics.md",
+          "published_sha256": "e15059c92146710f76a6cb07276e75a00a760e3b02d6df93e7e9d98004a2e813"
+        },
+        {
+          "path": "evidence/schematics/browser-checks.json",
+          "published_sha256": "b34520f94c25e0bfe752d91c377917e320e72a8d2b08799211fcb733cb0b4465"
+        },
+        {
+          "path": "evidence/schematics/changed-files.txt",
+          "published_sha256": "1ec775ac6eee93bb28de8e605b3131482f1116cc798ba2abb96ee66e291eb648"
+        },
+        {
+          "path": "evidence/schematics/commands.json",
+          "published_sha256": "ff3ff9b3d9187f59bacef4139ca019ec46cb557507afdcabe7c2e08c6c58918f"
+        },
+        {
+          "path": "evidence/schematics/input-checksums.json",
+          "published_sha256": "000f8e1714efcb70c70cb130f1ab05231ba553abcffe9c48654aa24e87a08312"
+        },
+        {
+          "path": "evidence/schematics/package-inspection.json",
+          "published_sha256": "7c64aae6d4debd3205fa98794c6d0c7df7688bf8f4f09a66f2b6d8015edf8a36"
+        },
+        {
+          "path": "evidence/schematics/tested-source.json",
+          "published_sha256": "68c81186c1c17d6b28ca4f19259e4c02859d6043015e4a807e84757c21c376f6"
+        }
+      ]
     }
   ]
 }
