@@ -23,6 +23,32 @@ assignments. The retired Bash pipeline and metadata script are available in Git
 history. Stock Bowtie 1 comparison modules remain available in `modules/`, but
 are not imported or run by the main workflow.
 
+## Experimental bulk ATAC
+
+A separate **single-library, synthetic paired-end prototype** is available. It
+does not change the DAP-seq workflow or its scientific defaults.
+
+![Genesis experimental bulk ATAC workflow](docs/images/genesis_atac_metro_map_animated.svg)
+
+[Static ATAC map](docs/images/genesis_atac_metro_map.svg) ·
+[Scope and input contract](experimental/atac/README.md) ·
+[ENCODE and plant-method decisions](experimental/atac/plant-methods.md)
+
+```bash
+pixi run pipeline-atac --help
+pixi run validate-atac --keep
+```
+
+Validation requires Docker, a clean committed checkout and the exact images in
+`benchmarks/locks/genesis-atac-prototype.json`. Local FastQC/MultiQC image IDs
+must already be available; they are not downloadable registry tags. Validation
+retains a deterministic fixture, task traces, checksums and fresh/resume results
+under `tests/.runs/`. It checks output contents and all eight cached tasks.
+
+Real-data trimming, scalable fragment processing, biological replicate analysis
+and production plant QC criteria remain future work. sc/snATAC is a design
+contract, not an implemented processing branch.
+
 ## Install and run
 
 Install [Pixi](https://pixi.sh/), then install the project and its Python tools:

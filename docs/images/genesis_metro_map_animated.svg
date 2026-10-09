@@ -1,141 +1,118 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 870" role="img" aria-labelledby="title description">
 <title id="title">GENESIS / DAP-seq</title>
-<desc id="description">Implemented validation workflow • explicit references • reproducible processing. Routes show data dependencies, not timing. QC is diagnostic: FastQC warnings do not reject a dataset. MultiQC aggregates FastQC, samtools and Genesis metadata; SPP stays separate. Controls can serve multiple treatments. Controls receive QC and tracks; only treatments receive peaks and quantification. FASTQs and BAMs remain intermediate files. Reference products publish separately. Animated movement indicates dependencies, not runtime.</desc>
+<desc id="description">Implemented workflow · raw-read QC · explicit controls and reference identity. QC is diagnostic. FastQC warnings do not reject a dataset; SPP is reported separately. Controls receive QC and tracks; treatments receive peaks and quantification. FASTQs and BAMs stay intermediate. Routes summarize data dependencies, not runtime. Crossings without a station do not join channels.</desc>
 <style>
-    svg{--bg:#fbfcfe;--text:#172c3d;--muted:#536779;--panel:#eef2f6;--white:#fff;background:var(--bg);font-family:Arial,Helvetica,sans-serif}
-    .title{font-size:31px;font-weight:700;letter-spacing:1px;fill:var(--text)}
-    .subtitle,.note{font-size:14px;fill:var(--muted)}
-    .section{font-size:12px;font-weight:700;letter-spacing:1.8px;fill:var(--muted)}
-    .label{font-size:17px;font-weight:700;fill:var(--text);paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
-    .detail{font-size:12px;fill:var(--muted);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+    svg{--bg:#fbfcfe;--text:#172c3d;--muted:#536779;--panel:#e2e8ef;background:var(--bg);font-family:Arial,Helvetica,sans-serif}
+    .title{font-size:32px;font-weight:700;letter-spacing:1px;fill:var(--text)}
+    .subtitle,.note{font-size:17px;fill:var(--muted)}
+    .label{font-size:21px;font-weight:700;fill:var(--text)}
+    .detail{font-size:16px;fill:var(--muted)}
     .station{fill:var(--bg);stroke-width:4}
     .line{fill:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
-    .planned{stroke-dasharray:9 9;opacity:.8}
-    .flow{fill:none;stroke:var(--white);stroke-width:2;stroke-dasharray:2 38;stroke-linecap:round;animation:travel 12s linear infinite;pointer-events:none}
+    .planned{stroke-dasharray:9 9}
+    .flow{fill:none;stroke:white;stroke-width:2;stroke-dasharray:2 38;stroke-linecap:round;animation:travel 12s linear infinite;pointer-events:none}
     @keyframes travel{to{stroke-dashoffset:-400}}
     @media(prefers-reduced-motion:reduce){.flow{display:none}}
-    @media(prefers-color-scheme:dark){svg{--bg:#14212d;--text:#eff6fc;--muted:#bdcbd6;--panel:#213342;--white:#fff}.line{filter:brightness(1.25)}}
-    @media print{.flow{display:none}svg{--bg:#fff;--text:#172c3d;--muted:#536779;--panel:#eef2f6}}
+    @media(prefers-color-scheme:dark){svg{--bg:#14212d;--text:#eff6fc;--muted:#bdcbd6;--panel:#344957}.line,.station{filter:brightness(1.25)}}
+    @media print{.flow{display:none}svg{--bg:#fff;--text:#172c3d;--muted:#536779;--panel:#e2e8ef}}
     </style>
 <rect width="1480" height="870" fill="var(--bg)"/>
-<path d="M42 34 L57 20 L72 34 L57 48 Z" fill="#087f8c"/>
-<text class="title" x="90" y="46">GENESIS / DAP-seq</text>
-<text class="subtitle" x="90" y="74">Implemented validation workflow • explicit references • reproducible processing</text>
-<rect x="48" y="99" width="460" height="32" rx="8" fill="var(--panel)"/>
-<text class="section" x="62" y="120">01  INPUTS &amp; REFERENCE</text>
-<rect x="535" y="99" width="365" height="32" rx="8" fill="var(--panel)"/>
-<text class="section" x="549" y="120">02  ALIGNMENT &amp; METADATA</text>
-<rect x="925" y="99" width="505" height="32" rx="8" fill="var(--panel)"/>
-<text class="section" x="939" y="120">03  QC, SIGNAL &amp; QUANTIFICATION</text>
-<path id="route-0" class="line" stroke="#087f8c" d="M 110 300 L 290 300"><title>Sample sheet validation</title></path>
-<path class="flow" style="animation-delay:-0s" d="M 110 300 L 290 300"/>
-<path id="route-1" class="line" stroke="#4169b1" d="M 110 620 L 165 620 Q 180 620 180 605 L 180 395 Q 180 380 195 380 L 275 380 Q 290 380 290 365 L 290 300"><title>Exact reference participates in validation</title></path>
-<path class="flow" style="animation-delay:-1s" d="M 110 620 L 165 620 Q 180 620 180 605 L 180 395 Q 180 380 195 380 L 275 380 Q 290 380 290 365 L 290 300"/>
-<path id="route-2" class="line" stroke="#087f8c" d="M 290 300 L 480 300"><title>Validated libraries are downloaded</title></path>
-<path class="flow" style="animation-delay:-2s" d="M 290 300 L 480 300"/>
-<path id="route-3" class="line" stroke="#4169b1" d="M 290 300 L 355 300 Q 370 300 370 315 L 370 535 Q 370 550 385 550 L 470 550"><title>Build or verify chromosome sizes</title></path>
-<path class="flow" style="animation-delay:-3s" d="M 290 300 L 355 300 Q 370 300 370 315 L 370 535 Q 370 550 385 550 L 470 550"/>
-<path id="route-4" class="line" stroke="#4169b1" d="M 290 300 L 315 300 Q 330 300 330 315 L 330 675 Q 330 690 345 690 L 680 690"><title>Build or verify FASTA index</title></path>
-<path class="flow" style="animation-delay:-4s" d="M 290 300 L 315 300 Q 330 300 330 315 L 330 675 Q 330 690 345 690 L 680 690"/>
-<path id="route-5" class="line" stroke="#4169b1" d="M 470 550 L 495 550 Q 510 550 510 565 L 510 675 Q 510 690 525 690 L 680 690"><title>Reference length sizes indexing resources</title></path>
-<path class="flow" style="animation-delay:-5s" d="M 470 550 L 495 550 Q 510 550 510 565 L 510 675 Q 510 690 525 690 L 680 690"/>
-<path id="route-6" class="line" stroke="#087f8c" d="M 480 300 L 850 300"><title>Unmodified downloaded reads feed alignment</title></path>
-<path class="flow" style="animation-delay:-6s" d="M 480 300 L 850 300"/>
-<path id="route-7" class="line" stroke="#9260b7" d="M 480 300 L 525 300 Q 540 300 540 285 L 540 200 Q 540 185 555 185 L 680 185"><title>Raw-read QC runs in parallel</title></path>
-<path class="flow" style="animation-delay:-7s" d="M 480 300 L 525 300 Q 540 300 540 285 L 540 200 Q 540 185 555 185 L 680 185"/>
-<path id="route-8" class="line" stroke="#087f8c" d="M 480 300 L 495 300 Q 510 300 510 315 L 510 405 Q 510 420 525 420 L 680 420"><title>Read metadata</title></path>
-<path class="flow" style="animation-delay:-8s" d="M 480 300 L 495 300 Q 510 300 510 315 L 510 405 Q 510 420 525 420 L 680 420"/>
-<path id="route-9" class="line" stroke="#4169b1" d="M 470 550 L 555 550 Q 570 550 570 535 L 570 435 Q 570 420 585 420 L 680 420"><title>Chromosome sizes feed metadata</title></path>
-<path class="flow" style="animation-delay:-9s" d="M 470 550 L 555 550 Q 570 550 570 535 L 570 435 Q 570 420 585 420 L 680 420"/>
-<path id="route-10" class="line" stroke="#087f8c" d="M 680 420 L 755 420 Q 770 420 770 405 L 770 315 Q 770 300 785 300 L 850 300"><title>Metadata accompanies full-read alignment</title></path>
-<path class="flow" style="animation-delay:-10s" d="M 680 420 L 755 420 Q 770 420 770 405 L 770 315 Q 770 300 785 300 L 850 300"/>
-<path id="route-11" class="line" stroke="#4169b1" d="M 680 690 L 835 690 Q 850 690 850 675 L 850 300"><title>Verified index feeds alignment</title></path>
-<path class="flow" style="animation-delay:-11s" d="M 680 690 L 835 690 Q 850 690 850 675 L 850 300"/>
-<path id="route-12" class="line" stroke="#9260b7" d="M 680 185 L 1320 185"><title>FastQC ZIP reports</title></path>
-<path class="flow" style="animation-delay:-0s" d="M 680 185 L 1320 185"/>
-<path id="route-13" class="line" stroke="#9260b7" d="M 680 420 L 720 420 Q 735 420 735 405 L 735 165 Q 735 150 750 150 L 1245 150 Q 1260 150 1260 165 L 1260 170 Q 1260 185 1275 185 L 1320 185"><title>Metadata joins run-level reporting</title></path>
-<path class="flow" style="animation-delay:-1s" d="M 680 420 L 720 420 Q 735 420 735 405 L 735 165 Q 735 150 750 150 L 1245 150 Q 1260 150 1260 165 L 1260 170 Q 1260 185 1275 185 L 1320 185"/>
-<path id="route-14" class="line" stroke="#9260b7" d="M 850 300 L 955 300 Q 970 300 970 285 L 970 260 Q 970 245 985 245 L 1080 245"><title>Alignment metrics</title></path>
-<path class="flow" style="animation-delay:-2s" d="M 850 300 L 955 300 Q 970 300 970 285 L 970 260 Q 970 245 985 245 L 1080 245"/>
-<path id="route-15" class="line" stroke="#9260b7" d="M 1080 245 L 1205 245 Q 1220 245 1220 230 L 1220 200 Q 1220 185 1235 185 L 1320 185"><title>Native samtools metrics</title></path>
-<path class="flow" style="animation-delay:-3s" d="M 1080 245 L 1205 245 Q 1220 245 1220 230 L 1220 200 Q 1220 185 1235 185 L 1320 185"/>
-<path id="route-16" class="line" stroke="#d76a35" d="M 850 300 L 925 300 Q 940 300 940 315 L 940 410 Q 940 425 955 425 L 1110 425"><title>Treatments and their assigned controls</title></path>
-<path class="flow" style="animation-delay:-4s" d="M 850 300 L 925 300 Q 940 300 940 315 L 940 410 Q 940 425 955 425 L 1110 425"/>
-<path id="route-17" class="line" stroke="#d76a35" d="M 1110 425 L 1330 425"><title>Treatment peaks</title></path>
-<path class="flow" style="animation-delay:-5s" d="M 1110 425 L 1330 425"/>
-<path id="route-18" class="line" stroke="#087f8c" d="M 850 300 L 1395 300 Q 1410 300 1410 315 L 1410 410 Q 1410 425 1395 425 L 1330 425"><title>Primary treatment BAM supports quantification</title></path>
-<path class="flow" style="animation-delay:-6s" d="M 850 300 L 1395 300 Q 1410 300 1410 315 L 1410 410 Q 1410 425 1395 425 L 1330 425"/>
-<path id="route-19" class="line" stroke="#bd527d" d="M 850 300 L 885 300 Q 900 300 900 315 L 900 550 Q 900 565 915 565 L 1080 565"><title>Independent first-50-bp R1 alignment inside BWA_MEM2_ALIGN; SPP is published separately</title></path>
-<path class="flow" style="animation-delay:-7s" d="M 850 300 L 885 300 Q 900 300 900 315 L 900 550 Q 900 565 915 565 L 1080 565"/>
-<path id="route-20" class="line" stroke="#438362" d="M 850 300 L 915 300 Q 930 300 930 315 L 930 675 Q 930 690 945 690 L 1080 690"><title>Full-read alignments feed coverage</title></path>
-<path class="flow" style="animation-delay:-8s" d="M 850 300 L 915 300 Q 930 300 930 315 L 930 675 Q 930 690 945 690 L 1080 690"/>
-<path id="route-21" class="line" stroke="#438362" d="M 1080 690 L 1315 690 Q 1330 690 1330 675 L 1330 425"><title>RPKM coverage feeds quantification</title></path>
-<path class="flow" style="animation-delay:-9s" d="M 1080 690 L 1315 690 Q 1330 690 1330 675 L 1330 425"/>
-<path id="route-22" class="line" stroke="#4169b1" d="M 470 550 L 470 735 Q 470 750 485 750 L 1365 750 Q 1380 750 1380 735 L 1380 440 Q 1380 425 1365 425 L 1330 425"><title>Chromosome sizes bound quantification</title></path>
-<path class="flow" style="animation-delay:-10s" d="M 470 550 L 470 735 Q 470 750 485 750 L 1365 750 Q 1380 750 1380 735 L 1380 440 Q 1380 425 1365 425 L 1330 425"/>
-<g id="samples"><title>Sample sheet: SE / PE • explicit controls; implemented</title>
-<circle class="station" cx="110" cy="300" r="8" stroke="#087f8c"/>
-<text class="label" text-anchor="middle" x="110" y="332">Sample sheet</text>
-<text class="detail" text-anchor="middle" x="110" y="350">SE / PE • explicit controls</text></g>
-<g id="VALIDATE_SHEET"><title>Validate: Samples + reference provenance; implemented</title>
-<circle class="station" cx="290" cy="300" r="8" stroke="#087f8c"/>
-<text class="label" text-anchor="middle" x="290" y="332">Validate</text>
-<text class="detail" text-anchor="middle" x="290" y="350">Samples + reference provenance</text></g>
-<g id="DOWNLOAD"><title>Download: Original mates remain unchanged; implemented</title>
-<circle class="station" cx="480" cy="300" r="8" stroke="#087f8c"/>
-<text class="label" text-anchor="middle" x="480" y="332">Download</text>
-<text class="detail" text-anchor="middle" x="480" y="350">Original mates remain unchanged</text></g>
-<g id="FASTQC"><title>FastQC: One report per mate; implemented</title>
-<circle class="station" cx="680" cy="185" r="8" stroke="#9260b7"/>
-<text class="label" text-anchor="middle" x="680" y="217">FastQC</text>
-<text class="detail" text-anchor="middle" x="680" y="235">One report per mate</text></g>
-<g id="METADATA"><title>Metadata: Genome size + read length; implemented</title>
-<circle class="station" cx="680" cy="420" r="8" stroke="#087f8c"/>
-<text class="label" text-anchor="middle" x="680" y="452">Metadata</text>
-<text class="detail" text-anchor="middle" x="680" y="470">Genome size + read length</text></g>
-<g id="BWA_MEM2_ALIGN"><title>bwa-mem2: Primary full-read alignments; implemented</title>
-<circle class="station" cx="850" cy="300" r="8" stroke="#087f8c"/>
-<text class="label" text-anchor="middle" x="850" y="332">bwa-mem2</text>
-<text class="detail" text-anchor="middle" x="850" y="350">Primary full-read alignments</text></g>
-<g id="QC"><title>samtools QC: flagstat · stats · idxstats; implemented</title>
-<circle class="station" cx="1080" cy="245" r="8" stroke="#9260b7"/>
-<text class="label" text-anchor="middle" x="1080" y="277">samtools QC</text>
-<text class="detail" text-anchor="middle" x="1080" y="295">flagstat · stats · idxstats</text></g>
-<g id="MULTIQC"><title>MultiQC: Run-level HTML + parsed data; implemented</title>
-<circle class="station" cx="1320" cy="185" r="8" stroke="#9260b7"/>
-<text class="label" text-anchor="middle" x="1320" y="217">MultiQC</text>
-<text class="detail" text-anchor="middle" x="1320" y="235">Run-level HTML + parsed data</text></g>
-<g id="CALL_PEAKS"><title>MACS3 peaks: Treatment + assigned control; implemented</title>
-<circle class="station" cx="1110" cy="425" r="8" stroke="#d76a35"/>
-<text class="label" text-anchor="middle" x="1110" y="457">MACS3 peaks</text>
-<text class="detail" text-anchor="middle" x="1110" y="475">Treatment + assigned control</text></g>
-<g id="QUANTIFY"><title>Quantify: Peak RPM + mean RPKM; implemented</title>
-<circle class="station" cx="1330" cy="425" r="8" stroke="#d76a35"/>
-<text class="label" text-anchor="middle" x="1330" y="457">Quantify</text>
-<text class="detail" text-anchor="middle" x="1330" y="475">Peak RPM + mean RPKM</text></g>
-<g id="spp"><title>SPP: Separate first-50-bp R1 alignment; implemented</title>
-<circle class="station" cx="1080" cy="565" r="8" stroke="#bd527d"/>
-<text class="label" text-anchor="middle" x="1080" y="597">SPP</text>
-<text class="detail" text-anchor="middle" x="1080" y="615">Separate first-50-bp R1 alignment</text></g>
-<g id="TRACKS"><title>deepTools tracks: Published BigWig signal; implemented</title>
-<circle class="station" cx="1080" cy="690" r="8" stroke="#438362"/>
-<text class="label" text-anchor="middle" x="1080" y="722">deepTools tracks</text>
-<text class="detail" text-anchor="middle" x="1080" y="740">Published BigWig signal</text></g>
-<g id="reference"><title>Exact FASTA: User-supplied assembly; implemented</title>
-<circle class="station" cx="110" cy="620" r="8" stroke="#4169b1"/>
-<text class="label" text-anchor="middle" x="110" y="652">Exact FASTA</text>
-<text class="detail" text-anchor="middle" x="110" y="670">User-supplied assembly</text></g>
-<g id="CHROM_SIZES"><title>Chromosome sizes: Verified reference products; implemented</title>
-<circle class="station" cx="470" cy="550" r="8" stroke="#4169b1"/>
-<text class="label" text-anchor="middle" x="470" y="582">Chromosome sizes</text>
-<text class="detail" text-anchor="middle" x="470" y="600">Verified reference products</text></g>
-<g id="BWA_MEM2_INDEX"><title>bwa-mem2 index: Verified reference products; implemented</title>
-<circle class="station" cx="680" cy="690" r="8" stroke="#4169b1"/>
-<text class="label" text-anchor="middle" x="680" y="722">bwa-mem2 index</text>
-<text class="detail" text-anchor="middle" x="680" y="740">Verified reference products</text></g>
-<path d="M42 770 H1438" stroke="var(--panel)" stroke-width="2"/>
-<text class="note" x="48" y="797">QC is diagnostic: FastQC warnings do not reject a dataset. MultiQC aggregates FastQC, samtools and Genesis metadata; SPP stays separate.</text>
-<text class="note" x="48" y="820">Controls can serve multiple treatments. Controls receive QC and tracks; only treatments receive peaks and quantification.</text>
-<text class="note" x="48" y="843">FASTQs and BAMs remain intermediate files. Reference products publish separately. Animated movement indicates dependencies, not runtime.</text>
-<metadata>Genesis diagram schema 1; workflow SHA256 c02389565606086b80228b52abd556cee7a3dba79f7e2f92eedda8164dfb2c5d; animation is schematic.</metadata>
-</svg>
+<text class="title" x="48" y="52">GENESIS / DAP-seq</text>
+<text class="subtitle" x="48" y="85">Implemented workflow · raw-read QC · explicit controls and reference identity</text>
+<path id="route-0" class="line" stroke="#087f8c" d="M 140 330 L 586 330 Q 600 330 614 330 L 830 330"><title>Validated libraries download and align</title></path>
+<path class="flow" style="animation-delay:-0s" d="M 140 330 L 586 330 Q 600 330 614 330 L 830 330"/>
+<path id="route-1" class="line" stroke="#ce6030" d="M 830 330 L 1046 330 Q 1060 330 1074 330 L 1290 330"><title>Treatment/control peaks and quantification</title></path>
+<path class="flow" style="animation-delay:-1s" d="M 830 330 L 1046 330 Q 1060 330 1074 330 L 1290 330"/>
+<path id="route-2" class="line" stroke="#9260b7" d="M 600 330 L 701 330 Q 715 330 715 316 L 715 194 Q 715 180 701 180 L 600 180"><title>Raw mates independently feed FastQC</title></path>
+<path class="flow" style="animation-delay:-2s" d="M 600 330 L 701 330 Q 715 330 715 316 L 715 194 Q 715 180 701 180 L 600 180"/>
+<path id="route-3" class="line" stroke="#9260b7" d="M 600 180 L 701 180 Q 715 180 715 194 L 715 216 Q 715 230 729 230 L 1391 230 Q 1405 230 1405 216 L 1405 194 Q 1405 180 1391 180 L 1290 180"><title>FastQC reports feed MultiQC</title></path>
+<path class="flow" style="animation-delay:-3s" d="M 600 180 L 701 180 Q 715 180 715 194 L 715 216 Q 715 230 729 230 L 1391 230 Q 1405 230 1405 216 L 1405 194 Q 1405 180 1391 180 L 1290 180"/>
+<path id="route-4" class="line" stroke="#9260b7" d="M 830 330 L 931 330 Q 945 330 945 316 L 945 194 Q 945 180 959 180 L 1060 180"><title>Alignment QC feeds MultiQC</title></path>
+<path class="flow" style="animation-delay:-4s" d="M 830 330 L 931 330 Q 945 330 945 316 L 945 194 Q 945 180 959 180 L 1060 180"/>
+<path id="route-5" class="line" stroke="#087f8c" d="M 600 330 L 499 330 Q 485 330 485 344 L 485 496 Q 485 510 499 510 L 600 510"><title>Read metadata</title></path>
+<path class="flow" style="animation-delay:-5s" d="M 600 330 L 499 330 Q 485 330 485 344 L 485 496 Q 485 510 499 510 L 600 510"/>
+<path id="route-6" class="line" stroke="#087f8c" d="M 600 510 L 701 510 Q 715 510 715 496 L 715 344 Q 715 330 729 330 L 830 330"><title>Metadata accompanies alignment</title></path>
+<path class="flow" style="animation-delay:-6s" d="M 600 510 L 701 510 Q 715 510 715 496 L 715 344 Q 715 330 729 330 L 830 330"/>
+<path id="route-7" class="line" stroke="#4169b1" d="M 140 690 L 241 690 Q 255 690 255 676 L 255 344 Q 255 330 269 330 L 370 330"><title>Reference identity is validated</title></path>
+<path class="flow" style="animation-delay:-7s" d="M 140 690 L 241 690 Q 255 690 255 676 L 255 344 Q 255 330 269 330 L 370 330"/>
+<path id="route-8" class="line" stroke="#4169b1" d="M 370 330 L 269 330 Q 255 330 255 344 L 255 496 Q 255 510 241 510 L 140 510"><title>Build or verify chromosome sizes</title></path>
+<path class="flow" style="animation-delay:-8s" d="M 370 330 L 269 330 Q 255 330 255 344 L 255 496 Q 255 510 241 510 L 140 510"/>
+<path id="route-9" class="line" stroke="#4169b1" d="M 370 330 L 269 330 Q 255 330 255 344 L 255 676 Q 255 690 269 690 L 370 690"><title>Build or verify index</title></path>
+<path class="flow" style="animation-delay:-9s" d="M 370 330 L 269 330 Q 255 330 255 344 L 255 676 Q 255 690 269 690 L 370 690"/>
+<path id="route-10" class="line" stroke="#4169b1" d="M 140 510 L 600 510"><title>Chromosome sizes feed metadata and index resources</title></path>
+<path class="flow" style="animation-delay:-10s" d="M 140 510 L 600 510"/>
+<path id="route-11" class="line" stroke="#4169b1" d="M 370 690 L 701 690 Q 715 690 715 676 L 715 344 Q 715 330 729 330 L 830 330"><title>Verified index feeds alignment</title></path>
+<path class="flow" style="animation-delay:-11s" d="M 370 690 L 701 690 Q 715 690 715 676 L 715 344 Q 715 330 729 330 L 830 330"/>
+<path id="route-12" class="line" stroke="#bd527d" d="M 830 330 L 931 330 Q 945 330 945 344 L 945 496 Q 945 510 931 510 L 830 510"><title>Separate shortened-read alignment feeds SPP</title></path>
+<path class="flow" style="animation-delay:-0s" d="M 830 330 L 931 330 Q 945 330 945 344 L 945 496 Q 945 510 931 510 L 830 510"/>
+<path id="route-13" class="line" stroke="#438362" d="M 830 330 L 931 330 Q 945 330 945 344 L 945 676 Q 945 690 959 690 L 1060 690"><title>Full-read coverage</title></path>
+<path class="flow" style="animation-delay:-1s" d="M 830 330 L 931 330 Q 945 330 945 344 L 945 676 Q 945 690 959 690 L 1060 690"/>
+<path id="route-14" class="line" stroke="#438362" d="M 1060 690 L 1391 690 Q 1405 690 1405 676 L 1405 344 Q 1405 330 1391 330 L 1290 330"><title>Coverage and chromosome bounds support quantification</title></path>
+<path class="flow" style="animation-delay:-2s" d="M 1060 690 L 1391 690 Q 1405 690 1405 676 L 1405 344 Q 1405 330 1391 330 L 1290 330"/>
+<path id="route-15" class="line" stroke="#9260b7" d="M 600 510 L 499 510 Q 485 510 485 496 L 485 134 Q 485 120 499 120 L 1391 120 Q 1405 120 1405 134 L 1405 166 Q 1405 180 1391 180 L 1290 180"><title>Metadata joins run-level reporting</title></path>
+<path class="flow" style="animation-delay:-3s" d="M 600 510 L 499 510 Q 485 510 485 496 L 485 134 Q 485 120 499 120 L 1391 120 Q 1405 120 1405 134 L 1405 166 Q 1405 180 1391 180 L 1290 180"/>
+<g id="samples"><title>Sample sheet: SE / PE + controls</title>
+<circle class="station" cx="140" cy="330" r="9" stroke="#087f8c"/>
+<text class="label" text-anchor="middle" x="140" y="290">Sample sheet</text>
+<text class="detail" text-anchor="middle" x="140" y="313">SE / PE + controls</text></g>
+<g id="VALIDATE_SHEET"><title>Validate: Inputs + provenance</title>
+<circle class="station" cx="370" cy="330" r="9" stroke="#087f8c"/>
+<text class="label" text-anchor="middle" x="370" y="290">Validate</text>
+<text class="detail" text-anchor="middle" x="370" y="313">Inputs + provenance</text></g>
+<g id="DOWNLOAD"><title>Download: Unmodified raw mates</title>
+<circle class="station" cx="600" cy="330" r="9" stroke="#087f8c"/>
+<text class="label" text-anchor="middle" x="600" y="290">Download</text>
+<text class="detail" text-anchor="middle" x="600" y="313">Unmodified raw mates</text></g>
+<g id="BWA_MEM2_ALIGN"><title>bwa-mem2: Full-read alignment</title>
+<circle class="station" cx="830" cy="330" r="9" stroke="#087f8c"/>
+<text class="label" text-anchor="middle" x="830" y="290">bwa-mem2</text>
+<text class="detail" text-anchor="middle" x="830" y="313">Full-read alignment</text></g>
+<g id="CALL_PEAKS"><title>MACS3 peaks: Assigned control</title>
+<circle class="station" cx="1060" cy="330" r="9" stroke="#ce6030"/>
+<text class="label" text-anchor="middle" x="1060" y="290">MACS3 peaks</text>
+<text class="detail" text-anchor="middle" x="1060" y="313">Assigned control</text></g>
+<g id="QUANTIFY"><title>Quantify: RPM + mean RPKM</title>
+<circle class="station" cx="1290" cy="330" r="9" stroke="#ce6030"/>
+<text class="label" text-anchor="middle" x="1290" y="290">Quantify</text>
+<text class="detail" text-anchor="middle" x="1290" y="313">RPM + mean RPKM</text></g>
+<g id="FASTQC"><title>FastQC: One report per mate</title>
+<circle class="station" cx="600" cy="180" r="9" stroke="#9260b7"/>
+<text class="label" text-anchor="middle" x="600" y="140">FastQC</text>
+<text class="detail" text-anchor="middle" x="600" y="163">One report per mate</text></g>
+<g id="QC"><title>samtools QC: Three metric families</title>
+<circle class="station" cx="1060" cy="180" r="9" stroke="#9260b7"/>
+<text class="label" text-anchor="middle" x="1060" y="140">samtools QC</text>
+<text class="detail" text-anchor="middle" x="1060" y="163">Three metric families</text></g>
+<g id="MULTIQC"><title>MultiQC: HTML + parsed data</title>
+<circle class="station" cx="1290" cy="180" r="9" stroke="#9260b7"/>
+<text class="label" text-anchor="middle" x="1290" y="140">MultiQC</text>
+<text class="detail" text-anchor="middle" x="1290" y="163">HTML + parsed data</text></g>
+<g id="CHROM_SIZES"><title>Chromosome sizes: Verified products</title>
+<circle class="station" cx="140" cy="510" r="9" stroke="#4169b1"/>
+<text class="label" text-anchor="middle" x="140" y="470">Chromosome sizes</text>
+<text class="detail" text-anchor="middle" x="140" y="493">Verified products</text></g>
+<g id="METADATA"><title>Metadata: Genome + read length</title>
+<circle class="station" cx="600" cy="510" r="9" stroke="#087f8c"/>
+<text class="label" text-anchor="middle" x="600" y="470">Metadata</text>
+<text class="detail" text-anchor="middle" x="600" y="493">Genome + read length</text></g>
+<g id="spp"><title>SPP: Separate 50-bp R1</title>
+<circle class="station" cx="830" cy="510" r="9" stroke="#bd527d"/>
+<text class="label" text-anchor="middle" x="830" y="470">SPP</text>
+<text class="detail" text-anchor="middle" x="830" y="493">Separate 50-bp R1</text></g>
+<g id="reference"><title>Exact FASTA: Explicit assembly</title>
+<circle class="station" cx="140" cy="690" r="9" stroke="#4169b1"/>
+<text class="label" text-anchor="middle" x="140" y="650">Exact FASTA</text>
+<text class="detail" text-anchor="middle" x="140" y="673">Explicit assembly</text></g>
+<g id="BWA_MEM2_INDEX"><title>bwa-mem2 index: Verified products</title>
+<circle class="station" cx="370" cy="690" r="9" stroke="#4169b1"/>
+<text class="label" text-anchor="middle" x="370" y="650">bwa-mem2 index</text>
+<text class="detail" text-anchor="middle" x="370" y="673">Verified products</text></g>
+<g id="TRACKS"><title>deepTools tracks: BigWig signal</title>
+<circle class="station" cx="1060" cy="690" r="9" stroke="#438362"/>
+<text class="label" text-anchor="middle" x="1060" y="650">deepTools tracks</text>
+<text class="detail" text-anchor="middle" x="1060" y="673">BigWig signal</text></g>
+<path d="M48 762 H1432" stroke="var(--panel)" stroke-width="2"/>
+<text class="note" x="48" y="798">QC is diagnostic. FastQC warnings do not reject a dataset; SPP is reported separately.</text>
+<text class="note" x="48" y="823">Controls receive QC and tracks; treatments receive peaks and quantification. FASTQs and BAMs stay intermediate.</text>
+<text class="note" x="48" y="848">Routes summarize data dependencies, not runtime. Crossings without a station do not join channels.</text>
+<metadata>Genesis diagram schema 2; main.nf SHA256 c02389565606086b80228b52abd556cee7a3dba79f7e2f92eedda8164dfb2c5d; schematic animation.</metadata></svg>

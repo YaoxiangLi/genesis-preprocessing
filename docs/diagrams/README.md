@@ -9,18 +9,16 @@ The chapter labels are reading guides, not synchronization barriers.
 
 The architecture map distinguishes implemented DAP-seq processing, experimental
 bulk ATAC, tested pseudobulk/multiome contracts and planned barcode processing.
-Dashed lines and explicit text mark work outside the implemented DAP workflow. Biological replicates are not implicitly pooled.
+Solid routes include the available experimental bulk ATAC prototype. Dashed routes mark specified or planned integrations. Biological replicates are not implicitly pooled.
 
 Edit `render_metro.py` to update station labels, data dependencies and layout, then
 run `python docs/diagrams/render_metro.py`. It uses only Python's standard library
-and deterministically generates the static, animated and architecture SVGs.
-The SVG metadata records the SHA256 of the documented `main.nf`; it is not a
+and deterministically generates five static, animated and architecture SVGs.
+The SVG metadata records the SHA256 of each documented workflow (DAP or ATAC); it is not a
 claim about an upstream release. Update a map with its corresponding workflow
 change. Do not depict validation-only features as available in an upstream revision
 which does not contain them.
 
-The original Genesis artwork uses the metro-map visual convention, inspired by
-the [nf-core/rnaseq map](https://github.com/nf-core/rnaseq/blob/master/docs/images/nf-core-rnaseq_metro_map_animated.svg).
 SVG text remains editable and selectable. The assets contain no external fonts,
 scripts, remote resources or raster images. Native CSS animates small route
 markers; the static SVG works without animation. Reduced-motion and print media
