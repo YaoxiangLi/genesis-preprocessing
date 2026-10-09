@@ -1,6 +1,7 @@
 nextflow.enable.dsl = 2
 
 include { validateParameters; paramsSummaryLog } from 'plugin/nf-schema'
+include { dotenv } from 'plugin/nf-dotenv'
 include { VALIDATE_SHEET } from './modules/validate_sheet'
 include { CHROM_SIZES } from './modules/chrom_sizes'
 include { BWA_MEM2_INDEX } from './modules/bwa_mem2_index'
@@ -27,7 +28,22 @@ workflow {
         max_seed_occurrences: params.bwa_max_seed_occurrences,
         score_threshold: params.bwa_score_threshold
     ]
-    VALIDATE_SHEET(Channel.value(sheet), Channel.value(referencesDir))
+    def provenanceScript = file("${projectDir}/genesis_tools/src/genesis_tools/reference_cache.py")
+    def recipeHash = { module ->
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        digest.update(file("${projectDir}/modules/${module}.nf").bytes)
+        digest.update(provenanceScript.bytes)
+        digest.digest().encodeHex().toString()
+    }
+    def generator = dotenv('DAP_SEQ_ALIGNMENT_IMAGE')
+    def sizesRecipe = recipeHash('chrom_sizes')
+    def indexRecipe = recipeHash('bwa_mem2_index')
+    def recipes = [
+        'chrom-sizes': [container: generator, recipe_sha256: sizesRecipe],
+        'bwa-mem2': [container: generator, recipe_sha256: indexRecipe]
+    ]
+    VALIDATE_SHEET(Channel.value(sheet), Channel.value(referencesDir), recipes,
+                   file("${projectDir}/genesis_tools/src"))
     samples = VALIDATE_SHEET.out.sheet.splitCsv(header: true, sep: '\t')
         .map { row ->
             [id: row.sample_id, species: row.species, read1_url: row.read1_url,
@@ -38,7 +54,9 @@ workflow {
         }
     referenceInputs = samples.unique { sample -> sample.ref_id }
         .map { meta ->
-            def ref = [id: meta.ref_id, filename: meta.reference_fasta]
+            def ref = [id: meta.ref_id, filename: meta.reference_fasta,
+                       generator_container: generator, sizes_recipe: sizesRecipe,
+                       index_recipe: indexRecipe]
             tuple(ref, file("${referencesDir}/${ref.filename}", checkIfExists: true))
         }
     sizesBranches = referenceInputs.branch { ref, _fasta ->
@@ -46,7 +64,7 @@ workflow {
                 file("${referencesDir}/${ref.id}.chrom.sizes").size() > 0
         missing: true
     }
-    CHROM_SIZES(sizesBranches.missing)
+    CHROM_SIZES(sizesBranches.missing, provenanceScript)
     sizes_ch = sizesBranches.cached.map { ref, _fasta ->
             tuple(ref.id, ref, file("${referencesDir}/${ref.id}.chrom.sizes"))
         }
@@ -65,7 +83,7 @@ workflow {
     indexInputs = indexBranches.missing.map { ref, fasta -> tuple(ref.id, ref, fasta) }
         .join(genomeLengths, by: 0, failOnDuplicate: true)
         .map { _id, ref, fasta, length -> tuple(ref + [length: length], fasta) }
-    BWA_MEM2_INDEX(indexInputs)
+    BWA_MEM2_INDEX(indexInputs, provenanceScript)
     indexes = indexBranches.cached.map { ref, _fasta ->
             tuple(ref.id, ref, file("${referencesDir}/${ref.id}.bwa-mem2"))
         }

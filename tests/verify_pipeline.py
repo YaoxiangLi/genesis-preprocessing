@@ -783,6 +783,51 @@ def check_bams(work: Path) -> None:
                 assert all(not int(fields[1]) & 1 for fields in records), bam
 
 
+def check_reference_failures(work: Path, sheet: Path, *, docker: bool) -> None:
+    """Reject bad reference caches before DOWNLOAD, using copies of synthetic references."""
+    parent = work / "reference-failures"
+    parent.mkdir()
+    original = {
+        p.relative_to(work / "references"): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in (work / "references").rglob("*")
+        if p.is_file()
+    }
+    for scenario in ("changed-fasta", "missing-provenance", "damaged-index", "id-collision"):
+        case = parent / scenario
+        case.mkdir()
+        references = case / "references"
+        shutil.copytree(work / "references", references)
+        shutil.copy2(work / "limits.config", case / "limits.config")
+        samples = list(csv.DictReader(sheet.open(), delimiter="\t"))
+        if scenario == "changed-fasta":
+            fasta = references / "se.fa.gz"
+            old = fasta.stat()
+            content = gzip.decompress(fasta.read_bytes())
+            fasta.write_bytes(gzip.compress(content.replace(b"A", b"T", 1), mtime=0))
+            os.utime(fasta, ns=(old.st_atime_ns, old.st_mtime_ns))
+        elif scenario == "missing-provenance":
+            (references / "se.chrom.sizes.provenance.json").unlink()
+        elif scenario == "damaged-index":
+            (references / "se.bwa-mem2/genome.ann").write_text("damaged\n")
+        else:
+            shutil.copy2(references / "se.fa.gz", references / "se.fna.gz")
+            control = next(row for row in samples if row["sample_id"] == "se_control")
+            samples.append({**control, "sample_id": "collision", "reference_fasta": "se.fna.gz"})
+        candidate = case / "samples.tsv"
+        write_sheet(candidate, samples)
+        assert run_pipeline(case, candidate, docker=docker, expect_failure=True).returncode != 0
+        diagnostic = (
+            "reference ID collision" if scenario == "id-collision" else "Unverified reference cache"
+        )
+        assert diagnostic in (case / "output-run.log").read_text()
+        assert {row["name"].split(" ")[0] for row in trace_rows(case)} == {"VALIDATE_SHEET"}
+    assert original == {
+        p.relative_to(work / "references"): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in (work / "references").rglob("*")
+        if p.is_file()
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -821,6 +866,7 @@ def main() -> None:
             if args.docker:
                 check_bams(work)
             check_resume(work, sheet, docker=args.docker)
+            check_reference_failures(work, sheet, docker=args.docker)
             assert raw_before == {
                 path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in raw_before
             }

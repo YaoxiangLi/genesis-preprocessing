@@ -28,12 +28,16 @@ pixi run install-all
 Place each sheet's gzipped reference FASTA under `references/`, using the exact
 basename in `reference_fasta`. Reference genomes are not downloaded automatically.
 Nextflow builds missing chromosome-size files and bwa-mem2 indexes once per
-reference, and copies them back to that directory. The first resume after generating references can rerun downstream
-tasks as inputs move to their published cache paths; subsequent resumes reuse
-those task results. Existing nonempty size files
-and complete indexes are reused. Remove derived files and use a fresh work
-directory when replacing a reference; cached reference products are not checked
-against the FASTA's contents.
+reference and publishes checksum provenance beside them. Every invocation,
+including resume, verifies the decompressed FASTA, all derived-product hashes,
+and generator identity before downloads start. Existing products without valid
+provenance stop the run: preserve them and use a fresh reference directory
+containing the exact FASTA to regenerate products. Nothing is silently overwritten.
+Gzip metadata and mtime-only changes do not change FASTA identity. Distinct FASTA
+basenames must not collapse to the same reference ID after removing their suffix.
+The first resume after generating references can rerun downstream tasks as inputs
+move to published paths; subsequent resumes reuse computation. Reference validation
+intentionally runs again, even when all downstream tasks are cached.
 
 Run exactly one sheet per invocation:
 
