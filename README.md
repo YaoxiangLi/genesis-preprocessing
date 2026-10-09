@@ -64,6 +64,18 @@ keeps unresolved problems visible for human review.
 [Execution guide](docs/usage/execution.md) ·
 [Static execution map](docs/images/genesis_execution.svg)
 
+## Create workflow figures
+
+```bash
+pixi run genesis schematic --workflow atac --output atac.svg
+```
+
+Generate illustrated DAP-seq, ATAC and execution schematics in the Genesis
+botanical style. Choose light or dark themes, animate connections, or edit a
+JSON template. Free licensed artwork is bundled for offline use.
+
+[Figure guide and preview](docs/usage/schematics.md)
+
 ## Validate and compare methods
 
 ```bash

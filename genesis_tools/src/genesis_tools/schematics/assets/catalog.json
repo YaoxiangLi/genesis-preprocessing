@@ -1,0 +1,138 @@
+{
+  "dna-2": {
+    "file": "dna-2.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/dna-2.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "a139ce24cefb9684cec278e00afcd295904ececeb4604ec47cb326bc624b0961"
+  },
+  "plant-2": {
+    "file": "plant-2.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/plant-2.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "1919d015b66b571c01d85361aafda26d1abcd88353135e400e1e1e4af7db7c3c"
+  },
+  "database": {
+    "file": "database.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/database.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "7cdcca11c1555d48e19c2fcd2fce4420cbec734f3fa3d28274f8167a796ee0d6"
+  },
+  "download": {
+    "file": "download.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/download.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "c13f6f9cf87deee99e331622169efd59cd764b376994540347e50d6bb5e2e0ef"
+  },
+  "filter": {
+    "file": "filter.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/filter.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "69bbcca665588bd0b64c44c42ced4538b3e3c75a59e3fc46e58b1f10d99d15ec"
+  },
+  "chart-area-line": {
+    "file": "chart-area-line.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/chart-area-line.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "c7c4e6548a60047e5c93b390371f0aa210c62684fc55164aeb4b07a3367a9add"
+  },
+  "report-analytics": {
+    "file": "report-analytics.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/report-analytics.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "eb2c36226f43949a8ce75413d6b4ce8a1d84d23631fe2e20c6f119e4366252ce"
+  },
+  "server": {
+    "file": "server.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/server.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "6c4aa71ca6fd11a738abf7972ad893f808e2e25d6181b5b329784050f95490d2"
+  },
+  "network": {
+    "file": "network.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/network.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "41a8ff03ae456bdbb860aa664ec2c572ef316a60e86bab223e6037b841403d78"
+  },
+  "user-check": {
+    "file": "user-check.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/user-check.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "bbbea83573b85525e35cac636928032ba27d830bee9cbfd229319bff5ccf2251"
+  },
+  "refresh": {
+    "file": "refresh.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/refresh.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "9dd8ab8cac268489501cbb0a106d93cc3f367add493d20c47ec1e1d9804c760a"
+  },
+  "file-description": {
+    "file": "file-description.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/file-description.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "1db30f85efbd331fa3035d638c61deb2f346eac8c5d301aafff11bdecbe6c679"
+  },
+  "git-merge": {
+    "file": "git-merge.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/git-merge.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "e6d8c06c5430d314df1295046760d8515dc553c420680bc1b8e1f2fd57a8756c"
+  },
+  "microscope": {
+    "file": "microscope.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/microscope.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "279fb1bd505b97a6b79514f890bdb6dac4783b06b4b1880ba31e36403bce1a66"
+  },
+  "scissors": {
+    "file": "scissors.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/scissors.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "a2e396becae03724ba9272489b293c94f96d3583e7a2c16c79c139cfe8427659"
+  },
+  "stack-2": {
+    "file": "stack-2.svg",
+    "source": "https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/stack-2.svg",
+    "revision": "a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d",
+    "author": "Pawe\u0142 Kuna and Tabler contributors",
+    "license": "MIT",
+    "sha256": "fbe45033ef093505d88dd56cc421290aebc51a5e9dd6c49b68bda588f4d952d9"
+  },
+  "genesis-seed": {
+    "file": "genesis-seed.svg",
+    "source": "Original Genesis seedling and DNA vector artwork",
+    "revision": "1",
+    "author": "Yaoxiang Li",
+    "license": "MIT",
+    "sha256": "ed7898be10c34a57af8e4c88cbaa300800197c4fea73d95a00c167ecc7a1b292"
+  }
+}

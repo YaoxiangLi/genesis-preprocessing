@@ -26,4 +26,4 @@ error-on-warning = true
 
 
 [tool.setuptools.package-data]
-genesis_tools = ["benchmark/report.html"]
+genesis_tools = ["benchmark/report.html", "schematics/assets/*"]

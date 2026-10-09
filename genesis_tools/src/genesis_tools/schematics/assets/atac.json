@@ -1,0 +1,182 @@
+{
+  "version": 1,
+  "title": "Bulk ATAC-seq",
+  "subtitle": "Paired-end plant libraries, explicit analysis choices and separate biological replicates.",
+  "notes": [
+    "Adapters, MAPQ and duplicate handling are explicit. Plant quality thresholds remain unspecified.",
+    "Peaks use unshifted fragments; cut-site tracks use Tn5 offsets. Selected dependencies are shown."
+  ],
+  "nodes": [
+    {
+      "id": "fastqc",
+      "title": "Raw-read QC",
+      "detail": "FastQC for both raw mates",
+      "icon": "microscope",
+      "col": 1,
+      "row": 0,
+      "kind": "qc"
+    },
+    {
+      "id": "report",
+      "title": "QC report",
+      "detail": "Raw + usable metrics / MultiQC",
+      "icon": "report-analytics",
+      "col": 2,
+      "row": 0,
+      "kind": "qc"
+    },
+    {
+      "id": "reference",
+      "title": "Exact reference",
+      "detail": "Checksummed FASTA and index",
+      "icon": "dna-2",
+      "col": 3,
+      "row": 0,
+      "kind": "reference"
+    },
+    {
+      "id": "reads",
+      "title": "Plant libraries",
+      "detail": "Paired lanes; declared replicates",
+      "icon": "plant-2",
+      "col": 0,
+      "row": 1,
+      "kind": "reads"
+    },
+    {
+      "id": "acquire",
+      "title": "Acquire reads",
+      "detail": "Verify checksums and pairing",
+      "icon": "download",
+      "col": 1,
+      "row": 1,
+      "kind": "reads"
+    },
+    {
+      "id": "adapters",
+      "title": "Adapter choice",
+      "detail": "Full reads or declared adapters",
+      "icon": "scissors",
+      "col": 2,
+      "row": 1,
+      "kind": "reads"
+    },
+    {
+      "id": "align",
+      "title": "Align + mark",
+      "detail": "bwa-mem2 / duplicate marking",
+      "icon": "stack-2",
+      "col": 3,
+      "row": 1,
+      "kind": "reads"
+    },
+    {
+      "id": "tss",
+      "title": "TSS annotation",
+      "detail": "Exact release and positions",
+      "icon": "database",
+      "col": 0,
+      "row": 2,
+      "kind": "reference"
+    },
+    {
+      "id": "enrich",
+      "title": "Enrichment",
+      "detail": "Fragment FRiP and TSS profile",
+      "icon": "report-analytics",
+      "col": 1,
+      "row": 2,
+      "kind": "qc"
+    },
+    {
+      "id": "peaks",
+      "title": "Accessible peaks",
+      "detail": "MACS3 paired-fragment mode",
+      "icon": "chart-area-line",
+      "col": 2,
+      "row": 2,
+      "kind": "results"
+    },
+    {
+      "id": "fragments",
+      "title": "Usable fragments",
+      "detail": "MAPQ, duplicates and organelles",
+      "icon": "filter",
+      "col": 3,
+      "row": 2,
+      "kind": "reads"
+    },
+    {
+      "id": "compare",
+      "title": "Compare libraries",
+      "detail": "Peak overlap; no pooling",
+      "icon": "git-merge",
+      "col": 2,
+      "row": 3,
+      "kind": "results"
+    },
+    {
+      "id": "tracks",
+      "title": "Cut-site tracks",
+      "detail": "Tn5 offsets / raw cut counts",
+      "icon": "chart-area-line",
+      "col": 3,
+      "row": 3,
+      "kind": "results"
+    }
+  ],
+  "edges": [
+    [
+      "reads",
+      "acquire"
+    ],
+    [
+      "acquire",
+      "adapters"
+    ],
+    [
+      "acquire",
+      "fastqc"
+    ],
+    [
+      "fastqc",
+      "report"
+    ],
+    [
+      "reference",
+      "align"
+    ],
+    [
+      "adapters",
+      "align"
+    ],
+    [
+      "align",
+      "report"
+    ],
+    [
+      "align",
+      "fragments"
+    ],
+    [
+      "fragments",
+      "peaks"
+    ],
+    [
+      "peaks",
+      "enrich"
+    ],
+    [
+      "tss",
+      "enrich"
+    ],
+    [
+      "peaks",
+      "compare"
+    ],
+    [
+      "fragments",
+      "tracks"
+    ]
+  ]
+}

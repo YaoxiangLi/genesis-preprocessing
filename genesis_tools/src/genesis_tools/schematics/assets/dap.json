@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "title": "DAP-seq",
+  "subtitle": "From plant DNA binding experiments to peaks, signal and quantitative measurements.",
+  "notes": [
+    "Raw reads stay unchanged. Treatments use their assigned controls; QC supports human review.",
+    "Selected dependencies are shown. SPP uses a separate shortened-read alignment and remains outside MultiQC."
+  ],
+  "nodes": [
+    {
+      "id": "reference",
+      "title": "Exact reference",
+      "detail": "Declared assembly and identity",
+      "icon": "dna-2",
+      "col": 0,
+      "row": 0,
+      "kind": "reference"
+    },
+    {
+      "id": "index",
+      "title": "Reference products",
+      "detail": "Verified index and sizes",
+      "icon": "database",
+      "col": 1,
+      "row": 0,
+      "kind": "reference"
+    },
+    {
+      "id": "fastqc",
+      "title": "Raw-read QC",
+      "detail": "FastQC for each mate",
+      "icon": "microscope",
+      "col": 2,
+      "row": 0,
+      "kind": "qc"
+    },
+    {
+      "id": "report",
+      "title": "QC report",
+      "detail": "FastQC + samtools / MultiQC",
+      "icon": "report-analytics",
+      "col": 3,
+      "row": 0,
+      "kind": "qc"
+    },
+    {
+      "id": "samples",
+      "title": "Plant libraries",
+      "detail": "SE / PE; treatment and control",
+      "icon": "plant-2",
+      "col": 0,
+      "row": 1,
+      "kind": "reads"
+    },
+    {
+      "id": "download",
+      "title": "Acquire reads",
+      "detail": "Validate, download and stage",
+      "icon": "download",
+      "col": 1,
+      "row": 1,
+      "kind": "reads"
+    },
+    {
+      "id": "align",
+      "title": "Align + QC",
+      "detail": "bwa-mem2 and samtools",
+      "icon": "stack-2",
+      "col": 2,
+      "row": 1,
+      "kind": "reads"
+    },
+    {
+      "id": "peaks",
+      "title": "Binding peaks",
+      "detail": "MACS3 with assigned control",
+      "icon": "chart-area-line",
+      "col": 3,
+      "row": 1,
+      "kind": "results"
+    },
+    {
+      "id": "spp",
+      "title": "Strand signal",
+      "detail": "SPP on separate 50-base R1",
+      "icon": "filter",
+      "col": 1,
+      "row": 2,
+      "kind": "qc"
+    },
+    {
+      "id": "tracks",
+      "title": "Signal tracks",
+      "detail": "BigWig coverage",
+      "icon": "chart-area-line",
+      "col": 2,
+      "row": 2,
+      "kind": "results"
+    },
+    {
+      "id": "quant",
+      "title": "Quantification",
+      "detail": "RPM and mean RPKM",
+      "icon": "file-description",
+      "col": 3,
+      "row": 2,
+      "kind": "results"
+    }
+  ],
+  "edges": [
+    [
+      "reference",
+      "index"
+    ],
+    [
+      "index",
+      "align"
+    ],
+    [
+      "samples",
+      "download"
+    ],
+    [
+      "download",
+      "align"
+    ],
+    [
+      "download",
+      "fastqc"
+    ],
+    [
+      "fastqc",
+      "report"
+    ],
+    [
+      "align",
+      "report"
+    ],
+    [
+      "align",
+      "peaks"
+    ],
+    [
+      "download",
+      "spp"
+    ],
+    [
+      "align",
+      "tracks"
+    ],
+    [
+      "peaks",
+      "quant"
+    ]
+  ]
+}

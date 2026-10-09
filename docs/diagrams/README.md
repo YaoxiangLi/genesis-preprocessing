@@ -31,3 +31,7 @@ not the source repository.
 
 The execution map shows local, scheduler and independent-worker routes. It describes
 software capabilities; it does not imply live validation on every named cluster.
+
+Illustrated stage-card figures are also available through `pixi run genesis schematic`.
+See the [schematic guide](../usage/schematics.md) for themes, editable templates
+and the licensed asset catalog. These supplement the detailed metro maps.

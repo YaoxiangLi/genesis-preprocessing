@@ -296,6 +296,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="action", required=True)
     commands.add_parser("doctor")
+    from ..schematics.render import configure
+    from ..schematics.render import execute as schematic
+
+    configure(commands.add_parser("schematic", help="Generate Genesis workflow illustrations"))
     for name in ("run", "resume", "status", "issues", "resolve", "reconcile", "serve"):
         child = commands.add_parser(name)
         child.add_argument("directory", type=Path)
@@ -311,6 +315,12 @@ def main() -> None:
         if name == "serve":
             child.add_argument("--port", type=int, default=8765)
     args = parser.parse_args()
+    if args.action == "schematic":
+        try:
+            schematic(args)
+        except (ValueError, OSError) as error:
+            parser.error(str(error))
+        return
     if args.action == "doctor":
         print(
             json.dumps(

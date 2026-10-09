@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 908" role="img" aria-labelledby="title description">
+<title id="title">Genesis / DAP-seq</title>
+<desc id="description">From plant DNA binding experiments to peaks, signal and quantitative measurements.. Arrows show selected data dependencies; this is not a live execution graph.</desc>
+<style>
+    svg{background:#f6f4ed;font-family:Arial,Helvetica,sans-serif;color:#173c32}
+    text{fill:#173c32}.detail,.subtitle,.note{fill:#52685f}
+    .card{fill:#ffffff;stroke:#d4ddd3;stroke-width:1.5}
+    .route{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+    .flow{fill:none;stroke:#173c32;stroke-width:2;stroke-dasharray:2 24;
+    animation:flow 10s linear infinite}
+    @keyframes flow{to{stroke-dashoffset:-260}}
+    @media(prefers-reduced-motion:reduce){.flow{display:none}}
+    @media print{.flow{display:none}}
+    </style><rect width="1340" height="908" fill="#f6f4ed"/>
+<svg x="54" y="28" width="100" height="120" viewBox="0 0 24 24" fill="none" stroke="#173c32" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V10M12 12C4 13 2 8 3 3C9 3 13 6 12 12ZM12 9C12 4 16 2 21 2C21 8 18 11 12 9Z" />
+<path d="M6 6L12 12M18 5L12 10M8 14C18 16 6 20 16 22M16 14C6 16 18 20 8 22M10 16H14M10 20H14" />
+</svg>
+<text x="180" y="55" font-size="14" letter-spacing="4">GENESIS / PLANT GENOMICS</text>
+<text class="heading" x="180" y="99" font-size="32" font-weight="700">DAP-seq</text>
+<text class="subtitle" x="180" y="130" font-size="16">From plant DNA binding experiments to peaks, signal and quantitative measurements.</text>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="context-stroke" stroke-width="1.5"/></marker></defs>
+<path d="M 314 266 L 349 266 L 349 266 L 384 266" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="reference" data-to="index" d="M 314 266 L 349 266 L 349 266 L 384 266" stroke="#4473a0" marker-end="url(#arrow)"/>
+<path d="M 634 299 L 655 299 L 655 432.4 L 704 432.4" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="index" data-to="align" d="M 634 299 L 655 299 L 655 432.4 L 704 432.4" stroke="#4473a0" marker-end="url(#arrow)"/>
+<path d="M 314 472 L 349 472 L 349 472 L 384 472" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="samples" data-to="download" d="M 314 472 L 349 472 L 349 472 L 384 472" stroke="#147d79" marker-end="url(#arrow)"/>
+<path d="M 634 472 L 669 472 L 669 472 L 704 472" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="download" data-to="align" d="M 634 472 L 669 472 L 669 472 L 704 472" stroke="#147d79" marker-end="url(#arrow)"/>
+<path d="M 634 439 L 683 439 L 683 305.6 L 704 305.6" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="download" data-to="fastqc" d="M 634 439 L 683 439 L 683 305.6 L 704 305.6" stroke="#147d79" marker-end="url(#arrow)"/>
+<path d="M 954 266 L 989 266 L 989 266 L 1024 266" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="fastqc" data-to="report" d="M 954 266 L 989 266 L 989 266 L 1024 266" stroke="#8a63a5" marker-end="url(#arrow)"/>
+<path d="M 954 439 L 1003 439 L 1003 305.6 L 1024 305.6" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="align" data-to="report" d="M 954 439 L 1003 439 L 1003 305.6 L 1024 305.6" stroke="#147d79" marker-end="url(#arrow)"/>
+<path d="M 954 472 L 989 472 L 989 472 L 1024 472" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="align" data-to="peaks" d="M 954 472 L 989 472 L 989 472 L 1024 472" stroke="#147d79" marker-end="url(#arrow)"/>
+<path d="M 484 538 L 484 612" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="download" data-to="spp" d="M 484 538 L 484 612" stroke="#147d79" marker-end="url(#arrow)"/>
+<path d="M 804 538 L 804 612" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="align" data-to="tracks" d="M 804 538 L 804 612" stroke="#147d79" marker-end="url(#arrow)"/>
+<path d="M 1124 538 L 1124 612" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="peaks" data-to="quant" d="M 1124 538 L 1124 612" stroke="#aa6927" marker-end="url(#arrow)"/>
+<g id="stage-reference" class="stage"><rect class="card" x="64" y="200" width="250" height="132" rx="16"/><path d="M82 200 H296" stroke="#4473a0" stroke-width="4"/><svg x="82" y="221" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4473a0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3v1c-.01 3.352 -1.68 6.023 -5.008 8.014c-3.328 1.99 3.336 -2 .008 -.014c-3.328 1.99 -5 4.662 -5.008 8.014v1" />
+  <path d="M17 21.014v-1c-.01 -3.352 -1.68 -6.023 -5.008 -8.014c-3.328 -1.99 3.336 2 .008 .014c-3.328 -1.991 -5 -4.662 -5.008 -8.014v-1" />
+  <path d="M7 4h10" />
+  <path d="M7 20h10" />
+  <path d="M8 8h8" />
+  <path d="M8 16h8" />
+</svg>
+<text class="label" x="132" y="232" font-size="18" font-weight="700">Exact reference</text>
+<text class="detail" x="82" y="288" font-size="14">Declared assembly and identity</text>
+</g>
+<g id="stage-index" class="stage"><rect class="card" x="384" y="200" width="250" height="132" rx="16"/><path d="M402 200 H616" stroke="#4473a0" stroke-width="4"/><svg x="402" y="221" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4473a0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" />
+  <path d="M4 6v6a8 3 0 0 0 16 0v-6" />
+  <path d="M4 12v6a8 3 0 0 0 16 0v-6" />
+</svg>
+<text class="label" x="452" y="232" font-size="18" font-weight="700">Reference products</text>
+<text class="detail" x="402" y="288" font-size="14">Verified index and sizes</text>
+</g>
+<g id="stage-fastqc" class="stage"><rect class="card" x="704" y="200" width="250" height="132" rx="16"/><path d="M722 200 H936" stroke="#8a63a5" stroke-width="4"/><svg x="722" y="221" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8a63a5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21h14" />
+  <path d="M6 18h2" />
+  <path d="M7 18v3" />
+  <path d="M9 11l3 3l6 -6l-3 -3l-6 6" />
+  <path d="M10.5 12.5l-1.5 1.5" />
+  <path d="M17 3l3 3" />
+  <path d="M12 21a6 6 0 0 0 3.715 -10.712" />
+</svg>
+<text class="label" x="772" y="232" font-size="18" font-weight="700">Raw-read QC</text>
+<text class="detail" x="722" y="288" font-size="14">FastQC for each mate</text>
+</g>
+<g id="stage-report" class="stage"><rect class="card" x="1024" y="200" width="250" height="132" rx="16"/><path d="M1042 200 H1256" stroke="#8a63a5" stroke-width="4"/><svg x="1042" y="221" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8a63a5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
+  <path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2" />
+  <path d="M9 17v-5" />
+  <path d="M12 17v-1" />
+  <path d="M15 17v-3" />
+</svg>
+<text class="label" x="1092" y="232" font-size="18" font-weight="700">QC report</text>
+<text class="detail" x="1042" y="288" font-size="14">FastQC + samtools / MultiQC</text>
+</g>
+<g id="stage-samples" class="stage"><rect class="card" x="64" y="406" width="250" height="132" rx="16"/><path d="M82 406 H296" stroke="#147d79" stroke-width="4"/><svg x="82" y="427" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#147d79" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a10 10 0 1 0 20 0" />
+  <path d="M12 19a10 10 0 0 1 10 -10" />
+  <path d="M2 9a10 10 0 0 1 10 10" />
+  <path d="M12 4a9.7 9.7 0 0 1 2.99 7.5" />
+  <path d="M9.01 11.5a9.7 9.7 0 0 1 2.99 -7.5" />
+</svg>
+<text class="label" x="132" y="438" font-size="18" font-weight="700">Plant libraries</text>
+<text class="detail" x="82" y="494" font-size="14">SE / PE; treatment and control</text>
+</g>
+<g id="stage-download" class="stage"><rect class="card" x="384" y="406" width="250" height="132" rx="16"/><path d="M402 406 H616" stroke="#147d79" stroke-width="4"/><svg x="402" y="427" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#147d79" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+  <path d="M7 11l5 5l5 -5" />
+  <path d="M12 4l0 12" />
+</svg>
+<text class="label" x="452" y="438" font-size="18" font-weight="700">Acquire reads</text>
+<text class="detail" x="402" y="494" font-size="14">Validate, download and stage</text>
+</g>
+<g id="stage-align" class="stage"><rect class="card" x="704" y="406" width="250" height="132" rx="16"/><path d="M722 406 H936" stroke="#147d79" stroke-width="4"/><svg x="722" y="427" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#147d79" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l-8 4l8 4l8 -4l-8 -4" />
+  <path d="M4 12l8 4l8 -4" />
+  <path d="M4 16l8 4l8 -4" />
+</svg>
+<text class="label" x="772" y="438" font-size="18" font-weight="700">Align + QC</text>
+<text class="detail" x="722" y="494" font-size="14">bwa-mem2 and samtools</text>
+</g>
+<g id="stage-peaks" class="stage"><rect class="card" x="1024" y="406" width="250" height="132" rx="16"/><path d="M1042 406 H1256" stroke="#aa6927" stroke-width="4"/><svg x="1042" y="427" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#aa6927" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l4 -6l4 2l4 -5l4 4l0 5l-16 0" />
+  <path d="M4 12l3 -4l4 2l5 -6l4 4" />
+</svg>
+<text class="label" x="1092" y="438" font-size="18" font-weight="700">Binding peaks</text>
+<text class="detail" x="1042" y="494" font-size="14">MACS3 with assigned control</text>
+</g>
+<g id="stage-spp" class="stage"><rect class="card" x="384" y="612" width="250" height="132" rx="16"/><path d="M402 612 H616" stroke="#8a63a5" stroke-width="4"/><svg x="402" y="633" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8a63a5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227" />
+</svg>
+<text class="label" x="452" y="644" font-size="18" font-weight="700">Strand signal</text>
+<text class="detail" x="402" y="700" font-size="14">SPP on separate 50-base R1</text>
+</g>
+<g id="stage-tracks" class="stage"><rect class="card" x="704" y="612" width="250" height="132" rx="16"/><path d="M722 612 H936" stroke="#aa6927" stroke-width="4"/><svg x="722" y="633" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#aa6927" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l4 -6l4 2l4 -5l4 4l0 5l-16 0" />
+  <path d="M4 12l3 -4l4 2l5 -6l4 4" />
+</svg>
+<text class="label" x="772" y="644" font-size="18" font-weight="700">Signal tracks</text>
+<text class="detail" x="722" y="700" font-size="14">BigWig coverage</text>
+</g>
+<g id="stage-quant" class="stage"><rect class="card" x="1024" y="612" width="250" height="132" rx="16"/><path d="M1042 612 H1256" stroke="#aa6927" stroke-width="4"/><svg x="1042" y="633" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#aa6927" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" />
+  <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+  <path d="M9 17h6" />
+  <path d="M9 13h6" />
+</svg>
+<text class="label" x="1092" y="644" font-size="18" font-weight="700">Quantification</text>
+<text class="detail" x="1042" y="700" font-size="14">RPM and mean RPKM</text>
+</g>
+<path d="M64 825 H1274" stroke="#d4ddd3"/>
+<text class="note" x="64" y="853" font-size="14">Raw reads stay unchanged. Treatments use their assigned controls; QC supports human review.</text>
+<text class="note" x="64" y="875" font-size="14">Selected dependencies are shown. SPP uses a separate shortened-read alignment and remains outside MultiQC.</text>
+<metadata>{&quot;assets&quot;: {&quot;chart-area-line&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;chart-area-line.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;c7c4e6548a60047e5c93b390371f0aa210c62684fc55164aeb4b07a3367a9add&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/chart-area-line.svg&quot;}, &quot;database&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;database.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;7cdcca11c1555d48e19c2fcd2fce4420cbec734f3fa3d28274f8167a796ee0d6&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/database.svg&quot;}, &quot;dna-2&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;dna-2.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;a139ce24cefb9684cec278e00afcd295904ececeb4604ec47cb326bc624b0961&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/dna-2.svg&quot;}, &quot;download&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;download.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;c13f6f9cf87deee99e331622169efd59cd764b376994540347e50d6bb5e2e0ef&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/download.svg&quot;}, &quot;file-description&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;file-description.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;1db30f85efbd331fa3035d638c61deb2f346eac8c5d301aafff11bdecbe6c679&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/file-description.svg&quot;}, &quot;filter&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;filter.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;69bbcca665588bd0b64c44c42ced4538b3e3c75a59e3fc46e58b1f10d99d15ec&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/filter.svg&quot;}, &quot;genesis-seed&quot;: {&quot;author&quot;: &quot;Yaoxiang Li&quot;, &quot;file&quot;: &quot;genesis-seed.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;1&quot;, &quot;sha256&quot;: &quot;ed7898be10c34a57af8e4c88cbaa300800197c4fea73d95a00c167ecc7a1b292&quot;, &quot;source&quot;: &quot;Original Genesis seedling and DNA vector artwork&quot;}, &quot;microscope&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;microscope.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;279fb1bd505b97a6b79514f890bdb6dac4783b06b4b1880ba31e36403bce1a66&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/microscope.svg&quot;}, &quot;plant-2&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;plant-2.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;1919d015b66b571c01d85361aafda26d1abcd88353135e400e1e1e4af7db7c3c&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/plant-2.svg&quot;}, &quot;report-analytics&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;report-analytics.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;eb2c36226f43949a8ce75413d6b4ce8a1d84d23631fe2e20c6f119e4366252ce&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/report-analytics.svg&quot;}, &quot;stack-2&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;stack-2.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;fbe45033ef093505d88dd56cc421290aebc51a5e9dd6c49b68bda588f4d952d9&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/stack-2.svg&quot;}}, &quot;licenses&quot;: {&quot;GENESIS-ART-LICENSE.txt&quot;: &quot;MIT License\n\nCopyright (c) 2026 Yaoxiang Li\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \&quot;Software\&quot;), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \&quot;AS IS\&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n&quot;, &quot;TABLER-LICENSE.txt&quot;: &quot;MIT License\n\nCopyright (c) 2020-2026 Pawe\u0142 Kuna\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \&quot;Software\&quot;), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \&quot;AS IS\&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n&quot;}, &quot;renderer&quot;: &quot;Genesis botanical schematic v1&quot;, &quot;spec_sha256&quot;: &quot;4ddb9f82ba3cc9037d2a7a9d7f904e5d462cbae6f5f66399dd11f8bf81cbbd53&quot;, &quot;theme&quot;: &quot;light&quot;}</metadata></svg>
