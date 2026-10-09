@@ -14,8 +14,9 @@ Each implementation checkpoint has focused checks before integration. The user s
 See IMPLEMENTATION_BRIEF.md for the extended scope.
 
 Evidence: [validation report](../../validation/reports/curation-foundations-validation.md).
-Live scientific containers, SSH/schedulers and AI/GPU acceptance are explicitly
-NOT RUN or out of scope; completed local checkpoints do not imply those passed.
+At the foundations checkpoint, live scientific containers, SSH/schedulers and
+AI/GPU acceptance were explicitly NOT RUN or out of scope; completed local
+checkpoints do not imply those passed.
 
 
 ## Hybrid extension checkpoints
@@ -27,6 +28,9 @@ NOT RUN or out of scope; completed local checkpoints do not imply those passed.
 - [x] Add evidence-backed metadata proposals, separate review/apply and new revisions.
 - [x] Add bounded deterministic diagnosis and optional explanations without auto-repair.
 - [x] Add synthetic gold cases, fake HTTP, lifecycle and complete offline CLI scenarios.
-- [ ] Complete full regressions, installed-wheel acceptance and documentation checks.
-- [ ] Record exact extension validation evidence and limitations.
+- [x] Complete full regressions, installed-wheel acceptance and documentation checks.
+- [x] Record exact extension validation evidence and limitations.
 - [ ] Publish tested implementation and complete README to GitHub main and verify it.
+
+Extension evidence: [validation report](../../validation/reports/hybrid-llm-validation.md).
+Live API/GPU/SSH acceptance remains NOT RUN; opt-in acceptance runners are included.

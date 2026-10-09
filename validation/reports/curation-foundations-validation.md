@@ -3,7 +3,9 @@
 Date: 2026-10-09. Scope: the agreed Prompts **0–3** (audit, contracts,
 scientific registry, QC and manual review). Source baseline:
 `bb16baca5d9bb09bfff8825fc537fcb125809c07`, branch `main`.
-Implementation changes are uncommitted; no new revision or release is claimed.
+Implementation changes were uncommitted when this evidence was captured; the
+foundation milestone was subsequently committed as `117e5dc`. No release was
+claimed by the original validation run.
 The exact implementation/test/resource hashes, dependency versions and final wheel
 digest are in [environment-and-source.json](../evidence/curation/environment-and-source.json).
 
