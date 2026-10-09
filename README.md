@@ -345,3 +345,11 @@ outputs on the full public datasets remain a separate validation task. Native
 macOS stub traces do not include task runtime metrics; Docker traces do.
 
 See [docs/nextflow-style.md](docs/nextflow-style.md) for module conventions.
+
+## Opt-in method benchmarks
+
+Use `pixi run benchmark` for explicit sensitivity experiments and pinned raw-ATAC
+workflow comparisons. The default synthetic fixtures run without dataset downloads;
+real plant candidate plans remain blocked until reference and input identity are
+resolved. See [benchmark commands, contracts and limitations](benchmarks/README.md).
+Production scientific defaults are unchanged.
