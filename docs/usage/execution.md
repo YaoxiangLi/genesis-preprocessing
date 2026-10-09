@@ -31,8 +31,8 @@ scratch, not a short-lived login session or home filesystem for work files.
 pixi run pipeline-atac samples.tsv --references references.json \
   --profile sherlock,apptainer --config /path/site.config --outdir /scratch/run
 
-# NERSC: creates a temporary, command-scoped Podman-HPC adapter
-scripts/nersc-podman.sh pixi run pipeline-atac samples.tsv \
+# NERSC: the adapter path must be visible from compute nodes
+GENESIS_RUNTIME_DIR=/scratch/run/runtime scripts/nersc-podman.sh pixi run pipeline-atac samples.tsv \
   --references references.json --profile nersc \
   --config /path/site.config --outdir /scratch/run
 
@@ -44,6 +44,11 @@ NERSC submissions are capped at 15 outstanding tasks with five-minute scheduler
 polling and at most one submission per ten seconds. These are conservative
 starting settings, not a throughput guarantee. Administrators manage scheduler
 services, node membership and authentication. Genesis does not configure them.
+The Podman-HPC adapter defaults to `workspace/runtime/` under the launch
+directory. Set `GENESIS_RUNTIME_DIR` to shared project scratch at NERSC; do not
+use controller-local `/tmp`. Successful commands remove their private adapter.
+Failed commands retain it for recovery while queued jobs may still need it.
+
 Remote site execution still requires a live site acceptance run; local tests
 cannot establish scheduler access or site performance.
 

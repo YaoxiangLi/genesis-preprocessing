@@ -57,11 +57,28 @@ def main() -> None:
         fake.chmod(0o755)
         output = subprocess.check_output(
             [str(wrapper), "podman", "info", "two words"],
-            env={**os.environ, "PATH": f"{folder}:{os.environ['PATH']}"},
+            env={
+                **os.environ,
+                "PATH": f"{folder}:{os.environ['PATH']}",
+                "GENESIS_RUNTIME_DIR": str(folder / "shared-runtime"),
+            },
             text=True,
         )
         assert output.splitlines() == ["info", "two words"]
         assert not (folder / "podman").exists()
+        shared = folder / "shared-runtime"
+        failed = subprocess.run(
+            [str(wrapper), "false"],
+            env={
+                **os.environ,
+                "PATH": f"{folder}:{os.environ['PATH']}",
+                "GENESIS_RUNTIME_DIR": str(shared),
+            },
+            capture_output=True,
+            text=True,
+        )
+        assert failed.returncode == 1 and "retained for recovery" in failed.stderr
+        assert len(list(shared.glob("podman.*/podman"))) == 1
     print("PASS: local default, seven parsed deployment profiles and scoped Podman-HPC adapter")
 
 
