@@ -6,13 +6,34 @@ supports human review, and optionally uses external APIs or private LLM services
 metadata proposals and failure explanations. Use one server or a controller with
 independent authenticated workers. Nextflow remains responsible for scientific computation.
 
-**AI is optional.** Validation, search, QC and manual review work offline. Models
-cannot approve datasets, change scientific parameters, execute shell/SQL or retry jobs.
-The model-serving backend has offline lifecycle tests; real GPU/SSH deployment and
-live API acceptance are **NOT RUN** in the current extension validation report.
+## Architecture and Current Capabilities
+
+Follow plant reads through scientific processing to reusable results, then opt into
+validation, cataloging and review. Run on one server or distribute independent
+datasets across authenticated workers.
+
+[![Genesis architecture: plant reads and explicit references enter DAP-seq or bulk ATAC-seq pipelines; results feed validation, registry, human review and reviewed export. Optional AI exchanges evidence and proposals; a controller supports local or SSH workers.](docs/images/genesis_architecture_overview.svg)](docs/images/genesis_architecture_overview.svg)
+
+**AI is optional.** Models suggest metadata and explanations; deterministic checks
+and accountable human review govern changes. Core processing and manual curation
+work without AI. [Open the full-size, editable diagram](docs/images/genesis_architecture_overview.svg).
+
+**Implemented** means code is available. **Validated** names the evidence and its
+limits. **Planned** identifies remaining validation, not completed work. Evidence
+snapshot: **2026-10-09**.
+
+| Capability | Implemented | Validated | Planned / next validation |
+| --- | --- | --- | --- |
+| [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Historical Docker runs and public ATAC subsets; current regressions ([scientific evidence](validation/reports/supported-atac-execution-validation.md), [current checks](validation/reports/hybrid-llm-validation.md)) | — |
+| [Controller / workers](docs/usage/execution.md) | Yes | Local isolation, retries, recovery and deployment-profile parsing ([evidence](validation/reports/supported-atac-execution-validation.md)) | Live SSH / scheduler site acceptance |
+| [Validation / registry](docs/usage/curation.md) | Yes | Binary formats, provenance, migrations, backup/restore and installed-package checks ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
+| [QC / human review / export](docs/usage/curation.md) | Yes | Offline workflow, stale-decision rejection, export eligibility and immutable history ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
+| [Metadata / AI assistant / diagnosis](docs/usage/ai-providers.md) | Yes | Synthetic cases, mock providers and fake HTTP; real biological accuracy **not evaluated** ([evidence](validation/reports/hybrid-llm-validation.md)) | Live provider acceptance and expert-reviewed metadata evaluation |
+| [Private LLM deployment](docs/usage/llm-deployment.md) | Yes | Offline lifecycle, resource conflicts, ownership and failure simulations; live GPU/SSH **not run** ([evidence](validation/reports/hybrid-llm-validation.md)) | Real GPU / SSH deployment acceptance |
 
 ## Contents
 
+- [Architecture and Current Capabilities](#architecture-and-current-capabilities)
 - [Install and check your environment](#install-and-check-your-environment)
 - [Try the complete offline tutorial](#try-the-complete-offline-tutorial)
 - [Process DAP-seq](#process-dap-seq)
