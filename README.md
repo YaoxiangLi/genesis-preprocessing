@@ -75,6 +75,10 @@ paths with recorded values. Curation/AI commands print JSON by default and accep
 `--json`; use `--help` on each subcommand. First-time environment installation can
 need network access; the subsequent offline tutorial does not.
 
+**Continuing development on another server?** Follow the
+[development handoff](docs/development.md) for a fresh clone, environment setup,
+checks, implementation context and the boundary between Git and local run data.
+
 ## Try the complete offline tutorial
 
 This creates two tiny, explicitly synthetic DAP/ATAC artifact catalogs, verifies
