@@ -21,6 +21,7 @@ def configure(parser: argparse.ArgumentParser) -> None:
         child.add_argument("directory", type=Path)
         child.add_argument("dataset")
         child.add_argument("--json", action="store_true")
+        child.add_argument("--scope", choices=("inputs", "results"), default="results")
         if name == "ingest":
             child.add_argument("--source", type=Path, action="append", default=[])
             child.add_argument("--accession", action="append", default=[])
@@ -43,7 +44,12 @@ def configure(parser: argparse.ArgumentParser) -> None:
 def execute(args: argparse.Namespace) -> tuple[Any, int]:
     if args.operation == "ingest":
         return harmonize.ingest(
-            args.directory, args.dataset, args.source, args.accession, args.classification
+            args.directory,
+            args.dataset,
+            args.source,
+            args.accession,
+            args.classification,
+            scope=args.scope,
         ), 0
     if args.operation == "propose":
         if bool(args.config) != bool(args.provider) or args.fields and args.provider:
@@ -53,13 +59,16 @@ def execute(args: argparse.Namespace) -> tuple[Any, int]:
             args.dataset,
             select(args.config, args.provider) if args.config else None,
             args.fields,
+            scope=args.scope,
         )
         if args.output:
             dump(args.output, result, immutable=True)
         return result, 0
     if args.operation == "apply":
-        return harmonize.apply(args.directory, args.dataset, args.target, args.output), 0
-    with contextlib.closing(store.connect(args.directory)) as db:
+        return harmonize.apply(
+            args.directory, args.dataset, args.target, args.output, scope=args.scope
+        ), 0
+    with contextlib.closing(store.connect(args.directory, scope=args.scope)) as db:
         proposal = store.get(db, "proposal", args.target)
         if proposal["data"]["dataset_id"] != args.dataset:
             raise ValueError("Proposal belongs to another dataset")

@@ -15,7 +15,7 @@ from typing import Any
 
 from ..contracts.records import canonical, fingerprint, identity, loads, now, record, validate
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 MIGRATIONS = {
     1: [
         "CREATE TABLE meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)",
@@ -97,20 +97,83 @@ MIGRATIONS = {
         "CREATE INDEX records_kind_version ON records(kind,version)",
         "CREATE TABLE service_heads (id TEXT PRIMARY KEY,plan TEXT NOT NULL,state TEXT NOT NULL)",
     ],
+    4: [
+        "CREATE TABLE input_heads (dataset TEXT PRIMARY KEY REFERENCES datasets(id),"
+        "version TEXT NOT NULL,manifest TEXT NOT NULL,metadata TEXT NOT NULL,"
+        "source_bundle TEXT,canonical_revision TEXT,result_manifest TEXT,result_input TEXT)",
+        "CREATE TABLE input_decisions (sequence INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "dataset TEXT REFERENCES datasets(id),category TEXT,action TEXT,version TEXT UNIQUE,"
+        "body TEXT NOT NULL)",
+        "CREATE TRIGGER immutable_input_decisions_update BEFORE UPDATE ON input_decisions "
+        "BEGIN SELECT RAISE(ABORT,'immutable decision'); END",
+        "CREATE TRIGGER immutable_input_decisions_delete BEFORE DELETE ON input_decisions "
+        "BEGIN SELECT RAISE(ABORT,'immutable decision'); END",
+        "CREATE INDEX input_decisions_target ON input_decisions(dataset,category,sequence DESC)",
+        "CREATE TABLE study_collections (study TEXT,plan TEXT,job TEXT,attempt INTEGER,"
+        "spec TEXT,receipt TEXT NOT NULL,PRIMARY KEY(study,plan,job,attempt,spec))",
+    ],
 }
 
 
-def connect(directory: Path, *, readonly: bool = True) -> sqlite3.Connection:
+class Connection(sqlite3.Connection):
+    """A connection selects one explicit review scope; no process-global routing."""
+
+    scope: str = "results"
+
+
+def scope_of(db: sqlite3.Connection) -> str:
+    return getattr(db, "scope", "results")
+
+
+@contextlib.contextmanager
+def scoped(db: sqlite3.Connection, scope: str) -> Iterator[None]:
+    if not isinstance(db, Connection) or scope not in {"inputs", "results"}:
+        raise ValueError("A scoped registry connection is required")
+    before = db.scope
+    db.scope = scope
+    try:
+        yield
+    finally:
+        db.scope = before
+
+
+def input_state(db: sqlite3.Connection, dataset: str) -> dict[str, Any] | None:
+    if db.execute("PRAGMA user_version").fetchone()[0] < 4:
+        return None
+    row = db.execute("SELECT * FROM input_heads WHERE dataset=?", (dataset,)).fetchone()
+    return dict(row) if row else None
+
+
+def heads_table(db: sqlite3.Connection) -> str:
+    return "input_heads" if scope_of(db) == "inputs" else "metadata_heads"
+
+
+def decisions_table(db: sqlite3.Connection) -> str:
+    return "input_decisions" if scope_of(db) == "inputs" else "decisions"
+
+
+def connect(
+    directory: Path, *, readonly: bool = True, scope: str = "results"
+) -> sqlite3.Connection:
+    if scope not in {"inputs", "results"}:
+        raise ValueError("Unknown review scope")
     path = directory.resolve() / "registry.sqlite"
     db = sqlite3.connect(
-        path.as_uri() + ("?mode=ro" if readonly else "?mode=rw"), uri=True, timeout=30
+        path.as_uri() + ("?mode=ro" if readonly else "?mode=rw"),
+        uri=True,
+        timeout=30,
+        factory=Connection,
     )
+    db.scope = scope
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys=ON")
     version = db.execute("PRAGMA user_version").fetchone()[0]
     if version > SCHEMA_VERSION or version < 1:
         db.close()
         raise ValueError("Unsupported registry schema; use init to initialize/migrate")
+    if scope == "inputs" and version < 4:
+        db.close()
+        raise ValueError("Run registry init to enable input review")
     if readonly:
         db.execute("PRAGMA query_only=ON")
     return db
@@ -137,8 +200,8 @@ def lock(directory: Path) -> Iterator[None]:
 
 
 @contextlib.contextmanager
-def write(directory: Path) -> Iterator[sqlite3.Connection]:
-    with lock(directory), contextlib.closing(connect(directory, readonly=False)) as db:
+def write(directory: Path, *, scope: str = "results") -> Iterator[sqlite3.Connection]:
+    with lock(directory), contextlib.closing(connect(directory, readonly=False, scope=scope)) as db:
         if db.execute("PRAGMA user_version").fetchone()[0] != SCHEMA_VERSION:
             raise ValueError("Run registry init to migrate before writing")
         with db:
@@ -208,7 +271,39 @@ def current(db: sqlite3.Connection, dataset: str) -> dict[str, Any]:
     row = db.execute("SELECT * FROM datasets WHERE id=?", (dataset,)).fetchone()
     if not row:
         raise ValueError("Unknown dataset ID")
-    return dict(row)
+    result = dict(row)
+    if scope_of(db) == "inputs":
+        head = db.execute("SELECT * FROM input_heads WHERE dataset=?", (dataset,)).fetchone()
+        if not head:
+            raise ValueError("Dataset has no registered input revision")
+        manifest = get(db, "manifest", head["manifest"])["data"]
+        result.update(
+            manifest=head["manifest"],
+            metadata=head["metadata"],
+            validation=None,
+            assessment=None,
+            worker=manifest["worker"],
+            name=manifest["name"],
+            species=manifest["species"],
+            reference_id=manifest["reference"]["id"],
+        )
+    return result
+
+
+def update_metadata(db: sqlite3.Connection, dataset: str, metadata: dict[str, Any]) -> None:
+    text = canonical(metadata)
+    if scope_of(db) == "inputs":
+        db.execute("UPDATE input_heads SET metadata=? WHERE dataset=?", (text, dataset))
+        head = db.execute(
+            "SELECT result_manifest FROM input_heads WHERE dataset=?", (dataset,)
+        ).fetchone()
+        if head and head[0]:
+            return
+    db.execute("UPDATE datasets SET metadata=? WHERE id=?", (text, dataset))
+    if db.execute("SELECT value FROM meta WHERE key='fts5'").fetchone()[0] == "true":
+        name = db.execute("SELECT name FROM datasets WHERE id=?", (dataset,)).fetchone()[0]
+        db.execute("DELETE FROM search_text WHERE id=?", (dataset,))
+        db.execute("INSERT INTO search_text VALUES(?,?)", (dataset, text + " " + name))
 
 
 def entity(
@@ -261,7 +356,15 @@ def import_bundle(directory: Path, value: dict[str, Any]) -> dict[str, int]:
                 entity(db, key, "lane", data["source_id"], canonical(lane), data["study"])
                 db.execute("INSERT OR IGNORE INTO relations VALUES(?,?,'lane')", (dataset, key))
             db.execute("INSERT OR IGNORE INTO workers VALUES(?, '{}')", (data["worker"],))
-            existing = db.execute("SELECT manifest FROM datasets WHERE id=?", (dataset,)).fetchone()
+            existing = db.execute(
+                "SELECT manifest,metadata FROM datasets WHERE id=?", (dataset,)
+            ).fetchone()
+            metadata = data["metadata"]
+            if existing:
+                before = get(db, "manifest", existing[0])["data"]["metadata"]
+                # Preserve curator changes; decisions still become stale when evidence changes.
+                edits = {k: v for k, v in loads(existing[1]).items() if before.get(k) != v}
+                metadata = {**metadata, **edits}
             validation = pairs.get((dataset, manifest["version"]))
             if not existing:
                 db.execute(
@@ -276,7 +379,7 @@ def import_bundle(directory: Path, value: dict[str, Any]) -> dict[str, int]:
                         data["worker"],
                         manifest["version"],
                         validation["version"] if validation else None,
-                        canonical(data["metadata"]),
+                        canonical(metadata),
                     ),
                 )
             elif existing[0] != manifest["version"]:
@@ -304,7 +407,7 @@ def import_bundle(directory: Path, value: dict[str, Any]) -> dict[str, int]:
                         data["worker"],
                         manifest["version"],
                         validation["version"] if validation else None,
-                        canonical(data["metadata"]),
+                        canonical(metadata),
                         dataset,
                     ),
                 )
@@ -338,7 +441,7 @@ def import_bundle(directory: Path, value: dict[str, Any]) -> dict[str, int]:
                 db.execute("DELETE FROM search_text WHERE id=?", (dataset,))
                 db.execute(
                     "INSERT INTO search_text VALUES(?,?)",
-                    (dataset, canonical(data["metadata"]) + " " + data["name"]),
+                    (dataset, canonical(metadata) + " " + data["name"]),
                 )
             added += 1
         put(db, value)

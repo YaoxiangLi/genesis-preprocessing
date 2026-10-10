@@ -27,6 +27,7 @@ def configure(parser: argparse.ArgumentParser) -> None:
         child = commands.add_parser(name)
         child.add_argument("directory", type=Path)
         child.add_argument("--json", action="store_true")
+        child.add_argument("--scope", choices=("inputs", "results"), default="results")
         child.set_defaults(curation_handler=execute)
         if name == "propose":
             child.add_argument("--file", type=Path, required=True)
@@ -52,7 +53,7 @@ def configure(parser: argparse.ArgumentParser) -> None:
 
 def execute(args: argparse.Namespace) -> tuple[Any, int]:
     if args.operation == "propose":
-        return review.submit(args.directory, load(args.file)), 0
+        return review.submit(args.directory, load(args.file), scope=args.scope), 0
     if args.operation in {"approve", "reject", "request-info"}:
         return review.decide(
             args.directory,
@@ -64,11 +65,20 @@ def execute(args: argparse.Namespace) -> tuple[Any, int]:
             load(args.evidence)["evidence"] if args.evidence else [],
             args.target,
             load(args.profile) if args.profile else None,
+            scope=args.scope,
         ), 0
-    with contextlib.closing(store.connect(args.directory)) as db:
+    with contextlib.closing(store.connect(args.directory, scope=args.scope)) as db:
         db.execute("BEGIN")
         if args.operation == "queue":
             rows = store.search(db, after=args.after, limit=args.limit)
+            if args.scope == "inputs":
+                rows = [
+                    r
+                    for r in rows
+                    if db.execute(
+                        "SELECT 1 FROM input_heads WHERE dataset=?", (r["id"],)
+                    ).fetchone()
+                ]
             return {
                 "results": [
                     review.status(db, row["id"])
@@ -82,7 +92,8 @@ def execute(args: argparse.Namespace) -> tuple[Any, int]:
                 raise ValueError("Invalid pagination")
             rows = db.execute(
                 (
-                    "SELECT sequence,body FROM decisions WHERE dataset=? AND sequence>? ORDER "
+                    f"SELECT sequence,body FROM {store.decisions_table(db)} "
+                    "WHERE dataset=? AND sequence>? ORDER "
                     "BY sequence LIMIT ?"
                 ),
                 (args.dataset, args.after, args.limit),

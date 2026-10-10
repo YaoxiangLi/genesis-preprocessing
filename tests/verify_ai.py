@@ -341,12 +341,14 @@ def metadata_checks(root: Path) -> None:
     rejects(lambda: assistant.tool(directory, "sql", {"sql": "DROP TABLE datasets"}), "Unsupported")
     # Actual prior schema and populated scientific/approval history survive migration and restore.
     with sqlite3.connect(directory / "registry.sqlite") as db:
+        for table in ("input_heads", "input_decisions", "study_collections"):
+            db.execute(f"DROP TABLE {table}")
         db.execute("DROP TABLE metadata_heads")
         db.execute("DROP TABLE service_heads")
         db.execute("DROP INDEX records_kind_version")
         db.execute("PRAGMA user_version=2")
     store.initialize(directory)
-    assert list(directory.glob("before-v2-to-v3-*.sqlite"))
+    assert list(directory.glob("before-v2-to-v4-*.sqlite"))
     backup = root / "backup.sqlite"
     store.backup(directory, backup)
     restored = root / "restored"

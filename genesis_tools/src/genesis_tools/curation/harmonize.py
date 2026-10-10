@@ -120,7 +120,13 @@ def retrieve(accession: str) -> tuple[str, str, str]:
 
 
 def ingest(
-    directory: Path, dataset: str, paths: list[Path], accessions: list[str], classification: str
+    directory: Path,
+    dataset: str,
+    paths: list[Path],
+    accessions: list[str],
+    classification: str,
+    *,
+    scope: str = "results",
 ) -> dict[str, Any]:
     if classification not in CLASSIFICATIONS or not paths and not accessions:
         raise ValueError("Provide source files/accessions and a valid classification")
@@ -148,10 +154,10 @@ def ingest(
         sources.append(source_record(text, url, media))
     if sum(len(s["data"]["snapshot"]) for s in sources) > 8 * MAX_SOURCE:
         raise ValueError("Source bundle exceeds 16 MiB")
-    with store.write(directory) as db:
+    with store.write(directory, scope=scope) as db:
         row = store.current(db, dataset)
         head = db.execute(
-            "SELECT source_bundle FROM metadata_heads WHERE dataset=?", (dataset,)
+            f"SELECT source_bundle FROM {store.heads_table(db)} WHERE dataset=?", (dataset,)
         ).fetchone()
         # Re-ingestion extends evidence instead of silently discarding earlier sources.
         if head and head[0]:
@@ -191,17 +197,24 @@ def ingest(
         for source in sources:
             store.put(db, source, dataset)
         store.put(db, value, dataset)
-        db.execute(
-            "INSERT INTO metadata_heads VALUES(?,?,NULL) ON CONFLICT(dataset) DO "
-            "UPDATE SET source_bundle=excluded.source_bundle",
-            (dataset, value["version"]),
-        )
+        if scope == "inputs":
+            db.execute(
+                "UPDATE input_heads SET source_bundle=? WHERE dataset=?",
+                (value["version"], dataset),
+            )
+        else:
+            db.execute(
+                f"INSERT INTO {store.heads_table(db)}(dataset,source_bundle,canonical_revision) "
+                "VALUES(?,?,NULL) ON CONFLICT(dataset) DO "
+                "UPDATE SET source_bundle=excluded.source_bundle",
+                (dataset, value["version"]),
+            )
     return value
 
 
 def head(db: sqlite3.Connection, dataset: str) -> dict[str, Any]:
     row = db.execute(
-        "SELECT source_bundle FROM metadata_heads WHERE dataset=?", (dataset,)
+        f"SELECT source_bundle FROM {store.heads_table(db)} WHERE dataset=?", (dataset,)
     ).fetchone()
     if not row or not row[0]:
         raise ValueError("Ingest source evidence for this dataset first")
@@ -396,8 +409,10 @@ def propose(
     dataset: str,
     config: dict[str, Any] | None = None,
     fields_file: Path | None = None,
+    *,
+    scope: str = "results",
 ) -> dict[str, Any]:
-    with contextlib.closing(store.connect(directory)) as db:
+    with contextlib.closing(store.connect(directory, scope=scope)) as db:
         row = store.current(db, dataset)
         bundle = head(db, dataset)
     fields = extract(bundle, loads(row["metadata"]))
@@ -446,12 +461,14 @@ def propose(
         "invocation": invocation["version"] if invocation else None,
     }
     proposal = record("proposal", data, identity("proposal", fingerprint(data)), version=2)
-    return review.submit(directory, proposal)
+    return review.submit(directory, proposal, scope=scope)
 
 
-def apply(directory: Path, dataset: str, target: str, output: Path) -> dict[str, Any]:
+def apply(
+    directory: Path, dataset: str, target: str, output: Path, *, scope: str = "results"
+) -> dict[str, Any]:
     """Publish a new immutable metadata/input revision; never rewrite a campaign or raw source."""
-    with store.write(directory) as db:
+    with store.write(directory, scope=scope) as db:
         proposal = store.get(db, "proposal", target)
         if proposal["schema_version"] != 2 or proposal["data"]["dataset_id"] != dataset:
             raise ValueError("Apply requires this dataset's version 2 proposal")
@@ -465,7 +482,7 @@ def apply(directory: Path, dataset: str, target: str, output: Path) -> dict[str,
                 "An explicit current human approval of this exact proposal is required"
             )
         prior = db.execute(
-            "SELECT canonical_revision FROM metadata_heads WHERE dataset=?", (dataset,)
+            f"SELECT canonical_revision FROM {store.heads_table(db)} WHERE dataset=?", (dataset,)
         ).fetchone()
         if prior and prior[0]:
             previous = store.get(db, "metadata_revision", prior[0])
@@ -516,15 +533,9 @@ def apply(directory: Path, dataset: str, target: str, output: Path) -> dict[str,
         # differs.
         dump(output, revision, immutable=True)
         store.put(db, revision, dataset)
-        db.execute("UPDATE datasets SET metadata=? WHERE id=?", (canonical(metadata), dataset))
+        store.update_metadata(db, dataset, metadata)
         db.execute(
-            "UPDATE metadata_heads SET canonical_revision=? WHERE dataset=?",
+            f"UPDATE {store.heads_table(db)} SET canonical_revision=? WHERE dataset=?",
             (revision["version"], dataset),
         )
-        if db.execute("SELECT value FROM meta WHERE key='fts5'").fetchone()[0] == "true":
-            db.execute("DELETE FROM search_text WHERE id=?", (dataset,))
-            db.execute(
-                "INSERT INTO search_text VALUES(?,?)",
-                (dataset, canonical(metadata) + " " + row["name"]),
-            )
     return revision

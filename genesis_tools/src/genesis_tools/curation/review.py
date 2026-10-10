@@ -41,7 +41,8 @@ def profile() -> dict[str, Any]:
 
 def latest(db: sqlite3.Connection, dataset: str, category: str) -> dict[str, Any] | None:
     row = db.execute(
-        "SELECT body FROM decisions WHERE dataset=? AND category=? ORDER BY sequence DESC LIMIT 1",
+        f"SELECT body FROM {store.decisions_table(db)} WHERE dataset=? AND category=? "
+        "ORDER BY sequence DESC LIMIT 1",
         (dataset, category),
     ).fetchone()
     return loads(row[0]) if row else None
@@ -60,18 +61,40 @@ def bindings(
     }
     if db.execute("PRAGMA user_version").fetchone()[0] >= 3:
         source = db.execute(
-            "SELECT source_bundle FROM metadata_heads WHERE dataset=?", (dataset,)
+            f"SELECT source_bundle FROM {store.heads_table(db)} WHERE dataset=?", (dataset,)
         ).fetchone()
         if source:
             result["source_bundle"] = source[0]
+    if store.scope_of(db) == "inputs":
+        result["scope"] = "inputs"
     if category in {"qc", "eligibility"}:
         result.update(validation=row["validation"], assessment=row["assessment"])
     if category == "eligibility":
         result["profile"] = (export_profile or profile())["version"]
+        if inherited_input(db, dataset):
+            with store.scoped(db, "inputs"):
+                result["input_token"] = token(db, dataset)
         for name in ("metadata", "qc"):
             previous = latest(db, dataset, name)
             result[name + "_decision"] = previous["version"] if previous else None
     return result
+
+
+def inherited_input(db: sqlite3.Connection, dataset: str) -> dict[str, Any] | None:
+    if store.scope_of(db) != "results":
+        return None
+    head = store.input_state(db, dataset)
+    row = store.current(db, dataset)
+    if (
+        not head
+        or head["result_manifest"] != row["manifest"]
+        or head["result_input"] != head["version"]
+    ):
+        return None
+    metadata = loads(row["metadata"])
+    if any(metadata.get(k) != v for k, v in loads(head["metadata"]).items()):
+        return None
+    return head
 
 
 def effective(
@@ -82,6 +105,9 @@ def effective(
 ) -> str:
     decision = latest(db, dataset, category)
     if not decision:
+        if category == "metadata" and inherited_input(db, dataset):
+            with store.scoped(db, "inputs"):
+                return effective(db, dataset, category)
         return "UNREVIEWED"
     if (
         category == "metadata"
@@ -91,7 +117,8 @@ def effective(
         proposal = store.get(db, "proposal", decision["data"]["target"])
         if proposal["schema_version"] == 2:
             head = db.execute(
-                "SELECT source_bundle,canonical_revision FROM metadata_heads WHERE dataset=?",
+                f"SELECT source_bundle,canonical_revision FROM {store.heads_table(db)} "
+                "WHERE dataset=?",
                 (dataset,),
             ).fetchone()
             if head and head[1]:
@@ -119,9 +146,11 @@ def effective(
 def token(db: sqlite3.Connection, dataset: str) -> str:
     row = store.current(db, dataset)
     decisions = [latest(db, dataset, category) for category in CATEGORIES]
-    return fingerprint(
-        {"current": row, "decisions": [d["version"] if d else None for d in decisions]}
-    )
+    data = {"current": row, "decisions": [d["version"] if d else None for d in decisions]}
+    if store.scope_of(db) == "results" and inherited_input(db, dataset):
+        with store.scoped(db, "inputs"):
+            data["input_token"] = token(db, dataset)
+    return fingerprint(data)
 
 
 def status(db: sqlite3.Connection, dataset: str) -> dict[str, Any]:
@@ -146,10 +175,14 @@ def status(db: sqlite3.Connection, dataset: str) -> dict[str, Any]:
             )
             else "STALE"
         )
+    execution = store.get(db, "manifest", row["manifest"])["data"]["run"]["execution_state"]
+    head = store.input_state(db, dataset)
+    if store.scope_of(db) == "inputs" or head and not head["result_manifest"]:
+        execution = "NOT_RUN"
     return {
         "dataset_id": dataset,
         "manifest_version": row["manifest"],
-        "execution": store.get(db, "manifest", row["manifest"])["data"]["run"]["execution_state"],
+        "execution": execution,
         "structural": structural,
         "qc": scientific,
         "reviews": {category: effective(db, dataset, category) for category in CATEGORIES},
@@ -167,7 +200,7 @@ def check_evidence(db: sqlite3.Connection, dataset: str, evidence: list[dict[str
     sources = list(manifest["sources"])
     if db.execute("PRAGMA user_version").fetchone()[0] >= 3:
         head = db.execute(
-            "SELECT source_bundle FROM metadata_heads WHERE dataset=?", (dataset,)
+            f"SELECT source_bundle FROM {store.heads_table(db)} WHERE dataset=?", (dataset,)
         ).fetchone()
         if head and head[0]:
             bundle = store.get(db, "source_bundle", head[0])["data"]
@@ -218,14 +251,14 @@ def check_evidence(db: sqlite3.Connection, dataset: str, evidence: list[dict[str
                 ) from error
 
 
-def submit(directory: Path, proposal: dict[str, Any]) -> dict[str, Any]:
+def submit(directory: Path, proposal: dict[str, Any], *, scope: str = "results") -> dict[str, Any]:
     validate(proposal, "proposal")
     data = proposal["data"]
     if proposal["schema_version"] == 1 and set(data["changes"]) - DESCRIPTIVE:
         raise ValueError(
             "Only descriptive metadata can be revised; scientific inputs remain immutable"
         )
-    with store.write(directory) as db:
+    with store.write(directory, scope=scope) as db:
         row = store.current(db, data["dataset_id"])
         if row["manifest"] != data["manifest_version"]:
             raise ValueError("Proposal targets a stale manifest")
@@ -248,13 +281,20 @@ def decide(
     evidence: list[dict[str, Any]],
     target: str | None = None,
     export_profile: dict[str, Any] | None = None,
+    *,
+    scope: str = "results",
 ) -> dict[str, Any]:
+    if scope == "inputs" and category != "metadata":
+        raise ValueError("Input review supports metadata only; QC needs execution results")
     if category not in CATEGORIES or action not in {"approve", "reject", "request-info"}:
         raise ValueError("Unsupported review decision")
     if not reason.strip():
         raise ValueError("A nonempty accountable reason is required")
     export_profile = validate(export_profile, "profile") if export_profile else profile()
-    with store.write(directory) as db:
+    with store.write(directory, scope=scope) as db:
+        head = store.input_state(db, dataset)
+        if scope == "results" and head and not head["result_manifest"]:
+            raise ValueError("Results do not exist; review metadata with --scope inputs")
         if token(db, dataset) != expected_token:
             raise ValueError("Stale review token; inspect current evidence before deciding")
         row = store.current(db, dataset)
@@ -281,15 +321,7 @@ def decide(
                     raise ValueError("Dataset is not eligible: " + "; ".join(issues))
             if proposal and proposed_record["schema_version"] == 1:
                 metadata = {**loads(row["metadata"]), **proposal["changes"]}
-                db.execute(
-                    "UPDATE datasets SET metadata=? WHERE id=?", (canonical(metadata), dataset)
-                )
-                if db.execute("SELECT value FROM meta WHERE key='fts5'").fetchone()[0] == "true":
-                    db.execute("DELETE FROM search_text WHERE id=?", (dataset,))
-                    db.execute(
-                        "INSERT INTO search_text VALUES(?,?)",
-                        (dataset, canonical(metadata) + " " + row["name"]),
-                    )
+                store.update_metadata(db, dataset, metadata)
         bound = bindings(db, dataset, category, export_profile)
         decision = ReviewDecision(
             dataset,
@@ -312,7 +344,8 @@ def decide(
         if category == "eligibility":
             store.put(db, export_profile, dataset)
         db.execute(
-            "INSERT INTO decisions(dataset,category,action,version,body) VALUES(?,?,?,?,?)",
+            f"INSERT INTO {store.decisions_table(db)}"
+            "(dataset,category,action,version,body) VALUES(?,?,?,?,?)",
             (dataset, category, action, decision["version"], canonical(decision)),
         )
     return decision
@@ -383,7 +416,8 @@ def reviewed_export(
             metadata = loads(row["metadata"])
             metadata_head = (
                 db.execute(
-                    "SELECT source_bundle,canonical_revision FROM metadata_heads WHERE dataset=?",
+                    f"SELECT source_bundle,canonical_revision FROM {store.heads_table(db)} "
+                    "WHERE dataset=?",
                     (dataset,),
                 ).fetchone()
                 if db.execute("PRAGMA user_version").fetchone()[0] >= 3
@@ -405,6 +439,7 @@ def reviewed_export(
                     "metadata_revision": store.get(db, "metadata_revision", metadata_head[1])
                     if metadata_head and metadata_head[1]
                     else None,
+                    "input_curation": input_evidence(db, dataset),
                     "invocations": [
                         store.get(db, "invocation", p["data"]["invocation"])
                         for p in proposals
@@ -440,4 +475,26 @@ def reviewed_export(
         "location_semantics": (
             "worker-qualified observations; consumers must recheck bytes before use"
         ),
+    }
+
+
+def input_evidence(db: sqlite3.Connection, dataset: str) -> dict[str, Any] | None:
+    head = inherited_input(db, dataset)
+    if not head:
+        return None
+    with store.scoped(db, "inputs"):
+        decision = latest(db, dataset, "metadata")
+    return {
+        "input_manifest": store.get(db, "input_manifest", head["version"]),
+        "metadata": loads(head["metadata"]),
+        "decision": decision,
+        "proposal": store.get(db, "proposal", decision["data"]["target"])
+        if decision and decision["data"]["target"]
+        else None,
+        "source_bundle": store.get(db, "source_bundle", head["source_bundle"])
+        if head["source_bundle"]
+        else None,
+        "metadata_revision": store.get(db, "metadata_revision", head["canonical_revision"])
+        if head["canonical_revision"]
+        else None,
     }
