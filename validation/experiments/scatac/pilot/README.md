@@ -73,6 +73,9 @@ archive metadata only; it does not download the atlas's sequencing files.
 `final_review.py` checks the completed acceptance receipts, source freeze,
 publication file sizes, credential patterns and documentation links. It does not
 rerun biological processing or replace the full regression suite.
+For Git publication, `prepare_public_evidence.py` retains the original TSV bytes,
+normalizes only the public copies to quoted LF records, and verifies exact parsed
+field equality. The original and published checksums are both recorded.
 
 `record.py` wraps commands with complete stdout/stderr and GNU time measurements.
 Its receipt records the starting Git SHA and scATAC source hashes. The diff hash
