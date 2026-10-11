@@ -1,0 +1,6 @@
+x <- readRDS('/data/atlas.RDS')
+id <- attr(x,'active.ident')
+print(table(id))
+write.table(data.frame(cell_id=names(id),author_active_label=as.character(id)),'/out/active-labels.tsv',sep='\t',row.names=FALSE,quote=FALSE)
+print(names(attr(x,'misc')));print(names(attr(x,'tools')))
+if(file.exists('/sys/fs/cgroup/memory.peak')) print(readLines('/sys/fs/cgroup/memory.peak'))
