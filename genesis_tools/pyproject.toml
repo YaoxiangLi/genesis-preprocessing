@@ -27,4 +27,4 @@ error-on-warning = true
 
 
 [tool.setuptools.package-data]
-genesis_tools = ["benchmark/report.html", "schematics/assets/*", "contracts/schemas/*.json", "qc_policy/policies/*.json", "llm/schemas/*.json", "llm/prompts/*.txt", "curation/vocabularies/*.json"]
+genesis_tools = ["benchmark/report.html", "schematics/assets/*", "scatac/assets/*", "contracts/schemas/*.json", "qc_policy/policies/*.json", "llm/schemas/*.json", "llm/prompts/*.txt", "curation/vocabularies/*.json"]
