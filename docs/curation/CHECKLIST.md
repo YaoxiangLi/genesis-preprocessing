@@ -49,8 +49,9 @@ Live API/GPU/SSH acceptance remains NOT RUN; opt-in acceptance runners are inclu
 - [x] Exercise real local supervision, real bigWig reading and synthetic reviewed export.
 - [x] Document each study command, recovery, migration and worker configuration.
 - [x] Record final full-suite and installed-wheel acceptance evidence.
-- [ ] Publish and verify a fresh GitHub checkout.
+- [x] Publish and verify a fresh GitHub checkout.
 
 Evidence: [study workflow report](../../validation/reports/study-workflow-validation.md).
+Publication and fresh installation: [GitHub handoff evidence](../../validation/evidence/study-workflow/github-checkout.json).
 Live SSH/scheduler, real sequencing through the new coordinator, live APIs and GPU
 services remain separate acceptance work; local fixtures do not establish these passed.

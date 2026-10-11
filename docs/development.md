@@ -173,6 +173,13 @@ Its [validation report](../validation/reports/study-workflow-validation.md) reco
 current source revisions, full checks, real bigWig validation, packaging and publication
 evidence. The earlier handoff below remains historical evidence for its named revision.
 
+A fresh GitHub clone of `a85ba7f` installed successfully and passed all 170 README/guide
+command checks, study acceptance with the separate binary reader, and the existing
+offline tutorial. All 411 tracked files matched the published checkout and it remained
+clean. The full clone/install/focused acceptance took 39.048 seconds using existing
+package caches on this Linux host. [Commands and per-step results](../validation/evidence/study-workflow/github-checkout.json)
+record the scope; this is not acceptance on an unspecified destination server.
+
 For focused development, run:
 
 ```bash

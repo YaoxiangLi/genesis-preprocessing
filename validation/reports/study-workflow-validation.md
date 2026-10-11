@@ -25,6 +25,7 @@ and compatibility decisions.
 | `tests/verify_curation_artifacts.py --bigwig-python /tmp/genesis-bigwig-env/bin/python` | **PASS**: actual BAM/bigWig, corrupt formats, reference mismatch, bounded scans and worker separation | 1.506 s |
 | Build/install wheel and run outside checkout | **PASS**: shipped schemas 1/2/3, seven study subcommand help pages, full study acceptance with binary reader, existing offline tutorial | 36.034 s, including build/install |
 | README and usage recipes | **PASS**: 170 documented commands parse; linked local files exist | Included in full suite |
+| Fresh GitHub clone/install/focused acceptance | **PASS**: all tracked bytes match; installed CLI, documentation, study/binary tests and offline tutorial; checkout remains clean | 39.048 s |
 | Architecture overview | **PASS**: 57 native browser labels, no overlap/panel escape/connector crossing; 11 licensed asset hashes; responsive light/dark embedding at 1040/390 px | Not benchmarked |
 | Scientific-source comparison against baseline | **PASS**: no changes to `main.nf`, workflows, modules, profiles, ATAC scientific code, samples or reference-cache implementation | Not benchmarked |
 
@@ -56,6 +57,24 @@ Imports resolved to installed `site-packages`; torch, vLLM and pyBigWig were abs
 from that core environment. The optional binary reader remained a separate interpreter.
 The existing offline tutorial exported two synthetic datasets with six explicit
 demonstration decisions; its pipeline/live-inference status remained `NOT RUN`.
+
+## GitHub handoff
+
+The implementation and documentation were published to GitHub `main` at
+`a85ba7fe6ee1690f318136f8beb7d4145195afc1`. GitHub's API returned matching bytes for
+the README, study guide, architecture SVG and study CLI. GitHub Markdown rendering
+included the new workflow section, capability row and linked execution template.
+[Publication receipt](../evidence/study-workflow/publication.json).
+
+A separate clone at `/tmp/genesis-study-github-msr5_g3m/repository` installed new
+project environments, passed help/doctor, the 170 documented recipes, study acceptance
+with the binary reader, and the existing two-dataset offline tutorial. All 411 tracked
+files matched the published checkout byte for byte; `git status --porcelain` was empty
+after the checks. [Per-step results](../evidence/study-workflow/github-checkout.json)
+and [timing/log receipt](../evidence/study-workflow/github-handoff.json) record exact
+commands. This used the same Linux host and existing package caches, not a different
+server or an uncached network installation. The follow-up publication adds this
+evidence and handoff documentation without changing the tested implementation.
 
 ## What the new acceptance establishes
 
