@@ -1,14 +1,15 @@
 # Genesis plant sequencing and curation
 
 Genesis processes plant **DAP-seq** and **paired-end bulk ATAC-seq** into QC reports,
-peaks and signal tracks. It also validates artifacts, catalogs scientific provenance,
+peaks and signal tracks. It also turns **single-cell ATAC fragments** into cell-type
+signals while keeping biological replicates separate. Genesis catalogs provenance,
 supports human review, and optionally uses external APIs or private LLM services for
-metadata proposals and failure explanations. Use one server or a controller with
-independent authenticated workers. Nextflow remains responsible for scientific computation.
+metadata proposals and failure explanations. DAP-seq and bulk ATAC use Nextflow on
+one server or through authenticated workers. The scATAC fragment commands run locally.
 
 ## Architecture and Current Capabilities
 
-Start with a prepared study: register inputs, optionally review metadata, inspect a
+For DAP-seq and bulk ATAC, start with a prepared study: register inputs, optionally review metadata, inspect a
 campaign plan, run scientific processing, and collect validated results for review
 and export. Run on one server or distribute independent datasets across authenticated
 workers. The standalone pipeline commands remain available.
@@ -21,12 +22,12 @@ work without AI. [Open the full-size, editable diagram](docs/images/genesis_arch
 
 **Implemented** means code is available. **Validated** names the evidence and its
 limits. **Planned** identifies remaining validation, not completed work. Evidence
-snapshot: **2026-10-10**.
+snapshot: **2026-10-11**.
 
 | Capability | Implemented | Validated | Planned / next validation |
 | --- | --- | --- | --- |
 | [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Historical Docker runs and public ATAC subsets; current regressions ([scientific evidence](validation/reports/supported-atac-execution-validation.md), [current checks](validation/reports/hybrid-llm-validation.md)) | — |
-| [Single-cell ATAC fragments](docs/usage/scatac.md) | Inventory, ingestion, replicate-preserving pseudobulks and model exports | Deterministic fixtures, pinned peak/track tools and both model loaders ([evidence](validation/reports/scatac-delivery-validation.md)) | Reference/annotation resolution and reviewed Arabidopsis/Sorghum release |
+| [Single-cell ATAC fragments](docs/usage/scatac.md) | Study discovery, ingestion, cell-type signals and model exports | Two biological replicates per species; 24 Arabidopsis/Sorghum groups and 48 actual model-loader checks ([evidence](validation/reports/scatac-completion.md)) | Scientific review, documented reference caveats and plant model training |
 | [Controller / workers](docs/usage/execution.md) | Yes | Local isolation, retries, recovery and deployment-profile parsing ([evidence](validation/reports/supported-atac-execution-validation.md)) | Live SSH / scheduler site acceptance |
 | [Complete prepared-study workflow](docs/usage/studies.md) | Yes | Input review → immutable plans → local workers → automatic collection → reviewed export, with synthetic output writers and real bigWig validation ([evidence](validation/reports/study-workflow-validation.md)) | Live SSH and real sequencing acceptance through the new coordinator |
 | [Validation / registry](docs/usage/curation.md) | Yes | Binary formats, provenance, migrations, backup/restore and installed-package checks ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
@@ -42,6 +43,7 @@ snapshot: **2026-10-10**.
 - [Run a prepared study from inputs to reviewed results](#run-a-prepared-study-from-inputs-to-reviewed-results)
 - [Process DAP-seq](#process-dap-seq)
 - [Process bulk ATAC-seq](#process-bulk-atac-seq)
+- [Process single-cell ATAC fragments](#process-single-cell-atac-fragments)
 - [Run on a cluster or independent workers](#run-on-a-cluster-or-independent-workers)
 - [Validate inputs and artifacts](#validate-inputs-and-artifacts)
 - [Import, search and back up the registry](#import-search-and-back-up-the-registry)
@@ -242,6 +244,24 @@ or single-cell barcode processing is implied.
 ![Bulk ATAC workflow](docs/images/genesis_atac_metro_map_animated.svg)
 
 [Exact column/reference definitions and output paths](docs/usage/bulk-atac.md).
+
+## Process single-cell ATAC fragments
+
+Start with fragment files, an exact reference and cell annotations. Run ingestion,
+cell-type grouping and model export on a standalone Linux server:
+
+```bash
+pixi run genesis scatac ingest --manifest library.json --output fragments/library-1
+pixi run genesis scatac pseudobulk --input fragments/library-1 --annotations cells.jsonl --policy policy.json --output pseudobulk
+pixi run genesis scatac products --input pseudobulk/TASK_ID --output products/TASK_ID
+pixi run genesis scatac model export --input products/TASK_ID --config model.json --output models/TASK_ID
+```
+
+The [scATAC guide](docs/usage/scatac.md) covers study discovery, input contracts,
+QC, resume, registry review and release assembly. The [model handoff](docs/usage/scatac-model-handoff.md)
+explains the separate Cherimoya and ChromBPNet adapters. Unknown cell labels and
+missing QC remain visible; file-format compatibility does not approve a dataset
+for training. Raw-read reconstruction requires a declared protocol-specific workflow.
 
 ## Run on a cluster or independent workers
 

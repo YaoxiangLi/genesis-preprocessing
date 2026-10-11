@@ -4,6 +4,8 @@ Date: 2026-10-10. Baseline: `37ef72069b8205cd4ce263d4b62139c943d42e02`.
 Branch: `feature/scatac-delivery`. New implementation hashes and complete command
 logs are retained under `results/incremental-prs/` outside Git. This is a software
 validation and public-source audit, **not a completed two-species model-ready release**.
+The subsequent implementation and real-data pilot are documented in
+[scATAC completion](scatac-completion.md). Observations below describe this earlier revision.
 
 ## Implemented and tested
 

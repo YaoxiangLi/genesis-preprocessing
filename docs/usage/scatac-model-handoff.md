@@ -79,6 +79,49 @@ This supports data loading without renaming the genome. It does not establish
 compatibility with the unmodified ChromBPNet training CLI for numeric contigs.
 Use the bundle's declared windows and configure training separately.
 
+## Starting training after review
+
+Keep each biological replicate as a separate task. Choose the training task and
+review its cells, reference, QC and chromosome folds before configuring a model.
+The test fold is reserved for final evaluation, including during parameter tuning.
+The pilot's zero jitter is part of the validated context boundary; changing it
+requires a new export and boundary validation.
+
+For Cherimoya, construct train and validation `PeakGenerator` instances from their
+respective BEDs. Disable reverse complementation and shuffling for validation.
+With no controls, each batch is `(sequence, counts, positive_label)`. Pass the
+training generator's `.dataset` and the collected validation tensors to
+`cherimoya.training.fit(model, training_data, X_valid, y_valid,
+labels_valid=labels_valid, ...)`. Configure `Cherimoya(signal_groups=[1],
+n_control_tracks=0, trimming=(input_window-output_window)//2, ...)` so its output
+length matches the bundle. Record architecture, optimizer, seed and training
+resources separately. Size the validation tensor allocation before loading it.
+
+For ChromBPNet, construct the typed train and validation batch generators above
+with `return_coords=False`. Supply the selected bias model and explicit model
+parameters to the pinned `chrombpnet.training.train.get_model` API, then pass the
+resulting model and architecture module to `fit_and_evaluate`. This avoids the
+numeric-contig parser in the high-level initializer. Model parameter files must
+agree with the bundle's windows, folds and jitter. Record the training negative
+sampling ratio explicitly; the loader checks use a 1:1 ratio. Bias model selection
+and counts-loss calibration are still required; the pilot does not provide a
+trained plant bias model.
+
+These training entry points were inspected in the pinned source. Acceptance tests
+exercise their data loaders, not optimization or checkpoint quality. Save the
+export checksum, model commit, training configuration and resulting checkpoints
+together when the modeling group runs training.
+
+## Handoff checklist
+
+- Verify bundle checksums and rerun the pinned loader check on the receiving server.
+- Review the exact reference, source cells, author labels and biological replicate.
+- Review measured QC and missing evidence without substituting human QC cutoffs.
+- Approve chromosome folds and assess homology leakage for the intended model task.
+- Record the bias model where required, training settings and registry review decisions.
+
+Keep the release in candidate status until the required decisions are recorded.
+
 ## Reproduce loader acceptance
 
 The real-tool fixture generator is `tests/validate_scatac_products.py`. Export its

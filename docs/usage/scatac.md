@@ -57,6 +57,11 @@ Five-column support counts and optional sixth-column strand are preserved.
 Duplicate library/barcode/interval rows are rejected for review, not silently removed.
 The Chromap adapter also requires the MAPQ, duplicate, trimming, barcode translation
 and command provenance used to create the fragments.
+Counts describe the supplied fragments and declared contig lists. The ingestion
+category `nuclear` means outside the listed mitochondrial/plastid contigs. Zero
+organellar rows do not establish a zero organellar fraction in the original
+library, especially when the reference omits those contigs or upstream processing
+already removed them. Keep unavailable original-library QC as unknown.
 
 Cells are keyed by **library + barcode**. The existing
 [cell contract](../../validation/design/scatac-metadata-schema.yaml) governs
@@ -117,11 +122,15 @@ Adapters target Cherimoya `8ecf7f791ec07c05a701076cc58a0f845bf97609` and ChromBP
 SHA, even input/output window sizes, jitter, and explicit train/validation/test
 chromosomes. No human chromosome defaults are supplied. The export includes a
 FASTA, sizes, raw-count bigWig, summit-centered peak regions, deterministic
-genomic background tiles, cell membership, QC and parent provenance.
-Choose `nonoverlapping-genome-tiles-v1` or `gc-matched-genome-tiles-v1` explicitly.
+genomic background regions, cell membership, QC and parent provenance.
+Choose `nonoverlapping-genome-tiles-v1`, `gc-matched-genome-tiles-v1` or the explicit
+stride-based `gc-matched-genome-windows-v1` method.
 GC matching requires `background_seed` and records the matching differences;
 insufficient background space is an error. Chromosome folds prevent coordinate-window
 leakage; sequence-homology leakage remains a separate modeling concern.
+GC is `(G + C) / window length`. Ambiguous reference bases are retained, and
+`backgrounds.json` counts affected candidate and positive windows. Review that
+policy alongside the selected model's sequence encoding.
 
 Both adapters expose one unstranded channel without a control track. ChromBPNet
 requires a recorded bias-model plan; exporting files does not supply or validate
