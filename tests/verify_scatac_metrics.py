@@ -73,6 +73,11 @@ def main() -> None:
         assert report["folds"]["train"]["gc_percentage_point_differences"] == {0: 2}
         assert backgrounds.match(fasta, positive, candidate, 100, 7) == (matched, report)
         rejects(backgrounds.match, fasta, positive, {"train": [row(500)]}, 100, 7)
+        ordered = {"train": [row(100)], "test": [row(100)]}
+        pools = {split: [row(center) for center in range(50, 151, 10)] for split in ordered}
+        expected = backgrounds.match(fasta, ordered, pools, 100, 7)
+        reversed_folds = dict(reversed(list(ordered.items())))
+        assert backgrounds.match(fasta, reversed_folds, pools, 100, 7) == expected
         data: dict[str, Any] = {
             "group": {
                 "identity": {"study_id": "toy", "biological_replicate_id": "r1", "cell_type": "A"},

@@ -53,7 +53,9 @@ def match(
                 set(seq) - set("ACGT")
             )
 
-        for split, peaks in positives.items():
+        # JSON object order is not part of the content identity. It must not alter RNG use.
+        for split in sorted(positives):
+            peaks = positives[split]
             pools: dict[int, list[str]] = defaultdict(list)
             excluded = 0
             for row in candidates[split]:
