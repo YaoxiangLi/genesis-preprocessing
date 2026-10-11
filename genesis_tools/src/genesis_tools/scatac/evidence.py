@@ -9,6 +9,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from ..contracts.records import dump, fingerprint, load
+from . import discovery
 
 COMPONENTS = ("fragments", "cell_annotations", "reference_compatibility", "biological_replicates")
 AVAILABILITY = (*COMPONENTS, "fastq", "cell_barcodes", "processed_matrices")
@@ -46,7 +47,7 @@ def attach(directory: Path, source: Path) -> dict[str, Any]:
     inventory = load(directory / "inventory.json")
     known = {
         r["values"].get("bioproject") or r["values"].get("study_accession")
-        for r in inventory["data"]["rows"]
+        for r in discovery.rows(directory, inventory["data"]["rows"])
     }
     if set(value["studies"]) - known:
         raise ValueError("Evidence references a study absent from this inventory")
