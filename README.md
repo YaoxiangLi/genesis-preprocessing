@@ -26,6 +26,7 @@ snapshot: **2026-10-10**.
 | Capability | Implemented | Validated | Planned / next validation |
 | --- | --- | --- | --- |
 | [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Historical Docker runs and public ATAC subsets; current regressions ([scientific evidence](validation/reports/supported-atac-execution-validation.md), [current checks](validation/reports/hybrid-llm-validation.md)) | — |
+| [Single-cell ATAC fragments](docs/usage/scatac.md) | Inventory, ingestion, replicate-preserving pseudobulks and model exports | Deterministic fixtures, pinned peak/track tools and both model loaders ([evidence](validation/reports/scatac-delivery-validation.md)) | Reference/annotation resolution and reviewed Arabidopsis/Sorghum release |
 | [Controller / workers](docs/usage/execution.md) | Yes | Local isolation, retries, recovery and deployment-profile parsing ([evidence](validation/reports/supported-atac-execution-validation.md)) | Live SSH / scheduler site acceptance |
 | [Complete prepared-study workflow](docs/usage/studies.md) | Yes | Input review → immutable plans → local workers → automatic collection → reviewed export, with synthetic output writers and real bigWig validation ([evidence](validation/reports/study-workflow-validation.md)) | Live SSH and real sequencing acceptance through the new coordinator |
 | [Validation / registry](docs/usage/curation.md) | Yes | Binary formats, provenance, migrations, backup/restore and installed-package checks ([evidence](validation/reports/hybrid-llm-validation.md)) | — |

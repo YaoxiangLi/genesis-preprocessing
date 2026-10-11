@@ -20,7 +20,13 @@ DOCS = [
     ROOT / "README.md",
     *(
         ROOT / "docs/usage" / name
-        for name in ("curation.md", "ai-providers.md", "llm-deployment.md", "studies.md")
+        for name in (
+            "curation.md",
+            "ai-providers.md",
+            "llm-deployment.md",
+            "studies.md",
+            "scatac.md",
+        )
     ),
 ]
 
