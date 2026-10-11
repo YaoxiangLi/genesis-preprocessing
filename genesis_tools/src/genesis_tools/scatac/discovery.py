@@ -104,7 +104,9 @@ def sample(
         for v in values
         if v != "NONE"
     ]
-    atac = bool(re.search(r"ATAC|chromatin accessibility", title, re.I))
+    atac = bool(re.search(r"ATAC|chromatin accessibility", title, re.I)) or any(
+        v.casefold() == "atac-seq" for v in fields.get("Sample_library_strategy", [])
+    )
     # Fragment files are direct evidence of an ATAC product, unlike generic processing prose.
     atac = atac or any("fragments.tsv" in v for v in files)
     values = {

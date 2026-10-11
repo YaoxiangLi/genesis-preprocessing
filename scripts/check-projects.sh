@@ -33,6 +33,8 @@ uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_readm
 
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_study.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_inventory.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_discovery.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_metrics.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_fragments.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_pseudobulk.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_exports.py"

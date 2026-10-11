@@ -56,7 +56,7 @@ ATAC cut convention. Do not run an additional fragment-to-track shift on them.
 
 The real-tool fixture generator is `tests/validate_scatac_products.py`. Export its
 products with a config naming the exact target SHA, input window 2114, output
-window 1000, jitter 0, no controls, `nonoverlapping-genome-tiles-v1` background,
+window 1000, jitter 0, no controls, `gc-matched-genome-tiles-v1` background with seed 7,
 and folds `chr1` / `chr2` / `chr3`. For ChromBPNet declare the unsupplied fixture
 bias model explicitly.
 
@@ -64,13 +64,15 @@ Frozen Cherimoya IO dependencies are in
 `validation/environments/scatac-loaders/`. Run:
 
 ```bash
-pixi run uv run --frozen --project validation/environments/scatac-loaders python validation/experiments/scatac/cherimoya_loader.py --model-root ../benchmarks/cherimoya --bundle ../results/scatac-products-fixture/cherimoya
+pixi run genesis scatac model validate --input models/cherimoya/TASK_ID --model-root ../benchmarks/cherimoya --output loader-tests/cherimoya/TASK_ID
+pixi run genesis scatac model validate --input models/chrombpnet/TASK_ID --model-root ../benchmarks/chrombpnet --output loader-tests/chrombpnet/TASK_ID
 ```
 
-`validation/experiments/scatac/chrombpnet_loader.py` takes the same arguments and
-runs in the recorded ChromBPNet container. Both scripts test all three folds with
-a positive and a background window. Exact recorded Docker arguments and timings
-are in `validation/reports/scatac-command-summary.json`.
+The ChromBPNet check uses an immutable Docker image; the Cherimoya check uses
+the frozen IO environment. Both test all three folds with a positive and a
+background window. Each result retains commands, versions, logs and checksums.
+Repeat with `--resume` to verify reuse. The complete fixture check is
+`tests/validate_scatac_loaders.py`; it also verifies registry and release gates.
 
 The deterministic fixture should yield 600 counts in each positive window and
 zero in its background. Those values validate the fixture only; they are not

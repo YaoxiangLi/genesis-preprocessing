@@ -120,6 +120,18 @@ def main() -> None:
         value["bindings"]["inventory_version"] = "stale"
         rejected(identities.validate, directory, value)
         rejected(discovery.soft, "<html>temporary archive error</html>")
+        # Archive modality remains evidence when the title contains only a sample name.
+        unnamed = discovery.sample(
+            "GSM11111",
+            "GSE11111",
+            "PRJNA11111",
+            {
+                "Sample_title": ["Root replicate 1"],
+                "Sample_library_strategy": ["ATAC-seq"],
+                "Sample_organism_ch1": [discovery.SPECIES[0]],
+            },
+        )
+        assert unnamed["classification"] == "ATAC_CANDIDATE"
         rejected(discovery.geo_url, "GSE1&api_key=invalid")
         cached = discovery.Archive(directory / "cache")
         rejected(cached.get, "https://example.org/private")
