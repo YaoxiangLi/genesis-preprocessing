@@ -52,6 +52,30 @@ ChromBPNet needs a suitable bias model and its own training configuration. No
 human bias model is chosen automatically. Exported bigWigs already use the audited
 ATAC cut convention. Do not run an additional fragment-to-track shift on them.
 
+Keep chromosome names as strings. The pinned ChromBPNet training CLI infers
+numeric names such as Arabidopsis `1` as integers, which can discard chromosome
+folds or fail during FASTA/bigWig lookup. Genesis tests its actual batch generator
+with explicitly typed tables, preserving the original reference names:
+
+```python
+import pandas as pd
+from chrombpnet.training.data_generators.batchgen_generator import ChromBPNetBatchGenerator
+
+columns = ["chr", "start", "end", "name", "score", "strand", "signal", "p", "q", "summit"]
+peaks = pd.read_csv("train.peaks.bed", sep="\t", names=columns, dtype={"chr": str})
+background = pd.read_csv("train.background.bed", sep="\t", names=columns, dtype={"chr": str})
+loader = ChromBPNetBatchGenerator(
+    peak_regions=peaks, nonpeak_regions=background, genome_fasta="genome.fa",
+    batch_size=64, inputlen=2114, outputlen=1000, max_jitter=0,
+    negative_sampling_ratio=1, cts_bw_file="signal.bw", add_revcomp=False,
+    return_coords=True, shuffle_at_epoch_start=False,
+)
+```
+
+This supports data loading without renaming the genome. It does not establish
+compatibility with the unmodified ChromBPNet training CLI for numeric contigs.
+Use the bundle's declared windows and configure training separately.
+
 ## Reproduce loader acceptance
 
 The real-tool fixture generator is `tests/validate_scatac_products.py`. Export its
@@ -73,6 +97,8 @@ the frozen IO environment. Both test all three folds with a positive and a
 background window. Each result retains commands, versions, logs and checksums.
 Repeat with `--resume` to verify reuse. The complete fixture check is
 `tests/validate_scatac_loaders.py`; it also verifies registry and release gates.
+Generate a second product fixture with `--numeric-chromosomes` to exercise
+Arabidopsis-style names through both actual loaders.
 
 The deterministic fixture should yield 600 counts in each positive window and
 zero in its background. Those values validate the fixture only; they are not

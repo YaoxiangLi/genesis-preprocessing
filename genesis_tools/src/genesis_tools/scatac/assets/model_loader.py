@@ -107,7 +107,11 @@ def main() -> None:
                     "q",
                     "summit",
                 ]
-                regions = [pd.read_csv(p, sep="\t", names=columns) for p in paths]
+                # Plant references may use numeric names. Preserve identifiers exactly:
+                # pandas inference can turn "1" into an integer or strip leading zeros.
+                regions = [
+                    pd.read_csv(p, sep="\t", names=columns, dtype={"chr": str}) for p in paths
+                ]
                 loader = io.ChromBPNetBatchGenerator(
                     regions[0],
                     regions[1],
@@ -159,6 +163,7 @@ def main() -> None:
                     "counts": counts,
                     "per_base_signal": "PASS",
                     "per_base_sequence": "PASS",
+                    "chromosomes": [row[0] for row in selected],
                 }
             )
     result = {

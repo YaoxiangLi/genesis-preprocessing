@@ -17,13 +17,17 @@ def main() -> None:
     parser.add_argument("--references", type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
+    chromosomes = list(load(args.input / "metadata.json")["reference"]["contigs"])
+    assert len(chromosomes) == 3  # The three-contig real-tool fixture.
     bundles = {}
     for target, sha in model.MODELS.items():
         config = {
             "schema_version": 1,
             "target": target,
             "model_sha": sha,
-            "folds": {"train": ["chr1"], "validation": ["chr2"], "test": ["chr3"]},
+            "folds": dict(
+                zip(("train", "validation", "test"), ([c] for c in chromosomes), strict=True)
+            ),
             "input_window": 2114,
             "output_window": 1000,
             "max_jitter": 0,
@@ -42,6 +46,9 @@ def main() -> None:
         validation = args.output / (target + "-loader")
         result = loaders.run(bundle, args.references / target, validation)
         assert result["manifest"]["data"]["loader_test"] == "PASS"
+        assert [
+            fold["chromosomes"] for fold in result["manifest"]["data"]["evidence"]["folds"]
+        ] == [[chrom, chrom] for chrom in chromosomes]
         assert loaders.run(bundle, args.references / target, validation, resume=True)["cached"]
         assert model.validate(bundle)["context_windows"] == "PASS"
         bundles[target] = {"bundle": str(bundle.resolve()), "validation": str(validation.resolve())}
