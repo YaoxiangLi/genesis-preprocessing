@@ -1,0 +1,25 @@
+{
+  "comparison": [
+    {
+      "target": "chrombpnet",
+      "task": "genesis-task-v1-12b34b09a2a9e9c578d71a003e56b946a5c041d4b013ffc1d9a128fd8d09613e",
+      "all_bundle_artifacts_byte_identical": true
+    },
+    {
+      "target": "chrombpnet",
+      "task": "genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e",
+      "all_bundle_artifacts_byte_identical": true
+    },
+    {
+      "target": "cherimoya",
+      "task": "genesis-task-v1-12b34b09a2a9e9c578d71a003e56b946a5c041d4b013ffc1d9a128fd8d09613e",
+      "all_bundle_artifacts_byte_identical": true
+    },
+    {
+      "target": "cherimoya",
+      "task": "genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e",
+      "all_bundle_artifacts_byte_identical": true
+    }
+  ],
+  "interpretation": "The pilot already serialized fold keys canonically; fixing arbitrary input-key order preserves its individual bundle artifacts."
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "captured_utc": "2026-10-11T07:08:42.213017+00:00",
+  "archived_files": 53,
+  "working_copies_match": 52,
+  "historical_archive_only": [
+    "prepare_sorghum_v1.py"
+  ],
+  "catalog_sha256": "db9f2e2aac8d5a6a27892e00fa01ebb234f6c574ff2402554eccbec9c60c0c04"
+}

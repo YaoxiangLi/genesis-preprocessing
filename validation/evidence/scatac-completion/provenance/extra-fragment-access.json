@@ -1,0 +1,36 @@
+{
+  "metadata_sha256": "e2d92d0e5f1a77d99ef593837a533c5267cbc0c96ea6def65f5800cba6d8b6f2",
+  "files": [
+    {
+      "geo_sample": "GSM9536803",
+      "organisms": [
+        "Arabidopsis thaliana"
+      ],
+      "url": "https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM9536nnn/GSM9536803/suppl/GSM9536803_10-dpi_control-01-fragments.tsv.gz",
+      "http_status": 200,
+      "content_length": "1934714767",
+      "content_type": "application/x-gzip",
+      "last_modified": "Fri, 20 Feb 2026 19:40:28 GMT",
+      "retrieved_utc": "2026-10-11T04:50:55.458548+00:00",
+      "file_sha256": null,
+      "downloaded_bytes": 0,
+      "interpretation": "Public endpoint accessible; complete file checksum and biological metadata not yet validated"
+    },
+    {
+      "geo_sample": "GSM9536804",
+      "organisms": [
+        "Arabidopsis thaliana",
+        "Heterodera schachtii"
+      ],
+      "url": "https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM9536nnn/GSM9536804/suppl/GSM9536804_10-dpi_syncytium-01-fragments.tsv.gz",
+      "http_status": 200,
+      "content_length": "1086519823",
+      "content_type": "application/x-gzip",
+      "last_modified": "Fri, 20 Feb 2026 19:37:06 GMT",
+      "retrieved_utc": "2026-10-11T04:50:55.522003+00:00",
+      "file_sha256": null,
+      "downloaded_bytes": 0,
+      "interpretation": "Public endpoint accessible; complete file checksum and biological metadata not yet validated"
+    }
+  ]
+}

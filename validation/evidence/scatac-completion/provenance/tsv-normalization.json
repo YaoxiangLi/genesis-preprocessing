@@ -1,0 +1,70 @@
+{
+  "captured_utc": "2026-10-11T07:13:05.781659+00:00",
+  "change": "Public copies use LF records and explicit field quoting. Raw results, release artifacts and all field values are unchanged.",
+  "files": [
+    {
+      "original_sha256": "d8706f00f8e7ca4da9dc5ac183541e519a5a6eb68171ad44ece06692f37dfc5c",
+      "parsed_fields_unchanged": true,
+      "path": "inventory/scATAC_accessions.tsv",
+      "published_sha256": "47343b794bd4dff80a8d6374839b08b7f0bf206f777f0179d43b266c1a6f24e8",
+      "records_including_header": 702
+    },
+    {
+      "original_sha256": "18643ee6c7045c7dba850fb3af1c0b29adafefae5f72f8cdc4530fd7ea3bef1d",
+      "parsed_fields_unchanged": true,
+      "path": "inventory/scATAC_libraries.tsv",
+      "published_sha256": "a1907ebf91c41c41609b630a401554c90b0a4f432538effdd86b57e05e43549a",
+      "records_including_header": 107
+    },
+    {
+      "original_sha256": "1b5912519315e3e4b0c3e141923ac03a06bbc9c1030df5926588d601e94a2bb9",
+      "parsed_fields_unchanged": true,
+      "path": "inventory/scATAC_metadata_issues.tsv",
+      "published_sha256": "bb7ec224e406da41ac3209ab666023c21afd1391372bc2c92ba717f60a97f552",
+      "records_including_header": 217
+    },
+    {
+      "original_sha256": "27c2679bb618f1a509e18e5b4a9aebf333e886acb7a5e65001a3675581836ccd",
+      "parsed_fields_unchanged": true,
+      "path": "inventory/scATAC_readiness.tsv",
+      "published_sha256": "e80b1072f95e2aea7691017fbd8ec5e27943c71dd894565bada6e303f0dfd886",
+      "records_including_header": 17
+    },
+    {
+      "original_sha256": "ca3197adb907094854838894025aa62601ef4de35caeaa46bb297bd3eb78532a",
+      "parsed_fields_unchanged": true,
+      "path": "inventory/scATAC_samples.tsv",
+      "published_sha256": "465425ade9aa4260f4d378c733f2f5036438d9199c53ce4c4c1b4a77e0c2052d",
+      "records_including_header": 91
+    },
+    {
+      "original_sha256": "aa15a7fbda42da48b5722df5cd93f0f7499900f8e5f7bfd788d764a95fe2e005",
+      "parsed_fields_unchanged": true,
+      "path": "inventory/scATAC_studies.tsv",
+      "published_sha256": "74b2c1848aaad8f72ccc577f6ef3b88c325bd618295ebd8689fe927222e7be5a",
+      "records_including_header": 17
+    },
+    {
+      "original_sha256": "b1f707990e04ea4a879366e32bb1793ecfd16050a83609d659d61acea6c942d0",
+      "parsed_fields_unchanged": true,
+      "path": "pseudobulk-qc.tsv",
+      "published_sha256": "11394c83a9083b8d17dcfe871727367a0e3be226e8ebb6e29b7df7c69aab60ff",
+      "records_including_header": 25
+    },
+    {
+      "original_sha256": "a5288ec29af5dbbf2e9ae5192c58b1c8ef9dfe7139f0ded51bccb2ec157f1589",
+      "parsed_fields_unchanged": true,
+      "path": "replicate-qc.tsv",
+      "published_sha256": "f1fcc9783d7a3fa13943abe5de29dbd121464128f02c2da7de77596d1f9219fd",
+      "records_including_header": 13
+    },
+    {
+      "original_sha256": "cb10292fcc00c4c76a25c22f6c2358af54646c1bb26f5b9fa4277ac91aaa453e",
+      "parsed_fields_unchanged": true,
+      "path": "resources.tsv",
+      "published_sha256": "056ab0ad0437274713498b6804b4ca74aa5d86d08e8508f931a566b8abbea9f1",
+      "records_including_header": 131
+    }
+  ],
+  "status": "PASS"
+}

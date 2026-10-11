@@ -1,0 +1,38 @@
+{
+  "label": "completed-pilot-artifact-review",
+  "command": [
+    "python3",
+    "../scratch/scatac-completion/final_review.py"
+  ],
+  "cwd": "/home/exouser/projects/genesis-preprocessing-validation/repo",
+  "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+  "scatac_source_sha256": {
+    "genesis_tools/src/genesis_tools/scatac/model.py": "8f62172ff67f0b91f60e26edfc335e3034d0c7be60eec0bd6216d68613e23329",
+    "genesis_tools/src/genesis_tools/scatac/discovery.py": "0126ac6d1e7b95bbab4715992fc52c9363a34aaa7b2c7b0c8e9b840f5388c5a1",
+    "genesis_tools/src/genesis_tools/scatac/inventory.py": "218f7f9fb664493d12f4b0133397b6f7f2d9826e199408fb57e7c086e6a9f0e7",
+    "genesis_tools/src/genesis_tools/scatac/pseudobulk.py": "fb38a30ed98a45d4f0d96d4bb10742c99607d30c01660f93c02bdd5540122d05",
+    "genesis_tools/src/genesis_tools/scatac/identities.py": "94c3b3048aa2502a3e0c505c321726a31754f39da82a5a71018b624e2bee162b",
+    "genesis_tools/src/genesis_tools/scatac/products.py": "f660358d94b9607242551015a6eaa0badf98d525b9fbacb1c1a9edaa53f2bd1f",
+    "genesis_tools/src/genesis_tools/scatac/common.py": "e7f28e84dd03a8f84bdb7b841c075298b0a7ef49216b7c6113be69c804a0d51c",
+    "genesis_tools/src/genesis_tools/scatac/ingest.py": "620d93a2fa96a7329467dfcf4a823a71347073aa40aa00748f535ea222f1ba98",
+    "genesis_tools/src/genesis_tools/scatac/__init__.py": "d73cba3b641772f4f1f1e37b4dc69b87e5042e91f9f71f2ab3432693dfb8e443",
+    "genesis_tools/src/genesis_tools/scatac/release.py": "ba613ec5763aecb1cc69fe908b7b083d1a087dacf5bb95f4c5275b4c78e4f43a",
+    "genesis_tools/src/genesis_tools/scatac/qc.py": "0b66e7c63869405e997fdc6cf8f04936a0206bbc2c4ddd06a422f26a1000a5d9",
+    "genesis_tools/src/genesis_tools/scatac/workbook.py": "4d3e699dbfcfd80b222462df086dfdddcd41493f48fce9e1c1cf0afb45a89237",
+    "genesis_tools/src/genesis_tools/scatac/loaders.py": "7c56a1efb154018a0ed30669734b0c48233b3eac0865f2ae32c29e78e7584181",
+    "genesis_tools/src/genesis_tools/scatac/backgrounds.py": "7dcc85136499bff547d153b38679595e3314b4d3a9c01ff37062dbbe4281d11b",
+    "genesis_tools/src/genesis_tools/scatac/registry.py": "1f101c3b5dc61c810615387d70dbc9d8ee8ec16bdf5459a99212a507c9966e77",
+    "genesis_tools/src/genesis_tools/scatac/archive_runs.py": "2ec731b0dcda43bb7c15f9b060c4118a3106616f13e81f6c48366b6a3605ef66",
+    "genesis_tools/src/genesis_tools/scatac/evidence.py": "58622ae12100f8082cb5c10a9ec29b6c76be150e7d79019952edddebae8cffdc",
+    "genesis_tools/src/genesis_tools/scatac/compare.py": "25cf5c3b897505be80290d0bc87d089e12cbbc95dd9b5dc04bd2e0c233231530",
+    "genesis_tools/src/genesis_tools/scatac/cli.py": "ad33a8222a696767247480ab3df2bfd3bb66a665fa20fe1eea40c8222afa3043",
+    "genesis_tools/src/genesis_tools/scatac/assets/model_loader.py": "0679a9a5a4a6116f191632f56a4b54d8ec32fc9ed31b5e1dc7259b8267bfe162"
+  },
+  "diff_sha256": "d609b3bb5985b6a68a551941ea808944ece7f7d9e51162023c748d03626e5255",
+  "started_utc": "2026-10-11T07:11:06.708794+00:00",
+  "elapsed_seconds": 0.35238684399519116,
+  "exit_status": 0,
+  "input_sha256": {},
+  "logs": "/home/exouser/projects/genesis-preprocessing-validation/results/scatac-completion/commands/completed-pilot-artifact-review",
+  "acceptance": "PASS"
+}

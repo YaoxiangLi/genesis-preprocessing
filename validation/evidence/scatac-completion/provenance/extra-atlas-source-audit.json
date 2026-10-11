@@ -1,0 +1,87 @@
+{
+  "files_with_fragment_filename_mentions": [],
+  "finding": "Additional processed atlas data and author analysis code exist; no directly downloadable fragment file was identified by this bounded code/metadata inspection. This is not evidence of absence from every possible source.",
+  "full_data_files_downloaded": false,
+  "public_links": [],
+  "retrieved_utc": "2026-10-11T05:39:26.222122+00:00",
+  "source_commit": "2e86323116ad371408d9033b1aaec87c5625359e",
+  "source_file_count": 24,
+  "source_file_sha256": {
+    ".gitignore": "2e4f406fea469034d0252f722625a0b02c56a8496215150cc9797b70bebebe50",
+    "CRMs/annotate_ath.ipynb": "3826da93568178b646a95ba70d3bf3c2a624aac50175e995165ea056a2b2e69f",
+    "CRMs/cluster_aly.ipynb": "08a438aa65f03671cca70700f6e06c9847404a6735333761cf5d3f0b34e75fe9",
+    "CRMs/cluster_ath.ipynb": "14bbe16de775f7b0e0dcde87d201abecf7540b2309e97a0bff2f40649d1edb0d",
+    "CRMs/cluster_bol.ipynb": "085e1a1d2b3d4de89e6286d4ca63ee7c3087fbba8e813703a746f3dde607a171",
+    "CRMs/cluster_cru.ipynb": "d48fbb0bc8eae276532fa389cf179263bb8bb4c0026bd03c71858b1186fd49cc",
+    "CRMs/conserved_crms.ipynb": "ae49980414e0a27036ebde514a7e705fa21056fd51cafa701f00b036ca3b5c8a",
+    "FILENAME_RECOMMENDATIONS.md": "ff5c89473e1b2968c1f8b823f69d1e028aa7b7f818165dcaab09dafdb1f9dac7",
+    "README.md": "609fb0f46ee86ba6ee507460d96586c6ff71ab9f62491ffa4d9c7d8d5f351cb5",
+    "dapseq/1_assign_peaks.sh": "ca743b8de642191d9448c8b8359f3fc26732c61aa6553fb90157e25b0a804cc8",
+    "dapseq/2_annotate_peaks.py": "a675d60761e69d67727e095545c3993c6ff2492c8cafc36de9c96e421826f5f6",
+    "dapseq/3_filter_mark_cons_n4.ipynb": "965a156921f81c1b9460748de15655433bf996f67a3b69f12693da5400ed3cd6",
+    "genomic_features/1_combine_cds.ipynb": "b16faf09d15d7486f466a6e87c3550112feb56460ea05b6e92d1c054c87a1a20",
+    "genomic_features/2_intergenic_dist.ipynb": "2416c44aef6f879f67641dc2e48d30fa7e80d4a7383797669426672a6db6efad",
+    "genomic_features/3_extract_features.ipynb": "497d0d88ff3c7370927ae16ea369b43924ca0b2f7ef666be553ca618dcea4f14",
+    "norm_TFBS_density/density_atg_50bp.ipynb": "658fffee7e7d8807795bb0b99ba01d02c12adf9fdd5814c0b3e4d6eaebfe5a5f",
+    "norm_TFBS_density/density_tss_50bp.ipynb": "b502e455a46c2dd4d9e0e0d0099c720f3af3aa10cea44edacb4d5720f6ed2518",
+    "snATAC_snRNA_integration/calc_ACR_expression_correlation_by_promoter_region.ipynb": "ec0092dc1bb6b851d9b6475e20fbb2c33e06aee55565bc4be0d85738a454400a",
+    "snATACseq/accessibility_tau.ipynb": "79c7b08426e5bf3d3ae834b9b33dad040c138e4b3ff2f22c2d1980107ff7a7c7",
+    "snATACseq/dap_vs_atac_matrix.ipynb": "1c2e3b00944c52114c89eed1d68f3efb4813d4a04e837b441fdcbd7842d02a31",
+    "snATACseq/tf_module_enrich.ipynb": "9569efae872e6c6d0439c6714860d69f31b25cd6eb34d2e13e06df240ef73b3f",
+    "snRNA/assign_tfs_to_fbns_and_test_regulatory_impact.ipynb": "1ace83417b62cba06eb4f43156a6de26a543d190e3ddfe630d5adbbbef99321f",
+    "snRNA/calc_cohens_d_in_promoter_regions.R": "67dcffb3c97fb468b6480f2364c6602ca55cba3c98ee92f0e43e3e6f18427a42",
+    "snRNA/setup.R": "4e74200890f096c0a9ddc38df0b3512f45a5f5998699ff7b6da917bfdea57427"
+  },
+  "source_repository": "https://code.jgi.doe.gov/AMoralesCruz/regulatory-neighborhoods",
+  "status": "NEEDS_METADATA / NEEDS_PROCESSED_FILES",
+  "zenodo_api_url": "https://zenodo.org/api/records/18407668",
+  "zenodo_files": [
+    {
+      "checksum": "md5:97c213047546aae2db66949bddf0e49a",
+      "name": "TF_celltype_specific_regulatory_impact_by_promoter_region.cscore4.csv",
+      "size": 8443418
+    },
+    {
+      "checksum": "md5:664d355f8ba7cc492307731f7cb4d265",
+      "name": "hormone_response_DEseq_results.csv",
+      "size": 94117181
+    },
+    {
+      "checksum": "md5:f05c8ccb7d96f8b732d2b312928f04e5",
+      "name": "TF_hormone_response_regulatory_impact_by_promoter_region.cscore4.csv",
+      "size": 2854852
+    },
+    {
+      "checksum": "md5:d3f4f7b398d982bb93a427070931b929",
+      "name": "Athaliana_seedling_mean_peak_accessibility_by_celltype.tsv",
+      "size": 38267220
+    },
+    {
+      "checksum": "md5:e6c8463aec933bb2cf45bf1bcde0aef5",
+      "name": "Athaliana_scATAC_seedling_all_peaks_relative_accessibility_and_tauscore.tsv",
+      "size": 8609376
+    },
+    {
+      "checksum": "md5:8f4fa4800887b69dae3e22b83964a205",
+      "name": "genome_annotations.zip",
+      "size": 6123316
+    },
+    {
+      "checksum": "md5:68f0b27fd44dcd6e7d5cc9f4b56df6f4",
+      "name": "Brassicaceae_multiDAPseq_dataset_gene_assignment_promoters.tsv",
+      "size": 4128592453
+    },
+    {
+      "checksum": "md5:68f0b27fd44dcd6e7d5cc9f4b56df6f4",
+      "name": "Brassicaceae_multiDAPseq_dataset_gene_assignment_distal.tsv",
+      "size": 4128592453
+    }
+  ],
+  "zenodo_http_status": 200,
+  "zenodo_license": {
+    "id": "cc-by-4.0"
+  },
+  "zenodo_metadata_bytes": 7772,
+  "zenodo_snapshot_sha256": "5420835dd68958b8d2c9d2625b9d27904f792ad28e653331f63d18e5e1779f39",
+  "zenodo_url": "https://zenodo.org/records/18407668"
+}

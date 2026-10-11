@@ -1,0 +1,36 @@
+{
+  "acceptance_receipt_sha256": {
+    "bulk-atac-docker-regression": "8925696f687e1bb3b857649436e05763122ab6046cb022f059dba7d8132f4399",
+    "completed-code-frozen-checks": "6155a701c4410f071dbe1f0e81fe224f844a99ce02bc7d1060ff76592f79502f",
+    "diagnostic-frozen-docker-regression": "1de81f37dc43defa27d62263dd2c369889cb37bd8d6a60b24014d4df63117cc2",
+    "independent-real-pilot-conservation": "98c336a5d0c263d8dd98ace226d8711b4f7b928ce3d99a71484bed18cb156512",
+    "portable-real-pilot-loaders": "7cbcb3f4c6a8c0f385192ff91c8d1458ad48468d5dcaedfe5c8bada58ae8ae73",
+    "two-species-pilot-release-v3": "cd9c5d389b60e477cd5edfef6a366b9291c22b992522cedc6d505fb48faf754b"
+  },
+  "actual_model_tests": 48,
+  "broken_local_markdown_file_links": [],
+  "captured_utc": "2026-10-11T07:11:07.044591+00:00",
+  "changed_files_scanned": 286,
+  "credential_pattern_findings": [],
+  "files_over_5MB": [],
+  "groups": 24,
+  "head": "f83bd75d71db74f080c93ee7090a54cee8295504",
+  "included_cells": 6170,
+  "portable_model_tests": 4,
+  "production_code_unchanged_since_checks": true,
+  "replicate_comparisons": 12,
+  "scan_scope": "Known credential patterns in changed/new files; not proof that arbitrary secrets cannot exist. No matched values emitted.",
+  "scientific_review": "UNREVIEWED",
+  "status": "PASS",
+  "tested_code_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+  "training": "NOT_RUN",
+  "unchanged_from_baseline": [
+    "modules",
+    "main.nf",
+    "nextflow.config",
+    "pixi.toml",
+    "pixi.lock",
+    "genesis_tools/pyproject.toml",
+    "genesis_tools/uv.lock"
+  ]
+}

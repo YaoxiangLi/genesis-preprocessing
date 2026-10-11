@@ -1,0 +1,439 @@
+{
+  "window": 2114,
+  "rows": [
+    {
+      "task": "genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e",
+      "cell_type": "trichoblast",
+      "replicate": "root-rep1",
+      "stride": 2114,
+      "positives": {
+        "train": 12347,
+        "validation": 2999,
+        "test": 4595
+      },
+      "candidates": {
+        "train": 17163,
+        "validation": 4466,
+        "test": 6117
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "c1cd686a01d20f8a4ae4797d084868fa9e4996e22c028f334bad99cfea662542"
+    },
+    {
+      "task": "genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e",
+      "cell_type": "trichoblast",
+      "replicate": "root-rep1",
+      "stride": 1000,
+      "positives": {
+        "train": 12347,
+        "validation": 2999,
+        "test": 4595
+      },
+      "candidates": {
+        "train": 36282,
+        "validation": 9441,
+        "test": 12928
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "c1cd686a01d20f8a4ae4797d084868fa9e4996e22c028f334bad99cfea662542"
+    },
+    {
+      "task": "genesis-task-v1-12b34b09a2a9e9c578d71a003e56b946a5c041d4b013ffc1d9a128fd8d09613e",
+      "cell_type": "endodermal cell",
+      "replicate": "root-rep1",
+      "stride": 2114,
+      "positives": {
+        "train": 14907,
+        "validation": 3585,
+        "test": 5589
+      },
+      "candidates": {
+        "train": 15079,
+        "validation": 4005,
+        "test": 5310
+      },
+      "one_to_one_possible": false,
+      "peak_sha256": "035959c22173dd2260f238bed6d206359facdcc8a44cb921fda3f7508a4d8e6f"
+    },
+    {
+      "task": "genesis-task-v1-12b34b09a2a9e9c578d71a003e56b946a5c041d4b013ffc1d9a128fd8d09613e",
+      "cell_type": "endodermal cell",
+      "replicate": "root-rep1",
+      "stride": 1000,
+      "positives": {
+        "train": 14907,
+        "validation": 3585,
+        "test": 5589
+      },
+      "candidates": {
+        "train": 31903,
+        "validation": 8461,
+        "test": 11188
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "035959c22173dd2260f238bed6d206359facdcc8a44cb921fda3f7508a4d8e6f"
+    },
+    {
+      "task": "genesis-task-v1-37d4fdf61fb922092e6aca4b041f01b4bfc56f43a88e8c6beba35e563dc325d7",
+      "cell_type": "cortical cell",
+      "replicate": "root-rep1",
+      "stride": 2114,
+      "positives": {
+        "train": 14211,
+        "validation": 3450,
+        "test": 5347
+      },
+      "candidates": {
+        "train": 15603,
+        "validation": 4084,
+        "test": 5495
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "1fbca8fa47ff8e235fc592311023400a6666330e2236321783dba923f7a34368"
+    },
+    {
+      "task": "genesis-task-v1-37d4fdf61fb922092e6aca4b041f01b4bfc56f43a88e8c6beba35e563dc325d7",
+      "cell_type": "cortical cell",
+      "replicate": "root-rep1",
+      "stride": 1000,
+      "positives": {
+        "train": 14211,
+        "validation": 3450,
+        "test": 5347
+      },
+      "candidates": {
+        "train": 32993,
+        "validation": 8618,
+        "test": 11608
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "1fbca8fa47ff8e235fc592311023400a6666330e2236321783dba923f7a34368"
+    },
+    {
+      "task": "genesis-task-v1-638020cbc83c8f29dcd00e33db9f70f6e938aecc6e79de6e5eb17496419489e8",
+      "cell_type": "stele cell",
+      "replicate": "root-rep2",
+      "stride": 2114,
+      "positives": {
+        "train": 16235,
+        "validation": 3906,
+        "test": 6078
+      },
+      "candidates": {
+        "train": 13731,
+        "validation": 3663,
+        "test": 4846
+      },
+      "one_to_one_possible": false,
+      "peak_sha256": "321821039cdbf87a77c468e17906460006c0e030f2513334af0bd7c56fc50636"
+    },
+    {
+      "task": "genesis-task-v1-638020cbc83c8f29dcd00e33db9f70f6e938aecc6e79de6e5eb17496419489e8",
+      "cell_type": "stele cell",
+      "replicate": "root-rep2",
+      "stride": 1000,
+      "positives": {
+        "train": 16235,
+        "validation": 3906,
+        "test": 6078
+      },
+      "candidates": {
+        "train": 29078,
+        "validation": 7707,
+        "test": 10236
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "321821039cdbf87a77c468e17906460006c0e030f2513334af0bd7c56fc50636"
+    },
+    {
+      "task": "genesis-task-v1-86eee732163486efaa239e69d77bc4b06ddfe4c679f0fb5dd0ca3ac7044f1ada",
+      "cell_type": "trichoblast",
+      "replicate": "root-rep2",
+      "stride": 2114,
+      "positives": {
+        "train": 7037,
+        "validation": 1696,
+        "test": 2440
+      },
+      "candidates": {
+        "train": 23037,
+        "validation": 5896,
+        "test": 8625
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "e9ee4c1a10fa07b9ff2c1d52520763543c621234809e0bc8a879190da469c08a"
+    },
+    {
+      "task": "genesis-task-v1-86eee732163486efaa239e69d77bc4b06ddfe4c679f0fb5dd0ca3ac7044f1ada",
+      "cell_type": "trichoblast",
+      "replicate": "root-rep2",
+      "stride": 1000,
+      "positives": {
+        "train": 7037,
+        "validation": 1696,
+        "test": 2440
+      },
+      "candidates": {
+        "train": 48792,
+        "validation": 12459,
+        "test": 18219
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "e9ee4c1a10fa07b9ff2c1d52520763543c621234809e0bc8a879190da469c08a"
+    },
+    {
+      "task": "genesis-task-v1-8e512ee4a3043fda31df2ded177d22959d5fad568e6619d1ecd02862b9e5aeff",
+      "cell_type": "endodermal cell",
+      "replicate": "root-rep2",
+      "stride": 2114,
+      "positives": {
+        "train": 14924,
+        "validation": 3577,
+        "test": 5594
+      },
+      "candidates": {
+        "train": 14786,
+        "validation": 3926,
+        "test": 5240
+      },
+      "one_to_one_possible": false,
+      "peak_sha256": "1f940dd50fbef27fb37c78a2a0354385a4fe1dadb17cf60bd2ccfd63b7327bd1"
+    },
+    {
+      "task": "genesis-task-v1-8e512ee4a3043fda31df2ded177d22959d5fad568e6619d1ecd02862b9e5aeff",
+      "cell_type": "endodermal cell",
+      "replicate": "root-rep2",
+      "stride": 1000,
+      "positives": {
+        "train": 14924,
+        "validation": 3577,
+        "test": 5594
+      },
+      "candidates": {
+        "train": 31193,
+        "validation": 8325,
+        "test": 11049
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "1f940dd50fbef27fb37c78a2a0354385a4fe1dadb17cf60bd2ccfd63b7327bd1"
+    },
+    {
+      "task": "genesis-task-v1-a6539cedd52fd2370c87a9bb09b37332bcff1816c359e0290eedc0f80202a81a",
+      "cell_type": "cortical cell",
+      "replicate": "root-rep2",
+      "stride": 2114,
+      "positives": {
+        "train": 13400,
+        "validation": 3193,
+        "test": 4993
+      },
+      "candidates": {
+        "train": 16005,
+        "validation": 4212,
+        "test": 5700
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "aa8459faf90c043db8e346d4d47e2ca5a83ae0bcee63b233a8a4b7d49a73d067"
+    },
+    {
+      "task": "genesis-task-v1-a6539cedd52fd2370c87a9bb09b37332bcff1816c359e0290eedc0f80202a81a",
+      "cell_type": "cortical cell",
+      "replicate": "root-rep2",
+      "stride": 1000,
+      "positives": {
+        "train": 13400,
+        "validation": 3193,
+        "test": 4993
+      },
+      "candidates": {
+        "train": 33868,
+        "validation": 8916,
+        "test": 12061
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "aa8459faf90c043db8e346d4d47e2ca5a83ae0bcee63b233a8a4b7d49a73d067"
+    },
+    {
+      "task": "genesis-task-v1-ab3fd51ea26927cd39a2bcd2d08dfc3927423ee81aade152f2df7a8c86e25eb6",
+      "cell_type": "atrichoblast",
+      "replicate": "root-rep1",
+      "stride": 2114,
+      "positives": {
+        "train": 14167,
+        "validation": 3431,
+        "test": 5391
+      },
+      "candidates": {
+        "train": 15888,
+        "validation": 4146,
+        "test": 5573
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "8d292caa9e88db80fbfc9db4946164d93ff1c59828233ab510aeb65169c0bdda"
+    },
+    {
+      "task": "genesis-task-v1-ab3fd51ea26927cd39a2bcd2d08dfc3927423ee81aade152f2df7a8c86e25eb6",
+      "cell_type": "atrichoblast",
+      "replicate": "root-rep1",
+      "stride": 1000,
+      "positives": {
+        "train": 14167,
+        "validation": 3431,
+        "test": 5391
+      },
+      "candidates": {
+        "train": 33665,
+        "validation": 8737,
+        "test": 11771
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "8d292caa9e88db80fbfc9db4946164d93ff1c59828233ab510aeb65169c0bdda"
+    },
+    {
+      "task": "genesis-task-v1-cce01c81d6bd7e8fac2be298645db5eb92e086b2e0a30df0a994fa2a20e540e6",
+      "cell_type": "atrichoblast",
+      "replicate": "root-rep2",
+      "stride": 2114,
+      "positives": {
+        "train": 13681,
+        "validation": 3351,
+        "test": 5157
+      },
+      "candidates": {
+        "train": 16169,
+        "validation": 4186,
+        "test": 5732
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "ebfabca1f73bb6673c0cb80de5d0fd1814dd2eaf796da0e3c7f4f90eabef3447"
+    },
+    {
+      "task": "genesis-task-v1-cce01c81d6bd7e8fac2be298645db5eb92e086b2e0a30df0a994fa2a20e540e6",
+      "cell_type": "atrichoblast",
+      "replicate": "root-rep2",
+      "stride": 1000,
+      "positives": {
+        "train": 13681,
+        "validation": 3351,
+        "test": 5157
+      },
+      "candidates": {
+        "train": 34242,
+        "validation": 8846,
+        "test": 12136
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "ebfabca1f73bb6673c0cb80de5d0fd1814dd2eaf796da0e3c7f4f90eabef3447"
+    },
+    {
+      "task": "genesis-task-v1-d14928bac922fc3e0f49a8ae51a43a59b8d8fbd87ef746a4e215aa6ce980b748",
+      "cell_type": "meristematic cell",
+      "replicate": "root-rep1",
+      "stride": 2114,
+      "positives": {
+        "train": 11464,
+        "validation": 2759,
+        "test": 4306
+      },
+      "candidates": {
+        "train": 17551,
+        "validation": 4602,
+        "test": 6218
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "207dbd823142b7c471bdd6b2e458404c06032dd74f3a2bd25426618fc9063212"
+    },
+    {
+      "task": "genesis-task-v1-d14928bac922fc3e0f49a8ae51a43a59b8d8fbd87ef746a4e215aa6ce980b748",
+      "cell_type": "meristematic cell",
+      "replicate": "root-rep1",
+      "stride": 1000,
+      "positives": {
+        "train": 11464,
+        "validation": 2759,
+        "test": 4306
+      },
+      "candidates": {
+        "train": 37192,
+        "validation": 9686,
+        "test": 13173
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "207dbd823142b7c471bdd6b2e458404c06032dd74f3a2bd25426618fc9063212"
+    },
+    {
+      "task": "genesis-task-v1-d3728c17d2dcd4eeeaff732c0afaf034dcf67c3449f4bcb6e7bdfb331c452aa8",
+      "cell_type": "stele cell",
+      "replicate": "root-rep1",
+      "stride": 2114,
+      "positives": {
+        "train": 16715,
+        "validation": 4007,
+        "test": 6252
+      },
+      "candidates": {
+        "train": 13710,
+        "validation": 3666,
+        "test": 4769
+      },
+      "one_to_one_possible": false,
+      "peak_sha256": "bd09b841dc7e7b6a6e41eefd1e93dbb252e3ccd84167b9080611eb0d4bc9eb05"
+    },
+    {
+      "task": "genesis-task-v1-d3728c17d2dcd4eeeaff732c0afaf034dcf67c3449f4bcb6e7bdfb331c452aa8",
+      "cell_type": "stele cell",
+      "replicate": "root-rep1",
+      "stride": 1000,
+      "positives": {
+        "train": 16715,
+        "validation": 4007,
+        "test": 6252
+      },
+      "candidates": {
+        "train": 29055,
+        "validation": 7701,
+        "test": 10096
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "bd09b841dc7e7b6a6e41eefd1e93dbb252e3ccd84167b9080611eb0d4bc9eb05"
+    },
+    {
+      "task": "genesis-task-v1-df799c1ed32040d7aeccbf4b085cccdaf0f2a77388f89e973e3934b9bbdefab5",
+      "cell_type": "meristematic cell",
+      "replicate": "root-rep2",
+      "stride": 2114,
+      "positives": {
+        "train": 6207,
+        "validation": 1591,
+        "test": 2323
+      },
+      "candidates": {
+        "train": 23931,
+        "validation": 6046,
+        "test": 8705
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "156c597dc793abff53d632bced0e2f344e615f96e08907458572e97936f0cd5a"
+    },
+    {
+      "task": "genesis-task-v1-df799c1ed32040d7aeccbf4b085cccdaf0f2a77388f89e973e3934b9bbdefab5",
+      "cell_type": "meristematic cell",
+      "replicate": "root-rep2",
+      "stride": 1000,
+      "positives": {
+        "train": 6207,
+        "validation": 1591,
+        "test": 2323
+      },
+      "candidates": {
+        "train": 50597,
+        "validation": 12731,
+        "test": 18394
+      },
+      "one_to_one_possible": true,
+      "peak_sha256": "156c597dc793abff53d632bced0e2f344e615f96e08907458572e97936f0cd5a"
+    }
+  ],
+  "method": "full positive context exclusion; chromosome-disjoint folds; within-fold candidate windows may overlap when stride < window",
+  "reference_method": "Pinned ChromBPNet get_genomewide_gc_bins.py defaults inputlen=2114, stride=1000; this does not declare a plant QC threshold"
+}

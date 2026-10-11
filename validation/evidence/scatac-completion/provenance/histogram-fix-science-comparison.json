@@ -1,0 +1,12 @@
+{
+  "before": "results/scatac-completion/arabidopsis/failed-products-histogram-identity/genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e",
+  "after": "results/scatac-completion/arabidopsis/products/genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e",
+  "identical_scientific_outputs": {
+    "fragments.tsv.gz": true,
+    "cuts.bedGraph": true,
+    "signal.bw": true,
+    "peaks_peaks.narrowPeak": true
+  },
+  "qc_values_unchanged": true,
+  "interpretation": "Only JSON key normalization and provenance changed"
+}

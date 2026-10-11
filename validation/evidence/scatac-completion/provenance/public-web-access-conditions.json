@@ -1,0 +1,27 @@
+{
+  "date_utc": "2026-10-11",
+  "observations": [
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE299784",
+      "route": "web page viewer",
+      "condition": "Browser-verification page returned; no series text from this route."
+    },
+    {
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE332675",
+      "route": "web page viewer",
+      "condition": "Page unavailable through this viewer."
+    },
+    {
+      "url": "https://www.nature.com/articles/s41467-026-75947-0",
+      "route": "web page viewer",
+      "condition": "Cookie-authorization redirect prevented full article retrieval."
+    }
+  ],
+  "evidence_used_instead": [
+    "Existing checksum-bound GEO SOFT snapshots in the inventory",
+    "Pinned public author Git repository",
+    "Public Zenodo record API metadata"
+  ],
+  "scope": "These are access-route observations, not proof that the datasets are unavailable. No full-article result was inferred from a failed page request.",
+  "elapsed_time": "UNAVAILABLE for these web-viewer requests"
+}

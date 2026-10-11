@@ -1,0 +1,86 @@
+[
+  {
+    "receipt": "sources/Araport11_GFF3_genes_transposons.201606.gff.gz.receipt.json",
+    "url": "https://plantgarden.jp/en/download/Arabidopsis_thaliana/t3702.G001/Araport11_GFF3_genes_transposons.201606.gff.gz",
+    "sha256": "22d8c42ec2ca667fc3f78105f568bf295ee10d2145b2bd76dcd290a469a27b99",
+    "bytes": 19641869,
+    "retrieved_utc": "2026-10-11T03:58:37.525846+00:00"
+  },
+  {
+    "receipt": "sources/GSE248919/combined.RData.gz.receipt.json",
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE248nnn/GSE248919/suppl/GSE248919_L1_sorghum_multiome_RNA_combined_with_ATAC.RData.gz",
+    "sha256": "5d2ef91cfeb2b86a93cf08ee45ee8a2ab2ae6dc39567be40ef85a179dcdd4d5e",
+    "bytes": 3269354650,
+    "retrieved_utc": "2026-10-11T03:40:56.947894+00:00"
+  },
+  {
+    "receipt": "sources/GSE299784/Arabidopsis_thaliana.TAIR10.55.dna.toplevel.fa.gz.receipt.json",
+    "url": "https://ftp.ensemblgenomes.ebi.ac.uk/pub/plants/release-55/fasta/arabidopsis_thaliana/dna/Arabidopsis_thaliana.TAIR10.dna.toplevel.fa.gz",
+    "sha256": "80a13166003333ba4982b57abdb3d2b62037bc831f4da29ea378c1b776fff8e2",
+    "bytes": 36462703,
+    "retrieved_utc": "2026-10-11T03:46:41.900516+00:00"
+  },
+  {
+    "receipt": "sources/GSE299784/Arabidopsis_thaliana.TAIR10.55.gtf.gz.receipt.json",
+    "url": "https://ftp.ensemblgenomes.ebi.ac.uk/pub/plants/release-55/gtf/arabidopsis_thaliana/Arabidopsis_thaliana.TAIR10.55.gtf.gz",
+    "sha256": "3f8dbbdbe82479fa3072858341af9759a2d9a620782a1bab5c6dff8d7eb0a4b7",
+    "bytes": 11240659,
+    "retrieved_utc": "2026-10-11T03:46:42.105024+00:00"
+  },
+  {
+    "receipt": "sources/GSE299784/atlas.RDS.receipt.json",
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE299nnn/GSE299784/suppl/GSE299784_root_atlas_ATACseq.RDS",
+    "sha256": "e1deca5d979e5e6cf2682b7205375dbb2cbd668f0177b5c99668a1e238dee8ce",
+    "bytes": 3170714716,
+    "retrieved_utc": "2026-10-11T03:45:59.551762+00:00"
+  },
+  {
+    "receipt": "sources/GSE299784/rep1.fragments.tsv.gz.receipt.json",
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM9046nnn/GSM9046074/suppl/GSM9046074_rep1_fragments.tsv.gz",
+    "sha256": "3fb0189051f651dbf98d598fbdfa559ede562e5fbb60437a065a48758ddc5f24",
+    "bytes": 1683903585,
+    "retrieved_utc": "2026-10-11T03:44:26.468729+00:00"
+  },
+  {
+    "receipt": "sources/GSE299784/rep2.fragments.tsv.gz.receipt.json",
+    "url": "https://ftp.ncbi.nlm.nih.gov/geo/samples/GSM9046nnn/GSM9046075/suppl/GSM9046075_rep2_fragments.tsv.gz",
+    "sha256": "321da3b627137c2177789f01b5cb77920bd0a11f696c39a8a82cc9bfa00dcbf2",
+    "bytes": 1654579304,
+    "retrieved_utc": "2026-10-11T03:44:23.490007+00:00"
+  },
+  {
+    "receipt": "sources/Sbicolor_454_v3.0.1.fa.gz.receipt.json",
+    "url": "https://plantgarden.jp/en/download/Sorghum_bicolor/t4558.G012/Sbicolor_454_v3.0.1.fa.gz",
+    "sha256": "8683530943438cee02ca14340010b2b897b4dcff45238dd8efeabb604c7c3936",
+    "bytes": 206738754,
+    "retrieved_utc": "2026-10-11T04:01:38.039416+00:00"
+  },
+  {
+    "receipt": "sources/Sbicolor_454_v3.1.1.gene.gff3.gz.receipt.json",
+    "url": "https://plantgarden.jp/en/download/Sorghum_bicolor/t4558.G012/Sbicolor_454_v3.1.1.gene.gff3.gz",
+    "sha256": "7206b0dddea6a507218386273211b255030a9373562b6f8e89050f65c3c211f0",
+    "bytes": 6067058,
+    "retrieved_utc": "2026-10-11T03:59:20.478707+00:00"
+  },
+  {
+    "receipt": "sources/Sorghum_bicolor_NCBIv3.ensembl55.fa.gz.receipt.json",
+    "url": "https://ftp.ensemblgenomes.ebi.ac.uk/pub/plants/release-55/fasta/sorghum_bicolor/dna/Sorghum_bicolor.Sorghum_bicolor_NCBIv3.dna.toplevel.fa.gz",
+    "sha256": "ad40aa753793907fee06b3fe18a57d97f2f72798f4bcef15417a87fe36df73fb",
+    "bytes": 203131834,
+    "retrieved_utc": "2026-10-11T03:59:29.694278+00:00"
+  },
+  {
+    "receipt": "sources/farmer2021.pdf.receipt.json",
+    "url": "https://par.nsf.gov/servlets/purl/10297371",
+    "sha256": "1b29bb2269de509e54117901ef4fa87a3f05b505b3dadf26088a4d8d7e5b3bf9",
+    "bytes": 3156910,
+    "retrieved_utc": "2026-10-11T03:53:56.811172+00:00"
+  },
+  {
+    "receipt": "sources/sorghum2024.xml.receipt.json",
+    "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11618092/fullTextXML",
+    "sha256": "7a394577134592311ac8a02af2cb5cd8d136d171fbfc0bb0d056882541f058c0",
+    "bytes": 173530,
+    "retrieved_utc": "2026-10-11T04:18:23.453109+00:00"
+  }
+]

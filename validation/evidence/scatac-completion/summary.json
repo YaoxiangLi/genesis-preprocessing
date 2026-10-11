@@ -1,0 +1,129 @@
+{
+  "captured_utc": "2026-10-11T07:08:48.137925+00:00",
+  "command_results": {
+    "FAIL": 31,
+    "PASS": 99
+  },
+  "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+  "plant_qc_thresholds": "UNSPECIFIED",
+  "release_acceptance": {
+    "actual_model_loader_tests": 48,
+    "biological_review": "UNREVIEWED",
+    "computational_acceptance": "PASS",
+    "groups": 24,
+    "release": "ff2d52fe8180c45634fbb8392a11d484cf1ca4562679737ac3bb4ff2ada11b27",
+    "training": "NOT_RUN"
+  },
+  "resource_scope": "GNU time process trees; Docker daemon children excluded; explicit limits are not measured peaks",
+  "schema_version": 1,
+  "scientific_review": "UNREVIEWED",
+  "species": {
+    "arabidopsis": {
+      "boundary_cuts_excluded": 16,
+      "cells": 4764,
+      "cuts": 98475500,
+      "frip": {
+        "max": 0.6065113220774576,
+        "min": 0.2595067145599456,
+        "n": 12
+      },
+      "groups": 12,
+      "peak_base_jaccard": {
+        "max": 0.7230354466401079,
+        "min": 0.3711502627076035,
+        "n": 6
+      },
+      "peaks": {
+        "max": 26974.0,
+        "min": 10122.0,
+        "n": 12
+      },
+      "pearson_all_bins": {
+        "max": 0.9859117741195622,
+        "min": 0.9432720202474311,
+        "n": 6
+      },
+      "pearson_nonzero_union": {
+        "max": 0.9857077279605443,
+        "min": 0.941611408685486,
+        "n": 6
+      },
+      "spearman_all_bins": {
+        "max": 0.9720960018490074,
+        "min": 0.9008228024468662,
+        "n": 6
+      },
+      "spearman_nonzero_union": {
+        "max": 0.9700856854441029,
+        "min": 0.8900357519883552,
+        "n": 6
+      },
+      "support": 73621178,
+      "support_redundancy_fraction": {
+        "max": 0.3643587846562142,
+        "min": 0.27638746509954637,
+        "n": 12
+      },
+      "tss_enrichment": {
+        "max": 3.715734472729145,
+        "min": 2.9159625344654185,
+        "n": 12
+      },
+      "unique_fragments": 49237758
+    },
+    "sorghum": {
+      "boundary_cuts_excluded": 0,
+      "cells": 1406,
+      "cuts": 77433562,
+      "frip": {
+        "max": 0.36533230349621654,
+        "min": 0.021912932087481685,
+        "n": 12
+      },
+      "groups": 12,
+      "peak_base_jaccard": {
+        "max": 0.32822881143272253,
+        "min": 0.016410783219788602,
+        "n": 6
+      },
+      "peaks": {
+        "max": 35540.0,
+        "min": 285.0,
+        "n": 12
+      },
+      "pearson_all_bins": {
+        "max": 0.9553568797723111,
+        "min": 0.8746697963114752,
+        "n": 6
+      },
+      "pearson_nonzero_union": {
+        "max": 0.9564672602977092,
+        "min": 0.8754436939906143,
+        "n": 6
+      },
+      "spearman_all_bins": {
+        "max": 0.8005634475429501,
+        "min": 0.5054766121108731,
+        "n": 6
+      },
+      "spearman_nonzero_union": {
+        "max": 0.7630927749724907,
+        "min": 0.32752371025246896,
+        "n": 6
+      },
+      "support": 67937945,
+      "support_redundancy_fraction": {
+        "max": 0.6258090035696866,
+        "min": 0.31838984852303687,
+        "n": 12
+      },
+      "tss_enrichment": {
+        "max": 5.584530209419883,
+        "min": 4.2813601295361465,
+        "n": 12
+      },
+      "unique_fragments": 38716781
+    }
+  },
+  "training": "NOT_RUN"
+}

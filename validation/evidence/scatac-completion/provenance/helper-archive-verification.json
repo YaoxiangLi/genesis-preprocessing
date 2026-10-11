@@ -1,0 +1,9 @@
+{
+  "archive_files_verified": 51,
+  "current_workspace_matches": 50,
+  "archive_only_historical_versions": [
+    "prepare_sorghum_v1.py"
+  ],
+  "status": "PASS",
+  "initial_check_limit": "The first path comparison assumed every historical archive filename also existed in scratch; prepare_sorghum_v1.py is retained only in the archive. All archived bytes are independently checked against script-checksums.json."
+}

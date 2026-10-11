@@ -1,0 +1,65 @@
+{
+  "arabidopsis": {
+    "source_cells": 4764,
+    "fragment_count_exact_matches": 4704,
+    "fragment_count_deltas": {
+      "n": 4764,
+      "min": -3,
+      "median": 0.0,
+      "max": 0
+    },
+    "author_passed_filters_sum": 49237820,
+    "retained_fragment_rows_sum": 49237758,
+    "pct_reads_in_peaks_uses_total_denominator_matches": 4764,
+    "metrics": {
+      "author_named_pct_reads_in_peaks": {
+        "n": 4764,
+        "min": 15.018876691642,
+        "median": 40.68163900429575,
+        "max": 72.9389242265176
+      },
+      "author_peak_over_passed": {
+        "n": 4764,
+        "min": 0.8029676477742642,
+        "median": 0.901049830610757,
+        "max": 0.9801538633069461
+      },
+      "source_duplicate_fraction": {
+        "n": 4764,
+        "min": 0.05466376815767121,
+        "median": 0.235530482160885,
+        "max": 0.46937565858798735
+      },
+      "source_mitochondrial_fraction": {
+        "n": 4764,
+        "min": 0.004222527182518737,
+        "median": 0.09441089783283327,
+        "max": 0.367321440966197
+      },
+      "source_lowmapq_fraction": {
+        "n": 4764,
+        "min": 0.02565219495668167,
+        "median": 0.18694902929136717,
+        "max": 0.5901096099923528
+      },
+      "author_nucleosome_signal": {
+        "n": 4764,
+        "min": 0.189596499756928,
+        "median": 0.911006813622797,
+        "max": 8.85772719189045
+      }
+    },
+    "interpretation": [
+      "Published pct_reads_in_peaks uses total, not passed fragments, as denominator.",
+      "Genesis group FRiP uses newly called group peaks, so it is not an exact comparison with author library peak sets.",
+      "Author retained fragment files have no organellar rows; original mitochondrial counts remain source QC.",
+      "No equivalent source TSS-enrichment score found; TSS_fragments is a count, not enrichment."
+    ]
+  },
+  "inputs_sha256": {
+    "/home/exouser/projects/genesis-preprocessing-validation/results/scatac-pilot/sources/GSE155304/author-cells.tsv": "d8ef604f6b1cc1f603c43cd795c8baa9e358a1056a6e41537cd91a80ccb002cc",
+    "/home/exouser/projects/genesis-preprocessing-validation/results/scatac-completion/arabidopsis/ingested-1/barcodes.tsv": "af4701464cdb8ed38a2ac1ef7eb6438ad5c853d1e5a3c314e2f55e7e1e29fd67",
+    "/home/exouser/projects/genesis-preprocessing-validation/results/scatac-completion/arabidopsis/ingested-2/barcodes.tsv": "2e24bcc5419e2e09b7acc25d5fc7f8c5e616347ecdbc9f45e8789f7484c6b75c"
+  },
+  "plant_thresholds": "UNSPECIFIED"
+}

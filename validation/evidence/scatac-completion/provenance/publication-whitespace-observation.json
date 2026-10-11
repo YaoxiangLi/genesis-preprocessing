@@ -1,0 +1,13 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "git_sha": "5f5e5fd28c44abc62530662cba63f9a77bb53353",
+  "captured_utc": "2026-10-11T07:13:05.620594+00:00",
+  "exit_status": 2,
+  "log_sha256": "b90603096108d6dc962ac9655ff3d271ffe608efb2f8ebfef8c4cf41f1893321",
+  "condition": "Raw TSV CRLF endings and terminal empty fields are flagged by Git whitespace checking. Originals retained; publication copies will be normalized with exact field equality."
+}

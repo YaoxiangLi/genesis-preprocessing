@@ -1,0 +1,110 @@
+{
+  "GSM7922845": {
+    "experiment": "SRX22683056",
+    "elapsed_seconds": 38.458815887977835,
+    "support_cap": 255,
+    "counts": {
+      "fragments": 28436391,
+      "reported_support": 74754238,
+      "rows_at_255": 0
+    },
+    "author_groups": {
+      "unknown": {
+        "fragments": 3511855,
+        "reported_support": 9367267,
+        "rows_at_255": 0
+      },
+      "xylem": {
+        "fragments": 412443,
+        "reported_support": 1101510,
+        "rows_at_255": 0
+      },
+      "mesophyll": {
+        "fragments": 4021035,
+        "reported_support": 10663413,
+        "rows_at_255": 0
+      },
+      "epidermis": {
+        "fragments": 2312955,
+        "reported_support": 6181215,
+        "rows_at_255": 0
+      },
+      "phloem": {
+        "fragments": 583812,
+        "reported_support": 1549134,
+        "rows_at_255": 0
+      },
+      "bundle sheath": {
+        "fragments": 1520165,
+        "reported_support": 4009226,
+        "rows_at_255": 0
+      },
+      "guard": {
+        "fragments": 481461,
+        "reported_support": 1265323,
+        "rows_at_255": 0
+      }
+    },
+    "interpretation": "Counts equal producer-reported support. Rows at 255 may be truncated; exact lost support is not recoverable from fragments. Unique fragments and unweighted cut counts are unaffected.",
+    "redundancy_fraction": "lower bound where support was capped",
+    "chromap_source_sha": "5bd17e1f1c50805e76904efd021603cb6a1b6e23",
+    "source_locations": [
+      "src/mapping_processor.h:184",
+      "src/mapping_writer.h:420"
+    ]
+  },
+  "GSM7922873": {
+    "experiment": "SRX22683080",
+    "elapsed_seconds": 128.5747051340295,
+    "support_cap": 255,
+    "counts": {
+      "fragments": 89706703,
+      "reported_support": 130050355,
+      "rows_at_255": 0
+    },
+    "author_groups": {
+      "unknown": {
+        "fragments": 22136809,
+        "reported_support": 32455286,
+        "rows_at_255": 0
+      },
+      "xylem": {
+        "fragments": 1058553,
+        "reported_support": 1558652,
+        "rows_at_255": 0
+      },
+      "epidermis": {
+        "fragments": 7421786,
+        "reported_support": 10895913,
+        "rows_at_255": 0
+      },
+      "mesophyll": {
+        "fragments": 10771930,
+        "reported_support": 15839386,
+        "rows_at_255": 0
+      },
+      "bundle sheath": {
+        "fragments": 3925972,
+        "reported_support": 5759916,
+        "rows_at_255": 0
+      },
+      "phloem": {
+        "fragments": 2891155,
+        "reported_support": 4250019,
+        "rows_at_255": 0
+      },
+      "guard": {
+        "fragments": 3315514,
+        "reported_support": 4864238,
+        "rows_at_255": 0
+      }
+    },
+    "interpretation": "Counts equal producer-reported support. Rows at 255 may be truncated; exact lost support is not recoverable from fragments. Unique fragments and unweighted cut counts are unaffected.",
+    "redundancy_fraction": "lower bound where support was capped",
+    "chromap_source_sha": "5bd17e1f1c50805e76904efd021603cb6a1b6e23",
+    "source_locations": [
+      "src/mapping_processor.h:184",
+      "src/mapping_writer.h:420"
+    ]
+  }
+}

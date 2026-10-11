@@ -1,0 +1,26 @@
+{
+  "arabidopsis": {
+    "reference_id": "TAIR10-EnsemblPlants55-80a131660033",
+    "source_gzip": "sources/GSE299784/Arabidopsis_thaliana.TAIR10.55.dna.toplevel.fa.gz",
+    "source_gzip_sha256": "80a13166003333ba4982b57abdb3d2b62037bc831f4da29ea378c1b776fff8e2",
+    "decompressed_fasta_sha256": "85c83b6dd6820769dae5df190adda7ca0762872d61e5634a91f1d14c8f4fd8ce",
+    "decompressed_bytes": 121662600,
+    "contigs": 7,
+    "sequence_bases": 119667750,
+    "completed_model_bundle_fasta_hashes": [
+      "85c83b6dd6820769dae5df190adda7ca0762872d61e5634a91f1d14c8f4fd8ce"
+    ],
+    "note": "FASTA hashes cover bytes, including headers and wrapping; source archives and model FASTA identities are distinct."
+  },
+  "sorghum": {
+    "reference_id": "Sbicolor-v3.0.1-868353094343",
+    "source_gzip": "sources/Sbicolor_454_v3.0.1.fa.gz",
+    "source_gzip_sha256": "8683530943438cee02ca14340010b2b897b4dcff45238dd8efeabb604c7c3936",
+    "decompressed_fasta_sha256": "4a5e7894b8f2ff07d26a123c7ce32840cb37a203ae4253ee407ecd45dcbe52b4",
+    "decompressed_bytes": 720688555,
+    "contigs": 870,
+    "sequence_bases": 708863705,
+    "completed_model_bundle_fasta_hashes": [],
+    "note": "FASTA hashes cover bytes, including headers and wrapping; source archives and model FASTA identities are distinct."
+  }
+}

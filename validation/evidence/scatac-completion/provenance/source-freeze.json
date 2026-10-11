@@ -1,0 +1,29 @@
+{
+  "audited_utc": "2026-10-11T06:50:09.001281+00:00",
+  "code_scopes": [
+    "genesis_tools/src",
+    "genesis_tools/tests",
+    "tests",
+    "modules",
+    "main.nf",
+    "nextflow.config",
+    "pixi.toml",
+    "pixi.lock",
+    "genesis_tools/pyproject.toml",
+    "genesis_tools/uv.lock"
+  ],
+  "current_pending_changes": "Documentation, frozen inspection lock, reproduction helpers and measured evidence only",
+  "full_checks_receipt_sha256": "6155a701c4410f071dbe1f0e81fe224f844a99ce02bc7d1060ff76592f79502f",
+  "status": "PASS",
+  "tested_code_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+  "tracked_and_untracked_code_matches_tested_revision": true,
+  "unchanged_from_base": [
+    "pixi.toml",
+    "pixi.lock",
+    "genesis_tools/pyproject.toml",
+    "genesis_tools/uv.lock",
+    "modules",
+    "main.nf",
+    "nextflow.config"
+  ]
+}

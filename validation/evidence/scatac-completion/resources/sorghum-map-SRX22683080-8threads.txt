@@ -1,0 +1,24 @@
+Command exited with non-zero status 1
+	Command being timed: "python3 ../scratch/scatac-completion/map_sorghum_8.py SRX22683080"
+	User time (seconds): 16640.19
+	System time (seconds): 90.96
+	Percent of CPU this job got: 745%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 37:24.08
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 23066312
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 6866274
+	Voluntary context switches: 4920486
+	Involuntary context switches: 124105
+	Swaps: 0
+	File system inputs: 52935752
+	File system outputs: 11961080
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

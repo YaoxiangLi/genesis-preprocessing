@@ -1,0 +1,22 @@
+{
+  "approved_total_cpus": 16,
+  "approved_total_memory_gib": 64,
+  "at_utc": "2026-10-11T06:43:26.325890+00:00",
+  "children_at_stop": [],
+  "command": "/home/exouser/projects/genesis-preprocessing-validation/repo/genesis_tools/.venv/bin/python3 ../scratch/scatac-completion/run_models.py sorghum ",
+  "completed_manifest_sha256": {
+    "sorghum/loader-validation/cherimoya/genesis-task-v1-100544a771c25c2a65f395f22e736f83325a281c194bc320c766f5896336eb1c/complete.json": "9489365de1eed7efecc1c76829d071979678e44c8f774ba1c9b177ff3ce5f63c",
+    "sorghum/loader-validation/cherimoya/genesis-task-v1-5ed75da51c1a21bd9a74d05326c4054fddc97842e4d84ffb88e76e0cf2d64ae2/complete.json": "7ae11b93df65b8587856783a066ec97f4235d506ea7aebe63b6ea3746ab290a9",
+    "sorghum/loader-validation/chrombpnet/genesis-task-v1-100544a771c25c2a65f395f22e736f83325a281c194bc320c766f5896336eb1c/complete.json": "09bbef8476f133022e6aec2e79cd594c553569e29f9f268a7248d5e15a748c21",
+    "sorghum/loader-validation/chrombpnet/genesis-task-v1-5ed75da51c1a21bd9a74d05326c4054fddc97842e4d84ffb88e76e0cf2d64ae2/complete.json": "403a9882160ccbffb0e518764bca37cffb9890c7fa67fc6288104ffa2d28e16d",
+    "sorghum/models/cherimoya/genesis-task-v1-100544a771c25c2a65f395f22e736f83325a281c194bc320c766f5896336eb1c/complete.json": "cece23f4943898040763fe6152b8037b5417d15b1199725686f463da2db58943",
+    "sorghum/models/cherimoya/genesis-task-v1-5ed75da51c1a21bd9a74d05326c4054fddc97842e4d84ffb88e76e0cf2d64ae2/complete.json": "05eab0c168aaa81ad5cd5836c03a2a03aa7fd7a17737d6a826b76f5cc32f79d3",
+    "sorghum/models/chrombpnet/genesis-task-v1-100544a771c25c2a65f395f22e736f83325a281c194bc320c766f5896336eb1c/complete.json": "9af092b16a7ef693727f99dcf1b6d3de0bbde21cda39af9099a46cc7ebe44ca6",
+    "sorghum/models/chrombpnet/genesis-task-v1-5ed75da51c1a21bd9a74d05326c4054fddc97842e4d84ffb88e76e0cf2d64ae2/complete.json": "000fe9be8089967925f506bc91a4b7b0589742bcf61ab1e68c11aebd0b77996a"
+  },
+  "maximum_concurrent_loader_container_memory_gib": 24,
+  "new_workers": 3,
+  "pid": 2343198,
+  "reason": "Move remaining independent model groups to three bounded workers; keep all scientific parameters and production code unchanged; serialize registry writes.",
+  "status": "INTENTIONAL_ORCHESTRATION_RESTART"
+}

@@ -1,0 +1,613 @@
+{
+  "budget": {
+    "cpus": 16,
+    "downloads_gb": 150,
+    "new_working_data_gb": 500,
+    "ram_gib": 64
+  },
+  "captured_utc": "2026-10-11T07:08:45.164211+00:00",
+  "disk_before_note": "Acquisition checked for more than 500 GB free; no exact pre-run filesystem snapshot was retained.",
+  "disk_free_bytes_after": 944675831808,
+  "download_scope": "Successful recorded major source assets and SRA objects; reused Arabidopsis files excluded. Metadata, software, retries and transport overhead are not a measured network total.",
+  "exact_disk_free_bytes_before": null,
+  "native_mapping": [
+    {
+      "command": "sorghum-map-SRX22683056",
+      "elapsed_seconds": 1522.4276678430033,
+      "git_sha": "99bc44332a1d9f96889eea2e0e303df16c4421ce",
+      "peak_process_rss_kib": 20928492
+    },
+    {
+      "command": "sorghum-map-SRX22683080-40GiB",
+      "elapsed_seconds": 2375.2345075429766,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "peak_process_rss_kib": 24817828
+    }
+  ],
+  "parallel_transition_manifests_unchanged": 8,
+  "resource_scope": "Stage execution timers exclude prerequisite waiting. Peak process RSS is a process high-water mark, not incremental stage memory. Docker daemon children are excluded; limits are not measured peaks.",
+  "stages": [
+    {
+      "elapsed_seconds": 1900.030518870044,
+      "git_sha": "bf2c08a1013060be07803220322eeab1d496b34e",
+      "path": "arabidopsis/core/execution.json",
+      "peak_process_rss_kib": 107560,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 1454.1536227189936,
+      "git_sha": "5bf44dbc04d9a751b3d33efb08077fad3388fb78",
+      "path": "arabidopsis/ingested-1/execution.json",
+      "peak_process_rss_kib": 105444,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 1759.2129519459559,
+      "git_sha": "5bf44dbc04d9a751b3d33efb08077fad3388fb78",
+      "path": "arabidopsis/ingested-2/execution.json",
+      "peak_process_rss_kib": 107816,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.7135049119824544,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e/execution.json",
+      "peak_process_rss_kib": 48300,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.628098779998254,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-12b34b09a2a9e9c578d71a003e56b946a5c041d4b013ffc1d9a128fd8d09613e/execution.json",
+      "peak_process_rss_kib": 52752,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.6358388300286606,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-37d4fdf61fb922092e6aca4b041f01b4bfc56f43a88e8c6beba35e563dc325d7/execution.json",
+      "peak_process_rss_kib": 53560,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.6774274880299345,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-638020cbc83c8f29dcd00e33db9f70f6e938aecc6e79de6e5eb17496419489e8/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.6740346669685096,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-86eee732163486efaa239e69d77bc4b06ddfe4c679f0fb5dd0ca3ac7044f1ada/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.671440499019809,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-8e512ee4a3043fda31df2ded177d22959d5fad568e6619d1ecd02862b9e5aeff/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.6641540049458854,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-a6539cedd52fd2370c87a9bb09b37332bcff1816c359e0290eedc0f80202a81a/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.62692509801127,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-ab3fd51ea26927cd39a2bcd2d08dfc3927423ee81aade152f2df7a8c86e25eb6/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.6254055579775013,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-cce01c81d6bd7e8fac2be298645db5eb92e086b2e0a30df0a994fa2a20e540e6/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.6116180759854615,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-d14928bac922fc3e0f49a8ae51a43a59b8d8fbd87ef746a4e215aa6ce980b748/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.739312313031405,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-d3728c17d2dcd4eeeaff732c0afaf034dcf67c3449f4bcb6e7bdfb331c452aa8/execution.json",
+      "peak_process_rss_kib": 57144,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 2.561973089003004,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/cherimoya/genesis-task-v1-df799c1ed32040d7aeccbf4b085cccdaf0f2a77388f89e973e3934b9bbdefab5/execution.json",
+      "peak_process_rss_kib": 57144,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 7.289268770022318,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e/execution.json",
+      "peak_process_rss_kib": 48676,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 4.649402706010733,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-12b34b09a2a9e9c578d71a003e56b946a5c041d4b013ffc1d9a128fd8d09613e/execution.json",
+      "peak_process_rss_kib": 52752,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 8.091428095998708,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-37d4fdf61fb922092e6aca4b041f01b4bfc56f43a88e8c6beba35e563dc325d7/execution.json",
+      "peak_process_rss_kib": 53876,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 7.154712849005591,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-638020cbc83c8f29dcd00e33db9f70f6e938aecc6e79de6e5eb17496419489e8/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 3.6695881329942495,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-86eee732163486efaa239e69d77bc4b06ddfe4c679f0fb5dd0ca3ac7044f1ada/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 6.647011105029378,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-8e512ee4a3043fda31df2ded177d22959d5fad568e6619d1ecd02862b9e5aeff/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 5.482363966002595,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-a6539cedd52fd2370c87a9bb09b37332bcff1816c359e0290eedc0f80202a81a/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 3.9525416219839826,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-ab3fd51ea26927cd39a2bcd2d08dfc3927423ee81aade152f2df7a8c86e25eb6/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 7.355389750970062,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-cce01c81d6bd7e8fac2be298645db5eb92e086b2e0a30df0a994fa2a20e540e6/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 6.636524759000167,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-d14928bac922fc3e0f49a8ae51a43a59b8d8fbd87ef746a4e215aa6ce980b748/execution.json",
+      "peak_process_rss_kib": 55412,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 8.239736119983718,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-d3728c17d2dcd4eeeaff732c0afaf034dcf67c3449f4bcb6e7bdfb331c452aa8/execution.json",
+      "peak_process_rss_kib": 57144,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 8.048498720978387,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "arabidopsis/loader-validation/chrombpnet/genesis-task-v1-df799c1ed32040d7aeccbf4b085cccdaf0f2a77388f89e973e3934b9bbdefab5/execution.json",
+      "peak_process_rss_kib": 57144,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 44.14862450497458,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-0e507a404b601deaa0341939971d57e93e9a971790235fa92cb5216303aa7d3e/execution.json",
+      "peak_process_rss_kib": 50008,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 64.02535753499251,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-12b34b09a2a9e9c578d71a003e56b946a5c041d4b013ffc1d9a128fd8d09613e/execution.json",
+      "peak_process_rss_kib": 51924,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 51.84095823101234,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-37d4fdf61fb922092e6aca4b041f01b4bfc56f43a88e8c6beba35e563dc325d7/execution.json",
+      "peak_process_rss_kib": 54644,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 73.38201749202562,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-638020cbc83c8f29dcd00e33db9f70f6e938aecc6e79de6e5eb17496419489e8/execution.json",
+      "peak_process_rss_kib": 59304,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 21.076823313022032,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-86eee732163486efaa239e69d77bc4b06ddfe4c679f0fb5dd0ca3ac7044f1ada/execution.json",
+      "peak_process_rss_kib": 59304,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 56.72594419302186,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-8e512ee4a3043fda31df2ded177d22959d5fad568e6619d1ecd02862b9e5aeff/execution.json",
+      "peak_process_rss_kib": 59304,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 51.00944328599144,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-a6539cedd52fd2370c87a9bb09b37332bcff1816c359e0290eedc0f80202a81a/execution.json",
+      "peak_process_rss_kib": 59304,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 61.65548805601429,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-ab3fd51ea26927cd39a2bcd2d08dfc3927423ee81aade152f2df7a8c86e25eb6/execution.json",
+      "peak_process_rss_kib": 60788,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 66.79130522400374,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-cce01c81d6bd7e8fac2be298645db5eb92e086b2e0a30df0a994fa2a20e540e6/execution.json",
+      "peak_process_rss_kib": 60788,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 39.611000130011234,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-d14928bac922fc3e0f49a8ae51a43a59b8d8fbd87ef746a4e215aa6ce980b748/execution.json",
+      "peak_process_rss_kib": 60788,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 78.27749907202087,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-d3728c17d2dcd4eeeaff732c0afaf034dcf67c3449f4bcb6e7bdfb331c452aa8/execution.json",
+      "peak_process_rss_kib": 60788,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 17.476574032974895,
+      "git_sha": "6fae768faf6ab6d6fb20bf51fcaaf35d556960ae",
+      "path": "arabidopsis/products/genesis-task-v1-df799c1ed32040d7aeccbf4b085cccdaf0f2a77388f89e973e3934b9bbdefab5/execution.json",
+      "peak_process_rss_kib": 60788,
+      "species": "arabidopsis"
+    },
+    {
+      "elapsed_seconds": 1366.704204529,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/core/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 413.9256921259803,
+      "git_sha": "4e431745dd9e8285a1055bbe83f552258ee14fb3",
+      "path": "sorghum/ingested-GSM7922845/execution.json",
+      "peak_process_rss_kib": 108136,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 1213.1618223169935,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/ingested-GSM7922873/execution.json",
+      "peak_process_rss_kib": 120312,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.8077423310023732,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-100544a771c25c2a65f395f22e736f83325a281c194bc320c766f5896336eb1c/execution.json",
+      "peak_process_rss_kib": 106588,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.763454614963848,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-5ed75da51c1a21bd9a74d05326c4054fddc97842e4d84ffb88e76e0cf2d64ae2/execution.json",
+      "peak_process_rss_kib": 114832,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.7985002760542557,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-70c7a56930dc8b5f5c184743a071956f00b272d7c8dfbc281db219a84657c1cf/execution.json",
+      "peak_process_rss_kib": 102708,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.6040601640124805,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-73889bcec5ecfca9eabab02f3ca74af7ac5020edf3a029732589304558175b66/execution.json",
+      "peak_process_rss_kib": 100588,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.501597036025487,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-83a7ce582076beb9db0ea489a481c154eb973eb1c2d219069867dd0e8553e7cb/execution.json",
+      "peak_process_rss_kib": 102148,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.578268426004797,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-911bd541155daf97383b75501bbdd683d46ccebb98b1e1c17d4554b24ce2e5d0/execution.json",
+      "peak_process_rss_kib": 103156,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.5354694650159217,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-92a774548b2a20efa6aea8a8a733b6a4ed012755fe37e328911bf2d1879d5405/execution.json",
+      "peak_process_rss_kib": 102600,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.5087546709692106,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-b73a32f652270c9727459a87f4f7627658ffa014f77fd90d1419fb60187c9ad2/execution.json",
+      "peak_process_rss_kib": 109048,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.508386498026084,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-c10553b67acc91168a9c9731543ea898128d7659f04cd90abaf009fbb5e57539/execution.json",
+      "peak_process_rss_kib": 104584,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.5876283409888856,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-cf12ec6ff2287dd9a02e47bac1b5247a7dde9480be7bd214c792a65a8ccaa1da/execution.json",
+      "peak_process_rss_kib": 109048,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.6566049800021574,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-d887abcb722e15c03b0dbf58dc72be1f6b4ba70c7f9c32682f41dd304b8bfb1d/execution.json",
+      "peak_process_rss_kib": 105788,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 3.528327370993793,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/cherimoya/genesis-task-v1-fe54e75e49ed585de45d23d33cd47d00dd3caaa25e88df4ccb7e1f256ebb7671/execution.json",
+      "peak_process_rss_kib": 104584,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 10.250857745006215,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-100544a771c25c2a65f395f22e736f83325a281c194bc320c766f5896336eb1c/execution.json",
+      "peak_process_rss_kib": 106800,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 4.547273123986088,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-5ed75da51c1a21bd9a74d05326c4054fddc97842e4d84ffb88e76e0cf2d64ae2/execution.json",
+      "peak_process_rss_kib": 115020,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 6.318739300011657,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-70c7a56930dc8b5f5c184743a071956f00b272d7c8dfbc281db219a84657c1cf/execution.json",
+      "peak_process_rss_kib": 103156,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 5.305759565031622,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-73889bcec5ecfca9eabab02f3ca74af7ac5020edf3a029732589304558175b66/execution.json",
+      "peak_process_rss_kib": 101272,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 4.560019775002729,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-83a7ce582076beb9db0ea489a481c154eb973eb1c2d219069867dd0e8553e7cb/execution.json",
+      "peak_process_rss_kib": 102600,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 5.706790955970064,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-911bd541155daf97383b75501bbdd683d46ccebb98b1e1c17d4554b24ce2e5d0/execution.json",
+      "peak_process_rss_kib": 103412,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 8.248536118015181,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-92a774548b2a20efa6aea8a8a733b6a4ed012755fe37e328911bf2d1879d5405/execution.json",
+      "peak_process_rss_kib": 102600,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 4.6569741269922815,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-b73a32f652270c9727459a87f4f7627658ffa014f77fd90d1419fb60187c9ad2/execution.json",
+      "peak_process_rss_kib": 109048,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 9.084076623024885,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-c10553b67acc91168a9c9731543ea898128d7659f04cd90abaf009fbb5e57539/execution.json",
+      "peak_process_rss_kib": 104584,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 5.05705369298812,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-cf12ec6ff2287dd9a02e47bac1b5247a7dde9480be7bd214c792a65a8ccaa1da/execution.json",
+      "peak_process_rss_kib": 109048,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 4.943666937004309,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-d887abcb722e15c03b0dbf58dc72be1f6b4ba70c7f9c32682f41dd304b8bfb1d/execution.json",
+      "peak_process_rss_kib": 105788,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 4.365426315984223,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/loader-validation/chrombpnet/genesis-task-v1-fe54e75e49ed585de45d23d33cd47d00dd3caaa25e88df4ccb7e1f256ebb7671/execution.json",
+      "peak_process_rss_kib": 104584,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 54.11993624002207,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-100544a771c25c2a65f395f22e736f83325a281c194bc320c766f5896336eb1c/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 9.645889097009785,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-5ed75da51c1a21bd9a74d05326c4054fddc97842e4d84ffb88e76e0cf2d64ae2/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 55.7887895059539,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-70c7a56930dc8b5f5c184743a071956f00b272d7c8dfbc281db219a84657c1cf/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 139.42991862498457,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-73889bcec5ecfca9eabab02f3ca74af7ac5020edf3a029732589304558175b66/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 51.06238342897268,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-83a7ce582076beb9db0ea489a481c154eb973eb1c2d219069867dd0e8553e7cb/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 30.532567127025686,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-911bd541155daf97383b75501bbdd683d46ccebb98b1e1c17d4554b24ce2e5d0/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 108.90219670301303,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-92a774548b2a20efa6aea8a8a733b6a4ed012755fe37e328911bf2d1879d5405/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 8.178281440981664,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-b73a32f652270c9727459a87f4f7627658ffa014f77fd90d1419fb60187c9ad2/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 21.06267160997959,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-c10553b67acc91168a9c9731543ea898128d7659f04cd90abaf009fbb5e57539/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 8.975299429963343,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-cf12ec6ff2287dd9a02e47bac1b5247a7dde9480be7bd214c792a65a8ccaa1da/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 32.650088706985116,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-d887abcb722e15c03b0dbf58dc72be1f6b4ba70c7f9c32682f41dd304b8bfb1d/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    },
+    {
+      "elapsed_seconds": 38.13316050899448,
+      "git_sha": "f83bd75d71db74f080c93ee7090a54cee8295504",
+      "path": "sorghum/products/genesis-task-v1-fe54e75e49ed585de45d23d33cd47d00dd3caaa25e88df4ccb7e1f256ebb7671/execution.json",
+      "peak_process_rss_kib": 105664,
+      "species": "sorghum"
+    }
+  ],
+  "storage": [
+    {
+      "allocated_bytes": 165530210304,
+      "command": [
+        "du",
+        "-s",
+        "--block-size=1",
+        "/home/exouser/projects/genesis-preprocessing-validation/results/scatac-completion"
+      ],
+      "path": "results/scatac-completion"
+    },
+    {
+      "allocated_bytes": 23592960,
+      "command": [
+        "du",
+        "-s",
+        "--block-size=1",
+        "/home/exouser/projects/genesis-preprocessing-validation/results/scatac-discovery"
+      ],
+      "path": "results/scatac-discovery"
+    },
+    {
+      "allocated_bytes": 654090240,
+      "command": [
+        "du",
+        "-s",
+        "--block-size=1",
+        "/home/exouser/projects/genesis-preprocessing-validation/scratch/scatac-completion"
+      ],
+      "path": "scratch/scatac-completion"
+    }
+  ],
+  "storage_scope": "Allocated blocks in the named directories, with hard links counted once within each du invocation. Existing shared model/tool environments, Docker layers and retained historical data are outside this snapshot.",
+  "verified_major_download_bytes": 37958418114,
+  "verified_new_source_asset_bytes": 10265165572,
+  "verified_new_sra_bytes": 27693252542
+}

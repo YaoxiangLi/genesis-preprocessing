@@ -1,0 +1,24 @@
+{
+  "libraries": {
+    "GSM4698760": {
+      "input_sha256": "6ab3024000deb86f37605f1789bffd39807a0c2df68e0948fb6ce691fe513699",
+      "original_fragment_rows": 81811226,
+      "original_support": 113530890,
+      "selected_cells": 2728,
+      "selected_original_fragments": 27371435,
+      "all_selected_counts_equal_ingestion": true,
+      "last_record_processed": true
+    },
+    "GSM4698761": {
+      "input_sha256": "d9ed324151b438b51037bf1afe52f5d0e50660de9e76497474c753210cc6e2c1",
+      "original_fragment_rows": 98254384,
+      "original_support": 143341235,
+      "selected_cells": 2036,
+      "selected_original_fragments": 21866323,
+      "all_selected_counts_equal_ingestion": true,
+      "last_record_processed": true
+    }
+  },
+  "elapsed_seconds": 179.04130981198978,
+  "interpretation": "Counts come directly from the original author fragment archives. The 62-fragment discrepancy against author passed_filters predates Genesis ingestion; its upstream cause remains unresolved."
+}

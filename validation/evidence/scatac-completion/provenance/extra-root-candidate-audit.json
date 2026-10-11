@@ -1,0 +1,50 @@
+{
+  "author_cell_type_crosswalk": null,
+  "available_source_qc_fields": [
+    "total",
+    "duplicate",
+    "chimeric",
+    "unmapped",
+    "lowmapq",
+    "mitochondrial",
+    "passed_filters",
+    "TSS.enrichment",
+    "nucleosome_signal",
+    "pct_reads_in_peaks"
+  ],
+  "cells_by_deposited_library_label": {
+    "atac_1": 6490,
+    "atac_2": 7976
+  },
+  "cells_by_numeric_cluster": {
+    "0": 1516,
+    "1": 1481,
+    "10": 672,
+    "11": 625,
+    "12": 587,
+    "13": 545,
+    "14": 527,
+    "15": 434,
+    "16": 387,
+    "17": 203,
+    "2": 1207,
+    "3": 1141,
+    "4": 1031,
+    "5": 1006,
+    "6": 933,
+    "7": 756,
+    "8": 726,
+    "9": 689
+  },
+  "deposited_cell_records": 14466,
+  "metadata_tsv_sha256": "8f4ed7d2c69341287d0ccd7af4e4711caff54cf4891cdddc9e7dbf44d97d6fed",
+  "new_sequencing_data_downloaded": false,
+  "pilot_included": false,
+  "readiness": "NEEDS_METADATA",
+  "reason": "Numeric ATAC clusters have no verified author cell-type mapping. RNA atlas cluster numbers cannot be substituted across independent assays.",
+  "retrieved_utc": "2026-10-11T06:20:58.457787+00:00",
+  "series_snapshot_sha256": "2d84fc6d6d10f2cc3fee5e87b329e0fe8503bb7d4c8b9232a42a4417af3af862",
+  "source_object_sha256": "e1deca5d979e5e6cf2682b7205375dbb2cbd668f0177b5c99668a1e238dee8ce",
+  "source_url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE299784",
+  "study": "GSE299784"
+}

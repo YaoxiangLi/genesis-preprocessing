@@ -1,0 +1,32 @@
+{
+  "acceptance": "Search documented; no claim of exhaustive discovery or evidence of dataset absence",
+  "confirmed_primary_sources": [
+    {
+      "finding": "Existing pilot study; additional technical and timepoint libraries do not establish new biological replicates by accession alone.",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE248919"
+    },
+    {
+      "finding": "Existing study, 0h Sorghum Multiome ATAC record; not counted as a newly discovered study.",
+      "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7922875"
+    }
+  ],
+  "elapsed_seconds": null,
+  "method": "Public web search followed by primary-source inspection; search snippets are leads, not accession evidence",
+  "new_verified_scatac_studies_from_this_supplemental_search": 0,
+  "peak_ram": null,
+  "queries": [
+    "site.ncbi.nlm.nih.gov/geo Sorghum \"ATAC\" \"single\"",
+    "site.ncbi.nlm.nih.gov/geo Sorghum \"snATAC\"",
+    "Sorghum single cell chromatin accessibility fragments data 2026",
+    "\"sorghum\" \"sci-ATAC\" data",
+    "\"Sorghum\" \"single-cell\" \"PRJNA\" \"ATAC\" -site:researchgate.net"
+  ],
+  "retrieved_utc": "2026-10-11T06:16:57.909365+00:00",
+  "sequencing_files_downloaded": false,
+  "unresolved_primary_source": [
+    {
+      "condition": "Web full-text retrieval returned an internal error. No new accession inferred from this search hit.",
+      "url": "https://www.biorxiv.org/content/10.64898/2026.01.08.698005v1.full"
+    }
+  ]
+}

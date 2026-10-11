@@ -1,0 +1,24 @@
+Command exited with non-zero status 1
+	Command being timed: "/home/exouser/.pixi/bin/pixi run uv run --frozen --project genesis_tools python -c from pathlib import Path; import tempfile,pysam; from genesis_tools.scatac import backgrounds; t=tempfile.TemporaryDirectory(); p=Path(t.name)/"g.fa"; p.write_text(">chr1\n"+"A"*3000+"\n>chr2\n"+"A"*3000+"\n"); pysam.faidx(str(p)); row=lambda c,n:f"{c}\t{n-1}\t{n+1}\tx\t0\t.\t0\t0\t0\t1"; positive={"train":[row("chr1",500)],"test":[row("chr2",500)]}; candidates={s:[row(c,n) for n in range(1000,2000,100)] for s,c in [("train","chr1"),("test","chr2")]}; a=backgrounds.match(p,positive,candidates,100,7); b=backgrounds.match(p,dict(reversed(list(positive.items()))),candidates,100,7); print(a[0]); print(b[0]); assert a==b, "Equivalent fold dictionaries changed deterministic background selection""
+	User time (seconds): 0.09
+	System time (seconds): 0.06
+	Percent of CPU this job got: 34%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.46
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 33960
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 13063
+	Voluntary context switches: 202
+	Involuntary context switches: 23
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 56
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

@@ -1,0 +1,8 @@
+{
+  "captured_utc": "2026-10-11T05:11:25.854469+00:00",
+  "stdlib_helper_python": "3.12.12 | packaged by conda-forge | (main, Oct 22 2025, 23:25:55) [GCC 14.3.0]",
+  "executable": "/home/exouser/miniforge3/bin/python3",
+  "architecture": "x86_64",
+  "raw_mapper_runtime": "0.3.2-r518",
+  "note": "Acquisition, logging and mapping wrappers use this existing stdlib Python; production scATAC processing uses the frozen project Python recorded separately."
+}

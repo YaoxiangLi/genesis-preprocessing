@@ -1,0 +1,23 @@
+	Command being timed: "python3 ../scratch/scatac-completion/extract_sra.py SRR26989943"
+	User time (seconds): 2320.72
+	System time (seconds): 282.45
+	Percent of CPU this job got: 386%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 11:12.83
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 582080
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 164300
+	Voluntary context switches: 2072816
+	Involuntary context switches: 274327
+	Swaps: 0
+	File system inputs: 798854536
+	File system outputs: 576904896
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

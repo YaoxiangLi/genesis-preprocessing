@@ -1,0 +1,124 @@
+{
+  "python": "3.14.5",
+  "pysam": "0.24.1",
+  "architecture": "x86_64",
+  "git_sha": "5bf44dbc04d9a751b3d33efb08077fad3388fb78",
+  "software": {
+    "pixi": {
+      "argv": [
+        "/home/exouser/.pixi/bin/pixi",
+        "--version"
+      ],
+      "stdout": "pixi 0.70.1\n",
+      "stderr": ""
+    },
+    "uv": {
+      "argv": [
+        "/home/exouser/.pixi/bin/pixi",
+        "run",
+        "uv",
+        "--version"
+      ],
+      "stdout": "uv 0.11.33 (x86_64-unknown-linux-gnu)\n",
+      "stderr": ""
+    },
+    "micromamba": {
+      "argv": [
+        "/home/exouser/.pixi/bin/pixi",
+        "run",
+        "micromamba",
+        "--version"
+      ],
+      "stdout": "2.5.0\n",
+      "stderr": ""
+    },
+    "nextflow": {
+      "argv": [
+        "/home/exouser/.pixi/bin/pixi",
+        "run",
+        "nextflow",
+        "-version"
+      ],
+      "stdout": "\n      N E X T F L O W\n      version 25.10.4 build 11173\n      created 10-02-2026 15:17 UTC (10:17 EDT)\n      cite doi:10.1038/nbt.3820\n      http://nextflow.io\n\n",
+      "stderr": ""
+    },
+    "java": {
+      "argv": [
+        "/home/exouser/.pixi/bin/pixi",
+        "run",
+        "java",
+        "-version"
+      ],
+      "stdout": "",
+      "stderr": "openjdk version \"23.0.2-internal\" 2025-01-21\nOpenJDK Runtime Environment (build 23.0.2-internal-adhoc.conda.src)\nOpenJDK 64-Bit Server VM (build 23.0.2-internal-adhoc.conda.src, mixed mode, sharing)\n"
+    },
+    "docker": {
+      "argv": [
+        "docker",
+        "version",
+        "--format",
+        "{{.Client.Version}} {{.Server.Version}} {{.Server.Arch}}"
+      ],
+      "stdout": "29.1.3 29.1.3 amd64\n",
+      "stderr": ""
+    },
+    "chromap": {
+      "argv": [
+        "/home/exouser/projects/genesis-preprocessing-validation/scratch/scatac-completion/raw-env/bin/chromap",
+        "--version"
+      ],
+      "stdout": "",
+      "stderr": "0.3.2-r518\n"
+    },
+    "fasterq_dump": {
+      "argv": [
+        "/home/exouser/projects/genesis-preprocessing-validation/scratch/scatac-completion/raw-env/bin/fasterq-dump",
+        "--version"
+      ],
+      "stdout": "\n/home/exouser/projects/genesis-preprocessing-validation/scratch/scatac-completion/raw-env/bin/fasterq-dump : 3.2.1\n\n",
+      "stderr": ""
+    },
+    "pigz": {
+      "argv": [
+        "pigz",
+        "--version"
+      ],
+      "stdout": "pigz 2.8\n",
+      "stderr": ""
+    }
+  },
+  "images": {
+    "kundajelab/dap_seq_peaks@sha256:10467dd29e3d25ce7769f76f57402bd1a5a582006e911d06479bfcc3e3325df3": {
+      "architecture": "amd64",
+      "os": "linux",
+      "id": "sha256:49c00c5a20397109816a2e1c5ea4a62d126ff1455db953c72dce0b8747c620ce",
+      "repo_digests": [
+        "kundajelab/dap_seq_peaks@sha256:10467dd29e3d25ce7769f76f57402bd1a5a582006e911d06479bfcc3e3325df3"
+      ]
+    },
+    "kundajelab/dap_seq_tracks@sha256:e6dd6ceb79e50fc6db83e9346a920e51fd2bf0dcffbc18c9305b1b6e8c806390": {
+      "architecture": "amd64",
+      "os": "linux",
+      "id": "sha256:61a1abe901bd424a719619a8e0c1a81275ee5635d96d12e16f8d5b25c3f66149",
+      "repo_digests": [
+        "kundajelab/dap_seq_tracks@sha256:e6dd6ceb79e50fc6db83e9346a920e51fd2bf0dcffbc18c9305b1b6e8c806390"
+      ]
+    },
+    "kundajelab/chrombpnet@sha256:6f41e0f59fc025285645e2cbfd1bb6347431b4e0ab6088804d11843cd6aed169": {
+      "architecture": "amd64",
+      "os": "linux",
+      "id": "sha256:8415cd6fc2bfb5fa6119471f2b0b56edd1207e167a0d63b3a58de304c13cab77",
+      "repo_digests": [
+        "kundajelab/chrombpnet@sha256:6f41e0f59fc025285645e2cbfd1bb6347431b4e0ab6088804d11843cd6aed169"
+      ]
+    },
+    "kundajelab/dap_seq_qc@sha256:ace177a497934a26adb305bc0dc92cc6a447fe8ca714b79f72a007c7acb53239": {
+      "architecture": "amd64",
+      "os": "linux",
+      "id": "sha256:2c5e0239910883b3540b152e24c651c13c1fae1ea454572e4ca7243a72066cfd",
+      "repo_digests": [
+        "kundajelab/dap_seq_qc@sha256:ace177a497934a26adb305bc0dc92cc6a447fe8ca714b79f72a007c7acb53239"
+      ]
+    }
+  }
+}
