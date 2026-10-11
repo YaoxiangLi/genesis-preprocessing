@@ -7,7 +7,11 @@ import time
 from pathlib import Path
 from typing import Any
 
+import pysam
+
+from ..benchmark.metrics import Regions
 from ..contracts.records import dump, fingerprint, load
+from . import backgrounds as gc_backgrounds
 from .common import complete, publication, reference, software, text_file, verify_output
 
 MODELS = {
@@ -53,7 +57,13 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
         raise ValueError("This adapter exports one unstranded ATAC channel without controls")
     if target == "chrombpnet" and not isinstance(config.get("bias_model"), dict):
         raise ValueError("Record a bias-model requirement; no human bias model is selected")
-    signature = fingerprint({"parent": parent["version"], "config": config, "software": software()})
+    signature = fingerprint(
+        {
+            "parent": parent["version"],
+            "config": config,
+            "software": software("model.py", "backgrounds.py", "../benchmark/metrics.py"),
+        }
+    )
     if output.exists() and resume:
         saved = verify_output(output, "scatac-model")
         if saved["data"]["signature"] != signature:
@@ -69,7 +79,9 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
         if not 0 <= offset < end - start:
             raise ValueError("Model peaks require a defined in-peak summit")
         center = start + offset
-        occupied.setdefault(chrom, []).append((center - radius, center + radius))
+        occupied.setdefault(chrom, []).append(
+            (min(start, center - radius), max(end, center + radius))
+        )
         if chrom not in mapping:
             excluded["unassigned_chromosome"] += 1
         elif center - radius < 0 or center + radius > sizes[chrom]:
@@ -79,7 +91,10 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
     if any(not records for records in rows.values()):
         raise ValueError("Each fold requires at least one peak with a valid context window")
     # Explicit, deterministic background. No sequence-matched or GC-matched claim.
-    if config.get("background_method") != "nonoverlapping-genome-tiles-v1":
+    if config.get("background_method") not in {
+        "nonoverlapping-genome-tiles-v1",
+        "gc-matched-genome-tiles-v1",
+    }:
         raise ValueError("Select a declared background method")
     backgrounds = {s: [] for s in rows}
     for chrom, split in mapping.items():
@@ -99,6 +114,13 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
     with publication(output) as stage:
         with text_file(fasta) as source, (stage / "genome.fa").open("w") as dest:
             shutil.copyfileobj(source, dest)
+        pysam.faidx(str(stage / "genome.fa"))
+        background_summary = {"method": config["background_method"]}
+        if config["background_method"] == "gc-matched-genome-tiles-v1":
+            backgrounds, background_summary = gc_backgrounds.match(
+                stage / "genome.fa", rows, backgrounds, window, config["background_seed"]
+            )
+        dump(stage / "backgrounds.json", background_summary)
         for name in ("signal.bw", "chrom.sizes", "metadata.json", "qc.json", "cells.jsonl"):
             shutil.copyfile(group / name, stage / name)
         dump(stage / "parent.json", parent)
@@ -137,7 +159,7 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
                 "status": "REQUIRES_MODEL_LOADER_TEST_AND_REVIEW",
                 "scientific_limitations": [
                     "Coordinate folds are disjoint; homology leakage is unassessed",
-                    "Genome-tile backgrounds are not GC matched",
+                    "Background matching is defined in backgrounds.json; homology is not matched",
                     "Training and plant biological quality are not validated by export",
                 ],
             },
@@ -148,14 +170,81 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
 
 def validate(directory: Path) -> dict[str, Any]:
     result = verify_output(directory, "scatac-model")
+    required = {
+        "genome.fa",
+        "genome.fa.fai",
+        "signal.bw",
+        "chrom.sizes",
+        "metadata.json",
+        "qc.json",
+        "cells.jsonl",
+        "parent.json",
+        "config.json",
+        "loader.json",
+        "folds.json",
+        "backgrounds.json",
+    }
+    required.update(
+        f"{fold}.{kind}.bed"
+        for fold in ("train", "validation", "test")
+        for kind in ("peaks", "background")
+    )
+    if required - result["outputs"].keys():
+        raise ValueError("Incomplete model bundle")
+    config = load(directory / "config.json")
+    loader = load(directory / "loader.json")
+    if config != result["data"]["config"] or config["model_sha"] != MODELS[config["target"]]:
+        raise ValueError("Inconsistent model configuration or revision")
+    if (
+        any(
+            loader[k] != config[k]
+            for k in ("target", "model_sha", "input_window", "output_window", "max_jitter")
+        )
+        or loader["further_tn5_shift"] is not False
+    ):
+        raise ValueError("Loader configuration differs from the declared model semantics")
     sizes = {
         r.split()[0]: int(r.split()[1])
         for r in (directory / "chrom.sizes").read_text().splitlines()
     }
-    folds(result["data"]["config"]["folds"], sizes)
+    mapping = folds(config["folds"], sizes)
+    if load(directory / "folds.json") != config["folds"]:
+        raise ValueError("Fold files disagree")
+    with pysam.FastaFile(str(directory / "genome.fa")) as genome:
+        if dict(zip(genome.references, genome.lengths, strict=True)) != sizes:
+            raise ValueError("Bundled FASTA dictionary differs from chromosome sizes")
+    radius = config["input_window"] // 2 + config["max_jitter"]
+    for fold in config["folds"]:
+        occupied = []
+        background = []
+        for kind, intervals in (("peaks", occupied), ("background", background)):
+            with (directory / f"{fold}.{kind}.bed").open() as stream:
+                for line in stream:
+                    f = line.rstrip().split("\t")
+                    if len(f) != 10:
+                        raise ValueError("Model regions require ten narrowPeak fields")
+                    chrom, start, end, summit = f[0], int(f[1]), int(f[2]), int(f[9])
+                    center = start + summit
+                    if (
+                        mapping.get(chrom) != fold
+                        or not 0 <= start < end <= sizes[chrom]
+                        or not 0 <= summit < end - start
+                        or center - radius < 0
+                        or center + radius > sizes[chrom]
+                    ):
+                        raise ValueError("Invalid or leaking model context window")
+                    intervals.append(
+                        (chrom, min(start, center - radius), max(end, center + radius))
+                    )
+            if not intervals:
+                raise ValueError("Each fold requires nonempty positive and background regions")
+        regions = Regions(occupied)
+        if any(regions.hits(*region) for region in background):
+            raise ValueError("Background overlaps a positive context window")
     return {
         "checksums": "PASS",
         "folds": "PASS",
+        "context_windows": "PASS",
         "model_ready": False,
         "loader_test": "NOT_ASSESSED",
         "manifest": result["version"],
