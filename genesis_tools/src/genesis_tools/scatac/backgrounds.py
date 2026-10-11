@@ -1,4 +1,4 @@
-"""Deterministic within-fold GC matching on declared nonoverlapping genomic tiles."""
+"""Deterministic within-fold GC matching on explicitly spaced genomic windows."""
 
 from __future__ import annotations
 
@@ -8,6 +8,25 @@ from pathlib import Path
 from typing import Any
 
 import pysam
+
+
+def candidate_stride(config: dict[str, Any], radius: int) -> int:
+    """Keep disjoint tiles unchanged; require an explicit stride for window sampling."""
+    method = config.get("background_method")
+    if method not in {
+        "nonoverlapping-genome-tiles-v1",
+        "gc-matched-genome-tiles-v1",
+        "gc-matched-genome-windows-v1",
+    }:
+        raise ValueError("Select a declared background method")
+    stride = config.get("background_stride")
+    if method != "gc-matched-genome-windows-v1":
+        if stride is not None:
+            raise ValueError("A background stride requires the explicit window method")
+        return 2 * radius
+    if type(stride) is not int or stride < 1:
+        raise ValueError("Background windows require an explicit positive integer stride")
+    return stride
 
 
 def match(

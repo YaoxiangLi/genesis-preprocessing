@@ -70,6 +70,7 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
             raise ValueError("Changed model export inputs")
         return {"cached": True, "manifest": saved}
     radius = window // 2 + jitter
+    stride = gc_backgrounds.candidate_stride(config, radius)
     rows: dict[str, list[str]] = {s: [] for s in config["folds"]}
     excluded = {"unassigned_chromosome": 0, "boundary_window": 0}
     occupied: dict[str, list[tuple[int, int]]] = {}
@@ -90,17 +91,12 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
             rows[mapping[chrom]].append(line)
     if any(not records for records in rows.values()):
         raise ValueError("Each fold requires at least one peak with a valid context window")
-    # Explicit, deterministic background. No sequence-matched or GC-matched claim.
-    if config.get("background_method") not in {
-        "nonoverlapping-genome-tiles-v1",
-        "gc-matched-genome-tiles-v1",
-    }:
-        raise ValueError("Select a declared background method")
+    # Exclude full positive contexts, even when backgrounds overlap within one fold.
     backgrounds = {s: [] for s in rows}
     for chrom, split in mapping.items():
         regions = sorted(occupied.get(chrom, []))
         cursor = 0
-        for center in range(radius, sizes[chrom] - radius + 1, 2 * radius):
+        for center in range(radius, sizes[chrom] - radius + 1, stride):
             left, right = center - radius, center + radius
             while cursor < len(regions) and regions[cursor][1] <= left:
                 cursor += 1
@@ -116,10 +112,21 @@ def export(group: Path, config_path: Path, output: Path, *, resume: bool = False
             shutil.copyfileobj(source, dest)
         pysam.faidx(str(stage / "genome.fa"))
         background_summary = {"method": config["background_method"]}
-        if config["background_method"] == "gc-matched-genome-tiles-v1":
+        candidate_counts = {split: len(records) for split, records in backgrounds.items()}
+        if config["background_method"] in {
+            "gc-matched-genome-tiles-v1",
+            "gc-matched-genome-windows-v1",
+        }:
             backgrounds, background_summary = gc_backgrounds.match(
                 stage / "genome.fa", rows, backgrounds, window, config["background_seed"]
             )
+        background_summary.update(
+            method=config["background_method"],
+            candidate_stride_bp=stride,
+            context_width_bp=2 * radius,
+            within_fold_background_contexts_may_overlap=stride < 2 * radius,
+            candidates_per_fold=candidate_counts,
+        )
         dump(stage / "backgrounds.json", background_summary)
         for name in ("signal.bw", "chrom.sizes", "metadata.json", "qc.json", "cells.jsonl"):
             shutil.copyfile(group / name, stage / name)

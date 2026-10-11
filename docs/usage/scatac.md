@@ -99,6 +99,13 @@ retain diagnostics; complete outputs are published atomically.
 
 ## Export model inputs
 
+Choose background geometry explicitly. `gc-matched-genome-tiles-v1` uses disjoint
+windows. For dense peak sets, `gc-matched-genome-windows-v1` accepts a positive
+integer `background_stride`, such as 1000 with a 2114 bp input window. Contexts
+may overlap within the same fold, but never cross chromosome folds or overlap
+positive contexts. Both GC methods require one distinct background per peak and
+report matching deviations; neither silently reduces that requirement.
+
 ```bash
 pixi run genesis scatac model export --input products/TASK_ID --config model.json --output models/TASK_ID
 pixi run genesis scatac model validate --input models/TASK_ID

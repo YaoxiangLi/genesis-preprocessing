@@ -15,6 +15,7 @@ def main() -> None:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--references", type=Path, required=True)
+    parser.add_argument("--background-stride", type=int)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     chromosomes = list(load(args.input / "metadata.json")["reference"]["contigs"])
@@ -38,6 +39,11 @@ def main() -> None:
             if target == "chrombpnet"
             else None,
         }
+        if args.background_stride is not None:
+            config.update(
+                background_method="gc-matched-genome-windows-v1",
+                background_stride=args.background_stride,
+            )
         path = args.output / (target + ".json")
         dump(path, config)
         bundle = args.output / target

@@ -14,6 +14,13 @@ from verify_scatac_exports import rejects
 
 
 def main() -> None:
+    tiles = {"background_method": "gc-matched-genome-tiles-v1"}
+    windows = {"background_method": "gc-matched-genome-windows-v1", "background_stride": 1000}
+    assert backgrounds.candidate_stride(tiles, 1057) == 2114
+    assert backgrounds.candidate_stride(windows, 1057) == 1000
+    for value in (None, 0, -1, 1.5, True):
+        rejects(backgrounds.candidate_stride, {**windows, "background_stride": value}, 1057)
+    rejects(backgrounds.candidate_stride, {**tiles, "background_stride": 1000}, 1057)
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         tss = root / "tss.tsv"

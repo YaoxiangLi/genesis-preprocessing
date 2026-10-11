@@ -103,6 +103,10 @@ Repeat with `--resume` to verify reuse. The complete fixture check is
 Generate a second product fixture with `--numeric-chromosomes` to exercise
 Arabidopsis-style names through both actual loaders.
 The additional fixture `--chromosomes 01 02 03` checks leading-zero preservation.
+Pass `--background-stride 1000` to the loader fixture test to exercise the explicit
+overlapping-window background method. The real pilot uses this recorded choice;
+the earlier disjoint-tile attempt is preserved. Always inspect `backgrounds.json`
+for candidate counts, within-fold overlap and GC matching deviations.
 
 The deterministic fixture should yield 600 counts in each positive window and
 zero in its background. Those values validate the fixture only; they are not
