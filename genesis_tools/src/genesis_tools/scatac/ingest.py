@@ -33,7 +33,7 @@ def run(manifest: Path, output: Path, *, resume: bool = False) -> dict[str, Any]
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", library["library_id"]):
         raise ValueError("Invalid library ID")
     producer = inputs["producer"]
-    if producer["format"] not in {"10x-atac", "10x-arc"}:
+    if producer["format"] not in {"10x-atac", "10x-arc", "chromap-atac"}:
         raise ValueError("Unsupported producer; an explicit adapter is required")
     if not producer.get("version") or producer["offsets"] != [4, -5]:
         raise ValueError("10x requires producer version and declared +4/-5 source offsets")
@@ -46,6 +46,35 @@ def run(manifest: Path, output: Path, *, resume: bool = False) -> dict[str, Any]
         raise ValueError(
             "Declare barcode correction/whitelist provenance, including unknown values"
         )
+    if producer["format"] == "chromap-atac":
+        required = {
+            "mapq_min",
+            "duplicates",
+            "adapter_trimming",
+            "maximum_fragment_length",
+            "barcode_read_format",
+            "barcode_translation_sha256",
+            "command_sha256",
+        }
+        if (
+            required - producer.keys()
+            or producer["duplicates"] != "coordinate-collapsed-with-support"
+        ):
+            raise ValueError("Chromap requires explicit filtering, barcode and command provenance")
+        if (
+            type(producer["mapq_min"]) is not int
+            or not 0 <= producer["mapq_min"] <= 60
+            or type(producer["adapter_trimming"]) is not bool
+            or type(producer["maximum_fragment_length"]) is not int
+            or producer["maximum_fragment_length"] <= 0
+            or not producer["barcode_read_format"]
+            or any(
+                not isinstance(producer.get(k), str)
+                or not re.fullmatch("[a-f0-9]{64}", producer[k])
+                for k in ("whitelist_sha256", "barcode_translation_sha256", "command_sha256")
+            )
+        ):
+            raise ValueError("Invalid Chromap processing provenance")
     source = checked_asset(inputs["fragments"], manifest.parent)
     fasta, sizes = reference(inputs["reference"], manifest.parent)
     normalized = {
@@ -56,7 +85,7 @@ def run(manifest: Path, output: Path, *, resume: bool = False) -> dict[str, Any]
             "fasta": {**inputs["reference"]["fasta"], "path": str(fasta)},
         },
     }
-    signature = fingerprint({"input": inputs, "software": software()})
+    signature = fingerprint({"input": inputs, "software": software("ingest.py")})
     if output.exists() and resume:
         previous = verify_output(output, "scatac-fragments")
         if previous["data"]["signature"] != signature:

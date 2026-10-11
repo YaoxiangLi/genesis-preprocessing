@@ -161,7 +161,7 @@ def aggregate(
             "parents": versions,
             "annotations": digest(annotations),
             "policy": policy,
-            "software": software(),
+            "software": software("pseudobulk.py", "assets/cell-v1.json"),
         }
     )
     if output.exists() and resume:

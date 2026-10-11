@@ -108,6 +108,32 @@ def main() -> None:
             with (output / "barcodes.tsv").open() as stream:
                 assert len(list(csv.DictReader(stream, delimiter="\t"))) == counts["barcodes"]
         assert totals == {"fragments": 9, "support": 12}
+        chromap = load(paths[0])
+        chromap["producer"].update(
+            format="chromap-atac",
+            version="0.3.2",
+            mapq_min=30,
+            duplicates="coordinate-collapsed-with-support",
+            adapter_trimming=True,
+            maximum_fragment_length=2000,
+            barcode_read_format="bc:8:23:-",
+            whitelist_sha256="1" * 64,
+            barcode_translation_sha256="2" * 64,
+            command_sha256="3" * 64,
+        )
+        dump(root / "chromap.json", chromap)
+        ingest.run(root / "chromap.json", root / "chromap")
+        assert (root / "chromap/fragments.tsv.gz").read_bytes() == (
+            root / paths[0].stem / "fragments.tsv.gz"
+        ).read_bytes()  # Adapter does not shift coordinates or collapse molecules again.
+        chromap["producer"].pop("mapq_min")
+        dump(root / "bad-chromap.json", chromap)
+        try:
+            ingest.run(root / "bad-chromap.json", root / "bad-chromap")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Undeclared Chromap filtering was accepted")
         data = load(paths[0])
         original = Path(data["fragments"]["path"]).read_text()
         first = original.splitlines()[0]

@@ -89,16 +89,18 @@ def reference(value: dict[str, Any], base: Path) -> tuple[Path, dict[str, int]]:
     return fasta, observed
 
 
-def software() -> dict[str, Any]:
+def software(*components: str) -> dict[str, Any]:
     code = Path(__file__).parent
+    paths = (
+        {code / name for name in (*components, "common.py")}
+        if components
+        else {p for p in code.rglob("*") if p.is_file() and p.suffix in {".py", ".json"}}
+    )
     return {
         "python": sys.version.split()[0],
         "pysam": pysam.__version__,
-        "implementation": {
-            str(p.relative_to(code)): digest(p)
-            for p in sorted(code.rglob("*"))
-            if p.is_file() and p.suffix in {".py", ".json"}
-        },
+        "implementation": {str(p.relative_to(code)): digest(p) for p in sorted(paths)},
+        "contracts_records_sha256": digest(code.parent / "contracts/records.py"),
     }
 
 
