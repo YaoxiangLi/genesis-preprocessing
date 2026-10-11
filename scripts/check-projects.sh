@@ -30,3 +30,5 @@ uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_ai.py
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_llm_deployment.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/evaluate_metadata.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_readme.py"
+
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_study.py"

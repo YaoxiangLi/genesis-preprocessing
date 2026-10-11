@@ -38,16 +38,14 @@ def ask(
     evidence = [tool(directory, "show", {"dataset": dataset}) for dataset in datasets]
     with contextlib.closing(store.connect(directory)) as db:
         for dataset in datasets:
-            head = db.execute(
-                "SELECT source_bundle FROM metadata_heads WHERE dataset=?", (dataset,)
-            ).fetchone()
-            if head:
-                actual = store.get(db, "source_bundle", head[0])["data"]["classification"]
-                order = {"public": 0, "internal": 1, "local-only": 2}
-                if order[actual] > order[classification]:
-                    raise ValueError(
-                        "Question classification would downgrade stored source restrictions"
-                    )
+            actual = store.classification(db, dataset)
+            if (
+                classification not in store.CLASSIFICATIONS
+                or store.CLASSIFICATIONS[actual] > store.CLASSIFICATIONS[classification]
+            ):
+                raise ValueError(
+                    "Question classification would downgrade stored source restrictions"
+                )
     hashes = [fingerprint(value) for value in evidence]
     result = invoke(
         directory,

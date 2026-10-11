@@ -71,6 +71,7 @@ def execute(args: argparse.Namespace) -> tuple[Any, int]:
         db.execute("BEGIN")
         if args.operation == "queue":
             rows = store.search(db, after=args.after, limit=args.limit)
+            next_after = rows[-1]["id"] if len(rows) == args.limit else None
             if args.scope == "inputs":
                 rows = [
                     r
@@ -85,7 +86,7 @@ def execute(args: argparse.Namespace) -> tuple[Any, int]:
                     for row in rows
                     if review.effective(db, row["id"], args.category) != "APPROVED"
                 ],
-                "next_after": rows[-1]["id"] if len(rows) == args.limit else None,
+                "next_after": next_after,
             }, 0
         if args.operation == "history":
             if not 1 <= args.limit <= 1000 or args.after < 0:

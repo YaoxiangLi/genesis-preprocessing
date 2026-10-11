@@ -135,6 +135,14 @@ def sheet_text(rows: list[dict[str, str]]) -> str:
     return stream.getvalue()
 
 
+def read_config(path: str) -> str:
+    with Path(path).open("rb") as stream:
+        content = stream.read(2 * 1024 * 1024 + 1)
+    if len(content) > 2 * 1024 * 1024:
+        raise ValueError("Site configuration exceeds 2 MiB")
+    return content.decode("utf-8")
+
+
 def build_job(
     study: dict[str, Any],
     members: list[dict[str, Any]],
@@ -216,7 +224,7 @@ def build_job(
             "-resume",
         ]
     if worker.get("config"):
-        content = Path(worker["config"]).read_text()
+        content = read_config(worker["config"])
         docs.append(text_document("site.config", content))
         argv += [
             "--config" if study["assay"] == "bulk-ATAC" else "-c",
@@ -253,7 +261,11 @@ def build_job(
 
 
 def build(
-    directory: Path, configuration: dict[str, Any], scan: dict[str, Any] | None = None
+    directory: Path,
+    configuration: dict[str, Any],
+    scan: dict[str, Any] | None = None,
+    *,
+    verify_assets: bool = True,
 ) -> dict[str, Any]:
     study_record = read_study(directory)
     study = study_record["data"]
@@ -278,7 +290,10 @@ def build(
                 blockers.append("Metadata edits need current input approval: " + dataset)
     assets = {a["path"]: a["sha256"] for i in items for a in i["data"]["assets"]}
     for path, expected in assets.items():
-        if not Path(path).is_file() or digest(Path(path)) != expected:
+        if not Path(path).is_file() or (
+            (verify_assets or path in {study["sheet"], study["references"]})
+            and digest(Path(path)) != expected
+        ):
             blockers.append("Prepared input changed or is missing: " + path)
     workers = config["workers"]
     assignments = config.get("assignments", {})
@@ -302,7 +317,9 @@ def build(
             "tokens": tokens,
             "execution": config,
             "configs": {
-                n: digest(Path(w["config"])) if w.get("config") else None
+                n: hashlib.sha256(read_config(w["config"]).encode()).hexdigest()
+                if w.get("config")
+                else None
                 for n, w in workers.items()
             },
         }
@@ -377,6 +394,8 @@ def recheck(directory: Path, value: dict[str, Any]) -> None:
     validate(value, "study_plan")
     if value["data"]["status"] != "READY":
         raise ValueError("Study plan is blocked; inspect its blockers")
-    actual = build(directory, value["data"]["execution"], value["data"]["validation"])
+    actual = build(
+        directory, value["data"]["execution"], value["data"]["validation"], verify_assets=False
+    )
     if actual["version"] != value["version"]:
         raise ValueError("Study plan is stale; inspect current inputs/review and create a new plan")

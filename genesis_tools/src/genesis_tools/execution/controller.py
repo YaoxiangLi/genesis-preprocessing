@@ -95,7 +95,7 @@ def request(
     )
 
 
-def tick(folder: Path) -> None:
+def tick(folder: Path, *, allowed_jobs: set[str] | None = None) -> None:
     plan = json.loads((folder / "campaign.json").read_text())
     campaign = hashlib.sha256((folder / "campaign.json").read_bytes()).hexdigest()[:16]
     with contextlib.closing(connect(folder)) as db, db:
@@ -145,6 +145,8 @@ def tick(folder: Path) -> None:
                 (name, max(0, worker["slots"] - occupied)),
             ).fetchall()
             for row in queued:
+                if allowed_jobs is not None and row["id"] not in allowed_jobs:
+                    continue
                 attempt = row["attempt"] + 1
                 payload = {
                     **json.loads(row["payload"]),

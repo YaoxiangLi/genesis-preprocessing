@@ -146,7 +146,11 @@ def effective(
 def token(db: sqlite3.Connection, dataset: str) -> str:
     row = store.current(db, dataset)
     decisions = [latest(db, dataset, category) for category in CATEGORIES]
-    data = {"current": row, "decisions": [d["version"] if d else None for d in decisions]}
+    data = {
+        "current": row,
+        "decisions": [d["version"] if d else None for d in decisions],
+        "evidence": bindings(db, dataset, "metadata"),
+    }
     if store.scope_of(db) == "results" and inherited_input(db, dataset):
         with store.scoped(db, "inputs"):
             data["input_token"] = token(db, dataset)

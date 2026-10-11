@@ -245,6 +245,27 @@ def initialize(directory: Path) -> dict[str, Any]:
     }
 
 
+CLASSIFICATIONS = {"public": 0, "internal": 1, "local-only": 2}
+
+
+def classification(db: sqlite3.Connection, dataset: str) -> str:
+    """Retained source restrictions cannot be downgraded by selecting another review scope."""
+    saved = db.execute("SELECT value FROM meta WHERE key=?", ("egress:" + dataset,)).fetchone()
+    if saved:
+        return saved[0]
+    result = "public"
+    for row in db.execute(
+        "SELECT r.body FROM records r JOIN links l USING(kind,id,version) "
+        "WHERE l.dataset=? AND r.kind IN ('source_bundle','input_manifest')",
+        (dataset,),
+    ):
+        label = loads(row[0])["data"]["classification"]
+        result = max((result, label), key=CLASSIFICATIONS.__getitem__)
+        if result == "local-only":
+            break
+    return result
+
+
 def put(db: sqlite3.Connection, value: dict[str, Any], dataset: str | None = None) -> None:
     validate(value)
     db.execute(
@@ -252,6 +273,12 @@ def put(db: sqlite3.Connection, value: dict[str, Any], dataset: str | None = Non
         (value["kind"], value["id"], value["version"], canonical(value), now()),
     )
     if dataset:
+        if value["kind"] in {"source_bundle", "input_manifest"}:
+            label = max(
+                (classification(db, dataset), value["data"]["classification"]),
+                key=CLASSIFICATIONS.__getitem__,
+            )
+            db.execute("INSERT OR REPLACE INTO meta VALUES(?,?)", ("egress:" + dataset, label))
         db.execute(
             "INSERT OR IGNORE INTO links VALUES(?,?,?,?)",
             (dataset, value["kind"], value["id"], value["version"]),
@@ -311,6 +338,15 @@ def entity(
 ) -> None:
     previous = db.execute("SELECT kind,source,original FROM entities WHERE id=?", (key,)).fetchone()
     if previous and tuple(previous) != (kind, source, original):
+        if kind == "lane" and tuple(previous[:2]) == (kind, source):
+            # Earlier registries stored a lane's first full observation as its name.
+            # Paths/checksums belong to versioned manifests, not the biological lane identity.
+            try:
+                legacy = loads(previous[2])
+                if str(legacy.get("lane_id", fingerprint(legacy))) == original:
+                    return
+            except ValueError:
+                pass
         raise ValueError("Entity ID collision across scientific sources or scopes")
     db.execute(
         "INSERT OR IGNORE INTO entities VALUES(?,?,?,?,?)", (key, kind, source, original, study)
@@ -318,6 +354,13 @@ def entity(
 
 
 def import_bundle(directory: Path, value: dict[str, Any]) -> dict[str, int]:
+    with write(directory) as db:
+        return import_bundle_db(db, value)
+
+
+def import_bundle_db(
+    db: sqlite3.Connection, value: dict[str, Any], *, promote: set[str] | None = None
+) -> dict[str, int]:
     validate(value, "bundle")
     pairs = {
         (v["data"]["dataset_id"], v["data"]["manifest_version"]): v
@@ -329,126 +372,133 @@ def import_bundle(directory: Path, value: dict[str, Any]) -> dict[str, int]:
     if any(key not in {(m["id"], m["version"]) for m in manifests} for key in pairs):
         raise ValueError("Validation refers to a manifest outside this bundle")
     added = 0
-    with write(directory) as db:
-        if db.execute(
-            "SELECT 1 FROM imports WHERE kind=? AND id=? AND version=?",
-            (value["kind"], value["id"], value["version"]),
-        ).fetchone():
-            return {"imported": 0, "unchanged": len(manifests)}
-        for manifest in manifests:
-            data, dataset = manifest["data"], manifest["id"]
-            if data["dataset_id"] != dataset:
-                raise ValueError("Dataset identity differs from manifest identity")
-            entity(db, dataset, "library", data["source_id"], data["library"], data["study"])
-            for kind, raw in (
-                ("study", data["study"]),
-                ("biosample", data["biosample"]),
-                ("reference", data["reference"]["id"]),
-            ):
-                if raw is not None:
-                    key = identity(kind, data["source_id"], raw)
-                    entity(db, key, kind, data["source_id"], raw, data["study"])
-                    db.execute(
-                        "INSERT OR IGNORE INTO relations VALUES(?,?,?)", (key, dataset, kind)
-                    )
-            for lane in data["lanes"]:
-                key = identity("lane", dataset, str(lane.get("lane_id", fingerprint(lane))))
-                entity(db, key, "lane", data["source_id"], canonical(lane), data["study"])
-                db.execute("INSERT OR IGNORE INTO relations VALUES(?,?,'lane')", (dataset, key))
-            db.execute("INSERT OR IGNORE INTO workers VALUES(?, '{}')", (data["worker"],))
-            existing = db.execute(
-                "SELECT manifest,metadata FROM datasets WHERE id=?", (dataset,)
+    if db.execute(
+        "SELECT 1 FROM imports WHERE kind=? AND id=? AND version=?",
+        (value["kind"], value["id"], value["version"]),
+    ).fetchone():
+        return {"imported": 0, "unchanged": len(manifests)}
+    for manifest in manifests:
+        data, dataset = manifest["data"], manifest["id"]
+        if data["dataset_id"] != dataset:
+            raise ValueError("Dataset identity differs from manifest identity")
+        entity(db, dataset, "library", data["source_id"], data["library"], data["study"])
+        for kind, raw in (
+            ("study", data["study"]),
+            ("biosample", data["biosample"]),
+            ("reference", data["reference"]["id"]),
+        ):
+            if raw is not None:
+                key = identity(kind, data["source_id"], raw)
+                entity(db, key, kind, data["source_id"], raw, data["study"])
+                db.execute("INSERT OR IGNORE INTO relations VALUES(?,?,?)", (key, dataset, kind))
+        for lane in data["lanes"]:
+            key = identity("lane", dataset, str(lane.get("lane_id", fingerprint(lane))))
+            entity(
+                db,
+                key,
+                "lane",
+                data["source_id"],
+                str(lane.get("lane_id", fingerprint(lane))),
+                data["study"],
+            )
+            db.execute("INSERT OR IGNORE INTO relations VALUES(?,?,'lane')", (dataset, key))
+        db.execute("INSERT OR IGNORE INTO workers VALUES(?, '{}')", (data["worker"],))
+        existing = db.execute(
+            "SELECT manifest,metadata FROM datasets WHERE id=?", (dataset,)
+        ).fetchone()
+        metadata = data["metadata"]
+        if existing:
+            before = get(db, "manifest", existing[0])["data"]["metadata"]
+            # Preserve curator changes; decisions still become stale when evidence changes.
+            edits = {
+                k: v for k, v in loads(existing[1]).items() if k not in before or before[k] != v
+            }
+            metadata = {**metadata, **edits}
+        validation = pairs.get((dataset, manifest["version"]))
+        if not existing:
+            db.execute(
+                "INSERT INTO datasets VALUES(?,?,?,?,?,?,?,?,?,?,NULL)",
+                (
+                    dataset,
+                    data["name"],
+                    data["assay"],
+                    data["species"],
+                    data["study"],
+                    data["reference"]["id"],
+                    data["worker"],
+                    manifest["version"],
+                    validation["version"] if validation else None,
+                    canonical(metadata),
+                ),
+            )
+        elif existing[0] != manifest["version"] and (promote is None or dataset in promote):
+            # Previously imported history must not roll the current dataset back.
+            historical = db.execute(
+                "SELECT 1 FROM records WHERE kind='manifest' AND id=? AND version=?",
+                (dataset, manifest["version"]),
             ).fetchone()
-            metadata = data["metadata"]
-            if existing:
-                before = get(db, "manifest", existing[0])["data"]["metadata"]
-                # Preserve curator changes; decisions still become stale when evidence changes.
-                edits = {k: v for k, v in loads(existing[1]).items() if before.get(k) != v}
-                metadata = {**metadata, **edits}
-            validation = pairs.get((dataset, manifest["version"]))
-            if not existing:
-                db.execute(
-                    "INSERT INTO datasets VALUES(?,?,?,?,?,?,?,?,?,?,NULL)",
-                    (
-                        dataset,
-                        data["name"],
-                        data["assay"],
-                        data["species"],
-                        data["study"],
-                        data["reference"]["id"],
-                        data["worker"],
-                        manifest["version"],
-                        validation["version"] if validation else None,
-                        canonical(metadata),
-                    ),
-                )
-            elif existing[0] != manifest["version"]:
-                # Previously imported history must not roll the current dataset back.
-                historical = db.execute(
-                    "SELECT 1 FROM records WHERE kind='manifest' AND id=? AND version=?",
-                    (dataset, manifest["version"]),
-                ).fetchone()
-                if historical:
-                    raise ValueError(
-                        "Historical revision import cannot replace the current manifest"
-                    )
-                db.execute(
-                    (
-                        "UPDATE datasets SET "
-                        "name=?,assay=?,species=?,study=?,reference_id=?,worker=?,manifest"
-                        "=?,validation=?,metadata=?,assessment=NULL WHERE id=?"
-                    ),
-                    (
-                        data["name"],
-                        data["assay"],
-                        data["species"],
-                        data["study"],
-                        data["reference"]["id"],
-                        data["worker"],
-                        manifest["version"],
-                        validation["version"] if validation else None,
-                        canonical(metadata),
-                        dataset,
-                    ),
-                )
-            elif validation:
-                db.execute(
-                    "UPDATE datasets SET validation=? WHERE id=?", (validation["version"], dataset)
-                )
-            put(db, manifest, dataset)
-            if validation:
-                put(db, validation, dataset)
-                for finding in validation["data"]["findings"]:
-                    put(db, finding, dataset)
-            for child in data["sources"] + data["measurements"]:
-                put(db, child, dataset)
-            for item in data["artifacts"]:
-                db.execute("INSERT OR IGNORE INTO workers VALUES(?, '{}')", (item["worker"],))
-                db.execute(
-                    "INSERT OR IGNORE INTO locations VALUES(?,?,?,?,?,?,?,?)",
-                    (
-                        dataset,
-                        item["id"],
-                        manifest["version"],
-                        item["worker"],
-                        item["path"],
-                        item["sha256"],
-                        item["availability"],
-                        item["role"],
-                    ),
-                )
-            if db.execute("SELECT value FROM meta WHERE key='fts5'").fetchone()[0] == "true":
-                db.execute("DELETE FROM search_text WHERE id=?", (dataset,))
-                db.execute(
-                    "INSERT INTO search_text VALUES(?,?)",
-                    (dataset, canonical(metadata) + " " + data["name"]),
-                )
-            added += 1
-        put(db, value)
-        db.execute(
-            "INSERT INTO imports VALUES(?,?,?,?)",
-            (value["kind"], value["id"], value["version"], now()),
-        )
+            if historical:
+                raise ValueError("Historical revision import cannot replace the current manifest")
+            db.execute(
+                (
+                    "UPDATE datasets SET "
+                    "name=?,assay=?,species=?,study=?,reference_id=?,worker=?,manifest"
+                    "=?,validation=?,metadata=?,assessment=NULL WHERE id=?"
+                ),
+                (
+                    data["name"],
+                    data["assay"],
+                    data["species"],
+                    data["study"],
+                    data["reference"]["id"],
+                    data["worker"],
+                    manifest["version"],
+                    validation["version"] if validation else None,
+                    canonical(metadata),
+                    dataset,
+                ),
+            )
+        elif validation and (promote is None or dataset in promote):
+            db.execute(
+                "UPDATE datasets SET validation=? WHERE id=?", (validation["version"], dataset)
+            )
+        put(db, manifest, dataset)
+        if validation:
+            put(db, validation, dataset)
+            for finding in validation["data"]["findings"]:
+                put(db, finding, dataset)
+        for child in data["sources"] + data["measurements"]:
+            put(db, child, dataset)
+        for item in data["artifacts"]:
+            db.execute("INSERT OR IGNORE INTO workers VALUES(?, '{}')", (item["worker"],))
+            db.execute(
+                "INSERT OR IGNORE INTO locations VALUES(?,?,?,?,?,?,?,?)",
+                (
+                    dataset,
+                    item["id"],
+                    manifest["version"],
+                    item["worker"],
+                    item["path"],
+                    item["sha256"],
+                    item["availability"],
+                    item["role"],
+                ),
+            )
+        if (promote is None or dataset in promote) and db.execute(
+            "SELECT value FROM meta WHERE key='fts5'"
+        ).fetchone()[0] == "true":
+            db.execute("DELETE FROM search_text WHERE id=?", (dataset,))
+            db.execute(
+                "INSERT INTO search_text VALUES(?,?)",
+                (dataset, canonical(metadata) + " " + data["name"]),
+            )
+        added += 1
+    put(db, value)
+    db.execute(
+        "INSERT INTO imports VALUES(?,?,?,?)",
+        (value["kind"], value["id"], value["version"], now()),
+    )
+
     return {"imported": added, "unchanged": 0}
 
 

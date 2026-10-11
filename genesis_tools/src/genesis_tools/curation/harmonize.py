@@ -155,6 +155,9 @@ def ingest(
     if sum(len(s["data"]["snapshot"]) for s in sources) > 8 * MAX_SOURCE:
         raise ValueError("Source bundle exceeds 16 MiB")
     with store.write(directory, scope=scope) as db:
+        classification = max(
+            (classification, store.classification(db, dataset)), key=CLASSIFICATIONS.__getitem__
+        )
         row = store.current(db, dataset)
         head = db.execute(
             f"SELECT source_bundle FROM {store.heads_table(db)} WHERE dataset=?", (dataset,)
@@ -415,6 +418,10 @@ def propose(
     with contextlib.closing(store.connect(directory, scope=scope)) as db:
         row = store.current(db, dataset)
         bundle = head(db, dataset)
+        restriction = max(
+            (bundle["data"]["classification"], store.classification(db, dataset)),
+            key=CLASSIFICATIONS.__getitem__,
+        )
     fields = extract(bundle, loads(row["metadata"]))
     invocation = None
     if fields_file:
@@ -425,7 +432,7 @@ def propose(
             config,
             task="metadata",
             data={"sources": bundle["data"]["sources"], "extracted": fields},
-            classification=bundle["data"]["classification"],
+            classification=restriction,
             source_hashes=sorted(s["data"]["sha256"] for s in bundle["data"]["sources"]),
             specification=schema("metadata-response-v1"),
             mock={"fields": fields},

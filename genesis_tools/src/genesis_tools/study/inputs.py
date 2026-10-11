@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import csv
 import re
 import sqlite3
@@ -202,16 +201,6 @@ def initialize(
             raise ValueError("Study identity/assay/registry changed; use a new directory")
     inputs = prepare(directory, study_id, assay, sheet, references, classification)
     store.initialize(registry)
-    # Register searchable projections only for genuinely new datasets, with no validation claims.
-    with contextlib.closing(store.connect(registry)) as db:
-        missing = [
-            i["data"]["manifest"]
-            for i in inputs
-            if not db.execute("SELECT 1 FROM datasets WHERE id=?", (i["id"],)).fetchone()
-        ]
-    if missing:
-        data = {"manifests": missing, "validations": []}
-        store.import_bundle(registry, record("bundle", data, identity("bundle", fingerprint(data))))
     value = record(
         "study",
         {
@@ -227,6 +216,16 @@ def initialize(
         version=3,
     )
     with store.write(registry, scope="inputs") as db:
+        missing = [
+            i["data"]["manifest"]
+            for i in inputs
+            if not db.execute("SELECT 1 FROM datasets WHERE id=?", (i["id"],)).fetchone()
+        ]
+        if missing:
+            data = {"manifests": missing, "validations": []}
+            store.import_bundle_db(
+                db, record("bundle", data, identity("bundle", fingerprint(data)))
+            )
         for item in inputs:
             dataset, data = item["id"], item["data"]
             projection = data["manifest"]
@@ -236,7 +235,11 @@ def initialize(
             metadata = projection["data"]["metadata"]
             if old:
                 original = store.get(db, "manifest", old["manifest"])["data"]["metadata"]
-                edits = {k: v for k, v in loads(old["metadata"]).items() if original.get(k) != v}
+                edits = {
+                    k: v
+                    for k, v in loads(old["metadata"]).items()
+                    if k not in original or original[k] != v
+                }
                 metadata = {**metadata, **edits}
             bundle_data = {
                 "dataset_id": dataset,

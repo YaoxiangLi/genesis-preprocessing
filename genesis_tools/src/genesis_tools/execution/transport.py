@@ -55,6 +55,7 @@ def request(
         "genesis_tools.execution.worker",
         "genesis_tools.llm.service_worker",
         "genesis_tools.llm.diagnostics",
+        "genesis_tools.study.collector",
     }:
         raise ValueError("Unsupported worker protocol")
     argv, options = command(worker, [worker["python"], "-m", module, action, str(path)])
