@@ -783,6 +783,17 @@ def check_bams(work: Path) -> None:
                 assert all(not int(fields[1]) & 1 for fields in records), bam
 
 
+def check_reference_failure_diagnostic(work: Path, diagnostic: str) -> None:
+    """Read the failed task's full stderr; Nextflow's console tail can truncate it."""
+    rows = trace_rows(work)
+    assert len(rows) == 1 and rows[0]["name"] == "VALIDATE_SHEET", rows
+    assert rows[0]["status"] == "FAILED", rows
+    prefix = work / "work" / rows[0]["hash"]
+    folders = list(prefix.parent.glob(prefix.name + "*"))
+    assert len(folders) == 1, folders
+    assert diagnostic in (folders[0] / ".command.err").read_text()
+
+
 def check_reference_failures(work: Path, sheet: Path, *, docker: bool) -> None:
     """Reject bad reference caches before DOWNLOAD, using copies of synthetic references."""
     parent = work / "reference-failures"
@@ -819,8 +830,7 @@ def check_reference_failures(work: Path, sheet: Path, *, docker: bool) -> None:
         diagnostic = (
             "reference ID collision" if scenario == "id-collision" else "Unverified reference cache"
         )
-        assert diagnostic in (case / "output-run.log").read_text()
-        assert {row["name"].split(" ")[0] for row in trace_rows(case)} == {"VALIDATE_SHEET"}
+        check_reference_failure_diagnostic(case, diagnostic)
     assert original == {
         p.relative_to(work / "references"): hashlib.sha256(p.read_bytes()).hexdigest()
         for p in (work / "references").rglob("*")
