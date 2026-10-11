@@ -12,7 +12,7 @@ from typing import Any
 import pysam
 from genesis_tools.contracts.records import dump, load
 from genesis_tools.scatac import ingest
-from genesis_tools.scatac.common import digest, verify_output
+from genesis_tools.scatac.common import digest, reference, verify_output
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -69,6 +69,27 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         _fixture, paths = inputs(root)
+        long_fasta = root / "unwrapped.fa"
+        long_fasta.write_text(">long\n" + "ACGT" * 600000 + "\n")
+        ref: dict[str, Any] = {
+            "reference_id": "long",
+            "assembly": "synthetic",
+            "species": "synthetic",
+            "fasta": {"path": str(long_fasta), "sha256": digest(long_fasta)},
+            "contigs": {"long": 2400000},
+            "mitochondrial_contigs": [],
+            "plastid_contigs": [],
+        }
+        assert reference(ref, root)[1] == {"long": 2400000}
+        long_fasta.write_text(">long\nACGT*\n")
+        ref["fasta"]["sha256"] = digest(long_fasta)
+        ref["contigs"] = {"long": 5}
+        try:
+            reference(ref, root)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Invalid FASTA alphabet accepted")
         totals = {"fragments": 0, "support": 0}
         for path in paths:
             output = root / path.stem

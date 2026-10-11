@@ -58,16 +58,27 @@ def reference(value: dict[str, Any], base: Path) -> tuple[Path, dict[str, int]]:
     observed: dict[str, int] = {}
     current = None
     with text_file(fasta) as stream:
-        for line in bounded_lines(stream):
-            if line.startswith(">"):
-                current = line[1:].split()[0]
+        line_start = True
+        while chunk := stream.readline(1024 * 1024):
+            if line_start and chunk.startswith(">"):
+                if not chunk.endswith("\n") and len(chunk) == 1024 * 1024:
+                    raise ValueError("Oversized FASTA header")
+                header = chunk[1:].split()
+                if not header:
+                    raise ValueError("Empty FASTA contig name")
+                current = header[0]
                 if current in observed:
                     raise ValueError("Duplicate FASTA contig")
                 observed[current] = 0
-            elif line.strip():
-                if current is None:
-                    raise ValueError("Sequence before FASTA header")
-                observed[current] += len(line.strip())
+            else:
+                sequence = "".join(chunk.split())
+                if sequence:
+                    if current is None:
+                        raise ValueError("Sequence before FASTA header")
+                    if set(sequence.upper()) - set("ACGTRYSWKMBDHVN"):
+                        raise ValueError("Non-IUPAC genomic FASTA sequence")
+                    observed[current] += len(sequence)
+            line_start = chunk.endswith("\n")
     if not observed or any(n < 1 for n in observed.values()) or value["contigs"] != observed:
         raise ValueError("FASTA and declared chromosome dictionary differ")
     mito, plastid = value["mitochondrial_contigs"], value["plastid_contigs"]
