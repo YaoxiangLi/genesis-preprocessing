@@ -91,6 +91,36 @@ def main() -> None:
         ("chr1", 4004, 4295, translated[0]): 1,
     }
     assert sum(observed.values()) == len(records)
+    # The pinned producer stores duplicate support in uint8_t. Keep the ordinary
+    # conservation test above and separately expose this lossy producer boundary.
+    for mate in (1, 2, 3):
+        read = (
+            sequence[1000:1075]
+            if mate == 1
+            else rc(sequence[1225:1300])
+            if mate == 2
+            else "CAGACGCG" + rc(barcodes[0])
+        )
+        with (root / f"saturation-read{mate}.fq").open("w") as stream:
+            for n in range(300):
+                stream.write(f"@saturated{n}\n{read}\n+\n{'I' * len(read)}\n")
+    saturation = list(commands[1])
+    for flag, value in (
+        ("-1", "saturation-read1.fq"),
+        ("-2", "saturation-read2.fq"),
+        ("-b", "saturation-read3.fq"),
+        ("-o", "saturation.fragments.tsv"),
+        ("--summary", "saturation.summary.tsv"),
+    ):
+        saturation[saturation.index(flag) + 1] = value
+    with (
+        (root / "saturation.stdout").open("w") as out,
+        (root / "saturation.stderr").open("w") as err,
+    ):
+        subprocess.run(saturation, cwd=root, stdout=out, stderr=err, check=True)
+    saturated = (root / "saturation.fragments.tsv").read_text().splitlines()
+    assert saturated == [f"chr1\t1004\t1295\t{translated[0]}\t255"]
+    print("OBSERVED LIMITATION: 300 supporting pairs are capped to 255 by Chromap 0.3.2")
     print(
         "PASS: exact +4/-5 coordinates, barcode orientation/translation, cell-level support and EOF"
     )
