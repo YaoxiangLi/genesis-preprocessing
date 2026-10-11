@@ -10,7 +10,7 @@ from typing import Any
 from unittest.mock import patch
 
 from genesis_tools.contracts.records import dump, load
-from genesis_tools.scatac import discovery, identities, inventory
+from genesis_tools.scatac import archive_runs, discovery, identities, inventory
 from verify_scatac_inventory import fixture
 
 
@@ -61,6 +61,25 @@ def main() -> None:
         added = next(r for r in report["libraries"] if r["candidate_id"] == "geo:GSM99991")
         assert added["library_id"] == "" and added["multiome"] == "unknown"
         assert len(load(directory / "discovery.json")["records"]) == 3
+        table = (
+            "run_accession\texperiment_accession\tsample_accession\tscientific_name\n"
+            "SRR99991\tSRX99991\tSAMN99991\tArabidopsis thaliana\n"
+            "SRR99992\tSRX99991\tSAMN99991\tArabidopsis thaliana\n"
+        )
+        with patch.object(discovery.Archive, "get", lambda self, url: table):
+            run_result = archive_runs.run(directory)
+            assert run_result == archive_runs.run(directory)
+        # The fixture also contains another project. Conflicting project matches are explicit.
+        report = inventory.audit(directory)
+        assert any(i["code"] == "ARCHIVE_RELATIONSHIP_CONFLICT" for i in report["metadata_issues"])
+        archive = load(directory / "archive-runs.json")
+        archive["records"] = [r for r in archive["records"] if r["project"] == "PRJNA99999"]
+        dump(directory / "archive-runs.json", archive)
+        report = inventory.audit(directory)
+        added = next(r for r in report["libraries"] if r["candidate_id"] == "geo:GSM99991")
+        assert added["run_accessions"] == "SRR99991;SRR99992"
+        assert added["original_run_accessions"] == ""
+        assert added["biological_replicate_id"] == ""
         sha = hashlib.sha256(atac.encode()).hexdigest()
         (directory / "sources" / (sha + ".txt")).write_text(atac)
         value = {
@@ -106,6 +125,7 @@ def main() -> None:
         rejected(cached.get, "https://example.org/private")
         inventory.export(directory, root / "export")
         assert (root / "export/discovery.json").is_file()
+        assert (root / "export/archive-runs.json").is_file()
     print(
         "PASS: repeat discovery, source preservation, modality/species separation, bound identities"
     )

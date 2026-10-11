@@ -12,7 +12,7 @@ from typing import Any
 
 from ..contracts.records import dump, fingerprint, identity, load, record, validate
 from ..registry import store
-from . import discovery, evidence, identities, workbook
+from . import archive_runs, discovery, evidence, identities, workbook
 
 SPECIES = ("Arabidopsis thaliana", "Sorghum bicolor")
 ACCESSIONS = {
@@ -173,6 +173,7 @@ def audit(directory: Path, *, resolve_identities: bool = True) -> dict[str, Any]
                             "CONFLICTING_RELATIONSHIP",
                             f"{accession}: {field} has conflicting source values",
                         )
+    archive_runs.apply(directory, libraries, accessions, issues)
     if resolve_identities:
         identities.apply(directory, libraries, issues)
         for accession, sample in samples.items():
@@ -268,7 +269,7 @@ def export(directory: Path, output: Path) -> dict[str, Any]:
     dump(output / "summary.json", result["summary"])
     original = validate(load(directory / "inventory.json"), "scatac_inventory")
     dump(output / "original-values.json", original)
-    for name in ("discovery", "identities", "evidence"):
+    for name in ("discovery", "identities", "evidence", "archive-runs"):
         path = directory / (name + ".json")
         if path.exists():
             dump(output / (name + ".json"), load(path))
