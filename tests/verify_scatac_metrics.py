@@ -9,7 +9,7 @@ from typing import Any
 
 import pysam
 from genesis_tools.scatac import backgrounds, compare, products, qc
-from genesis_tools.scatac.common import complete, digest
+from genesis_tools.scatac.common import complete, digest, verify_output
 from verify_scatac_exports import rejects
 
 
@@ -44,7 +44,14 @@ def main() -> None:
         assert result["frip"] == 2 / 3
         assert result["total_support"] == 6
         assert result["support_redundancy_fraction"] == 0.5
-        assert result["fragment_lengths"] == {10: 3}
+        assert result["fragment_lengths"] == {"10": 3}
+        assert result["peak_widths"] == {"8": 1, "10": 1}
+        # Widths 8 and 10 sort differently as integers and JSON string keys.
+        # A freshly published real QC distribution must verify after reload.
+        roundtrip = root / "qc-roundtrip"
+        roundtrip.mkdir()
+        recorded = complete(roundtrip, "scatac-qc-test", {"qc": result}, 0)
+        assert verify_output(roundtrip, "scatac-qc-test")["version"] == recorded["version"]
         fasta = root / "genome.fa"
         fasta.write_text(">chr1\n" + "A" * 200 + "G" * 200 + "A" * 200 + "G" * 200 + "\n")
         pysam.faidx(str(fasta))

@@ -118,11 +118,11 @@ def frip(fragments: Path, peaks: Path, sizes: dict[str, int]) -> dict[str, Any]:
                 overlaps += i < len(starts) and starts[i] < end
     return {
         "peak_count": number,
-        "peak_widths": dict(sorted(Counter(widths).items())),
+        "peak_widths": {str(width): count for width, count in sorted(Counter(widths).items())},
         "frip": overlaps / total if total else None,
         "overlapping_fragments": overlaps,
         "denominator_fragments": total,
-        "fragment_lengths": dict(sorted(lengths.items())),
+        "fragment_lengths": {str(length): count for length, count in sorted(lengths.items())},
         "total_support": support,
         "support_redundancy_fraction": 1 - total / support if support else None,
         "support_redundancy_definition": "1 - unique rows / read-pair support; not removal",
