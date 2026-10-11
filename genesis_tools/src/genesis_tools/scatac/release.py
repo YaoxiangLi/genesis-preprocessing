@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import re
 import shutil
 import time
 from pathlib import Path
@@ -11,8 +12,34 @@ from typing import Any
 from ..contracts.records import dump, fingerprint, identity, load
 from ..curation.review import CATEGORIES, exclusions, latest, profile, status
 from ..registry import store
-from .common import complete, digest, publication, verify_output
+from .common import checked_asset, complete, digest, publication, verify_output
 from .model import MODELS, validate
+
+
+def source_provenance(config: dict[str, Any], base: Path, stage: Path) -> dict[str, str]:
+    """Retain verified library manifests without duplicating the raw fragment libraries."""
+    versions = {}
+    for library, location in config.get("libraries", {}).items():
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", library):
+            raise ValueError("Invalid provenance library identifier")
+        directory = (base / location).resolve()
+        manifest = verify_output(directory, "scatac-fragments")
+        if manifest["data"]["input"]["library"]["library_id"] != library:
+            raise ValueError("Provenance library identifier does not match its manifest")
+        versions[library] = manifest["version"]
+        destination = stage / "provenance" / "libraries" / library
+        destination.mkdir(parents=True)
+        for name in ("complete.json", "input.json", "source-headers.json", "execution.json"):
+            shutil.copyfile(directory / name, destination / name)
+    for name, asset in config.get("source_evidence", {}).items():
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", name):
+            raise ValueError("Source evidence requires a plain unique filename")
+        path = checked_asset(asset, base)
+        destination = stage / "provenance" / "sources" / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, destination)
+    dump(stage / "provenance" / "library-versions.json", versions)
+    return versions
 
 
 def run(config_path: Path, registry: Path, output: Path) -> dict[str, Any]:
@@ -23,6 +50,7 @@ def run(config_path: Path, registry: Path, output: Path) -> dict[str, Any]:
     groups, observed, issues = [], {}, []
     seen = set()
     with contextlib.closing(store.connect(registry)) as db, publication(output) as stage:
+        library_versions = source_provenance(config, config_path.parent, stage)
         db.execute("BEGIN")
         for item in config["groups"]:
             path = (config_path.parent / item["products"]).resolve()
@@ -39,6 +67,11 @@ def run(config_path: Path, registry: Path, output: Path) -> dict[str, Any]:
                 raise ValueError("Registry points to a different pseudobulk revision")
             state = status(db, dataset)
             reasons = exclusions(db, dataset, profile())
+            if not parent["data"]["parents"] or any(
+                library_versions.get(library) != version
+                for library, version in parent["data"]["parents"].items()
+            ):
+                reasons.append("Matching source-library provenance is required for delivery")
             if state["structural"] != "PASS":
                 reasons.append("Complete structural validation is required for model delivery")
             observed.setdefault(bio["species"], set()).add(
@@ -103,6 +136,8 @@ def run(config_path: Path, registry: Path, output: Path) -> dict[str, Any]:
             "Model directories contain pinned loader configurations, exact FASTA files, raw "
             "cut-count tracks and disjoint chromosome folds. Do not apply another Tn5 shift. "
             "See manifest/groups.json and qc/review-status.json for acceptance evidence. "
+            "Source-library manifests are retained under provenance/libraries; raw library "
+            "fragment files are identified by checksum and are not duplicated in this release. "
             "Loader compatibility is distinct from training. ChromBPNet still needs the "
             "bias-model preparation recorded in loader.json; no human bias model is supplied.\n"
         )

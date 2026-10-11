@@ -135,6 +135,13 @@ each target's `bundle` and loader `validation` directories. `required_species`
 names the species that must each have two biological replicates within one study.
 Paths are relative to the release manifest or absolute.
 
+Add `libraries`, a mapping from library IDs to their verified ingestion directories,
+so the package retains the matching source manifests. Optional `source_evidence`
+maps plain filenames to `{ "path": "...", "sha256": "..." }` assets, such as
+acquisition receipts, annotation crosswalks and processing commands. Changed
+evidence is rejected. Raw library fragment files are identified by checksum;
+they are not copied again into every pseudobulk package.
+
 The release includes fragments, membership, signals, peaks, model bundles, QC,
 review decisions and checksums. Registration connects each pseudobulk to the
 existing metadata, QC and eligibility review system. A candidate remains
@@ -142,5 +149,5 @@ existing metadata, QC and eligibility review system. A candidate remains
 required reviews pass. Loader acceptance does not establish biological quality
 or demonstrate successful training.
 
-See the [model handoff](scatac-model-handoff.md) for loader setup and the [validation report](../../validation/reports/scatac-delivery-validation.md)
+See the [model handoff](scatac-model-handoff.md) for loader setup and the [validation report](../../validation/reports/scatac-completion.md)
 for the actual tests, public-data findings and remaining release gates.
