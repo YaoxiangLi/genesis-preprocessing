@@ -49,7 +49,8 @@ included datasets and six demonstration review decisions. It uses synthetic file
 and a mock provider; it does not run sequencing pipelines or call a live model.
 
 `checks` includes lint, formatting checks, types, Nextflow stubs, local worker
-tests, registry/review tests, fake HTTP, simulated model services and README
+tests, prepared-study execution/collection, registry/review tests, fake HTTP,
+simulated model services and README
 command checks. Its initial Nextflow run needs access to the pinned plugin
 registry or a verified cache containing `nf-schema@2.4.2` and `nf-dotenv@1.0.0`.
 If plugin resolution fails, restore registry access or configure an approved cache
@@ -165,6 +166,40 @@ Use the committed example configurations as templates, provision existing approv
 credentials on the target host, and inspect `git status` before committing.
 
 ## Handoff verification
+
+The prepared-study milestone adds the [complete study workflow](usage/studies.md),
+registry migration 4, version 3 records and separate input/result metadata review.
+Its [validation report](../validation/reports/study-workflow-validation.md) records
+current source revisions, full checks, real bigWig validation, packaging and publication
+evidence. The earlier handoff below remains historical evidence for its named revision.
+
+For focused development, run:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python tests/verify_study.py
+# Optional existing pyBigWig environment; no dependency is installed by this test.
+pixi run uv run --frozen --project genesis_tools python tests/verify_study.py \
+  --bigwig-python /path/to/track-environment/bin/python
+```
+
+These tests launch real local worker supervisors with a clearly synthetic output
+writer. They cover two workers with different data paths, DAP shared controls,
+controller restart, collection recovery, input review, stale evidence, binary scans,
+reviewed export and failure isolation. They do not execute Nextflow scientific tasks.
+The fixture writer lives only in `tests/`; it is not a production CLI mode.
+
+The next acceptance priorities are one tiny real scientific run through `study`, then
+an explicitly authorized SSH worker run on the destination site. DAP output provenance
+needs a separate science-preserving improvement before default full-validation export
+can accept it. Accession-first acquisition and expert-reviewed biological metadata
+evaluation remain separate development work. The existing API/GPU acceptance runners
+remain opt-in; no service or hardware is selected by the study workflow.
+
+Implementation map: `study/inputs.py` owns prepared registration; `planning.py` owns
+compilation; `staging.py` owns generated documents; `workflow.py` coordinates existing
+execution and collection; `collector.py` runs on workers. The execution controller
+remains the authoritative scheduler. `registry/store.py` owns scientific records and
+migrations, and `curation/review.py` owns scoped decisions and export eligibility.
 
 On 2026-10-10, a fresh GitHub clone of `b04bee2` installed successfully, passed CLI
 help/doctor and the complete offline demo, and passed the full check suite in

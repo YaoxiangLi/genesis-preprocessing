@@ -54,6 +54,11 @@ cannot establish scheduler access or site performance.
 
 ## Independent workers and isolated datasets
 
+For prepared DAP/ATAC sheets, use the [study workflow](studies.md) to compile these
+campaigns, stage checksummed documents, resume workers and collect results into the
+scientific registry automatically. The manual campaign format below remains available.
+Both paths use the same worker protocol, pinned checkout checks and retry rules.
+
 The campaign controller runs separate analysis jobs on existing Linux workers.
 Each worker needs the pinned, clean repository, its installed Pixi environment,
 and checksummed inputs already staged at the declared paths. Use approved site

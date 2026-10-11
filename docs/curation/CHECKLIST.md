@@ -35,3 +35,22 @@ checkpoints do not imply those passed.
 Extension evidence: [validation report](../../validation/reports/hybrid-llm-validation.md).
 Publication: [verified GitHub commit and content hashes](../../validation/evidence/hybrid-llm/publication.json).
 Live API/GPU/SSH acceptance remains NOT RUN; opt-in acceptance runners are included.
+
+## Prepared-study workflow checkpoints
+
+- [x] Register immutable prepared input revisions without invented results or QC.
+- [x] Add scoped input metadata review and preserve decisions across registry migration 4.
+- [x] Compile deterministic ATAC lane groups and DAP shared-control campaigns.
+- [x] Stage bounded owned documents and verify pinned worker checkouts/input hashes.
+- [x] Reuse the controller for run/resume, stale-plan gating and failed-job isolation.
+- [x] Collect asynchronously with bounded worker validation and atomic receipt import.
+- [x] Preserve curated metadata, source restrictions and historical late results.
+- [x] Carry exact input review evidence into explicit reviewed exports.
+- [x] Exercise real local supervision, real bigWig reading and synthetic reviewed export.
+- [x] Document each study command, recovery, migration and worker configuration.
+- [x] Record final full-suite and installed-wheel acceptance evidence.
+- [ ] Publish and verify a fresh GitHub checkout.
+
+Evidence: [study workflow report](../../validation/reports/study-workflow-validation.md).
+Live SSH/scheduler, real sequencing through the new coordinator, live APIs and GPU
+services remain separate acceptance work; local fixtures do not establish these passed.

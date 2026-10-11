@@ -1,14 +1,23 @@
 # Validate, catalog and review published datasets
 
-Curation is an explicit, offline step after DAP-seq or bulk ATAC processing.
-It adds artifact validation, a local scientific registry, reproducible QC
-assessments and manual review. Existing pipeline inputs, scientific settings,
+Curation supports input metadata review and review of published DAP-seq or bulk
+ATAC results. The [prepared-study workflow](studies.md) registers inputs, compiles
+campaigns and collects results automatically. The explicit post-processing commands
+below also work independently. Curation adds artifact validation, a local scientific
+registry, reproducible QC assessments and manual review. Existing scientific settings,
 outputs, retries and resume behavior remain unchanged. There is no LLM dependency.
 
 Install with `pixi run install-all`. Use `pixi run genesis` in this checkout, or
 the installed `genesis` command in the Python environment containing the wheel.
 All new command families support `--help` and `--json`. Successful commands emit
 JSON by default; search also supports `--format tsv`.
+
+For registered studies, add `--scope inputs` to metadata/review commands before
+processing. The default `--scope results` preserves post-processing behavior.
+Only metadata can be approved in the input scope; a matching collected result can
+carry that exact input approval forward with its original evidence. QC and export
+eligibility always require result-specific decisions. See the
+[study guide](studies.md#2-review-input-metadata-when-needed) for the full recipe.
 
 ## Five independent states
 
@@ -105,7 +114,7 @@ pixi run genesis validate manifest bundle.json --scan --level full --worker work
 
 Without `--scan`, this validates only the JSON contract and content digests.
 Record schemas ship in `genesis_tools/contracts/schemas/records-v1.json` and
-`records-v2.json`.
+`records-v2.json`; `records-v3.json` adds prepared inputs, studies, plans and collection receipts.
 `contracts.records` provides typed manifest, finding, measurement, proposal,
 assessment and decision records. Unknown versions, extra contract fields, malformed
 types, duplicate JSON keys, NaN and stale nested hashes are rejected. Flexible
@@ -359,10 +368,11 @@ pixi run genesis metadata apply /local/catalog DATASET_ID --target PROPOSAL_VERS
 ```
 
 Approval is `PENDING_APPLY` until apply succeeds; reviewed exports exclude it.
-Apply creates an immutable `metadata_revision`, updates the catalog's canonical
+Apply creates an immutable `metadata_revision`, updates the selected scope's canonical
 metadata and emits a `compiled_inputs` description referencing the exact original
-assay, lanes and reference. It is a manifest for constructing a new campaign, not
-an automatically executable replacement sample sheet. Scientific inputs are copied
+assay, lanes and reference. For registered input revisions, `genesis study plan`
+compiles reviewed metadata and those preserved scientific choices into an executable
+campaign. Apply itself does not launch work. Scientific inputs are copied
 verbatim; reference/control proposals remain descriptive. Existing executed sheets,
 campaigns and raw accession records are never rewritten. Reassess QC and review
 eligibility after metadata changes. Source/manifest changes or concurrent reviews
@@ -371,7 +381,7 @@ invalidate stale proposals/approvals. Repeating an unchanged apply is idempotent
 Legacy version 1 manual proposals keep their documented behavior: `review approve`
 applies their limited descriptive changes directly. Version 1 hashes and history
 remain readable. New rich proposals use version 2 and require explicit apply.
-The registry migrates through schema 3; stored source bundles/revisions/invocations
+The registry migrates through schema 4; stored source bundles/revisions/invocations
 are included with reviewed catalog provenance. Shared-account identity limitations
 and explicit individual review still apply.
 

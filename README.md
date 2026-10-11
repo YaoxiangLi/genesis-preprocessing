@@ -8,9 +8,10 @@ independent authenticated workers. Nextflow remains responsible for scientific c
 
 ## Architecture and Current Capabilities
 
-Follow plant reads through scientific processing to reusable results, then opt into
-validation, cataloging and review. Run on one server or distribute independent
-datasets across authenticated workers.
+Start with a prepared study: register inputs, optionally review metadata, inspect a
+campaign plan, run scientific processing, and collect validated results for review
+and export. Run on one server or distribute independent datasets across authenticated
+workers. The standalone pipeline commands remain available.
 
 [![Genesis architecture: plant reads and explicit references enter DAP-seq or bulk ATAC-seq pipelines; results feed validation, registry, human review and reviewed export. Optional AI exchanges evidence and proposals; a controller supports local or SSH workers.](docs/images/genesis_architecture_overview.svg)](docs/images/genesis_architecture_overview.svg)
 
@@ -20,12 +21,13 @@ work without AI. [Open the full-size, editable diagram](docs/images/genesis_arch
 
 **Implemented** means code is available. **Validated** names the evidence and its
 limits. **Planned** identifies remaining validation, not completed work. Evidence
-snapshot: **2026-10-09**.
+snapshot: **2026-10-10**.
 
 | Capability | Implemented | Validated | Planned / next validation |
 | --- | --- | --- | --- |
 | [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Historical Docker runs and public ATAC subsets; current regressions ([scientific evidence](validation/reports/supported-atac-execution-validation.md), [current checks](validation/reports/hybrid-llm-validation.md)) | — |
 | [Controller / workers](docs/usage/execution.md) | Yes | Local isolation, retries, recovery and deployment-profile parsing ([evidence](validation/reports/supported-atac-execution-validation.md)) | Live SSH / scheduler site acceptance |
+| [Complete prepared-study workflow](docs/usage/studies.md) | Yes | Input review → immutable plans → local workers → automatic collection → reviewed export, with synthetic output writers and real bigWig validation ([evidence](validation/reports/study-workflow-validation.md)) | Live SSH and real sequencing acceptance through the new coordinator |
 | [Validation / registry](docs/usage/curation.md) | Yes | Binary formats, provenance, migrations, backup/restore and installed-package checks ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
 | [QC / human review / export](docs/usage/curation.md) | Yes | Offline workflow, stale-decision rejection, export eligibility and immutable history ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
 | [Metadata / AI assistant / diagnosis](docs/usage/ai-providers.md) | Yes | Synthetic cases, mock providers and fake HTTP; real biological accuracy **not evaluated** ([evidence](validation/reports/hybrid-llm-validation.md)) | Live provider acceptance and expert-reviewed metadata evaluation |
@@ -36,6 +38,7 @@ snapshot: **2026-10-09**.
 - [Architecture and Current Capabilities](#architecture-and-current-capabilities)
 - [Install and check your environment](#install-and-check-your-environment)
 - [Try the complete offline tutorial](#try-the-complete-offline-tutorial)
+- [Run a prepared study from inputs to reviewed results](#run-a-prepared-study-from-inputs-to-reviewed-results)
 - [Process DAP-seq](#process-dap-seq)
 - [Process bulk ATAC-seq](#process-bulk-atac-seq)
 - [Run on a cluster or independent workers](#run-on-a-cluster-or-independent-workers)
@@ -109,6 +112,66 @@ pixi run genesis registry import /tmp/genesis-manual-demo/catalog \
 
 The workflow script is a runnable example of the commands described below.
 Synthetic structural correctness is not evidence of real biological quality.
+
+## Run a prepared study from inputs to reviewed results
+
+The `study` commands join input registration, optional metadata review, campaign
+execution and automatic result collection. Begin with an existing valid sample
+sheet and explicit references. Install Genesis on each selected worker and keep
+its checkout clean at the configured full Git SHA.
+
+Copy [the worker template](examples/curation/study-execution.local.json) outside
+the checkout, then replace its commit placeholder and every example path with
+your server's values. `git rev-parse HEAD` gives the revision to pin. Choose
+controller-local storage for the study directory and registry.
+
+```bash
+cp examples/curation/study-execution.local.json /local/study-execution.json
+pixi run genesis study init /local/studies/atac-A --study-id atac-A --assay bulk-ATAC \
+  --sheet /data/atac-A.tsv --references /data/references.json
+pixi run genesis study plan /local/studies/atac-A \
+  --execution /local/study-execution.json --output /local/atac-plan-v1.json
+# Inspect the plan's status, blockers, jobs, paths and commands before running.
+pixi run genesis study run /local/studies/atac-A --plan /local/atac-plan-v1.json
+pixi run genesis study status /local/studies/atac-A
+# Reconnect after a controller restart; existing attempts are retained.
+pixi run genesis study resume /local/studies/atac-A
+```
+
+For DAP use `--assay DAP-seq --sheet /data/dap.tsv --references /data/references`
+at registration; planning and execution use the same interface. ATAC libraries
+retain every technical lane. DAP treatments sharing a control run together and
+remain separate library records. SSH workers use explicit input-path mappings
+and already staged data; the controller transfers only bounded documents and receipts.
+
+| Functionality | Command and instructions |
+| --- | --- |
+| Register or revise inputs | `study init`; [input versions and identities](docs/usage/studies.md#1-register-prepared-inputs) |
+| Review metadata before execution | Existing `metadata` / `review` commands with `--scope inputs`; [individual review/apply](docs/usage/studies.md#2-review-input-metadata-when-needed) |
+| Compile a campaign | `study plan`; [worker configuration and plan inspection](docs/usage/studies.md#3-configure-workers-and-inspect-a-plan) |
+| Execute, resume and inspect | `study run`, `resume`, `status`; [reconnect and failure recovery](docs/usage/studies.md#4-execute-and-reconnect) |
+| Collect or revalidate results | Automatic during run/resume, or `study collect`; [budgets, readers and collection-only retries](docs/usage/studies.md#5-collect-validate-and-assess-results) |
+| Review and export | `study export --dataset ID` or `--selection FILE`; [evidence, approvals and exclusions](docs/usage/studies.md#6-review-and-export-a-selected-catalog) |
+
+Initial collection performs metadata-level inspection. Full validation needs an
+explicit scan budget and the appropriate artifact reader on each worker:
+
+```bash
+pixi run genesis study collect /local/studies/atac-A --level full \
+  --reader local=/path/to/track-environment/bin/python \
+  --max-bytes 10737418240 --max-records 10000000 --max-seconds 1800
+# After reviewing metadata, QC and eligibility using the linked guide:
+pixi run genesis study export /local/studies/atac-A --dataset DATASET_ID \
+  --output /local/reviewed-atac-v1.json
+```
+
+Revalidation does not rerun sequencing. Execution, collection, structural validity,
+scientific QC and approval have separate states; `SUCCEEDED` does not approve a
+dataset. Default exports exclude incomplete validation and missing approvals. DAP's
+existing output provenance can remain incomplete after a full scan; an explicit
+reviewed catalog exception is required to export it for a suitable purpose.
+The [complete guide](docs/usage/studies.md) covers both assays, optional AI/manual
+metadata curation, monitoring, migration, backup and continuation on another server.
 
 ## Process DAP-seq
 

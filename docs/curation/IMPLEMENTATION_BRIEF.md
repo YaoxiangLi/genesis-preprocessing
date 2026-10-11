@@ -111,3 +111,33 @@ Its separate validation report records offline acceptance and unrun live checks.
   policy changes or approval. Existing worker retry/reconciliation semantics remain.
 - The README contains complete workflows, with a runnable offline tutorial. Synthetic
   evaluation, fake HTTP and lifecycle simulations remain distinct from live acceptance.
+
+## Prepared-study milestone
+
+The next development milestone connects prepared sheets/references to the delivered
+curation and execution components. It does not add accession-first acquisition or a
+second scheduler. The public interface is `genesis study init|plan|run|resume|status|
+collect|export`, documented in the [study guide](../usage/studies.md).
+
+- Schema 3 records describe input manifests, study revisions, immutable plans and
+  collection receipts. Registry schema 4 stores input heads, separate input decisions
+  and collection lineage. Registration is not a scientific result or QC observation.
+- Metadata/review use explicit input/result scopes. Changed source evidence invalidates
+  review tokens. Applying an input proposal updates descriptive metadata; only an
+  explicit plan compiles executable documents, preserving all scientific choices.
+- ATAC jobs contain one library with all technical lanes. DAP jobs contain shared-control
+  groups, with separate library identities. Exact worker assignments, paths, profiles
+  and Git revisions are configuration. SSH inputs need explicit path mappings.
+- The existing controller and detached local/SSH supervisors own execution. A study
+  coordinator blocks stale queued launches while continuing to observe existing work.
+  No LLM/provider participates in job submission or deterministic collection.
+- Owned collection supervisors scan worker-local outputs with bounded budgets and
+  transfer checksummed receipts. Import, diagnostic QC and receipt lineage commit in
+  one registry transaction. Collection retries/readers do not resubmit analysis.
+- Matching input metadata approval can carry forward with its original evidence.
+  QC/eligibility still require current result decisions. Late or superseded receipts
+  remain history; source classifications cannot be downgraded across review scopes.
+- Legacy scientific outputs and parameters remain unchanged. DAP provenance remains
+  incomplete where existing reports lack evidence; default reviewed export excludes it.
+  Local synthetic lifecycle tests, actual binary readers, full regressions and wheel
+  acceptance are distinct from unrun live SSH or new scientific-container acceptance.
