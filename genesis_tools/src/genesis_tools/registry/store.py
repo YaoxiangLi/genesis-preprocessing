@@ -381,7 +381,8 @@ def import_bundle_db(
         data, dataset = manifest["data"], manifest["id"]
         if data["dataset_id"] != dataset:
             raise ValueError("Dataset identity differs from manifest identity")
-        entity(db, dataset, "library", data["source_id"], data["library"], data["study"])
+        scope = "pseudobulk" if manifest["schema_version"] == 5 else "library"
+        entity(db, dataset, scope, data["source_id"], data["library"], data["study"])
         for kind, raw in (
             ("study", data["study"]),
             ("biosample", data["biosample"]),

@@ -93,7 +93,7 @@ def dump(path: Path, value: object, *, immutable: bool = False) -> None:
 
 @lru_cache
 def schema(version: int = 1) -> dict[str, Any]:
-    if version not in {1, 2, 3, 4}:
+    if version not in {1, 2, 3, 4, 5}:
         raise ValueError("Unsupported contract version")
     return loads(files(__package__).joinpath(f"schemas/records-v{version}.json").read_text())
 
@@ -117,7 +117,7 @@ def validator(kind: str, version: int = 1) -> Validator:
 def validate(value: object, kind: str | None = None) -> dict[str, Any]:
     if not isinstance(value, dict) or type(value.get("schema_version")) is not int:
         raise ValueError("A versioned record object is required")
-    if value["schema_version"] not in {1, 2, 3, 4} or (kind and value.get("kind") != kind):
+    if value["schema_version"] not in {1, 2, 3, 4, 5} or (kind and value.get("kind") != kind):
         raise ValueError("Unsupported record version or kind")
     if not isinstance(value.get("kind"), str):
         raise ValueError("A record kind is required")
@@ -150,7 +150,15 @@ def validate(value: object, kind: str | None = None) -> dict[str, Any]:
     return value
 
 
-def record(kind: str, data: dict[str, Any], key: str, *, version: int = 1) -> dict[str, Any]:
+def record(
+    kind: str, data: dict[str, Any], key: str, *, version: int | None = None
+) -> dict[str, Any]:
+    if version is None:
+        version = (
+            5
+            if kind == "bundle" and any(m["schema_version"] == 5 for m in data.get("manifests", []))
+            else 1
+        )
     result = {"schema_version": version, "kind": kind, "id": key, "data": data}
     result["version"] = fingerprint(result)
     return validate(result, kind)
@@ -209,7 +217,8 @@ class ArtifactManifest:
     measurements: list[dict[str, Any]]
 
     def export(self) -> dict[str, Any]:
-        return record("manifest", asdict(self), self.dataset_id)
+        version = 5 if self.assay in {"scATAC", "snATAC", "multiome-ATAC"} else 1
+        return record("manifest", asdict(self), self.dataset_id, version=version)
 
 
 @dataclass(frozen=True)

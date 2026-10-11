@@ -494,7 +494,7 @@ def inspect_manifest(
             "Versioned metric agrees with its source and denominator",
             observed,
         )
-    manifest = record("manifest", data, original["id"])
+    manifest = record("manifest", data, original["id"], version=original["schema_version"])
     for value in findings:
         if value["data"]["subject"]["scope"] == "library":
             value["data"]["subject"]["version"] = manifest["version"]
