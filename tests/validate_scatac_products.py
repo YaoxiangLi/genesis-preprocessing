@@ -14,14 +14,18 @@ from verify_scatac_fragments import inputs
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--numeric-chromosomes", action="store_true")
+    naming = parser.add_mutually_exclusive_group()
+    naming.add_argument("--numeric-chromosomes", action="store_true")
+    naming.add_argument("--chromosomes", nargs=3)
     args = parser.parse_args()
     root = args.output.resolve()
     root.mkdir(parents=True, exist_ok=False)
     fixture, manifests = inputs(root)
     config = load(manifests[0])
     library = config["library"]
-    chromosomes = ("1", "2", "3") if args.numeric_chromosomes else ("chr1", "chr2", "chr3")
+    chromosomes = args.chromosomes or (
+        ("1", "2", "3") if args.numeric_chromosomes else ("chr1", "chr2", "chr3")
+    )
     fasta = root / "reference.fa"
     fasta.write_text("".join(f">{c}\n" + "ACGT" * 12500 + "\n" for c in chromosomes))
     config["reference"].update(

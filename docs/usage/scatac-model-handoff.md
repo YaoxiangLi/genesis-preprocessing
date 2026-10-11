@@ -15,11 +15,12 @@ Use commit `8ecf7f791ec07c05a701076cc58a0f845bf97609`. Its `PeakGenerator` accep
 one unstranded signal channel for this adapter:
 
 ```python
+import pandas as pd
 from cherimoya.io import PeakGenerator
 
 loader = PeakGenerator(
-    peaks="train.peaks.bed",
-    negatives="train.background.bed",
+    peaks=pd.read_csv("train.peaks.bed", sep="\t", header=None, dtype={0: str}),
+    negatives=pd.read_csv("train.background.bed", sep="\t", header=None, dtype={0: str}),
     sequences="genome.fa",
     signals=["signal.bw"],
     controls=None,
@@ -39,6 +40,8 @@ when they differ. The model's `fit` function expects the sampler
 IO only. Install the pinned model repository's full declared environment before
 training. Model architecture, loss, optimizer and compute resources remain model
 configuration decisions.
+Reading the chromosome column as text also preserves leading zeros in contig
+names. Passing an untyped filename directly can lose those zeros during parsing.
 
 ## ChromBPNet
 
@@ -99,6 +102,7 @@ Repeat with `--resume` to verify reuse. The complete fixture check is
 `tests/validate_scatac_loaders.py`; it also verifies registry and release gates.
 Generate a second product fixture with `--numeric-chromosomes` to exercise
 Arabidopsis-style names through both actual loaders.
+The additional fixture `--chromosomes 01 02 03` checks leading-zero preservation.
 
 The deterministic fixture should yield 600 counts in each positive window and
 zero in its background. Those values validate the fixture only; they are not

@@ -72,10 +72,26 @@ def main() -> None:
                 path = args.output / f"{split}.{kind}.bed"
                 path.write_text(row + "\n")
                 paths.append(path)
+            pd = importlib.import_module("pandas")
+            columns = [
+                "chr",
+                "start",
+                "end",
+                "name",
+                "score",
+                "strand",
+                "signal",
+                "p",
+                "q",
+                "summit",
+            ]
+            # Both loaders accept dataframes. Preserve identifiers before inference
+            # can turn "1" into an integer or strip leading zeros from "01".
+            regions = [pd.read_csv(p, sep="\t", names=columns, dtype={"chr": str}) for p in paths]
             if target == "cherimoya":
                 loader = io.PeakGenerator(
-                    str(paths[0]),
-                    str(paths[1]),
+                    regions[0],
+                    regions[1],
                     str(args.bundle / "genome.fa"),
                     [str(args.bundle / "signal.bw")],
                     in_window=in_window,
@@ -94,24 +110,6 @@ def main() -> None:
                 x, values = x.numpy(), y.numpy()[:, 0, :]
                 expected_shape = (2, 4, in_window)
             else:
-                pd = importlib.import_module("pandas")
-                columns = [
-                    "chr",
-                    "start",
-                    "end",
-                    "name",
-                    "score",
-                    "strand",
-                    "signal",
-                    "p",
-                    "q",
-                    "summit",
-                ]
-                # Plant references may use numeric names. Preserve identifiers exactly:
-                # pandas inference can turn "1" into an integer or strip leading zeros.
-                regions = [
-                    pd.read_csv(p, sep="\t", names=columns, dtype={"chr": str}) for p in paths
-                ]
                 loader = io.ChromBPNetBatchGenerator(
                     regions[0],
                     regions[1],
