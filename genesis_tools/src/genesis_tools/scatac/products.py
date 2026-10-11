@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from ..contracts.records import dump, fingerprint, load
+from . import qc as metrics
 from .common import complete, publication, software, text_file, verify_output
 
 IMAGES = {
@@ -102,12 +103,15 @@ def frip(fragments: Path, peaks: Path, sizes: dict[str, int]) -> dict[str, Any]:
             else:
                 combined.append((start, end))
         merged[chrom] = ([r[0] for r in combined], [r[1] for r in combined])
-    total = overlaps = 0
+    total = overlaps = support = 0
+    lengths: Counter[int] = Counter()
     with text_file(fragments) as stream:
         for line in stream:
             fields = line.split("\t")
             chrom, start, end = fields[0], int(fields[1]), int(fields[2])
             total += 1
+            support += int(fields[4])
+            lengths[end - start] += 1
             if chrom in merged:
                 starts, ends = merged[chrom]
                 i = bisect.bisect_right(ends, start)
@@ -118,6 +122,10 @@ def frip(fragments: Path, peaks: Path, sizes: dict[str, int]) -> dict[str, Any]:
         "frip": overlaps / total if total else None,
         "overlapping_fragments": overlaps,
         "denominator_fragments": total,
+        "fragment_lengths": dict(sorted(lengths.items())),
+        "total_support": support,
+        "support_redundancy_fraction": 1 - total / support if support else None,
+        "support_redundancy_definition": "1 - unique rows / read-pair support; not removal",
         "definition": "Unique fragment rows overlapping the union of group peaks by >=1 bp",
         "tss_enrichment": None,
         "tss_status": "NOT_EVALUATED: no validated TSS input in this product stage",
@@ -129,8 +137,22 @@ def run(core: Path, output: Path, *, resume: bool = False) -> dict[str, Any]:
     started = time.monotonic()
     previous = verify_output(core, "scatac-group-core")
     data = previous["data"]
-    group, policy = data["group"], data["policy"]
-    signature = fingerprint({"core": previous["version"], "images": IMAGES, "software": software()})
+    group = data["group"]
+    policy: dict[str, Any] = data["policy"]
+    if policy.get("tss"):
+        from .common import checked_asset
+
+        policy = {
+            **policy,
+            "tss": {**policy["tss"], "path": str(checked_asset(policy["tss"], core))},
+        }
+    signature = fingerprint(
+        {
+            "core": previous["version"],
+            "images": IMAGES,
+            "software": software("products.py", "qc.py", "../benchmark/metrics.py"),
+        }
+    )
     if output.exists() and resume:
         saved = verify_output(output, "scatac-group")
         if saved["data"]["signature"] != signature:
@@ -186,6 +208,12 @@ def run(core: Path, output: Path, *, resume: bool = False) -> dict[str, Any]:
             stage / "peaks_peaks.narrowPeak",
             group["reference"]["contigs"],
         )
+        if policy.get("tss"):
+            qc.update(
+                metrics.tss_profile(
+                    stage / "cuts.bedGraph", policy["tss"], group["reference"]["contigs"]
+                )
+            )
         dump(stage / "qc.json", qc)
         value = complete(
             stage,
