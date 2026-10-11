@@ -116,7 +116,12 @@ def run(bundle: Path, model_root: Path, output: Path, *, resume: bool = False) -
                 stderr=err,
                 timeout=1800,
                 check=False,
-                env={**os.environ, "OMP_NUM_THREADS": "2", "OPENBLAS_NUM_THREADS": "2"},
+                # The loader deliberately uses its own frozen environment, not the CLI's venv.
+                env={
+                    **{k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"},
+                    "OMP_NUM_THREADS": "2",
+                    "OPENBLAS_NUM_THREADS": "2",
+                },
             )
         dump(
             stage / "loader.command.json",
