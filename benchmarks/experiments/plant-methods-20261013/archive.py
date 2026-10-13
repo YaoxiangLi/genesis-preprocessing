@@ -38,7 +38,7 @@ def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, A
         if prune_work and result["status"] != "COMPLETE":
             raise ValueError("Keep work from incomplete experiments for diagnosis")
         work = {source / "indexes"}
-        for case in result["results"]:
+        for case in result.get("results", []):
             identifier(case["arm"])
             rep = case["repetition"]
             if type(rep) is not int or rep < 1:
@@ -99,8 +99,12 @@ def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, A
                 verified.add(item.name)
         if verified != set(manifest):
             raise ValueError("Archive omitted evidence")
+        missing_tables = []
         for name in ("metrics.tsv", "processing.tsv", "resources.tsv", "library-qc.tsv"):
-            shutil.copyfile(source / name, out / name)
+            if (source / name).is_file():
+                shutil.copyfile(source / name, out / name)
+            else:
+                missing_tables.append(name)
         if (source / "figures").is_dir():
             shutil.copytree(source / "figures", out / "figures")
         record: dict[str, Any] = {
@@ -114,6 +118,7 @@ def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, A
             "members": manifest,
             "pruned_work": [],
             "prune_status": "NOT_REQUESTED",
+            "missing_tables": missing_tables,
             "retention": (
                 "Inputs stay at their original locations; BAMs/indexes are not in this archive"
             ),

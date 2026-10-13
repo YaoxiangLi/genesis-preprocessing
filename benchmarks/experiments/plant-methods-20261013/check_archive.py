@@ -89,8 +89,23 @@ def main() -> None:
         with tarfile.open(root / "interrupted/evidence.tar.gz") as tar:
             if "results.json" not in tar.getnames():
                 raise AssertionError("Removal started without complete evidence")
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        source = fixture(root)
+        (source / "results.json").write_text(json.dumps({"status": "FAILED", "error": "stopped"}))
+        (source / "metrics.tsv").unlink()
+        record = archive(source, root / "failed-evidence")
+        if record["status"] != "FAILED" or record["missing_tables"] != ["metrics.tsv"]:
+            raise AssertionError("Incomplete evidence was fabricated or lost")
+        try:
+            archive(source, root / "refused-pruning", prune_work=True)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Failed work must remain available for diagnosis")
     print(
-        "PASS compact evidence, inputs, explicit pruning, writer isolation and interruption"
+        "PASS compact evidence, incomplete runs, explicit pruning, "
+        "writer isolation and interruption"
     )
 
 

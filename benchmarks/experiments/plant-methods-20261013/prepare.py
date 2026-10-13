@@ -223,8 +223,7 @@ def prepare(source: Path, out: Path, cohort: str, depths: list[int]) -> None:
                     else "https://doi.org/10.3389/fpls.2024.1370618"
                 ),
                 "sample_snapshots": {
-                    p.name: sha256(p)
-                    for p in sorted((HERE / "sources").glob("*.xml"))
+                    p.name: sha256(p) for p in sorted((HERE / "sources").glob("*.xml"))
                 },
                 "context": (
                     "Col-0, 7-day whole seedlings, 50000 nuclei, FANS-ATAC, rep1/rep2"

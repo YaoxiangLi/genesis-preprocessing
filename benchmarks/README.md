@@ -10,6 +10,11 @@ study, choose the evaluation data and scientific questions before looking at
 results. More mapped reads, higher FRiP or more peaks alone does not establish
 better biological accuracy.
 
+See the [October 2026 comparison report](../validation/reports/pipeline-method-comparison.md)
+for measured results, figures, failures and the current limits of the evidence.
+The [public plant recipe](experiments/plant-methods-20261013/README.md) reproduces
+the data selection and method matrix.
+
 ## Run a small comparison
 
 Install Genesis first using the [project instructions](../README.md#install-and-check-your-environment).
