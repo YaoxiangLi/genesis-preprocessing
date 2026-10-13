@@ -55,6 +55,11 @@ The generated version 2 experiment changes one component at a time:
 | Peak calling | MACS3 | MACS2; Genrich for ATAC | Selected alignments and nominal q-value; caller models remain different |
 | Interval counting | Genesis/Python span counts | bedtools coverage | Identical BAM and fixed intervals; read ends counted separately |
 
+The quick fixture uses BWA-MEM2 2.3 from the comparison environment. Production
+currently pins 2.2.1. The [public plant panel](experiments/plant-methods-20261013/README.md)
+adds a separately locked 2.2.1 baseline and compares 2.3 as an explicit alternative.
+It records the native package builds separately from the production image digests.
+
 DAP retains primary mapped alignments including MAPQ 0, uses each treatment's
 assigned control and MACS `keep_dup=1`. ATAC applies the production fragment
 selector: two proper primary mates, nuclear contigs, both MAPQs at least 30,
@@ -89,6 +94,8 @@ reason for every measurement. Blank/undefined is different from zero.
 | Peak count, union bases, median width | Interval count, nonduplicated genomic coverage and median length | Report together; broad or numerous peaks are not automatically better |
 | Peak Jaccard | Base-pair intersection / union with baseline | Agreement with baseline, not independent accuracy |
 | Fixed-region count correlation | Pearson/Spearman of fragment counts on identical regions | Undefined for too few regions or zero variance |
+| Biological replicate overlap | Peak base-pair intersection / union across an explicitly declared replicate pair | Reproducibility, not binding-site truth; replicates remain separate |
+| Held-out replicate FRiP | Fragments in one replicate overlapping peaks called in the other / retained fragments | Avoids calling and evaluating on the same library; still depends on peak width |
 | TSS enrichment | Common strand-aware ±2 kb cut profile, center/background ratio | Only with explicit annotation; inspect its definition and eligible TSS count |
 | Synthetic alignment recovery | Exact original contig/start/end/strand among mapped or raw simulated ends | Includes ambiguous origins; trimming/soft clipping can alter endpoints without a wrong locus |
 | Synthetic peak precision/recall | Called intervals overlapping enriched regions / calls; enriched regions recovered / truth regions | Also report base-level precision/recall to expose width changes |
@@ -107,6 +114,10 @@ RSS is a separate process statistic. Container memory, when available, has a
 different scope and can include page cache. None is whole-host peak RAM.
 Index construction is reported separately from per-library work. CPU and wall
 time from a Docker launcher must not be interpreted as container CPU usage.
+`processing.tsv` also measures each complete method case, including Python
+selection and task hashing, while excluding indexes and common evaluation.
+Temporary name-sorted/fixmate BAMs are removed after successful duplicate marking;
+aligned, marked and selected BAMs remain available for inspection and resume.
 
 Use three or more technical repetitions for timing comparisons, retaining each
 observation and the median/range. Randomize order with a fixed seed, report cache

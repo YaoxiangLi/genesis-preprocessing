@@ -36,11 +36,29 @@ TOOLS = {
 def validate_methods(spec: dict[str, Any], base: Path) -> list[dict[str, Any]]:
     env = spec["environment"]
     required = {"prefix", "legacy_prefix", "lock", "lock_sha256"}
-    keys(env, required, required, "environment")
+    keys(env, required | {"bwa_mem2_221"}, required, "environment")
     for name in ("prefix", "legacy_prefix", "lock"):
         env[name] = str((base / env[name]).resolve())
     if not SHA.fullmatch(env["lock_sha256"]) or sha256(Path(env["lock"])) != env["lock_sha256"]:
         raise ValueError("Benchmark environment lock differs")
+    if "bwa_mem2_221" in env:
+        pinned = env["bwa_mem2_221"]
+        keys(
+            pinned,
+            {"prefix", "lock", "lock_sha256"},
+            {"prefix", "lock", "lock_sha256"},
+            "bwa_mem2_221",
+        )
+        for name in ("prefix", "lock"):
+            pinned[name] = str((base / pinned[name]).resolve())
+        if (
+            not SHA.fullmatch(pinned["lock_sha256"])
+            or sha256(Path(pinned["lock"])) != pinned["lock_sha256"]
+        ):
+            raise ValueError("Production aligner comparison lock differs")
+        records = list((Path(pinned["prefix"]) / "conda-meta").glob("bwa-mem2-*.json"))
+        if len(records) != 1 or json.loads(records[0].read_text())["version"] != "2.2.1":
+            raise ValueError("The production-version comparison requires BWA-MEM2 2.2.1")
     if len(spec["parameters"]["mapq"]) != 1 or len(spec["parameters"]["duplicates"]) != 1:
         raise ValueError("Compare packages separately from MAPQ/duplicate policy matrices")
     if spec["parameters"]["spp"] or spec["parameters"]["quantify"]:
@@ -65,7 +83,7 @@ def validate_methods(spec: dict[str, Any], base: Path) -> list[dict[str, Any]]:
         keys(method, fields, fields, "method")
         identifier(method["id"])
         choices = {
-            "aligner": {"bwa-mem2", "bwa", "bowtie2"},
+            "aligner": {"bwa-mem2", "bwa-mem2-2.2.1", "bwa", "bowtie2"},
             "trimmer": {"none", "cutadapt", "fastp"},
             "duplicate_tool": {"none", "samtools", "picard"},
             "caller": {"macs3", "macs2", "genrich"},
@@ -73,6 +91,8 @@ def validate_methods(spec: dict[str, Any], base: Path) -> list[dict[str, Any]]:
         for name, allowed in choices.items():
             if method[name] not in allowed:
                 raise ValueError(f"Unsupported method {name}")
+        if method["aligner"] == "bwa-mem2-2.2.1" and "bwa_mem2_221" not in env:
+            raise ValueError("BWA-MEM2 2.2.1 requires its separately pinned environment")
         for key in ("adapter_r1", "adapter_r2"):
             value = method[key]
             if not isinstance(value, str) or (
@@ -100,6 +120,11 @@ def validate_methods(spec: dict[str, Any], base: Path) -> list[dict[str, Any]]:
     # Bind the actual installed binaries/package records, not just a claimed version.
     binaries = {name: Path(env["prefix"]) / "bin" / name for name in TOOLS}
     binaries["macs2"] = Path(env["legacy_prefix"]) / "bin/macs2"
+    prefixes = [env["prefix"], env["legacy_prefix"]]
+    if "bwa_mem2_221" in env:
+        prefix = env["bwa_mem2_221"]["prefix"]
+        prefixes.append(prefix)
+        binaries["bwa-mem2-2.2.1"] = Path(prefix) / "bin/bwa-mem2"
     env["executables"] = {}
     for name, binary in binaries.items():
         if not binary.is_file() or not os.access(binary, os.X_OK):
@@ -109,13 +134,13 @@ def validate_methods(spec: dict[str, Any], base: Path) -> list[dict[str, Any]]:
         env["executables"][name] = {"path": str(binary), "sha256": sha256(binary)}
     env["package_records"] = {
         str(p): sha256(p)
-        for prefix in (env["prefix"], env["legacy_prefix"])
+        for prefix in prefixes
         for p in sorted((Path(prefix) / "conda-meta").glob("*.json"))
     }
     env["compiled_components"] = {
         str(p): sha256(p)
         for p in [
-            *sorted((Path(env["prefix"]) / "bin").glob("bwa-mem2.*")),
+            *(p for prefix in prefixes for p in sorted((Path(prefix) / "bin").glob("bwa-mem2.*"))),
             *sorted(Path(env["legacy_prefix"]).glob("lib/python*/site-packages/MACS2/**/*.so")),
             *sorted(
                 Path(env["legacy_prefix"]).glob(
@@ -199,7 +224,7 @@ class Methods:
             command = [self.tool(aligner), "index", str(fasta)]
             suffixes = (
                 (".0123", ".amb", ".ann", ".bwt.2bit.64", ".pac")
-                if aligner == "bwa-mem2"
+                if aligner in {"bwa-mem2", "bwa-mem2-2.2.1"}
                 else (".amb", ".ann", ".bwt", ".pac", ".sa")
             )
             expected = [Path(str(fasta) + s) for s in suffixes]
@@ -327,6 +352,10 @@ class Methods:
                 [st, "markdup", "-s", str(target / "coordinate.bam"), str(marked)],
             ]
             self.task(target / "mark", [bam], [marked], commands)
+            # Only marked.bam is a cached output. These owned sort/fixmate products
+            # are temporary and would otherwise multiply storage on plant genomes.
+            for name in ("names.bam", "fixed.bam", "coordinate.bam"):
+                (target / name).unlink(missing_ok=True)
         elif method["duplicate_tool"] == "picard":
             command = [
                 self.tool("picard"),

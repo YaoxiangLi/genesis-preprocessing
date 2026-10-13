@@ -158,6 +158,27 @@ def main() -> None:
         changed = copy.deepcopy(spec)
         changed["parameters"]["mapq"] = [0, 30]
         rejects(lambda: validate_methods(changed, experiment.parent))
+        changed = copy.deepcopy(spec)
+        changed["methods"][0]["aligner"] = "bwa-mem2-2.2.1"
+        rejects(lambda: validate_methods(changed, experiment.parent))
+        pinned = root / "old-aligner"
+        (pinned / "bin").mkdir(parents=True)
+        binary = pinned / "bin/bwa-mem2"
+        binary.write_text("#!/bin/sh\nexit 0\n")
+        binary.chmod(0o700)
+        (pinned / "conda-meta").mkdir()
+        record = pinned / "conda-meta/bwa-mem2-fixture.json"
+        write_json(record, {"version": "2.2.1"})
+        lock = pinned / "pixi.lock"
+        lock.write_text("frozen original aligner")
+        changed["environment"]["bwa_mem2_221"] = {
+            "prefix": str(pinned),
+            "lock": str(lock),
+            "lock_sha256": sha256(lock),
+        }
+        validate_methods(copy.deepcopy(changed), experiment.parent)
+        write_json(record, {"version": "2.3"})
+        rejects(lambda: validate_methods(copy.deepcopy(changed), experiment.parent))
     print(
         "PASS publisher verification/resume, short downloads, reserved paths, "
         "SE/PE nested sampling, method contracts"

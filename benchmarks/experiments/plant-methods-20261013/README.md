@@ -1,0 +1,160 @@
+# Public plant method comparisons
+
+This panel compares DAP-seq and bulk ATAC tools on identical, randomly selected
+input templates. It uses separate outputs from normal Genesis runs. Package
+comparisons, complete-workflow acceptance and biological evidence are reported
+separately.
+
+## Data and questions
+
+| Cohort | Libraries | Question |
+| --- | --- | --- |
+| Arabidopsis SE DAP | FUS3 `SRR2926076`, ABI5 `SRR2926841`, shared control `SRR2926068` | Do aligner/caller changes preserve TF motif support and enrichment? |
+| Arabidopsis PE DAP | `SRR31238589`, `SRR31239194`, `SRR31238722`, `SRR31238919`, shared control `SRR31238993` | Do results hold for paired reads and different library yields? |
+| Arabidopsis ATAC | `SRR4000468`, `SRR4000469` | How do selection, TSS signal and agreement between biological replicates change? |
+| Maize ATAC | `SRR27443454`, `SRR27443453` | How do the same choices behave on a larger plant genome and adapter-containing libraries? |
+
+The SE DAP control is an explicit R1-only projection of an ENA paired-end run,
+matching the repository's sample sheet. The PE DAP samples are Halo protocol
+optimization libraries, **not confirmed biological replicates**. The two TF groups
+remain distinct and share only their declared control. Their TF-source organism
+must not be confused with the assayed Arabidopsis thaliana DNA.
+
+The Arabidopsis ATAC libraries represent Col-0, seven-day whole seedlings and
+50,000 FANS-isolated nuclei. The maize libraries represent B73, ten-day seedlings
+and 2,500 nuclei. Both cohorts have two biological replicates. The maize publication
+used gDNA controls; this panel's control-free ATAC comparison does not reproduce
+that complete analysis. See [Lu et al.](https://pmc.ncbi.nlm.nih.gov/articles/PMC5389718/)
+and the [maize study](https://doi.org/10.3389/fpls.2024.1370618).
+
+[ENA, SRA and BioSample snapshots](sources/) preserve the accession, layout and
+sample evidence. The [acquisition manifest](acquisition.json) pins public URLs,
+publisher sizes and checksums. It includes complete FASTQs, not HTTP prefixes.
+The preparer validates all records before taking nested 1-million and 5-million
+template samples. A PE template contains both mates. Smaller libraries retain
+their actual complete count; the requested cap is never reported as an observed
+count.
+
+References are TAIR10 with Ensembl Plants 59 annotation and B73 RefGen v4 with
+Ensembl Plants 46 annotation. The exact files and derived TSS hashes are checked
+by [prepare.py](prepare.py). These are explicit benchmark reference bundles;
+matching an assembly name does not prove identity with the original paper's files.
+
+## Software and baseline
+
+| Component | Baseline | Alternative |
+| --- | --- | --- |
+| Alignment | BWA-MEM2 2.2.1 | BWA-MEM2 2.3, BWA 0.7.19, Bowtie2 2.5.5 |
+| ATAC adapter handling | Declared full-read policy | Cutadapt 5.2, fastp 1.4.0 |
+| ATAC duplicate marking | samtools 1.24 | Picard 3.5.0 |
+| Peak calling | MACS3 3.0.5 | MACS2 2.2.9.1; Genrich 0.6.2 for ATAC |
+| Independent read-end counts | Python interval counts | bedtools 2.31.1 |
+
+The baseline matches the production aligner version and scientific settings.
+The native package build and the production container are different artifacts;
+their identities and complete-workflow tests remain separate evidence. The
+[comparison lock](../../environment/pixi.lock) and
+[2.2.1 lock](../../environment/bwa-mem2-2.2.1/pixi.lock) pin the native environments.
+MACS2 is built from its pinned source distribution in a separate Python 3.11
+environment. A Bioconda binary failed to import on this host; that failure must
+remain in the validation record.
+
+The [main benchmark guide](../../README.md#what-is-compared) defines the fixed
+policies and caller differences. The panel does not lower MAPQ or change q-values
+to make a method pass. Zero peaks remain a measured result. One change per method
+isolates the component being tested; comparisons of the complete production and
+nf-core workflows have a different scope.
+
+## Reproduce a cohort
+
+Install Genesis, then run from its checkout:
+
+```bash
+pixi install --all --manifest-path benchmarks/environment/pixi.toml
+pixi install --manifest-path benchmarks/environment/bwa-mem2-2.2.1/pixi.toml
+```
+
+The full input manifest downloads **86.01 GB** before retries and software
+downloads. Its transfer limit is 100 GB. Review the manifest and choose storage
+with room for original inputs plus temporary work. The recorded panel budget is
+16 CPUs, 96 GiB RAM, 48 hours of execution and 80 GB of temporary work across all
+experiments. Per-experiment limits do not enforce that aggregate automatically.
+
+```bash
+genesis benchmark acquire benchmarks/experiments/plant-methods-20261013/acquisition.json \
+  --out /data/genesis-method-sources --connections 4
+
+pixi run uv run --frozen --project genesis_tools python \
+  benchmarks/experiments/plant-methods-20261013/prepare.py \
+  --sources /data/genesis-method-sources --out /scratch/dap-se-inputs \
+  --cohort dap-se --depth 1000000 --depth 5000000
+
+pixi run uv run --frozen --project genesis_tools python \
+  benchmarks/experiments/plant-methods-20261013/compile_matrix.py \
+  /scratch/dap-se-inputs/dap-se-depth-1000000.json \
+  --out /scratch/dap-se-inputs/comparison-1m.json --repetitions 3 --cpus 14
+
+genesis benchmark run /scratch/dap-se-inputs/comparison-1m.json \
+  --out /scratch/dap-se-comparison-1m
+genesis benchmark report /scratch/dap-se-comparison-1m \
+  --plot-python benchmarks/environment/.pixi/envs/default/bin/python
+```
+
+Other cohort names are `dap-pe`, `atac-arabidopsis` and `atac-maize`. Use a separate
+preparation and result directory for each. Repeat compilation with the generated
+5-million-template manifest for the depth comparison. For maize, the compiler's
+`--group mapping` and `--group processing` split the matrix into smaller campaigns,
+each including the identical baseline. Keep the same inputs and sampling seed.
+Report every timing repetition and any incomplete group; do not pool replicates.
+
+Preparation can resume completed samples only when their sources, selection seed,
+depths and output hashes agree. A failed acquisition can resume its original
+destination; partial files do not count as verified sources. Benchmark execution
+uses `--resume` only with unchanged source, environments and experiment identity.
+
+## Independent DAP motif support
+
+[motifs.py](motifs.py) evaluates FUS3 and ABI5 against the PBM-derived JASPAR
+matrices [MA0565.1](https://jaspar.elixir.no/matrix/MA0565.1/) and
+[MA0931.1](https://jaspar.elixir.no/matrix/MA0931.1/). Their matrix snapshots, source
+URLs, hashes and CC BY 4.0 attribution are in [sources/](sources/). The DAP-derived
+FUS3 matrix is deliberately excluded from this independent measurement.
+
+```bash
+benchmarks/environment/.pixi/envs/default/bin/python \
+  benchmarks/experiments/plant-methods-20261013/check_motifs.py
+benchmarks/environment/.pixi/envs/default/bin/python \
+  benchmarks/experiments/plant-methods-20261013/motifs.py \
+  /scratch/dap-se-comparison-1m --out /scratch/dap-se-motif-support
+```
+
+Every eligible peak supplies a 200-base summit window. Ambiguous bases, chromosome
+edges and organellar windows are excluded and counted. Each window is paired with
+one seeded same-chromosome control, within two GC bases, outside the pooled summit
+windows from all compared methods. Unmatched controls are counted explicitly.
+The scanner tests both strands. Its threshold has an exact single-position,
+single-strand uniform-background tail of at most 0.0001, using a 0.5 pseudocount
+and weights rounded to millionths of a bit. This is not a peak-level p-value.
+
+Report peak/control motif-hit counts and fractions for all eligible pairs and
+the top 1,000/5,000 peaks by caller signal. An undersized selection is marked
+incomplete. A zero control count leaves fold enrichment undefined. Small control
+counts make fold ratios unstable; use the counts and fractions when comparing
+methods. Motif support is biological plausibility evidence, not in-vivo binding
+truth or proof that every extra peak is correct. No independent motif assignment
+has been established for the PE DAP groups in this panel.
+
+## Interpret the comparison
+
+Use the metric definitions in the [benchmark guide](../../README.md#read-the-measurements).
+For ATAC, consider replicate peak overlap, held-out replicate FRiP, TSS signal,
+retention, width and genome coverage together. A higher FRiP from broader peaks
+does not by itself support a replacement caller. For DAP, inspect independent
+motif support alongside enrichment, peak coverage and assigned-control behavior.
+
+Check biological evidence before efficiency. Command timings exclude the common
+evaluation code and reference indexing; `processing.tsv` includes selection and
+hashing. Index construction is a separate cost. Timing repetitions are technical
+measurements on the same input, not additional biological replicates. Host cache
+and concurrent activity must be disclosed. An unrun comparison provides no
+evidence for changing the pipeline.
