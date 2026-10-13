@@ -1,5 +1,9 @@
 # scATAC delivery validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-10. Baseline: `37ef72069b8205cd4ce263d4b62139c943d42e02`.
 Branch: `feature/scatac-delivery`. New implementation hashes and complete command
 logs are retained under `results/incremental-prs/` outside Git. This is a software

@@ -1,5 +1,9 @@
 # Plant Data Sets workbook inventory
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Update (2026-10-10): the user-specified Google workbook export is now available.
 The [scATAC delivery audit](scatac-delivery-validation.md) records its checksum,
 eight-tab snapshot and focused Arabidopsis/Sorghum inventory. The remaining text

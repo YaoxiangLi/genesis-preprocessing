@@ -1,5 +1,8 @@
 # ADR: supported paired-end ATAC and explicit deployment
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Date: 2026-10-09. Status: implemented; live remote-site acceptance remains outstanding.
 
 ## Decision

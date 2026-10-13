@@ -78,6 +78,8 @@ def positive(value: object, name: str) -> None:
 
 
 def public_url(url: str) -> None:
+    if not isinstance(url, str):
+        raise ValueError("Public URL must be a string")
     parsed = urlsplit(url)
     if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
         raise ValueError("Fetch supports public HTTPS URLs without credentials only")
@@ -91,18 +93,21 @@ def source_identity() -> dict[str, Any]:
     def git(*args: str) -> str:
         return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
 
-    paths = sorted(Path(__file__).parent.glob("*.py"))
+    package = Path(__file__).resolve().parent.parent
+    paths = sorted(Path(__file__).parent.glob("*.py")) + [package / "atac/fragments.py"]
     return {
         "git_sha": git("rev-parse", "HEAD"),
         "git_status": git("status", "--porcelain"),
-        "recipe_sha256": {p.name: sha256(p) for p in paths},
+        "recipe_sha256": {str(p.relative_to(package)): sha256(p) for p in paths},
     }
 
 
 def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
     path = path.resolve()
     with path.open("rb") as stream:
-        spec = tomllib.load(stream)
+        spec = json.load(stream) if path.suffix == ".json" else tomllib.load(stream)
+    if not isinstance(spec, dict):
+        raise ValueError("Experiment must be an object")
     allowed = {
         "schema_version",
         "id",
@@ -118,14 +123,19 @@ def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
         "workflow",
         "performance",
     }
+    method_comparison = spec.get("schema_version") == 2
+    if method_comparison:
+        allowed |= {"methods", "environment"}
     keys(spec, allowed, allowed - {"images", "workflow", "performance"}, "experiment")
-    if spec["schema_version"] != VERSION:
+    if type(spec["schema_version"]) is not int or spec["schema_version"] not in {1, 2}:
         raise ValueError("Unsupported experiment schema version")
     identifier(spec["id"])
     if spec["assay"] not in {"DAP-seq", "bulk-ATAC"}:
         raise ValueError("Only DAP-seq and bulk-ATAC are implemented")
-    if spec["adapter"] not in {"postalign", "genesis-atac", "nfcore-atac"}:
+    if spec["adapter"] not in {"postalign", "genesis-atac", "nfcore-atac", "methods"}:
         raise ValueError("Unsupported adapter")
+    if method_comparison != (spec["adapter"] == "methods"):
+        raise ValueError("Method comparisons require schema version 2 and adapter methods")
     if spec["comparison"] not in {
         "matched-stage",
         "workflow-native",
@@ -176,6 +186,10 @@ def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
     ]
     if len({a["id"] for a in arms}) != len(arms):
         raise ValueError("Duplicate experiment arms")
+    if method_comparison:
+        from .methods import validate_methods
+
+        arms = validate_methods(spec, path.parent)
     if spec["baseline"] not in {a["id"] for a in arms}:
         raise ValueError("Baseline must identify exactly one declared arm")
     performance = spec.get("performance", {"repetitions": 1, "random_order": False})
@@ -231,7 +245,7 @@ def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
             raise ValueError(f"Input checksum mismatch: {name}")
     if dataset["status"] == "READY":
         validate_dataset(dataset, assets, spec)
-    if spec["adapter"] != "postalign":
+    if spec["adapter"] not in {"postalign", "methods"}:
         workflow = spec.get("workflow", {})
         keys(
             workflow,
@@ -291,7 +305,7 @@ def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
         {k: result[k] for k in ("spec", "dataset_sha256", "arms")}
         | {"recipe": result["source"]["recipe_sha256"]}
     )
-    if spec["adapter"] != "postalign" and dataset["status"] == "READY":
+    if spec["adapter"] not in {"postalign", "methods"} and dataset["status"] == "READY":
         from .workflows import validate_options
 
         validate_options(result)
@@ -314,8 +328,16 @@ def validate_dataset(dataset: dict[str, Any], assets: dict[str, Any], spec: dict
         "tss",
         "annotation_release",
         "gtf",
+        "effective_genome_size",
     }
-    keys(ref, rkeys, rkeys - {"tss", "annotation_release", "gtf"}, "reference")
+    keys(
+        ref,
+        rkeys,
+        rkeys - {"tss", "annotation_release", "gtf", "effective_genome_size"},
+        "reference",
+    )
+    if "effective_genome_size" in ref:
+        positive(ref["effective_genome_size"], "effective_genome_size")
     if not SHA.fullmatch(ref["fasta_content_sha256"]):
         raise ValueError("Decompressed FASTA SHA256 required")
     positive(ref["genome_size"], "genome_size")
@@ -377,7 +399,7 @@ def validate_dataset(dataset: dict[str, Any], assets: dict[str, Any], spec: dict
             if spec["parameters"]["spp"]:
                 if "spp_bam" not in lib or ("marked_bam" in lib and "spp_marked_bam" not in lib):
                     raise ValueError("SPP requires independently aligned first-50 R1 artifacts")
-        elif "read1" not in lib or "read2" not in lib:
+        elif "read1" not in lib or (lib["layout"] == "PE" and "read2" not in lib):
             raise ValueError("Workflow adapters require paired raw FASTQs")
     for lib in libraries.values():
         control = lib["control"]
@@ -391,3 +413,31 @@ def validate_dataset(dataset: dict[str, Any], assets: dict[str, Any], spec: dict
                 raise ValueError("Controls must be control libraries of the same layout")
         if spec["assay"] == "bulk-ATAC" and control is not None:
             raise ValueError("DAP control assumptions cannot be inherited by ATAC")
+    replicate_pairs(dataset)
+
+
+def replicate_pairs(dataset: dict[str, Any]) -> list[list[str]]:
+    """Validate explicit, disjoint replicate pairs before any expensive work."""
+    source = dataset.get("source", {})
+    if not isinstance(source, dict):
+        raise ValueError("Dataset source must be an object")
+    pairs = source.get("replicate_pairs", [])
+    if not isinstance(pairs, list):
+        raise ValueError("replicate_pairs must be a list")
+    libraries = {lib["id"] for lib in dataset["libraries"]}
+    used: set[str] = set()
+    for pair in pairs:
+        if (
+            not isinstance(pair, list)
+            or len(pair) != 2
+            or any(not isinstance(name, str) for name in pair)
+            or len(set(pair)) != 2
+            or not set(pair) <= libraries
+        ):
+            raise ValueError("Replicate pairs must name two distinct recorded libraries")
+        if used.intersection(pair):
+            raise ValueError("Replicate pairs must be disjoint; no implicit pooled comparison")
+        if dataset["synthetic"] or dataset["assay"] != "bulk-ATAC":
+            raise ValueError("This biological replicate assessment requires real bulk ATAC")
+        used.update(pair)
+    return pairs

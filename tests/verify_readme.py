@@ -8,6 +8,7 @@ import hashlib
 import io
 import re
 import shlex
+import subprocess
 import sys
 import tomllib
 from collections.abc import Sequence
@@ -22,7 +23,13 @@ from genesis_tools.execution import controller
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = [
     ROOT / "README.md",
+    ROOT / "docs/README.md",
     ROOT / "docs/development.md",
+    ROOT / "docs/nextflow-style.md",
+    ROOT / "docs/diagrams/README.md",
+    ROOT / "genesis_tools/README.md",
+    ROOT / "benchmarks/README.md",
+    ROOT / "examples/scatac/README.md",
     *sorted((ROOT / "docs/usage").glob("*.md")),
 ]
 ARCHIVE = ROOT / "docs/history/dapseq-readme-fb60096.md"
@@ -54,7 +61,8 @@ def anchors(text: str) -> set[str]:
 
 
 def check_links(document: Path) -> None:
-    for target in re.findall(r"\]\(([^)]+)\)", document.read_text()):
+    prose = re.sub(r"^```.*?^```[^\n]*$", "", document.read_text(), flags=re.M | re.S)
+    for target in re.findall(r"\]\(([^)]+)\)", prose):
         if "://" in target or target.startswith("mailto:"):
             continue
         relative, separator, fragment = unquote(target).partition("#")
@@ -106,7 +114,25 @@ def parse_only(
 def main() -> None:
     check_preserved_dap_readme()
     # Historical commands describe the archived revision; check its links only.
-    for document in [*DOCS, ARCHIVE]:
+    all_documents = sorted(
+        {
+            ROOT / name
+            for name in subprocess.check_output(
+                [
+                    "git",
+                    "ls-files",
+                    "--cached",
+                    "--others",
+                    "--exclude-standard",
+                    "--",
+                    "*.md",
+                ],
+                cwd=ROOT,
+                text=True,
+            ).splitlines()
+        }
+    )
+    for document in all_documents:
         check_links(document)
     tasks = tomllib.loads((ROOT / "pixi.toml").read_text())["tasks"]
     count = 0
@@ -150,7 +176,7 @@ def main() -> None:
                         raise AssertionError("Documentation parser reached an executable action")
     print(
         f"PASS {count} documented CLI commands parse; {task_count} Pixi recipes resolve; "
-        f"links/anchors in {len(DOCS) + 1} documents resolve; original DAP README preserved"
+        f"links/anchors in {len(all_documents)} documents resolve; original DAP README preserved"
     )
 
 

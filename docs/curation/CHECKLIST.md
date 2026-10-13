@@ -1,5 +1,9 @@
 # Implementation checkpoints
 
+> Contributor history: the sections below describe successive implementation
+> milestones. For current commands, use the [curation](../usage/curation.md) and
+> [study](../usage/studies.md) guides. Earlier limitations apply to their named revisions.
+
 - [x] Audit checkout, instructions, public commands and current contracts.
 - [x] Record shared specification, compatibility boundary and planning baseline.
 - [x] Establish pinned development environment and record baseline fast checks.

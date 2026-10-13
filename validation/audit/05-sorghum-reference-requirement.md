@@ -1,5 +1,9 @@
 # Sorghum reference requirement — BLOCKED
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-07T17:03:59.850074+00:00. Upstream SHA: `4468c712e4c171b573e2ec2806fdc5327b5379e9`. Local branch: `validation/reference-cache-experiment`.
 
 Input: `repo/test-Sorghum_bicolor-PRJNA1177471.tsv`; SHA256 `b56fa04c5cd76817a2d85270d597e37572588b3046654b3c9c90167ac9b9a512`.

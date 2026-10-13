@@ -1,5 +1,8 @@
 # Multiome identity and inclusion contract
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Status: tested synthetic contract; no combined RNA/ATAC production pipeline. Shared entity identity is study/sample/replicate/library plus a declared cross-modality barcode mapping. A matching barcode string across different libraries is not evidence of the same nucleus. Original and corrected barcodes, correction provenance, chemistry and mapping cardinality must be retained; ambiguous many-to-one links are rejected by an ingestion adapter, not guessed.
 
 ATAC and RNA have independent present, QC metrics and include fields. A nucleus failing one modality remains represented and may contribute to the other. Shared doublet/cell-calling annotations are evidence; application to each modality is an explicit selection-policy decision. No universal joint pass rule is imposed.

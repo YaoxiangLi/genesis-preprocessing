@@ -1,5 +1,9 @@
 # Files changed and delivered
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Exact SHA256s and repository states: results/completion/final-manifest.json. Large outputs remain under results/ and scratch/.
 
 ## Combined DAP branch

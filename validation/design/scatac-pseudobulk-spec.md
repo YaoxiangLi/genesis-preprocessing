@@ -1,5 +1,8 @@
 # Model-ready sc/snATAC pseudobulk contract, version 1
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Status: executable synthetic contract, separate from production. Tests were written and failed on the missing implementation before `fixtures/pseudobulk/contract.py` was added. No real data have been connected. Plant QC thresholds remain **UNSPECIFIED**.
 
 Identity hierarchy is study → biological sample → biological replicate → library → library-scoped cell/nucleus barcode → versioned annotation → pseudobulk task. A sequencing accession does not identify a biological replicate. Missing replicate identity blocks model-ready export. Species, exact assembly and FASTA checksum, accession/cultivar/ecotype, tissue, developmental stage, treatment, condition, assay, protocol and biological replicate are explicit task dimensions. Annotation checksum is independently nullable, never implicitly taken from another release.

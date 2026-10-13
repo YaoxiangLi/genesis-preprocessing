@@ -1,43 +1,46 @@
 # Validation studies
 
-This directory publishes the validation workspace's audit, design, reports and
-small deterministic contract fixtures as of 2026-10-09. The current supported
-paired-end bulk ATAC workflow is validated on synthetic fixtures and small
-Arabidopsis and maize subsets. Its predecessor remains under `experimental/atac/`
-for historical benchmark reproduction.
+Use these reports to check what was tested, on which revision, with which inputs.
+Start with the task guides in [the documentation index](../docs/README.md) when
+running a new analysis. Each report retains its observation date, commands,
+measurements and limits; an earlier successful test is not a test of later code.
 
-Start with the [bulk ATAC and execution validation](reports/supported-atac-execution-validation.md),
-[compact evidence](evidence/supported-atac/README.md), and
-[reproduction instructions](reproduce/supported-atac/README.md).
+| Evidence | What it covers |
+| --- | --- |
+| [Real study acceptance](reports/real-study-validation.md) | DAP/ATAC processing through registration, collection, validation and reviewed export on synthetic inputs |
+| [Supported bulk ATAC](reports/supported-atac-execution-validation.md) | Synthetic fixtures and small public Arabidopsis/maize subsets; [compact evidence](evidence/supported-atac/README.md) and [reproduction](reproduce/supported-atac/README.md) |
+| [Curation and AI](reports/hybrid-llm-validation.md) | Registry/review, mock and HTTP providers, simulated model services; live GPU/API acceptance is separate |
+| [Single-cell delivery](reports/scatac-delivery-validation.md) | Fragment/pseudobulk contracts and pinned model-loader checks |
+| [Direct command installation](reports/direct-cli-validation.md) | Installation and use of `genesis` outside the checkout |
+| [Figure commands](reports/schematic-cli-validation.md) | Offline SVG rendering, licensed assets and browser checks |
+| [Lab promotion](reports/lab-main-promotion.md) | Integration, regression tests and fresh-checkout handoff |
+| [Earlier upstream review](reports/upstream-pr-review.md) | Six lab-repository merges and their issue/acceptance records |
+| [Earlier sensitivity study](reports/dapseq-sensitivity-study.md) | Explicit MAPQ/duplicate experiments; not an aligner-selection benchmark |
 
-The [schematic CLI validation](reports/schematic-cli-validation.md) covers the
-offline figure generator, bundled artwork and browser checks.
+For comparing pipeline packages, use [benchmarks](../benchmarks/README.md). Keep
+computational correctness, biological quality and execution performance separate.
+Small synthetic or shallow public subsets cannot establish full-study accuracy.
 
-The [upstream PR review](reports/upstream-pr-review.md) records the six reviewed
-lab-repository merges, linked issue closure, real Docker acceptance and the
-reference-provenance correction shared with the development fork.
+## Find the underlying evidence
 
-Earlier studies include the [benchmark validation](reports/benchmark-validation.md),
-[overall validation](reports/GENESIS_PREPROCESSING_VALIDATION.md),
-[benchmark design](design/benchmark-spec.md), and
-[model-ready pseudobulk contract](design/scatac-pseudobulk-spec.md).
+- `evidence/` contains compact command receipts, tables, traces and selected logs.
+- `reports/` explains results and their limitations.
+- `design/` records proposed contracts and method decisions; consult current guides
+  to determine what is implemented.
+- `audit/` preserves the original environment and repository inspection.
+- `reproduce/` contains portable recipes for specified public fixtures.
 
-Reports retain their original observation dates, tested commit IDs and limitations.
-Statements that work was local/unpushed describe the state at the time of testing;
-this snapshot is now published on the fork. No unresolved biological claim becomes
-validated by publication. The exact Sorghum DAP reference and metadata workbook
-remain outstanding; public ATAC subset validation does not resolve those blockers.
+Large reads, BAMs, reference indexes, environments and analysis work directories
+are excluded from Git. Historical workspace paths in reports identify original
+observations; they are not download links or setup paths. Where logs are committed,
+reports link to those files. A Git clone is not a backup of scientific data.
 
-Raw logs, BAMs, FASTQs, downloaded data and generated outputs remain in the original
-workspace under `results/` and `scratch/`; links to those locations are workspace
-evidence references and are not hosted here. Local absolute paths in provenance
-are historical paths, not runnable paths for a new checkout. Generate portable
-benchmark fixtures using the [benchmark guide](../benchmarks/README.md).
-Scheduler state and the unsent questions draft are intentionally excluded.
-`snapshot.json` records source and published content checksums for the original snapshot;
-subsequent validation additions are recorded separately in `updates`. Markdown repository
-links are adjusted for this directory's location. Small contract fixtures preserve
-the workspace's relative `fixtures/` and `design/` relationship.
+`snapshot.json` records the original validation snapshot's checksums; later additions
+are listed in its `updates` records or their own validation reports. Publication
+does not change a recorded NOT RUN or blocked result. The unresolved Sorghum DAP
+reference and metadata workbook remain documented in the original reports.
+
+## Reproduce archived contract checks
 
 To rerun the standalone contract checks with the project environment, create their
 workspace output directories first:

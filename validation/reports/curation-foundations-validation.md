@@ -1,5 +1,9 @@
 # Curation foundations validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-09. Scope: the agreed Prompts **0–3** (audit, contracts,
 scientific registry, QC and manual review). Source baseline:
 `bb16baca5d9bb09bfff8825fc537fcb125809c07`, branch `main`.

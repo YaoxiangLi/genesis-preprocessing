@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 import pysam
+from genesis_tools.benchmark.evaluation import alignment_truth, peak_truth, replicate_evaluation
 from genesis_tools.benchmark.metrics import (
     Regions,
     alignment_identity,
@@ -101,6 +102,35 @@ def bam_checks(root: Path) -> None:
     assert value["metrics"]["fragments_FRiP_own"]["value"] == 0.5
     assert value["metrics"]["read_ends_FRiP_own"]["value"] == 0.25
     assert value["fixed_counts"] == [1]
+    truth = alignment_truth(source, source, root)
+    assert truth["truth_alignment_precision"]["value"] == 1.0
+    assert truth["truth_alignment_recall"]["value"] == 1.0
+    other = root / "other-peaks.bed"
+    other.write_text("chr1\t800\t850\n")
+    assert peak_truth(bed, other)["truth_region_recall"]["value"] == 0
+    record = {
+        "status": "COMPLETE",
+        "libraries": {"a": {"metrics": {}}, "b": {"metrics": {}}},
+        "peaks": {"a": str(bed), "b": str(other)},
+        "bams": {"a": str(root / "q30-True.bam"), "b": str(root / "q30-True.bam")},
+    }
+    declared = {
+        "synthetic": False,
+        "assay": "bulk-ATAC",
+        "source": {"replicate_pairs": [["a", "b"]]},
+        "reference": {"mitochondrial": [], "plastid": ["plastid"]},
+        "libraries": [{"id": name, "layout": "PE", "raw_templates": 8} for name in ("a", "b")],
+    }
+    # Synthetic known-answer BAMs exercise the explicit-pair arithmetic only.
+    replicate_evaluation(declared, [record], root)
+    for library in record["libraries"].values():
+        assert library["metrics"]["replicate_peak_jaccard"]["value"] == 0
+        assert library["metrics"]["heldout_fragments_FRiP"]["value"] == 0.5
+    declared["source"] = {"replicate_pairs": [["a", "unknown"]]}
+    rejects(lambda: replicate_evaluation(declared, [record], root))
+    for invalid in ([["a", "b"], ["b", "a"]], [["a", ["b"]]], "a,b"):
+        declared["source"] = {"replicate_pairs": invalid}
+        rejects(lambda: replicate_evaluation(declared, [record], root))
     bed.write_text("")
     empty = assess(
         root / "q30-True.bam",

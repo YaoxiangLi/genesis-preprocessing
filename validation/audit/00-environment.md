@@ -1,5 +1,9 @@
 # Bootstrap host environment
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Observation date: 2026-10-07T16:09:02.473068+00:00. Workspace: `/home/exouser/projects/genesis-preprocessing-validation`. Upstream baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9` (`main`).
 
 ## Scope and acceptance

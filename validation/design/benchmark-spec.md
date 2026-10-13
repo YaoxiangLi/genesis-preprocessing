@@ -1,5 +1,8 @@
 # Genesis built-in benchmark specification
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Approved scope: DAP-seq and experimental PE bulk ATAC; preprocessing evidence; synthetic defaults and curated opt-in public manifests. Implementation branch validation/benchmark, starting e8b37e281b4cace2522179ac7208cfef15cd4dea. Production policy remains unchanged.
 
 The public interface is `pixi run benchmark plan|fetch|run|compare|report`. Versioned TOML experiments reference JSON dataset manifests. Dataset identities, reference sequence hashes, annotations, library/control graphs, input artifact hashes, software/container identities, experiment parameters, metric definitions, budgets and source hashes are explicit. Unknown keys or unsupported combinations fail validation. Missing public references are BLOCKED, not silently replaced.

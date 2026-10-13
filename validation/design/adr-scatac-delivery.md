@@ -1,5 +1,8 @@
 # Fragment-first scATAC delivery
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Status: accepted for implementation; real-data release acceptance remains open.
 
 ## Decisions

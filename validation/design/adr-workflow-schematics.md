@@ -1,5 +1,8 @@
 # ADR: offline Genesis workflow illustrations
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Date: 2026-10-09. Status: implemented.
 
 Use a native SVG renderer with versioned JSON templates, available through

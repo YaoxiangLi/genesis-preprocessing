@@ -1,5 +1,9 @@
 # Reference, cell and pseudobulk contract validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 The schemas under design/ are JSON syntax within valid YAML 1.2, validated with jsonschema 4.26.0 from the existing MultiQC 1.35 image (no new system installation). The reference-registry prototype verifies actual fixture bytes, including compressed/decompressed FASTA identity and chromosome-size hashes; it rejects missing identity, malformed checksums, ambiguous canonical IDs, changed FASTA content and damaged sizes. Annotation/masking/provider/organellar fields are explicit; this is not a general reference acquisition service.
 
 Pseudobulk tests were written first and recorded a missing-implementation failure. The implemented standalone fixture rejects unknown barcodes, duplicate cell records, duplicate unique-fragment rows, invalid intervals, unspecified biological replicate identity, invalid reference hashes and inclusion of absent modalities. Explicit technical merging is supported only within identical biological/reference/coordinate identity. Independent libraries remain separate. Input ordering does not affect output.

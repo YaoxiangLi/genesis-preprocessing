@@ -22,6 +22,10 @@ def create(
     adapter: str = "postalign",
     checkout: Path | None = None,
 ) -> Path:
+    if adapter == "methods":
+        from .methods import fixture
+
+        return fixture(out, assay=assay, small=small, checkout=checkout)
     if adapter != "postalign" and (assay != "bulk-ATAC" or checkout is None):
         raise ValueError("Workflow fixtures require bulk-ATAC and an explicit checkout")
     out = out.resolve()

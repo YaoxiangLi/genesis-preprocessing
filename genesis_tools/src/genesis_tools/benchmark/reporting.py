@@ -24,7 +24,19 @@ def report(out: Path) -> None:
     result = json.loads((out / "results.json").read_text())
     rows, distributions, counts = [], [], []
     library_qc = []
+    processing = []
     for arm in result.get("results", []):
+        if "processing_wall_seconds" in arm:
+            processing.append(
+                {
+                    "arm": arm["arm"],
+                    "repetition": arm["repetition"],
+                    "status": arm["status"],
+                    "wall_seconds": arm["processing_wall_seconds"],
+                    "scope": arm["processing_scope"],
+                    "resume": result.get("resume", False),
+                }
+            )
         for name, qc in arm.get("library_qc", {}).items():
             library_qc.append(
                 {
@@ -56,6 +68,11 @@ def report(out: Path) -> None:
                     prefix | {"distribution": "peak_width", "bin": width, "count": 1}
                 )
     table(out / "library-qc.tsv", library_qc, ["arm", "repetition", "library", "qc_json"])
+    table(
+        out / "processing.tsv",
+        processing,
+        ["arm", "repetition", "status", "wall_seconds", "scope", "resume"],
+    )
     fields = [
         "arm",
         "repetition",
@@ -80,17 +97,37 @@ def report(out: Path) -> None:
     for path in sorted((out / "commands").glob("*/*/run.json")):
         record = json.loads(path.read_text())
         memory = path.parent / "container-memory.peak"
+        time_file = path.parent / "time.txt"
+        timing = {}
+        if time_file.is_file():
+            for line in time_file.read_text().splitlines():
+                key, separator, value = line.strip().rpartition(": ")
+                if separator:
+                    timing[key] = value
+        cpu = None
+        if all(k in timing for k in ("User time (seconds)", "System time (seconds)")):
+            cpu = float(timing["User time (seconds)"]) + float(timing["System time (seconds)"])
         resources.append(
             {
                 "task": path.parent.parent.name,
                 "attempt": path.parent.name,
                 "status": record["status"],
                 "wall_seconds": record["wall_seconds"],
+                "cpu_seconds": cpu,
+                "sampled_process_group_peak_rss_bytes": record.get(
+                    "sampled_process_group_peak_rss_bytes"
+                ),
+                "max_process_rss_kib": timing.get("Maximum resident set size (kbytes)"),
                 "container_memory_peak_bytes": memory.read_text().strip()
                 if memory.is_file()
                 else None,
                 "logs": str(path.parent.relative_to(out)),
-                "scope": "tool invocation including container startup; not campaign wall time",
+                "scope": (
+                    "Docker launcher wall/CPU/RSS; CPU/RSS are not container usage"
+                    if record.get("image")
+                    else "native tool and children; includes startup; "
+                    "excludes Python selection/evaluation"
+                ),
             }
         )
     table(
@@ -101,6 +138,9 @@ def report(out: Path) -> None:
             "attempt",
             "status",
             "wall_seconds",
+            "cpu_seconds",
+            "sampled_process_group_peak_rss_bytes",
+            "max_process_rss_kib",
             "container_memory_peak_bytes",
             "scope",
             "logs",
@@ -135,6 +175,22 @@ def report(out: Path) -> None:
     (out / "report.html").write_text(content)
     if failures:
         write_json(out / "failures.json", failures)
+
+
+def figures(out: Path, python: Path) -> None:
+    """Render measured tables using a separately installed plotting interpreter."""
+    import subprocess
+
+    subprocess.run(
+        [
+            str(python.resolve()),
+            "-I",
+            str(Path(__file__).with_name("plots.py")),
+            str(out.resolve()),
+        ],
+        check=True,
+        timeout=300,
+    )
 
 
 def compare_runs(out: Path, reference: Path) -> Path:

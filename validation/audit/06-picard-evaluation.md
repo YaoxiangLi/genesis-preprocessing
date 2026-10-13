@@ -1,5 +1,13 @@
 # Picard evaluation — experiment only
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
+This is a dated validation record. Files labeled “historical workspace” were
+retained on the original test machine and are not included in this checkout.
+Use the [validation index](../README.md) for current reproduction instructions.
+
 Date: 2026-10-07. Decision: **do not add Picard to the default Genesis workflow**. Duplicate measurement is the strongest optional addition; the other candidates are redundant or need further scientific validation. No production code, environment manifest, lock file, BAM, FASTQ, reference, alignment, peak, or publication behavior was changed. No duplicate reads were removed.
 
 ## Scope and reproducibility
@@ -15,7 +23,7 @@ Four retained libraries from `results/multiqc/runs/docker-xbuym0la` were used in
 | se_treatment | SE | 32000 | 101 | 421294 |
 | pe_control | PE | 12000 | 210 | 449372 |
 
-Input SHA256 evidence (full paths and byte sizes in [inputs-before.json](../results/picard/inputs-before.json); rehashed after all experiments):
+Input SHA256 evidence (full paths and byte sizes in inputs-before.json (historical workspace: `../results/picard/inputs-before.json`); rehashed after all experiments):
 
 | Input | SHA256 |
 |---|---|
@@ -41,7 +49,7 @@ An isolated user-owned Pixi environment follows the repository's conda-forge/Bio
 | R | 4.4.3 / h502d0c9_11 |
 | Retained FastQC / SPP | 0.12.1 / 1.16.0 |
 
-Dependency manifests: [pixi.toml](../scratch/picard/environment/pixi.toml), [pixi.lock](../scratch/picard/environment/pixi.lock). Exact package URLs, builds and SHA256: [packages.json](../results/picard/packages.json). Lock SHA256: `0ed278ddff8f1a588fcf8d6bc9ae578ab27802f389baa7ba2214903c4b0a8fa9`. Java heap explicitly `-Xms128m -Xmx2g`; no CPU affinity/processor-count limit. Approximate installed environment disk footprint 1.6 GiB; experiment evidence 12 MiB. This footprint includes R, Java and dependencies, not just Picard.
+Dependency manifests: pixi.toml (historical workspace: `../scratch/picard/environment/pixi.toml`), pixi.lock (historical workspace: `../scratch/picard/environment/pixi.lock`). Exact package URLs, builds and SHA256: packages.json (historical workspace: `../results/picard/packages.json`). Lock SHA256: `0ed278ddff8f1a588fcf8d6bc9ae578ab27802f389baa7ba2214903c4b0a8fa9`. Java heap explicitly `-Xms128m -Xmx2g`; no CPU affinity/processor-count limit. Approximate installed environment disk footprint 1.6 GiB; experiment evidence 12 MiB. This footprint includes R, Java and dependencies, not just Picard.
 
 Initial command: `pixi install --manifest-path scratch/picard/environment/pixi.toml` (installation logs retained; initial solve elapsed/RAM not captured). Subsequent locked reinstallation succeeded; its command, wall time and GNU time resources are in `results/picard/reinstall.{json,time,stdout,stderr}`. All analyses used `pixi run --locked --manifest-path ...`. This locks full transitive resolution, including the Java/R versions allowed by the experimental manifest.
 
@@ -57,11 +65,11 @@ samtools stats BAM
 samtools idxstats BAM
 ```
 
-Every invocation has an exact expanded command, input SHA256, Genesis SHA, environment-lock SHA256, timestamps, elapsed time, output hashes, stdout, stderr, exit status and GNU time peak RSS/block-I/O in `results/picard/<label>/`. Scripts: [run_experiment.py](../scratch/picard/run_experiment.py), [native_benchmark.py](../scratch/picard/native_benchmark.py), [known_fixture.py](../scratch/picard/known_fixture.py). All duplicate-tool experiments are explicitly **duplicate-measurement sensitivity experiments**, not bug fixes or a proposed change to production duplicate handling. Picard's default insert-size exclusion of duplicate-flagged reads changes no membership here: all original duplicate flags are unset.
+Every invocation has an exact expanded command, input SHA256, Genesis SHA, environment-lock SHA256, timestamps, elapsed time, output hashes, stdout, stderr, exit status and GNU time peak RSS/block-I/O in `results/picard/<label>/`. Scripts: run_experiment.py (historical workspace: `../scratch/picard/run_experiment.py`), native_benchmark.py (historical workspace: `../scratch/picard/native_benchmark.py`), known_fixture.py (historical workspace: `../scratch/picard/known_fixture.py`). All duplicate-tool experiments are explicitly **duplicate-measurement sensitivity experiments**, not bug fixes or a proposed change to production duplicate handling. Picard's default insert-size exclusion of duplicate-flagged reads changes no membership here: all original duplicate flags are unset.
 
 ## Raw observations: costs
 
-One additional native measurement per library/tool places `/usr/bin/time -v` **inside** Pixi, excluding the launcher. Values below are native wall seconds / maximum RSS MiB. Native timing resolution is 0.01 s; these small, warm-cache cases are not throughput or full-dataset capacity estimates. The three initial repeats include Pixi startup; their medians and raw observations are retained in [resources.json](../results/picard/resources.json). RSS is GNU time's maximum process/descendant RSS, not simultaneous summed Java+R memory. No production resource request is inferred from these measurements.
+One additional native measurement per library/tool places `/usr/bin/time -v` **inside** Pixi, excluding the launcher. Values below are native wall seconds / maximum RSS MiB. Native timing resolution is 0.01 s; these small, warm-cache cases are not throughput or full-dataset capacity estimates. The three initial repeats include Pixi startup; their medians and raw observations are retained in resources.json (historical workspace: `../results/picard/resources.json`). RSS is GNU time's maximum process/descendant RSS, not simultaneous summed Java+R memory. No production resource request is inferred from these measurements.
 
 | Tool | SE control | SE treatment | PE control | PE treatment |
 |---|---:|---:|---:|---:|
@@ -138,14 +146,14 @@ The synthetic generator does not model PCR amplification, yet endpoint duplicate
 ## Failures, warnings and acceptance
 
 - All 124 recorded analysis/setup/header/benchmark commands exited 0; 48 main Picard runs, 36 main samtools runs, 28 native measurements, six known-fixture commands, four headers and two reference preparations. Locked reinstall also passed.
-- Parsed metric rows were identical over three repeats. The four-library overlap checks and known-answer checks passed; all original inputs rehashed unchanged. See [independent-checks.json](../results/picard/independent-checks.json) and [acceptance.json](../results/picard/acceptance.json).
+- Parsed metric rows were identical over three repeats. The four-library overlap checks and known-answer checks passed; all original inputs rehashed unchanged. See independent-checks.json (historical workspace: `../results/picard/independent-checks.json`) and acceptance.json (historical workspace: `../results/picard/acceptance.json`).
 - Expected applicability failure: SE insert-size collection produced no result, and SE ELC no metric rows despite success exit codes. These are not accepted as useful SE QC.
 - Warnings: SE insert-size empty-category warnings; optical read-name parsing warnings in duplicate tools. Their raw stderr is retained. No warning was hidden or converted into a biological fail threshold.
 - One experimental inspection-script run failed because a local variable shadowed the samtools executable path. Original stderr is preserved in `independent-checks-first.stderr`; only the standalone inspection helper was corrected, then rerun without changing assertions. No Picard, Genesis, or production-test failure was patched.
 - Missing evidence: real DAP-seq performance, large-genome memory/I/O scaling, optical-duplicate validity, multiple true libraries/read groups, nonzero error/indel/chimera cases, and biological meaning of estimated library size. These limit adoption, not the recorded small-fixture results.
 - Full Genesis regression suite was not rerun: this is a read-only standalone-tool experiment with no production edits; no claim of newly validating the pipeline suite is made. No local commit or branch change was needed for production code because none was changed.
 
-Files added: this audit, [ADR](../design/adr-picard.md), experiment scripts/environment/reference/source snapshots under `scratch/picard/`, and raw logs/metrics/marked copies/checksums under `results/picard/`. Genesis git diff/status remain empty. Complete artifact manifest: [checksums.json](../results/picard/checksums.json).
+Files added: this audit, [ADR](../design/adr-picard.md), experiment scripts/environment/reference/source snapshots under `scratch/picard/`, and raw logs/metrics/marked copies/checksums under `results/picard/`. Genesis git diff/status remain empty. Complete artifact manifest: checksums.json (historical workspace: `../results/picard/checksums.json`).
 
 ## Primary sources
 

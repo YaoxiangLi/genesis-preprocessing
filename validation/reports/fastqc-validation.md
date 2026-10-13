@@ -1,5 +1,9 @@
 # FastQC implementation and validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-07. Branch: `validation/fastqc`.
 Baseline SHA: `4468c712e4c171b573e2ec2806fdc5327b5379e9`.
 The baseline reports remain unchanged. This is the first intentional workflow change.

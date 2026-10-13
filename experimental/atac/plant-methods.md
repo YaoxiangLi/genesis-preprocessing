@@ -1,4 +1,8 @@
-# Method boundaries: ENCODE and plant ATAC
+# Historical prototype: methods and limitations
+
+This page describes the frozen experimental workflow. For current behavior, see
+the [bulk ATAC guide](../../docs/usage/bulk-atac.md); for package comparisons, see
+the [benchmark guide](../../benchmarks/README.md).
 
 The integrated prototype preserves the scientific behavior of commit
 `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`. Its input is one synthetic,
@@ -7,7 +11,7 @@ quality. All Genesis plant pass/fail thresholds remain **UNSPECIFIED**.
 
 ## Evidence and decisions
 
-| Topic | Primary evidence | Current Genesis behavior | Remaining work |
+| Topic | Primary evidence | Frozen prototype behavior | Remaining work |
 | --- | --- | --- | --- |
 | Reproducibility and QC | [ENCODE ATAC standards](https://www.encodeproject.org/atac-seq/) assess usable reads, complexity, fragment structure, enrichment and reproducibility; TSS interpretation depends on the reference | Fragment counts, NRF/PBC, FRiP, fragment lengths and a toy TSS profile are diagnostic | Biological replicates, concordance/IDR and reference-aware TSS implementation before production |
 | Alignment and filtering | [ENCODE code](https://github.com/ENCODE-DCC/atac-seq-pipeline/tree/47ba8dff9c332e24b48e767303e9fcac98589cf2) separates alignment, MAPQ, duplicate and chromosome filtering | bwa-mem2, samtools duplicate marking; both mates must meet the explicitly supplied MAPQ; marked duplicates excluded from usable fragments | Compare explicit alternatives empirically on exact plant assemblies; no claim of identity with ENCODE Bowtie2/Picard |
@@ -36,7 +40,7 @@ IDs also need a portable deployment strategy before use on another host.
 ## Reproducible evaluation
 
 `pixi run checks` runs known-answer arithmetic/filter tests and invalid-policy
-rejection. `pixi run validate-atac --keep` runs the pinned real tools on the
+rejection. `pixi run validate-atac-legacy --keep` runs the pinned real tools on the
 deterministic benchmark fixture, inspects published outputs, verifies raw input
 checksums, and requires all eight tasks to cache on resume. The benchmark
 manifest and image lock preserve every explicit experimental setting.

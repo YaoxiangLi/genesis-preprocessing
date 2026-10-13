@@ -1,5 +1,8 @@
 # ADR: Picard remains outside the default Genesis workflow
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Date: 2026-10-07. Status: evaluation complete; **no implementation approved or performed**. Evaluated Genesis `af0bbfb50806babd78b8e9f88df2a55aab0a2a13`, Picard 3.5.0. Evidence: [audit/06-picard-evaluation.md](../audit/06-picard-evaluation.md).
 
 ## Decision

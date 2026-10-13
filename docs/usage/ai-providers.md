@@ -1,9 +1,12 @@
 # Optional AI providers and read-only assistance
 
-The existing `genesis` CLI uses one provider adapter for metadata, diagnosis and
-catalog questions. Processing, validation, registry queries and human review work
-without it. No torch, vLLM, Hugging Face client or cloud SDK is installed into the
-core Python 3.14 environment. Live HTTP uses the standard library.
+Connect an optional LLM service to propose metadata, explain a failure or answer
+questions about selected catalog records. Start with the mock configuration to
+learn the commands without an account or network request, then configure an API
+or private endpoint. Processing and manual review also work without a provider.
+
+The client needs no GPU libraries. Hosting a model uses a
+[separate serving environment](llm-deployment.md).
 
 ## Configure and check
 

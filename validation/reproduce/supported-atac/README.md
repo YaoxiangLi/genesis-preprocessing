@@ -6,9 +6,9 @@ files outside Git. Docker must already work for the current user.
 ```bash
 python repo/validation/reproduce/supported-atac/public_inputs.py results/public-atac-inputs
 cd repo
-pixi run pipeline-atac ../results/public-atac-inputs/samples.tsv \
+genesis pipeline-atac ../results/public-atac-inputs/samples.tsv \
   --references ../results/public-atac-inputs/references.json --outdir ../results/public-atac-run
-pixi run pipeline-atac ../results/public-atac-inputs/samples.tsv \
+genesis pipeline-atac ../results/public-atac-inputs/samples.tsv \
   --references ../results/public-atac-inputs/references.json --outdir ../results/public-atac-run --resume
 ```
 

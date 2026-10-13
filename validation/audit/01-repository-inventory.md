@@ -1,5 +1,9 @@
 # Baseline repository inventory
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Observed 2026-10-07. This is independent static inspection of the untouched checkout, not confirmation of upstream's reported test results. No production code or preprocessing policy was changed. References below are local paths relative to `repo/`; exact input hashes appear in the appendix.
 
 ## Repository identity and scope

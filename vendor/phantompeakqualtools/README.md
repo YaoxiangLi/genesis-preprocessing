@@ -1,3 +1,5 @@
+# Vendored SPP cross-correlation script
+
 Vendored without modifications from kundajelab/phantompeakqualtools.
 
 File revision: 6984a713aba0218b76bacc63f2fb5087425fd6a3
@@ -15,6 +17,9 @@ changed the NSC/RSC baseline from the minimum correlation to correlation at the
 largest tested shift. Later changes include SOCK workers, early dependency
 loading, and compatibility with newer SPP versions. The workflow retains the
 historical explicit shift range (-s=-0:2:400), but scores can differ because of
-the baseline change and full-length bwa-mem2 first-read alignments.
+the baseline change and aligner differences. The current workflow aligns full
+reads for the main analysis and first-read QC, but supplies SPP with a separate
+alignment of first reads cut to 50 bases. See the
+[DAP analysis choices](../../docs/usage/dapseq-reference.md#analysis-choices).
 
 The workflow supplies GNU awk for the script's BAM-to-tagAlign conversion.

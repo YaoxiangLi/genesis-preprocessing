@@ -1,5 +1,9 @@
 # MultiQC implementation and validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-07. Branch: `validation/multiqc`.
 Parent/FastQC commit: `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`.
 Unmodified scientific baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9`.

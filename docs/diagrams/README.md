@@ -1,6 +1,6 @@
 # Genesis workflow maps
 
-The README map describes the implemented validation workflow. Routes show data
+The workflow maps describe the processing steps in the corresponding Nextflow workflows. Routes show data
 dependencies, not measured execution order or performance. Station titles name
 the tools or operations; circles indicate stages and plain crossings do not
 implicitly join channels. FastQC observes each raw mate independently. SPP uses
@@ -11,7 +11,7 @@ The architecture map distinguishes implemented DAP-seq processing, bulk ATAC, te
 Solid routes include the available bulk ATAC workflow. Dashed routes mark specified or planned integrations. Biological replicates are not implicitly pooled.
 
 Edit `render_metro.py` to update station labels, data dependencies and layout, then
-run `python docs/diagrams/render_metro.py`. It uses only Python's standard library
+run `pixi run uv run --frozen --project genesis_tools python docs/diagrams/render_metro.py`. It uses only Python's standard library
 and deterministically generates seven static, animated and architecture SVGs.
 The SVG metadata records the SHA256 of each documented workflow (DAP or ATAC); it is not a
 claim about an upstream release. Update a map with its corresponding workflow
@@ -32,6 +32,6 @@ not the source repository.
 The execution map shows local, scheduler and independent-worker routes. It describes
 software capabilities; it does not imply live validation on every named cluster.
 
-Illustrated stage-card figures are also available through `pixi run genesis schematic`.
+Illustrated stage-card figures are also available through `genesis schematic`.
 See the [schematic guide](../usage/schematics.md) for themes, editable templates
 and the licensed asset catalog. These supplement the detailed metro maps.

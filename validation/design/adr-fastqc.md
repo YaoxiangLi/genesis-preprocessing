@@ -1,5 +1,8 @@
 # ADR: independent raw-read FastQC branch
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Date: 2026-10-07. Status: implemented and validated; local commit `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`.
 Baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9`. Branch: `validation/fastqc`.
 

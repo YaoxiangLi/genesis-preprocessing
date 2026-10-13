@@ -1,5 +1,9 @@
 # Hybrid LLM and curation extension validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-09. Implementation tested:
 `accaf04f64833bd4fbb16bfd4bdb2ef083d0eb8c` on `main`, including the foundations
 milestone `117e5dc`. Public baseline:

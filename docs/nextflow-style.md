@@ -1,4 +1,11 @@
-The Nextflow scaffold follows igvf_pseudobulking_pipeline:
+# Nextflow contributor guide
+
+Use this guide when changing pipeline modules. For running an analysis, start with
+the [DAP](usage/dapseq-reference.md) or [bulk ATAC](usage/bulk-atac.md) guide.
+
+## Module structure
+
+The DAP scaffold follows igvf_pseudobulking_pipeline:
 
 - Each process declares its resources, conda YAML, and nf-dotenv container image.
 - QC and tracks take configurable resources from main.nf through a resources input;
@@ -25,25 +32,28 @@ QUANTIFY (genesis_tools) reads the BAM with pysam and the RPKM bedGraph in one
 pass each, with no intermediate files, and publishes the two score files. The
 standalone peak-rpm and peak-rpkm commands use the same code.
 
-Use:
-    pixi run install-all
-    pixi run build-dockers --no-push
-    pixi run build-dockers --no-push -- dap_seq_alignment genesis_tools
-    pixi run pipeline INPUT.tsv -profile local,docker
-    pixi run pipeline INPUT.tsv -profile sherlock,apptainer
+## Build and check changes
+
+```bash
+pixi run install-all --install-cli
+export PATH="$HOME/.local/bin:$PATH"
+pixi run build-dockers --no-push
+pixi run build-dockers --no-push -- dap_seq_alignment genesis_tools
+genesis pipeline INPUT.tsv -profile local,docker
+genesis pipeline INPUT.tsv -profile sherlock,apptainer
+```
 
 Every Docker build targets both linux/amd64 and linux/arm64. The original scripts
 default to pushing, so explicitly pass --no-push for local builds. They derive
-image tags from the latest Git tag (currently 0.1.0), with --tag available to
+image tags from the latest Git tag, with --tag available to
 override it. Image names match project/environment names without an extra prefix.
 The scripts update .env using image digests. Publishing images requires user
 approval; local images alone are not available to Sherlock's Apptainer.
 
-Without a supplied profile, the pipeline wrapper uses scripts/get-default-profile.sh. Run it through
-root Pixi so Nextflow can find micromamba. Input TSV and references are staged
+Without a supplied profile, the pipeline wrapper uses scripts/get-default-profile.sh. `genesis pipeline` selects the checkout's Pixi runtime automatically. The default is `local,docker`; choose a cluster profile explicitly. Input TSV and references are staged
 inputs, so container tasks do not depend on undeclared host source paths.
 
-The four sample sheets use the six-column schema. The main README describes the
+The four sample sheets use the six-column schema. The DAP reference guide describes the
 workflow and analysis policies; the superseded Bash pipeline and metadata helper
 have been removed. tests/verify_pipeline.py exercises actual Nextflow wiring,
 reference cache transitions, resume, validation failures, and publication boundaries.

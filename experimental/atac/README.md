@@ -1,6 +1,12 @@
-# Experimental paired-end ATAC fixture
+# Historical paired-end ATAC fixture
 
-This isolated entry point is a computational prototype, not a production plant ATAC pipeline. The main DAP-seq workflow is unchanged. Use `pixi run pipeline-atac` with explicit read1/read2, gzipped FASTA, BED0 TSS positions (`chrom position strand`), output directory, MAPQ, organellar names (or explicit `NONE`), genome size and `--adapter_policy none-synthetic-adapter-free`.
+This directory preserves the frozen prototype for reproducing earlier benchmarks.
+For new analyses, use the [supported bulk ATAC guide](../../docs/usage/bulk-atac.md).
+The current `genesis pipeline-atac` command runs that supported workflow.
+
+To rerun the historical fixture, use `pixi run validate-atac-legacy --keep`.
+Its runner supplies synthetic reads, the toy reference, TSS positions, explicit
+MAPQ/duplicate choices and the adapter-free fixture policy.
 
 The fixture path performs per-mate raw FastQC, bwa-mem2 alignment, samtools fixmate/markdup, both-mate MAPQ filtering, marked-duplicate exclusion, organellar exclusion/accounting, fragment generation, explicit +4/-5 cut representation, MACS3 BAMPE peaks, fragment FRiP, a defined toy TSS profile, fragment lengths/NRF/PBC, MultiQC and SHA256 provenance. Original reads/BAM are not altered. Biological thresholds are UNSPECIFIED. The TSS metric is not claimed to be numerically equivalent to ENCODE or ataqv.
 

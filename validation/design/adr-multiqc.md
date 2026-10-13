@@ -1,5 +1,8 @@
 # ADR: run-level MultiQC aggregation
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Date: 2026-10-07. Status: implemented and validated; local commit `af0bbfb50806babd78b8e9f88df2a55aab0a2a13`. Design preceded implementation.
 Base commit: `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`; branch `validation/multiqc`.
 

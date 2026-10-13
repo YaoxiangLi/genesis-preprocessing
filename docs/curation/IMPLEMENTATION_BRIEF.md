@@ -1,5 +1,9 @@
 # Curation and hybrid-LLM implementation specification
 
+> Contributor history: the sections below describe successive implementation
+> milestones. For current commands, use the [curation](../usage/curation.md) and
+> [study](../usage/studies.md) guides. Earlier limitations apply to their named revisions.
+
 Baseline: `bb16baca5d9bb09bfff8825fc537fcb125809c07`, clean `main` at audit.
 The foundations milestone implemented Prompts 0–3. The subsequent authorized
 extension implements Prompts 4–8 in this same checkout and publishes reviewed

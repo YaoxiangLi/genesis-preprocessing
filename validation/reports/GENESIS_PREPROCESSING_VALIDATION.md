@@ -1,5 +1,9 @@
 # Genesis preprocessing validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 ## Executive summary
 
 The local computational validation, reference-cache hardening, QC additions, isolated PE ATAC prototype, model-facing contracts and workflow diagrams are implemented and tested within their stated scope. This is **not full biological validation**. The exact Sorghum reference and Plant Data Sets workbook remain missing; no assembly or workbook was substituted. Synthetic data cannot settle plant MAPQ, duplication, motif or QC-threshold policies.

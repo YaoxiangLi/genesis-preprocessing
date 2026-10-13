@@ -1,5 +1,9 @@
 # Direct Genesis CLI and README update
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-13 UTC. Base revision: `1ce11f66afc21021e6228a1eee90d105fe511132`.
 Tests ran against the implementation working tree. The
 [source and evidence hashes](../evidence/direct-cli/checksums.json) identify the

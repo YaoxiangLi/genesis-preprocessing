@@ -1,5 +1,9 @@
 # Bulk ATAC and distributed execution validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-09. Platform: Ubuntu 24.04, Linux amd64, 32 CPUs, approximately
 115 GiB RAM. This report covers supported paired-end bulk ATAC, local execution,
 deployment profiles and the dataset controller. It does not establish biological

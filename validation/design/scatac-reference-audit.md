@@ -1,5 +1,8 @@
 # sc/snATAC reference implementation audit
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Pinned unmodified checkout: `benchmarks/ENCODE_scatac`, https://github.com/kundajelab/ENCODE_scatac, SHA `2c61bd523af482a79b35ab5c354d54707191c669`. README describes work in progress. Audit covers config, Snakemake rules, fragment and multimapper scripts, environments and ArchR script. This is not a successful end-to-end benchmark.
 
 | Capability | ENCODE_scatac implementation | 10x semantics / Genesis proposal | Unresolved |

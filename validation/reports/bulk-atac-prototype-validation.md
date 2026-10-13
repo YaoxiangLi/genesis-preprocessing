@@ -1,5 +1,9 @@
 # Bulk ATAC prototype and differential benchmark
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Status: **PASS for the synthetic computational scope**. Branch `validation/bulk-atac-prototype`, worktree `scratch/bulk-atac-prototype`, commit `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`. This separate `pixi run pipeline-atac` entry does not change the DAP workflow or defaults. Design preceded implementation: design/bulk-atac-spec.md and comparison TSV.
 
 The retained baseline PE treatment fixture supplies 32,000 pairs, 75-bp mates, a seeded 2-Mb synthetic chr1 and enriched loci. The annotation/TSS file is explicitly artificial. It is not Sorghum and not a biological ATAC dataset. Raw FASTQs are reused unchanged; nf-core staging copies have distinct R1/R2 basenames and identical SHA256s. No adapter trimming is performed; the command requires an explicit synthetic adapter-free policy.

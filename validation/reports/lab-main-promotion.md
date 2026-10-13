@@ -1,5 +1,9 @@
 # Full project promotion to lab main
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Acceptance date: 2026-10-12 (America/New_York; command receipts use UTC).
 
 This update integrates the full fork into `kundajelab/genesis-preprocessing`,

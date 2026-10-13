@@ -1,5 +1,9 @@
 # Completion ledger
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Original upstream: `4468c712e4c171b573e2ec2806fdc5327b5379e9`. Combined DAP work is on `validation/completion`; the PE ATAC prototype is isolated on `validation/bulk-atac-prototype`. Exact final SHAs/status and artifact checksums are in results/completion/final-manifest.json. No automatic merges or container pushes occurred.
 
 | Work | Status | Acceptance evidence / remaining boundary |

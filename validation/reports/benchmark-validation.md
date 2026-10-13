@@ -1,5 +1,13 @@
 # Built-in plant preprocessing benchmark validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
+This is a dated validation record. Files labeled “historical workspace” were
+retained on the original test machine and are not included in this checkout.
+Use the [validation index](../README.md) for current reproduction instructions.
+
 Date: 2026-10-09. Branch: `validation/benchmark`. Starting production revision:
 `e8b37e281b4cace2522179ac7208cfef15cd4dea`. This is an opt-in experiment layer;
 no production Nextflow module, pipeline configuration, dependency lock or scientific
@@ -141,14 +149,14 @@ to those contracts. Workspace evidence is under `results/benchmarks/` and
 Local commits use the configured Yaoxiang Li identity. Nothing was pushed and no
 issue/PR publishing queue was changed by this implementation.
 
-Evidence links: [content inspection](../results/benchmarks/inspection.json),
-[retained-study comparisons](../results/benchmarks/retained-comparisons.json),
-[SPP comparisons](../results/benchmarks/retained-spp-comparison.json),
-[cache acceptance](../results/benchmarks/final-cache-acceptance.json),
-[production-output comparison](../results/benchmarks/production-scientific-comparison.json),
-[browser checks](../results/benchmarks/browser.json),
-[interactive DAP report](../results/benchmarks/dap-final/report.html),
-[interactive ATAC report](../results/benchmarks/atac-hardened/report.html).
+Evidence links: content inspection (historical workspace: `../results/benchmarks/inspection.json`),
+retained-study comparisons (historical workspace: `../results/benchmarks/retained-comparisons.json`),
+SPP comparisons (historical workspace: `../results/benchmarks/retained-spp-comparison.json`),
+cache acceptance (historical workspace: `../results/benchmarks/final-cache-acceptance.json`),
+production-output comparison (historical workspace: `../results/benchmarks/production-scientific-comparison.json`),
+browser checks (historical workspace: `../results/benchmarks/browser.json`),
+interactive DAP report (historical workspace: `../results/benchmarks/dap-final/report.html`),
+interactive ATAC report (historical workspace: `../results/benchmarks/atac-hardened/report.html`).
 
 ## Recorded validation commands
 
@@ -158,29 +166,29 @@ stdout/stderr, exit status and GNU time output.
 
 | Validation | Exit | Wall s | Host peak RSS KiB | Evidence |
 | --- | ---: | ---: | ---: | --- |
-| full-checks-2 | 0 | 83.78 | 696920 | [logs](../results/incremental-prs/benchmark-full-checks-2/run.json) |
-| docker-regression | 0 | 329.68 | 687736 | [logs](../results/incremental-prs/benchmark-docker-regression/run.json) |
-| dap-final | 0 | 239.82 | 55152 | [logs](../results/incremental-prs/benchmark-dap-final/run.json) |
-| dap-resume | 0 | 5.01 | 52560 | [logs](../results/incremental-prs/benchmark-dap-resume/run.json) |
-| retained-study | 0 | 388.33 | 55468 | [logs](../results/incremental-prs/benchmark-retained-study/run.json) |
-| retained-comparison | 0 | 0.15 | 29476 | [logs](../results/incremental-prs/benchmark-retained-comparison/run.json) |
-| atac-final | 0 | 30.35 | 576564 | [logs](../results/incremental-prs/benchmark-atac-final/run.json) |
-| atac-resume | 0 | 7.37 | 524804 | [logs](../results/incremental-prs/benchmark-atac-resume/run.json) |
-| nfcore-final | 0 | 113.20 | 1358404 | [logs](../results/incremental-prs/benchmark-nfcore-final/run.json) |
-| nfcore-resume | 0 | 45.73 | 1612608 | [logs](../results/incremental-prs/benchmark-nfcore-resume/run.json) |
-| workflow-compare | 0 | 1.71 | 53388 | [logs](../results/incremental-prs/benchmark-workflow-compare/run.json) |
-| atac-cap | 0 | 28.05 | 570660 | [logs](../results/incremental-prs/benchmark-atac-cap/run.json) |
-| atac-cap-resume | 0 | 6.23 | 470920 | [logs](../results/incremental-prs/benchmark-atac-cap-resume/run.json) |
-| html-browser | 0 | 3.52 | 343460 | [logs](../results/incremental-prs/benchmark-html-browser/run.json) |
-| spp-cache-reproduction | 1 | 0.52 | 36112 | [logs](../results/incremental-prs/benchmark-spp-cache-reproduction/run.json) |
-| spp-cache-fixed-run | 0 | 50.97 | 54520 | [logs](../results/incremental-prs/benchmark-spp-cache-fixed-run/run.json) |
-| spp-cache-fixed-resume | 0 | 7.19 | 54628 | [logs](../results/incremental-prs/benchmark-spp-cache-fixed-resume/run.json) |
-| workflow-hardened-run | 0 | 30.58 | 507428 | [logs](../results/incremental-prs/benchmark-workflow-hardened-run/run.json) |
-| workflow-hardened-resume | 0 | 7.50 | 487636 | [logs](../results/incremental-prs/benchmark-workflow-hardened-resume/run.json) |
-| workflow-history-check | 0 | 0.21 | 35240 | [logs](../results/incremental-prs/benchmark-workflow-history-check/run.json) |
-| cache-acceptance | 0 | 0.04 | 13148 | [logs](../results/incremental-prs/benchmark-cache-acceptance/run.json) |
-| public-blocker | 2 | 0.18 | 35240 | [logs](../results/incremental-prs/benchmark-public-blocker/run.json) |
-| reject-different-depth | 2 | 0.20 | 34984 | [logs](../results/incremental-prs/benchmark-reject-different-depth/run.json) |
+| full-checks-2 | 0 | 83.78 | 696920 | logs (historical workspace: `../results/incremental-prs/benchmark-full-checks-2/run.json`) |
+| docker-regression | 0 | 329.68 | 687736 | logs (historical workspace: `../results/incremental-prs/benchmark-docker-regression/run.json`) |
+| dap-final | 0 | 239.82 | 55152 | logs (historical workspace: `../results/incremental-prs/benchmark-dap-final/run.json`) |
+| dap-resume | 0 | 5.01 | 52560 | logs (historical workspace: `../results/incremental-prs/benchmark-dap-resume/run.json`) |
+| retained-study | 0 | 388.33 | 55468 | logs (historical workspace: `../results/incremental-prs/benchmark-retained-study/run.json`) |
+| retained-comparison | 0 | 0.15 | 29476 | logs (historical workspace: `../results/incremental-prs/benchmark-retained-comparison/run.json`) |
+| atac-final | 0 | 30.35 | 576564 | logs (historical workspace: `../results/incremental-prs/benchmark-atac-final/run.json`) |
+| atac-resume | 0 | 7.37 | 524804 | logs (historical workspace: `../results/incremental-prs/benchmark-atac-resume/run.json`) |
+| nfcore-final | 0 | 113.20 | 1358404 | logs (historical workspace: `../results/incremental-prs/benchmark-nfcore-final/run.json`) |
+| nfcore-resume | 0 | 45.73 | 1612608 | logs (historical workspace: `../results/incremental-prs/benchmark-nfcore-resume/run.json`) |
+| workflow-compare | 0 | 1.71 | 53388 | logs (historical workspace: `../results/incremental-prs/benchmark-workflow-compare/run.json`) |
+| atac-cap | 0 | 28.05 | 570660 | logs (historical workspace: `../results/incremental-prs/benchmark-atac-cap/run.json`) |
+| atac-cap-resume | 0 | 6.23 | 470920 | logs (historical workspace: `../results/incremental-prs/benchmark-atac-cap-resume/run.json`) |
+| html-browser | 0 | 3.52 | 343460 | logs (historical workspace: `../results/incremental-prs/benchmark-html-browser/run.json`) |
+| spp-cache-reproduction | 1 | 0.52 | 36112 | logs (historical workspace: `../results/incremental-prs/benchmark-spp-cache-reproduction/run.json`) |
+| spp-cache-fixed-run | 0 | 50.97 | 54520 | logs (historical workspace: `../results/incremental-prs/benchmark-spp-cache-fixed-run/run.json`) |
+| spp-cache-fixed-resume | 0 | 7.19 | 54628 | logs (historical workspace: `../results/incremental-prs/benchmark-spp-cache-fixed-resume/run.json`) |
+| workflow-hardened-run | 0 | 30.58 | 507428 | logs (historical workspace: `../results/incremental-prs/benchmark-workflow-hardened-run/run.json`) |
+| workflow-hardened-resume | 0 | 7.50 | 487636 | logs (historical workspace: `../results/incremental-prs/benchmark-workflow-hardened-resume/run.json`) |
+| workflow-history-check | 0 | 0.21 | 35240 | logs (historical workspace: `../results/incremental-prs/benchmark-workflow-history-check/run.json`) |
+| cache-acceptance | 0 | 0.04 | 13148 | logs (historical workspace: `../results/incremental-prs/benchmark-cache-acceptance/run.json`) |
+| public-blocker | 2 | 0.18 | 35240 | logs (historical workspace: `../results/incremental-prs/benchmark-public-blocker/run.json`) |
+| reject-different-depth | 2 | 0.20 | 34984 | logs (historical workspace: `../results/incremental-prs/benchmark-reject-different-depth/run.json`) |
 
 Exit 1 for the SPP cache reproduction is the intentionally failing pre-fix assertion.
 Exit 2 for the public plan and unequal-depth comparison is required rejection behavior.
@@ -192,7 +200,7 @@ treatments). The saved acceptance script checks that derivation and zero tool re
 ## Final acceptance
 
 Final local SHA: `a93c59cd4ed7daeb99dcbca8fe783704e06746f3`. Git working tree is clean. Full final
-`pixi run checks` passed in 84.09 seconds; [final command receipt](../results/incremental-prs/benchmark-final-checks-3/run.json).
+`pixi run checks` passed in 84.09 seconds; final command receipt (historical workspace: `../results/incremental-prs/benchmark-final-checks-3/run.json`).
 Docker real-tool regression passed in 329.68 seconds. Final cache-only changes
 were subsequently verified with the full checks, real SPP and ATAC fresh/resume
 runs, and successful/corrupt invocation-history tests. Production modules and both
@@ -208,7 +216,7 @@ metadata decisions. UNRESOLVED: biological superiority of policies; no conclusio
 is inferred from synthetic success. Deferred metric domains are explicitly listed
 above. No production scientific setting changed and nothing was pushed.
 
-[Final repository state and complete changed-file inventory](../results/benchmarks/final-repository-state.json).
+Final repository state and complete changed-file inventory (historical workspace: `../results/benchmarks/final-repository-state.json`).
 
 Local commits:
 

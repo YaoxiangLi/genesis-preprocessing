@@ -1,5 +1,8 @@
 # Bulk ATAC design and bounded prototype specification
 
+> Design record. Check the [current task guides](../../docs/README.md) for
+> implemented commands and the [validation index](../README.md) for tested behavior.
+
 Status: experimental design authorized for a minimal isolated PE prototype. No DAP scientific default changes. Comparison sources are the actual unmodified checkouts: ENCODE ATAC `47ba8dff9c332e24b48e767303e9fcac98589cf2` (v2.2.3) and nf-core/atacseq `1a1dbe52ffbd82256c941a032b0e22abbd925b8a` (2.1.2). See the accompanying TSV for every choice and classification. Primary implementation evidence: ENCODE atac.wdl and src/encode_task_bam2ta.py; nf-core nextflow.config, conf/modules.config, workflows/atacseq.nf and assets/bamtools_filter_pe.json.
 
 These pipelines do not implement one universal ATAC policy. ENCODE defaults to MAPQ30, while the inspected nf-core default filter is MAPQ1, with additional NM, clipping, pairing and insert-span filters. nf-core marks duplicates with Picard then excludes them by default; it also merges replicates unless disabled. Genesis must not silently inherit these settings or confuse peak-overlap consensus with IDR. Human chrM/MT defaults omit plant plastids.

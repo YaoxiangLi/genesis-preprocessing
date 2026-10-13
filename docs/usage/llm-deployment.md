@@ -1,7 +1,7 @@
 # Optional private model services
 
-Genesis manages one vLLM Docker service per reviewed plan on an already authorized
-Linux node. A standalone server can run it beside preprocessing. A controller can
+Use these commands to start and monitor a private vLLM service on a Linux node
+where you already have Docker and GPU access. A standalone server can run it beside preprocessing. A controller can
 run independent services or replicas on several existing SSH workers and mix them
 with external providers. Multiple GPUs may serve one model **within one node**.
 Cross-host tensor/Ray clusters, cloud provisioning and login-node fallback are not
@@ -9,8 +9,8 @@ implemented.
 
 The current backend has offline lifecycle/command tests. Real local/remote GPU
 acceptance is **NOT RUN** in the published validation evidence. Supply and test your
-approved image, model, node and site allocation before operational use. No example
-claims a tested production model/image combination or actual available hardware.
+approved image, model, node and site allocation before operational use. Choose a model and image compatible with your hardware; the template contains
+placeholders, not a tested deployment configuration.
 
 ## Prerequisites and inspection
 

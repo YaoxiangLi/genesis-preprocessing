@@ -9,9 +9,8 @@ genesis schematic --workflow execution --output execution.svg
 genesis schematic --workflow atac --theme dark --animate --output atac-dark.svg
 ```
 
-The Genesis botanical style combines a seedling/DNA illustration, forest-green
-text, warm backgrounds and illustrated stage cards. Figures work offline and
-contain selectable text. Open the SVG in a browser or a vector editor such as
+Figures work offline and contain editable, selectable text. The bundled templates
+use green stage cards and workflow icons. Open the SVG in a browser or a vector editor such as
 [Inkscape](https://inkscape.org/) to inspect or export it for publication.
 
 ![Genesis ATAC schematic](../images/genesis_atac_schematic.svg)

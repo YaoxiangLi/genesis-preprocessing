@@ -20,6 +20,26 @@ def disk_bytes(root: Path) -> int:
     return sum(p.stat().st_size for p in root.rglob("*") if p.is_file() and not p.is_symlink())
 
 
+def group_rss(group: int) -> int | None:
+    """Linux process-group RSS sum; shared pages can be counted more than once."""
+    proc = Path("/proc")
+    if not proc.is_dir():
+        return None
+    total = 0
+    found = False
+    for entry in proc.iterdir():
+        if not entry.name.isdecimal():
+            continue
+        try:
+            fields = (entry / "stat").read_text().rsplit(")", 1)[1].split()
+            if int(fields[2]) == group:
+                found = True
+                total += int(fields[21]) * os.sysconf("SC_PAGE_SIZE")
+        except OSError, IndexError, ValueError:
+            continue  # A process can exit between enumeration and reading stat.
+    return total if found else None
+
+
 class Runtime:
     def __init__(self, plan: dict[str, Any], out: Path, *, resume: bool) -> None:
         self.plan, self.out, self.resume = plan, out.resolve(), resume
@@ -27,6 +47,13 @@ class Runtime:
         self.limits = plan["spec"]["limits"]
         self.events: list[dict[str, Any]] = []
         self.images: dict[str, Any] = {}
+        self.budget_path = self.out / "runtime-budget.json"
+        self.previous_seconds = (
+            json.loads(self.budget_path.read_text())["elapsed_seconds"]
+            if self.budget_path.exists()
+            else 0.0
+        )
+        self.last_check = -1.0
         self.out.mkdir(parents=True, exist_ok=True)
         lock = self.out / "experiment.json"
         if lock.exists():
@@ -43,8 +70,13 @@ class Runtime:
         self.check()
 
     def check(self) -> None:
-        if time.monotonic() - self.start > self.limits["seconds"]:
+        elapsed = self.previous_seconds + time.monotonic() - self.start
+        if elapsed > self.limits["seconds"]:
             raise ValueError("Campaign wall-time limit exceeded")
+        if elapsed - self.last_check < 1:
+            return
+        self.last_check = elapsed
+        write_json(self.budget_path, {"elapsed_seconds": elapsed})
         if disk_bytes(self.out) > self.limits["disk_bytes"]:
             raise ValueError("Campaign output-storage limit exceeded")
 
@@ -103,6 +135,7 @@ class Runtime:
         *,
         image: str | None = None,
         network: bool = False,
+        env: dict[str, str] | None = None,
     ) -> None:
         self.check()
         cwd.mkdir(parents=True, exist_ok=True)
@@ -186,13 +219,25 @@ class Runtime:
         }
         start = time.monotonic()
         status = "FAILED"
+        peak_rss: int | None = None
         with (log / "stdout").open("wb") as stdout, (log / "stderr").open("wb") as stderr:
             process = subprocess.Popen(
-                timed, cwd=cwd, stdout=stdout, stderr=stderr, start_new_session=True
+                timed,
+                cwd=cwd,
+                stdout=stdout,
+                stderr=stderr,
+                start_new_session=True,
+                env=None if env is None else os.environ | env,
             )
             try:
                 while process.poll() is None:
                     time.sleep(0.1)
+                    if image is None:
+                        measured = group_rss(process.pid)
+                        if measured is not None:
+                            peak_rss = max(peak_rss or 0, measured)
+                            if peak_rss > self.limits["memory_gb"] * 1024**3:
+                                raise ValueError("Native process-group memory budget exceeded")
                     self.check()
                 status = "COMPLETE" if process.returncode == 0 else "FAILED"
             except BaseException:
@@ -214,6 +259,11 @@ class Runtime:
                     status=status,
                     exit_status=process.returncode,
                     wall_seconds=time.monotonic() - start,
+                    sampled_process_group_peak_rss_bytes=peak_rss,
+                    memory_scope=(
+                        "Linux process-group RSS sum sampled about every 0.1 s; "
+                        "shared pages may be counted twice"
+                    ),
                 )
                 write_json(log / "run.json", record)
         if status != "COMPLETE":

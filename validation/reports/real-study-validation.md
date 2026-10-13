@@ -1,5 +1,9 @@
 # Real DAP/ATAC study validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 The complete prepared-study workflow passed real scientific processing, full artifact
 validation and the default reviewed export on seven synthetic libraries. Validation ran
 on **2026-10-13** from clean revision

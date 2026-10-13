@@ -1,5 +1,9 @@
 # Prepared-study workflow validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 This is the historical prepared-study implementation report. The [2026-10-13 real-tool follow-up](real-study-validation.md) adds complete DAP provenance and real DAP/ATAC study acceptance. Results below retain their original scope and revision.
 
 Date: 2026-10-11 UTC / 2026-10-10 America/New_York.

@@ -1,18 +1,18 @@
 # Validate, catalog and review published datasets
 
-Curation supports input metadata review and review of published DAP-seq or bulk
-ATAC results. The [prepared-study workflow](studies.md) registers inputs, compiles
-campaigns and collects results automatically. The explicit post-processing commands
-below also work independently. Curation adds artifact validation, a local scientific
-registry, reproducible QC assessments and manual review. Existing scientific settings,
-outputs, retries and resume behavior remain unchanged. There is no LLM dependency.
+Use these commands to check output files, find datasets in a local catalog and
+record metadata or QC reviews. Start with a completed DAP or bulk ATAC run. If you
+want to manage inputs and processing as well, follow the [study workflow](studies.md),
+which collects results into the same catalog automatically. No AI service is needed.
 
 Install with `pixi run install-all --install-cli` and put `~/.local/bin` on PATH
 (see [installation](../../README.md#install-and-check-your-environment)). Use
 `genesis` from any directory, or the command in the Python environment containing
 an installed wheel.
-All new command families support `--help` and `--json`. Successful commands emit
-JSON by default; search also supports `--format tsv`.
+These command families support `--help` and `--json`. Successful commands emit
+JSON by default; search also supports `--format tsv`. In the examples, replace
+`DATASET_ID` with an ID returned by `registry search` or `study init`. A sequencing
+accession is not necessarily the catalog ID.
 
 For registered studies, add `--scope inputs` to metadata/review commands before
 processing. The default `--scope results` preserves post-processing behavior.
@@ -21,7 +21,20 @@ carry that exact input approval forward with its original evidence. QC and expor
 eligibility always require result-specific decisions. See the
 [study guide](studies.md#2-review-input-metadata-when-needed) for the full recipe.
 
-## Five independent states
+## Try the workflow with synthetic data
+
+From the repository root, run the complete offline tutorial in a new directory:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python examples/curation/offline_workflow.py /tmp/genesis-curation-demo
+```
+
+It validates synthetic files, imports them, records demonstration reviews and exports
+a catalog. Expected output: `status: PASS`, two included datasets and six review
+decisions. Inspect its files to learn the formats before working with real studies.
+The tutorial uses a mock provider and requires no account.
+
+## Understand the dataset status
 
 | State | Owner | Meaning |
 | --- | --- | --- |

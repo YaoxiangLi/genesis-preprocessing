@@ -1,5 +1,9 @@
 # Unmodified upstream baseline verification
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Date: 2026-10-07. Host: Ubuntu 24.04.2, x86_64; Docker linux/amd64. Baseline SHA: **`4468c712e4c171b573e2ec2806fdc5327b5379e9`**, branch `main`.
 
 **Normal checks: PASS. Docker validation command: FAIL.** All 34 real workflow tasks completed and upstream output assertions passed, but the Docker test harness then failed to read a BAM because its helper container runs as UID 999 against a mode 0700 fixture directory owned by UID 1001. That failure was reproduced and preserved without changing permissions, source, tests or configuration. Independent host inspection verified all 15 BAMs and the numerical outputs. The original resume checks, which the failing harness did not reach, were invoked separately without altering their implementation and passed. Both additional stable resumes cached all 30 expected tasks.

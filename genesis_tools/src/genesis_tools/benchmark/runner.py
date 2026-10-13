@@ -446,12 +446,22 @@ def run(plan: dict[str, Any], out: Path, *, resume: bool = False) -> None:
         out == Path(a["path"]) or out in Path(a["path"]).parents for a in plan["assets"].values()
     ):
         raise ValueError("Campaign output must not contain original input assets")
-    runtime = Runtime(plan, out, resume=resume)
+    out.mkdir(parents=True, exist_ok=True)
     lock = out / ".running"
     descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     os.write(descriptor, str(os.getpid()).encode())
     os.close(descriptor)
+    try:
+        run_locked(plan, out, resume=resume)
+    finally:
+        lock.unlink(missing_ok=True)
+
+
+def run_locked(plan: dict[str, Any], out: Path, *, resume: bool) -> None:
+    """Initialize persistent state only while holding the campaign's writer lock."""
+    runtime = Runtime(plan, out, resume=resume)
     started = time.monotonic()
+    previous_affinity = os.sched_getaffinity(0) if hasattr(os, "sched_getaffinity") else None
     result: dict[str, Any] = {"status": "FAILED"}
     try:
         # Bound local Python work as well as Docker tasks; never increase existing limits.
@@ -459,11 +469,15 @@ def run(plan: dict[str, Any], out: Path, *, resume: bool = False) -> None:
         ceiling = runtime.limits["memory_gb"] * 1024**3
         if previous[0] != resource.RLIM_INFINITY:
             ceiling = min(ceiling, previous[0])
-        if plan["spec"]["adapter"] == "postalign":
+        if plan["spec"]["adapter"] in {"postalign", "methods"}:
             resource.setrlimit(resource.RLIMIT_AS, (ceiling, previous[1]))
         verify_reference(plan)
         if plan["spec"]["adapter"] == "postalign":
             values = postalign(runtime)
+        elif plan["spec"]["adapter"] == "methods":
+            from .methods import execute
+
+            values = execute(runtime)
         else:
             from .workflows import workflow
 
@@ -479,6 +493,7 @@ def run(plan: dict[str, Any], out: Path, *, resume: bool = False) -> None:
             else "PARTIAL_FAILURE",
             "results": values,
             "inputs_unchanged": unchanged,
+            "resume": resume,
         }
         write_json(out / "results.json", result)
         from .reporting import report
@@ -508,5 +523,6 @@ def run(plan: dict[str, Any], out: Path, *, resume: bool = False) -> None:
         write_json(attempts / f"{time.time_ns()}.json", result)
         write_json(out / "results.json", result)
         resource.setrlimit(resource.RLIMIT_AS, previous)
-        lock.unlink(missing_ok=True)
+        if previous_affinity is not None:
+            os.sched_setaffinity(0, previous_affinity)
     print(f"COMPLETE: {out / 'report.html'}")

@@ -1,144 +1,178 @@
-# Explicit plant preprocessing benchmarks
+# Compare preprocessing methods
 
-These commands are opt-in experiments. They do not alter the production Nextflow
-workflow or scientific defaults. Run from the repository with its locked Pixi
-and uv environments. Docker images must already exist at the recorded immutable
-identities; no image is pulled automatically.
+Use `genesis benchmark` to compare tools on the same reads and reference. It
+records the settings, input hashes, commands, failures, measurements and resource
+use for each method. Comparisons run separately from normal processing and do
+not change pipeline defaults.
 
-```bash
-pixi run benchmark fixture --out ../results/benchmarks/my-dap
-pixi run benchmark plan ../results/benchmarks/my-dap/experiment.toml
-pixi run benchmark run ../results/benchmarks/my-dap/experiment.toml --out ../results/benchmarks/my-run
-pixi run benchmark run ../results/benchmarks/my-dap/experiment.toml --out ../results/benchmarks/my-run --resume
-pixi run benchmark report ../results/benchmarks/my-run
-```
+Start with a small synthetic comparison to check your installation. For a real
+study, choose the evaluation data and scientific questions before looking at
+results. More mapped reads, higher FRiP or more peaks alone does not establish
+better biological accuracy.
 
-The default fixture contains SE, PE, a shared control, MAPQ boundary classes,
-unequal peak depths, duplicate flags and explicitly named organellar contigs.
-It tests computation, not plant biological quality. Duplicate flags are injected
-for known-answer testing, not a simulation of PCR or library complexity.
-The generated JSON dataset and TOML experiment are editable examples. Keep the
-originals: every changed input or policy defines a new campaign/output directory.
+## Run a small comparison
 
-## Experimental adapters
-
-| Adapter | Input / scope | Scientific boundary |
-|---|---|---|
-| `postalign` | Existing BAMs, DAP or PE ATAC; factorial MAPQ/duplicate experiments | Starts after alignment; cannot establish aligner accuracy or raw-workflow equivalence |
-| `genesis-atac` | Raw PE synthetic reads; clean pinned prototype checkout | Fixed duplicate exclusion, BAMPE, q=0.01, keep-dup all; synthetic only |
-| `nfcore-atac` | Raw PE reads; clean pinned nf-core/atacseq 2.1.2 checkout | Initial adapter supports BWA, explicit filtering and peak settings, no trimming; configured workflow, not untouched native defaults |
-
-Generate a raw ATAC fixture using `fixture --assay bulk-ATAC --adapter genesis-atac`
-(or `nfcore-atac`) with `--checkout /absolute/path/to/pinned/checkout` and `--out`.
-The original Genesis prototype commit is `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`.
-It is also integrated under `experimental/atac/`: use `--checkout "$PWD"` from
-a clean committed checkout to benchmark the integrated entry point;
-the nf-core checkout is `1a1dbe52ffbd82256c941a032b0e22abbd925b8a`.
-Container locks are in `locks/`. Local image IDs are immutable but require that
-exact local image or an independently verified exported image on another host;
-they are not portable registry download locations. No images are published here.
-Unknown process names fail closed instead of using upstream floating tags.
-
-Compare completed raw-workflow campaigns with identical source read bytes and
-reference sequence:
+Install Genesis first using the [project instructions](../README.md#install-and-check-your-environment).
+On Linux x86_64, install the separate, locked comparison environment:
 
 ```bash
-pixi run benchmark compare ../results/benchmarks/nfcore-run --against ../results/benchmarks/genesis-run
+pixi install --all --manifest-path benchmarks/environment/pixi.toml
 ```
 
-This computes common metrics against the selected reference run's fixed peaks
-and retains both policies. It does not force numerical agreement. The comparison
-is written under the candidate run without replacing either original result.
-Different input bytes, sampling seeds/caps, library sets or assemblies are rejected.
+This environment contains the candidate tools and Matplotlib. It does not change
+the pipeline environments. MACS2 uses a separate Python environment because its
+requirements differ from MACS3. The locked MACS2 source release is built locally;
+your host needs a C compiler. No Docker images are needed for this comparison.
 
-## Contracts and definitions
+```bash
+genesis benchmark fixture --adapter methods --assay bulk-ATAC --out /scratch/atac-benchmark-inputs
+genesis benchmark plan /scratch/atac-benchmark-inputs/experiment.json
+genesis benchmark run /scratch/atac-benchmark-inputs/experiment.json --out /scratch/atac-benchmark-results
+genesis benchmark report /scratch/atac-benchmark-results \
+  --plot-python benchmarks/environment/.pixi/envs/default/bin/python
+```
 
-Dataset JSON version 1 records reference FASTA (compressed and decompressed hashes),
-chromosome sizes, species/assembly/cultivar, organellar contig names, optional TSS/GTF
-assets, named libraries, biological replicate identity, layout, raw template count
-and explicit treatment/control edges. Every executable asset needs its SHA256.
-Controls are processed once per arm and shared by declared treatments. No implicit
-replicate pooling or sample-name matching is performed.
+Run these examples from the checkout and use new output directories. Open
+`report.html` in the result directory; no web server is needed. The `figures/`
+directory contains SVG, PDF and PNG plots, plus a checksum manifest. To test DAP,
+replace `--assay bulk-ATAC` with `--assay DAP-seq` and choose new directories.
 
-TOML version 1 records `adapter`, `comparison`, baseline arm, seed, parameter axes,
-resource limits and optional repetitions. Unknown fields are rejected.
-MAPQ zero means **no MAPQ cutoff**; positive cutoffs require both PE mates and exclude
-255 (unknown mapping quality). Duplicate exclusion is separate from marking:
-marked BAMs must retain the original alignment/read records, and are supplied as
-explicit input artifacts with marking-method provenance. BAM duplicate flags do
-not prove PCR origin. Caller `keep_dup` is a separate explicit setting.
-DAP retains organellar reads; the experimental ATAC policy excludes declared
-organelles. SPP accepts a separate independently aligned first-50-bp input; it does
-not shorten the primary analysis BAM. Failed SPP execution remains a failure.
+The DAP fixture includes SE and PE treatments and assigned controls. The ATAC
+fixture has one PE library. Both use a known synthetic genome and enriched regions.
+They test tool integration and known-answer measurements, not plant biological
+quality. The synthetic reads contain no adapters; trimming results from this
+fixture cannot establish which trimmer is better on real libraries.
 
-Read FRiP counts overlapping aligned read spans; fragment FRiP counts each accepted
-SE span or PE outer span once. Both own-peak and fixed-baseline-peak FRiP are reported.
-PE fragments require two primary mapped mates on the same contig. Fixed-region
-counts can count one fragment in multiple overlapping regions. Interval union
-Jaccard uses bases, not peak counts. Peak rank comparisons use reciprocal maximum
-overlap matches, with unmatched peaks reported. Correlations with constant or
-insufficient observations are undefined, not zero. TSS scoring uses explicit
-Tn5 cut positions, +/-2 kb windows, 100 bp flanks and a documented center/flank
-ratio; incomplete chromosome-edge windows are excluded. Native metrics remain
-separate. Synthetic edge TSSs can therefore yield undefined enrichment.
+## What is compared
 
-Post-alignment quantification preserves RPM and RPKM comparisons on fixed regions,
-including absolute changes: correlation alone cannot detect scaling changes.
-No universal plant QC threshold or composite quality score is assigned.
-Baseline peaks are a measure of change, not independent ground truth. No motif,
-polyploid homoeolog assignment, mappability-stratified accuracy, library-complexity
-estimation or biological-replicate concordance claim is made by this first release.
-Those require explicit annotations/independent data and additional metric adapters.
+The generated version 2 experiment changes one component at a time:
 
-## Reproducibility, resources and artifacts
+| Component | Baseline | Alternatives | Settings held fixed |
+| --- | --- | --- | --- |
+| Alignment | BWA-MEM2 | BWA, Bowtie2 | Raw reads, reference, downstream filtering and caller |
+| Adapter removal, ATAC only | Full reads | Cutadapt, fastp | Declared adapters; unrelated quality/length filters disabled |
+| Duplicate marking, ATAC only | samtools | Picard | Same input alignments and subsequent duplicate exclusion |
+| Peak calling | MACS3 | MACS2; Genrich for ATAC | Selected alignments and nominal q-value; caller models remain different |
+| Interval counting | Genesis/Python span counts | bedtools coverage | Identical BAM and fixed intervals; read ends counted separately |
 
-`experiment.json` records resolved inputs, SHA256s, source commit/recipe hashes,
-parameters and declared limits. Commands retain stdout/stderr, exit status,
-versions, wall time, GNU time output and available container memory/I/O counters.
-Container memory includes page cache; wrapper RSS is not container RSS. Workflow
-traces retain task status, resources, containers and actual command hashes.
-All attempted runs, including failures, remain available. Cached tasks require
-matching recipes, input hashes and output hashes. Stable resume is distinct from
-a cold run. No OS cache flushing or security configuration changes occur.
+DAP retains primary mapped alignments including MAPQ 0, uses each treatment's
+assigned control and MACS `keep_dup=1`. ATAC applies the production fragment
+selector: two proper primary mates, nuclear contigs, both MAPQs at least 30,
+no unknown MAPQ 255, and the declared duplicate policy. MACS uses BAMPE and
+`keep_dup=all` after selection. These fixture settings are explicit examples;
+real comparisons must document their own choices.
 
-Budgets limit campaign wall time, generated bytes, task CPUs/memory, downloads
-and matrix size. Tasks run serially; Nextflow concurrency is bounded. Post-alignment
-repetitions can use reproducibly shuffled order (`performance.random_order=true`);
-raw-workflow adapters currently reject that option. Repeated timings do not imply
-biological replicates or confidence intervals. Host load and warm caches affect
-runtime; compare those conditions separately. A raw workflow may set
-`parameters.template_cap` for deterministic nested paired subsampling, preserving
-complete original FASTQ records and recording selected-file hashes. Downloading
-still requires the full input file; subsampling is not a transfer shortcut.
+Bowtie2 uses `--very-sensitive-local`, with `-X 2000` for paired reads; ATAC also
+uses `--dovetail --no-mixed --no-discordant`. Genrich uses its ATAC cut-site mode
+and remaining defaults, including its minimum area criterion. Equal q-values
+do not make the callers statistically equivalent. Every executed argument is
+saved in the command records.
 
-Outputs include `results.json`, `metrics.json`, `metrics.tsv`, `counts.tsv`,
-`distributions.tsv`, `library-qc.tsv` (including controls), `resources.tsv`, native
-outputs and a self-contained filterable `report.html`. Undefined values include
-reasons. Full result JSON retains distribution and tool-native details.
+The `methods` adapter compares scientific components. It does not execute the
+complete Nextflow workflows or include FastQC, SPP, MultiQC and track generation
+in its timings. Use separate end-to-end acceptance to test those integrations.
+The [legacy benchmark guide](legacy.md) documents post-alignment policy matrices
+and pinned historical Genesis/nf-core adapters. Its `genesis-atac` adapter is the
+frozen prototype, not the current `genesis pipeline-atac` workflow.
 
-## Curated real plant panel (blocked, opt-in)
+## Read the measurements
 
-`catalog/arabidopsis-dap.toml` and `catalog/arabidopsis-atac.toml` are **blocked
-candidate plans**, not executable presets. `plan` returns exit 2 with the blocker;
-`fetch` refuses unresolved catalogs. Small official ENA metadata snapshots are
-committed; no real FASTQs or substitute references were downloaded.
+`metrics.tsv` includes a definition, version, unit, denominator and missing-value
+reason for every measurement. Blank/undefined is different from zero.
 
-GSE60141 candidates are FUS3 (SRR2926076), ABI5 (SRR2926841), and shared control
-SRR2926068. The repository uses R1 only for this control, although ENA declares its
-source library PAIRED. This needs an explicit projection decision, not silent mate
-removal. GSE85203 candidates are GSM2260231/SRR4000468 and
-GSM2260232/SRR4000469; reported replicate labels still require biological provenance.
-The exact TAIR10 FASTA, annotation release, input SHA256s and complete library
-metadata must be resolved before promotion to READY. An accession is not proof of
-biological replicate identity. Sorghum remains blocked on its exact requested
-reference; no assembly substitution is allowed.
+| Measurement | Definition | Interpretation |
+| --- | --- | --- |
+| Read retention | Retained primary mapped ends / raw ends | Yield under the declared selection policy |
+| Fragment retention | Complete same-contig spans / raw templates | Paired fragments and read ends have different denominators |
+| Own FRiP | Retained fragments overlapping any called peak / retained fragments | Depends on both read selection and the caller's peak set |
+| Fixed FRiP | The same ratio using baseline peaks | Measures change on fixed regions; baseline peaks are not truth |
+| Peak count, union bases, median width | Interval count, nonduplicated genomic coverage and median length | Report together; broad or numerous peaks are not automatically better |
+| Peak Jaccard | Base-pair intersection / union with baseline | Agreement with baseline, not independent accuracy |
+| Fixed-region count correlation | Pearson/Spearman of fragment counts on identical regions | Undefined for too few regions or zero variance |
+| TSS enrichment | Common strand-aware ±2 kb cut profile, center/background ratio | Only with explicit annotation; inspect its definition and eligible TSS count |
+| Synthetic alignment recovery | Exact original contig/start/end/strand among mapped or raw simulated ends | Includes ambiguous origins; trimming/soft clipping can alter endpoints without a wrong locus |
+| Synthetic peak precision/recall | Called intervals overlapping enriched regions / calls; enriched regions recovered / truth regions | Also report base-level precision/recall to expose width changes |
+| Independent count mismatches | Fixed intervals with different Python and bedtools read-end counts | Any mismatch fails the comparison; this checks arithmetic, not biological quality |
 
-`fetch` is a separate explicit command for READY manifests with public HTTPS URLs,
-exact byte sizes and SHA256s. It rejects credentials/query strings, size overruns,
-checksum mismatches and unresolved identities. ENA MD5 snapshots aid provenance
-but do not substitute for the manifest's SHA256 requirement.
+PE fragment counts use outer aligned spans. Read-end counts use unsplit alignment
+spans and count mates independently. One fragment may contribute to several
+individual overlapping regions; FRiP uses the region union and counts it once.
+Synthetic truth is available only when the fixture provides known origins.
+No universal plant pass/fail threshold or combined quality score is assigned.
 
-Sources: [ENA API](https://www.ebi.ac.uk/ena/portal/api/),
-[GSE60141](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60141),
-[GSE85203](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE85203),
-[nf-core/atacseq 2.1.2](https://github.com/nf-core/atacseq/tree/2.1.2).
+`resources.tsv` records command wall time, GNU-time CPU time and available memory
+measurements. Native memory is the largest sampled sum of process-group RSS;
+shared pages can be counted twice and short peaks can be missed. GNU-time maximum
+RSS is a separate process statistic. Container memory, when available, has a
+different scope and can include page cache. None is whole-host peak RAM.
+Index construction is reported separately from per-library work. CPU and wall
+time from a Docker launcher must not be interpreted as container CPU usage.
+
+Use three or more technical repetitions for timing comparisons, retaining each
+observation and the median/range. Randomize order with a fixed seed, report cache
+conditions, and keep biological replicates separate from timing repetitions.
+The runner does not flush the OS cache. A resumed task is not a fresh timing.
+
+## Prepare public or local inputs
+
+For files without a known SHA256, supply a publisher size/checksum and a saved
+source record in an acquisition manifest. The [plant comparison manifest](experiments/plant-methods-20261013/acquisition.json)
+is a complete example. Inspect its size and budgets before downloading:
+
+```bash
+genesis benchmark acquire sources.json --out /data/benchmark-sources --connections 4
+```
+
+Acquisition accepts public HTTPS and verifies the complete publisher MD5 or
+SHA256 before recording a measured SHA256 in `assets.lock.json`. An MD5 is a
+transport-integrity check, not authentication. Partial files remain untrusted.
+Rerunning the same command resumes exact HTTP byte ranges and verifies the whole
+file before use. Changed manifests need a new destination; failed checks never
+promote partial data. Cumulative transferred bytes and elapsed time survive retries.
+
+Use seeded nested samples to compare the same templates at multiple depths:
+
+```bash
+genesis benchmark sample --read1 /data/R1.fastq.gz --read2 /data/R2.fastq.gz \
+  --depth 1000000 --depth 5000000 --seed 60141 --out /scratch/depth-samples
+```
+
+For SE reads, omit `--read2`. The command scans and validates the full library,
+counts templates, selects the lowest seeded hashes and preserves original record
+order and mate pairing. It needs two passes and memory proportional to the largest
+sample. The smaller sample is contained in the larger one. Full-file download is
+still required; random subsampling does not reduce transfer size. `sampling.json`
+records source/output hashes, actual counts and selection rules. If a requested
+depth exceeds the library, the actual count is reported.
+
+A dataset manifest names the exact FASTA, decompressed FASTA hash, chromosome
+sizes, species/assembly, organellar contigs, optional TSS/GTF, libraries and
+controls. Assets stay outside Git. Copy the generated fixture's JSON structure
+and replace its synthetic identities and paths with measured source records.
+The [public panel preparer](experiments/plant-methods-20261013/prepare.py) shows
+how the recorded study inputs are compiled. An accession alone does not establish
+biological replication, tissue, TF-source species or the assayed DNA organism.
+
+## Resume and reproduce
+
+```bash
+genesis benchmark run /scratch/atac-benchmark-inputs/experiment.json \
+  --out /scratch/atac-benchmark-results --resume
+```
+
+Resume requires the same experiment identity and verifies cached input/output
+hashes. A changed tool, reference, policy or source recipe needs a new experiment
+directory. Retain `experiment.json`, `results.json`, the TSVs, command logs and
+figure manifest when sharing results. Keep source files separately if another
+server must rerun the analysis.
+
+Each experiment declares CPU, memory, time, output-storage, download and matrix
+limits. Those are per experiment: when running a panel, also track the total
+budget across preparation, indexes and all experiments. Do not launch the whole
+panel concurrently under a single experiment's resource allowance.
+
+Adopt a different package only after correctness checks pass and independent
+biological endpoints support equal or better quality on representative data.
+Then compare efficiency, preserve the old behavior as a reproducible baseline,
+update the workflow and rerun its end-to-end acceptance. If evidence is mixed or
+incomplete, retain the current default and report what remains unmeasured.

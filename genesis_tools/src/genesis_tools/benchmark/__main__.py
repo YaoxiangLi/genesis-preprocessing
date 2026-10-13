@@ -12,10 +12,27 @@ from .spec import load
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    sampling = commands.add_parser(
+        "sample", help="Validate and count FASTQs; make nested seeded depth samples"
+    )
+    sampling.add_argument("--read1", type=Path, required=True)
+    sampling.add_argument("--read2", type=Path)
+    sampling.add_argument("--depth", type=int, action="append", required=True)
+    sampling.add_argument("--seed", type=int, required=True)
+    sampling.add_argument("--max-seconds", type=int, default=172800)
+    sampling.add_argument("--out", type=Path, required=True)
+    acquisition = commands.add_parser(
+        "acquire", help="Verify publisher files and write a SHA256 asset lock"
+    )
+    acquisition.add_argument("manifest", type=Path)
+    acquisition.add_argument("--out", type=Path, required=True)
+    acquisition.add_argument("--connections", type=int, default=1, choices=range(1, 5))
     fixture = commands.add_parser("fixture")
     fixture.add_argument("--out", type=Path, required=True)
     fixture.add_argument(
-        "--adapter", choices=["postalign", "genesis-atac", "nfcore-atac"], default="postalign"
+        "--adapter",
+        choices=["postalign", "genesis-atac", "nfcore-atac", "methods"],
+        default="postalign",
     )
     fixture.add_argument("--checkout", type=Path)
     fixture.add_argument("--assay", choices=["DAP-seq", "bulk-ATAC"], default="DAP-seq")
@@ -30,9 +47,31 @@ def main() -> None:
         command.add_argument("results", type=Path)
         if name == "compare":
             command.add_argument("--against", type=Path)
+        else:
+            command.add_argument(
+                "--plot-python",
+                type=Path,
+                help="Optional isolated Python with Matplotlib; export SVG/PDF/PNG figures",
+            )
     args = parser.parse_args()
     try:
-        if args.command == "fixture":
+        if args.command == "sample":
+            from .reads import sample
+
+            print(
+                sample(
+                    [p for p in (args.read1, args.read2) if p is not None],
+                    args.out,
+                    depths=args.depth,
+                    seed=args.seed,
+                    seconds=args.max_seconds,
+                )
+            )
+        elif args.command == "acquire":
+            from .acquisition import acquire
+
+            print(acquire(args.manifest, args.out, connections=args.connections))
+        elif args.command == "fixture":
             from .fixture import create
 
             print(create(args.out, assay=args.assay, adapter=args.adapter, checkout=args.checkout))
@@ -57,6 +96,10 @@ def main() -> None:
             from .reporting import report
 
             report(args.results)
+            if getattr(args, "plot_python", None):
+                from .reporting import figures
+
+                figures(args.results, args.plot_python)
     except (ValueError, OSError, EOFError, KeyError) as error:
         parser.exit(2, f"Benchmark error: {error}\n")
 

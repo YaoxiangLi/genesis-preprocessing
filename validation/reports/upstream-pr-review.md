@@ -1,5 +1,9 @@
 # Lab repository PR review and merge validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Observed: 2026-10-13 UTC / 2026-10-12 America/New_York.
 
 All six open PRs in `kundajelab/genesis-preprocessing` were reviewed, tested and

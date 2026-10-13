@@ -1,5 +1,9 @@
 # Reference provenance validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Original baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9`. Combined validation HEAD before these edits: `65e522bb1f273d8c9145421fc40e63473aace7ad`; exact dirty source hashes, commands and full logs are retained under `results/incremental-prs/`. This change does not replace the original observations in audit/04.
 
 Implemented: reject reference-ID collisions; record SHA256 provenance for chromosome sizes and all five bwa-mem2 index products; revalidate content and generator identity on every invocation. Stop on unverified caches and preserve their contents. Stage the checked-out validator in the existing pinned tools container. No dependency manifest, lock, alignment parameter, duplicate policy or peak parameter changed.

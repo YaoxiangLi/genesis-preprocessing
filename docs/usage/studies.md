@@ -1,14 +1,13 @@
 # Process a prepared study from inputs to reviewed results
 
-`genesis study` connects prepared DAP-seq or bulk ATAC sample sheets to the existing
-controller, worker, validation, registry and review commands. Register inputs,
-optionally review descriptive metadata before execution, inspect an immutable
-campaign plan, run it, and collect results automatically. All of this works without
-AI. Existing `pipeline`, `pipeline-atac` and manually authored campaigns remain usable.
+Use `genesis study` when you want to track a study from its prepared sample sheet
+through processing, review and export. The commands save the input version, run
+jobs on your chosen workers and collect results into a catalog. AI is optional.
+For a single analysis without a catalog, use `genesis pipeline` or
+`genesis pipeline-atac` instead.
 
-This workflow starts with **prepared sheets and explicit references**. It does not
-discover studies, infer an assembly, choose controls, download papers, or generate
-scientific parameters from a title. See the [DAP](dapseq-reference.md) and
+Before starting, prepare the sample sheet and choose the reference, controls and
+analysis settings. See the [DAP](dapseq-reference.md) and
 [bulk ATAC](bulk-atac.md) guides for the existing input formats and output semantics.
 
 | Command | Purpose |
@@ -23,7 +22,8 @@ scientific parameters from a title. See the [DAP](dapseq-reference.md) and
 
 ## 1. Register prepared inputs
 
-Install with `pixi run install-all`. Keep study state and its SQLite registry on
+Complete the [command installation](../../README.md#install-and-check-your-environment)
+with `pixi run install-all --install-cli` and put `~/.local/bin` on PATH. Keep study state and its SQLite registry on
 controller-local storage outside the checkout. Workers need a clean checkout of
 the selected commit and their installed environment. Use absolute input paths.
 
@@ -42,8 +42,8 @@ The default registry is `STUDY_DIRECTORY/registry`; `init --registry /local/cata
 can select an existing/shared **controller-local** catalog. `init` prints dataset IDs
 and input versions. Record those IDs; an accession, a library and a job are different
 identities. A study's source namespace is `STUDY_ID:ASSAY`, so use a different study ID
-for unrelated sheets with overlapping library names. There is no manufactured result
-bundle, scientific measurement or approval: execution initially reports `NOT_RUN`.
+for unrelated sheets with overlapping library names. Execution initially reports `NOT_RUN`; processing and review provide the result
+and approval records later.
 
 Registration verifies current sample/reference requirements and snapshots source
 evidence and digests. At most 10,000 rows are accepted per study; stored documents

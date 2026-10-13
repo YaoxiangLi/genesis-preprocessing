@@ -1,5 +1,9 @@
 # README architecture overview validation
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
 Historical report: the README overview was subsequently removed at the project owner’s request.
 The linked image is retained at its original Git revision.
 

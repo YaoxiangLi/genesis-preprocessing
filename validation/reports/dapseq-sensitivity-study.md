@@ -1,5 +1,13 @@
 # Controlled DAP-seq sensitivity study
 
+> Validation record for the revision and date below. Use the
+> [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
+> paths identify the original test environment.
+
+This is a dated validation record. Files labeled “historical workspace” were
+retained on the original test machine and are not included in this checkout.
+Use the [validation index](../README.md) for current reproduction instructions.
+
 Date: 2026-10-07. **Computational fixture study completed; no production default changes.** The user explicitly selected retained fixtures and requested that biological limits be documented. These results support configurable sensitivity experiments, not a biological recommendation to discard ambiguous or duplicate reads.
 
 Genesis SHA: `af0bbfb50806babd78b8e9f88df2a55aab0a2a13`. Dedicated local branch: `validation/dapseq-sensitivity`; repository remains clean. No source, production tests, dependency manifests, credentials, Docker configuration or original inputs were changed. No push, sudo, new reference download, biological replicate pooling or trimming was performed.
@@ -18,11 +26,11 @@ The retained deterministic fixture at `results/multiqc/runs/docker-xbuym0la` con
 
 The SE control is reused unchanged within each policy branch; it is never pooled or counted twice in branch resource totals. All libraries are kept separate. The synthetic 2 Mb chr1 reference, 75-base reads, approximately 200 enriched treatment loci and 160–200 bp PE fragments come from `repo/tests/verify_pipeline.py:301` (seed 60141), with an exact repeated genomic block to produce MAPQ 0 alignments. These are layout/enrichment/repeat test cases, **not real DAP-seq targets or a realistic spectrum of sequencing errors/PCR effects**. Real Sorghum evaluation still requires its exact reference (audit/05); no synthetic FASTA is represented as that assembly.
 
-Input paths and SHA256 values for all 15 original BAM representations, raw FASTQs and reference files are in [preflight.json](../results/dapseq-sensitivity/preflight.json). Every original input was rehashed unchanged at completion. The existing alignments were reused, not realigned: this isolates post-alignment policy effects and excludes download/index/alignment cost from the timings.
+Input paths and SHA256 values for all 15 original BAM representations, raw FASTQs and reference files are in preflight.json (historical workspace: `../results/dapseq-sensitivity/preflight.json`). Every original input was rehashed unchanged at completion. The existing alignments were reused, not realigned: this isolates post-alignment policy effects and excludes download/index/alignment cost from the timings.
 
 ## Experimental design
 
-The full **3 × 3 factorial matrix** has nine branches, five libraries per branch, and 27 treatment/control peak analyses. [experiment-matrix.tsv](../results/dapseq-sensitivity/experiment-matrix.tsv) records every cell.
+The full **3 × 3 factorial matrix** has nine branches, five libraries per branch, and 27 treatment/control peak analyses. experiment-matrix.tsv (historical workspace: `../results/dapseq-sensitivity/experiment-matrix.tsv`) records every cell.
 
 | Factor | Levels | Fixed interpretation |
 |---|---|---|
@@ -57,11 +65,11 @@ Quantification uses the unmodified Genesis CLI with `--weighting primary`, indep
 
 All 27 treatment analyses called **200 peaks**. Marked-but-retained branches reproduce their same-MAPQ unmarked counterparts byte-for-byte for narrowPeak, coverage, own/fixed RPM and RPKM, and SPP numeric output. This checks actual payloads, not just peak counts.
 
-The baseline recreated the retained upstream-style fixture outputs exactly: narrowPeak decompressed bytes and both published quantification files match for all three treatments. SPP numeric fields also match for all five libraries. [baseline-comparison.json](../results/dapseq-sensitivity/baseline-comparison.json), [spp-baseline-comparison.json](../results/dapseq-sensitivity/spp-baseline-comparison.json), and [marked-retained-comparison.json](../results/dapseq-sensitivity/marked-retained-comparison.json) preserve these checks.
+The baseline recreated the retained upstream-style fixture outputs exactly: narrowPeak decompressed bytes and both published quantification files match for all three treatments. SPP numeric fields also match for all five libraries. baseline-comparison.json (historical workspace: `../results/dapseq-sensitivity/baseline-comparison.json`), spp-baseline-comparison.json (historical workspace: `../results/dapseq-sensitivity/spp-baseline-comparison.json`), and marked-retained-comparison.json (historical workspace: `../results/dapseq-sensitivity/marked-retained-comparison.json`) preserve these checks.
 
 ### Primary sensitivity results
 
-The table shows the distinct unmarked/excluded outcomes. All nine branches are in [treatment-summary.tsv](../results/dapseq-sensitivity/treatment-summary.tsv). Marked-retained results equal retained; MAPQ30 equals MAPQ10 in **every primary/SPP BAM and biological output payload**.
+The table shows the distinct unmarked/excluded outcomes. All nine branches are in treatment-summary.tsv (historical workspace: `../results/dapseq-sensitivity/treatment-summary.tsv`). Marked-retained results equal retained; MAPQ30 equals MAPQ10 in **every primary/SPP BAM and biological output payload**.
 
 | Treatment | Branch | Retained read ends | Peaks | Median width bp | Peak Jaccard | Peak-rank rho | Fixed RPM rho | Fixed RPKM rho | Fixed fragment/read-span FRiP |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -90,7 +98,7 @@ Without a MAPQ cutoff, duplicate exclusion removes 6,064/32,000 SE treatment rec
 | se_second | 0.004039 | 2.196% | 10.991% |
 | se_treatment | 0.003972 | 2.136% | 9.521% |
 
-Fixed-region baseline RPM ranges only from 4,687.5 to 4,750–4,781.25, because the generator assigns nearly equal read counts to every enriched locus. Consequently, the low RPM correlations after exclusion describe reordering of a very narrow distribution; they do **not** establish a comparable biological loss of signal. Absolute changes and [quantification-effects.tsv](../results/dapseq-sensitivity/quantification-effects.tsv) must accompany those correlations. MAPQ filtering alone leaves fixed-region RPM rank unchanged and raises RPM by approximately 0.313–0.317% through its reduced library-size denominator. A higher conditional FRiP after filtering is likewise not proof of improved biological quality.
+Fixed-region baseline RPM ranges only from 4,687.5 to 4,750–4,781.25, because the generator assigns nearly equal read counts to every enriched locus. Consequently, the low RPM correlations after exclusion describe reordering of a very narrow distribution; they do **not** establish a comparable biological loss of signal. Absolute changes and quantification-effects.tsv (historical workspace: `../results/dapseq-sensitivity/quantification-effects.tsv`) must accompany those correlations. MAPQ filtering alone leaves fixed-region RPM rank unchanged and raises RPM by approximately 0.313–0.317% through its reduced library-size denominator. A higher conditional FRiP after filtering is likewise not proof of improved biological quality.
 
 ### SPP read-length and duplicate sensitivity
 
@@ -108,13 +116,13 @@ The leading treatment estimates stay 180–182 bp and NSC is unchanged, while RS
 
 Raw control values expose a numerical/interpretive failure mode: baseline PE control RSC is `8.489226e+14`, with phantom and minimum correlations both printed as `0.004307489`, so its denominator is near zero at floating precision. SE control RSC is `-7.333333` because its phantom correlation is below the recorded minimum-shift correlation. These values are preserved, not coerced to zero or labeled biological passes. The SPP tool exited successfully and even emitted its own QualityTag in some cases; neither is adopted as a DAP-seq acceptance criterion.
 
-Duplicate exclusion on the separately marked SPP50 single-R1 representation changes treatment NSC to 341.4615 (PE), 285.9785 (SE second), and 404.0152 (SE treatment), while leading shifts remain 180/180/182. This includes removal of single-end redundancy even when primary PE fragment duplication is much lower. It must not be interpreted as an effect of removing only the 345 PE duplicate fragments. All nine branches and both controls remain in [spp.tsv](../results/dapseq-sensitivity/spp.tsv).
+Duplicate exclusion on the separately marked SPP50 single-R1 representation changes treatment NSC to 341.4615 (PE), 285.9785 (SE second), and 404.0152 (SE treatment), while leading shifts remain 180/180/182. This includes removal of single-end redundancy even when primary PE fragment duplication is much lower. It must not be interpreted as an effect of removing only the 345 PE duplicate fragments. All nine branches and both controls remain in spp.tsv (historical workspace: `../results/dapseq-sensitivity/spp.tsv`).
 
 ### Adapter and motif evidence
 
-All seven FastQC ZIPs contain an Adapter Content module with maximum reported adapter percentage **0.0**, PASS status and no overrepresented-sequence rows. [adapter-evidence.tsv](../results/dapseq-sensitivity/adapter-evidence.tsv) records the evidence. No trimming was tested: there is no adapter-positive case here. This does not demonstrate that real DAP-seq libraries never need adapter removal; trimming sensitivity remains conditional on actual adapter evidence. Raw FASTQs remain byte-identical.
+All seven FastQC ZIPs contain an Adapter Content module with maximum reported adapter percentage **0.0**, PASS status and no overrepresented-sequence rows. adapter-evidence.tsv (historical workspace: `../results/dapseq-sensitivity/adapter-evidence.tsv`) records the evidence. No trimming was tested: there is no adapter-positive case here. This does not demonstrate that real DAP-seq libraries never need adapter removal; trimming sensitivity remains conditional on actual adapter evidence. Raw FASTQs remain byte-identical.
 
-Motif QC is **NOT APPLICABLE to these fixtures**: there are enough artificial peaks, but no known TF target, TF family or planted binding motif. The reference is random sequence and the enriched coordinates were chosen without motif biology. Running a discovery program and retrospectively assigning a TF would be misleading. No existing fast-motif proposal was found in this workspace's audit/design/reports. [motif-status.tsv](../results/dapseq-sensitivity/motif-status.tsv) records the missing TF identity for each treatment; no motif program failure or absence is used to call a dataset bad.
+Motif QC is **NOT APPLICABLE to these fixtures**: there are enough artificial peaks, but no known TF target, TF family or planted binding motif. The reference is random sequence and the enriched coordinates were chosen without motif biology. Running a discovery program and retrospectively assigning a TF would be misleading. No existing fast-motif proposal was found in this workspace's audit/design/reports. motif-status.tsv (historical workspace: `../results/dapseq-sensitivity/motif-status.tsv`) records the missing TF identity for each treatment; no motif program failure or absence is used to call a dataset bad.
 
 For a future exact-reference real-data study, a reasonable fast candidate is [STREME](https://meme-suite.org/meme/doc/streme.html): use identically defined peak windows, reproducible ranking/tie handling, a fixed seed, declared background/control sequences, a held-out enrichment evaluation and a pinned plant motif-database release for TF-family comparison. Pin the executable/version before running it and preserve all motifs/scores, not only the expected match. That prospective protocol was **not run or validated** here. Motif-family enrichment would remain supportive evidence, with alternative explanations and failures reported rather than automatic quality rejection.
 
@@ -145,7 +153,7 @@ Environment: Pixi 0.70.1, project CPython 3.14.5, pysam 0.24.1 / HTSlib 1.24; pr
 | tracks | `kundajelab/dap_seq_tracks@sha256:e6dd6ceb79e50fc6db83e9346a920e51fd2bf0dcffbc18c9305b1b6e8c806390` |
 | tools | `kundajelab/genesis_tools@sha256:31458d4a6a83541f463ea4b0e692a0afc65c6df441f70c3f71fc4ccf1a11eb59` |
 
-MACS3 3.0.5; deepTools 3.5.6; samtools 1.24; R SPP 1.16.0. Image IDs/platform and RepoDigests are in [images.json](../results/dapseq-sensitivity/images.json); exact version stdout/stderr is under `commands/versions-*`. The Genesis quantifier comes from the pinned project tools image and reproduced published baseline values. SPP script and original module hashes are recorded with every applicable invocation. Containers mount the workspace read-only with only this study's results directory writable, run as the current user, and are limited to two CPUs/4 GiB; no privileged mode or Docker configuration changes.
+MACS3 3.0.5; deepTools 3.5.6; samtools 1.24; R SPP 1.16.0. Image IDs/platform and RepoDigests are in images.json (historical workspace: `../results/dapseq-sensitivity/images.json`); exact version stdout/stderr is under `commands/versions-*`. The Genesis quantifier comes from the pinned project tools image and reproduced published baseline values. SPP script and original module hashes are recorded with every applicable invocation. Containers mount the workspace read-only with only this study's results directory writable, run as the current user, and are limited to two CPUs/4 GiB; no privileged mode or Docker configuration changes.
 
 Reproduction entry points, run from the validation workspace (fresh experimental output directory required to preserve this evidence):
 
@@ -160,7 +168,7 @@ python scratch/dapseq-sensitivity/quant_effects.py
 python scratch/dapseq-sensitivity/verify.py
 ```
 
-The locked project environment and prior isolated Picard environment must already exist; image acquisition, if needed elsewhere, must use the digest references above. No floating tool/container versions are required. Each actual invocation has exact argv, cwd, git SHA, input hashes, UTC timestamp, wall time, full stdout/stderr, exit code and GNU-time data under `results/dapseq-sensitivity/commands/<label>/`. [commands.tsv](../results/dapseq-sensitivity/commands.tsv) indexes these. `filter-provenance.json` captures Python filtering versions/inputs/order. Final [checksums.json](../results/dapseq-sensitivity/checksums.json) covers scripts, manifests, summaries and generated outputs.
+The locked project environment and prior isolated Picard environment must already exist; image acquisition, if needed elsewhere, must use the digest references above. No floating tool/container versions are required. Each actual invocation has exact argv, cwd, git SHA, input hashes, UTC timestamp, wall time, full stdout/stderr, exit code and GNU-time data under `results/dapseq-sensitivity/commands/<label>/`. commands.tsv (historical workspace: `../results/dapseq-sensitivity/commands.tsv`) indexes these. `filter-provenance.json` captures Python filtering versions/inputs/order. Final checksums.json (historical workspace: `../results/dapseq-sensitivity/checksums.json`) covers scripts, manifests, summaries and generated outputs.
 
 ## Recommendations — interpretation, not production edits
 
@@ -175,8 +183,8 @@ No policy receives “change default.” Plant/DAP-seq QC thresholds remain **UN
 
 ## Acceptance, warnings and files
 
-**Passed:** all nine branches, 45 library cases, 27 treatment peak/quantification cases, 45 SPP50 and five full75 SPP diagnostics completed. All 172 recorded invocations and all 50 underlying Rscript calls exited zero. Original inputs and workflow sources remain unchanged; recreated baseline and marked-retained equivalence passed at payload level. Independent RPM calculations, PE completeness, no remaining duplicate flags in excluded outputs, MAPQ10/30 equivalence and deterministic metric-helper checks passed. See [acceptance.json](../results/dapseq-sensitivity/acceptance.json).
+**Passed:** all nine branches, 45 library cases, 27 treatment peak/quantification cases, 45 SPP50 and five full75 SPP diagnostics completed. All 172 recorded invocations and all 50 underlying Rscript calls exited zero. Original inputs and workflow sources remain unchanged; recreated baseline and marked-retained equivalence passed at payload level. Independent RPM calculations, PE completeness, no remaining duplicate flags in excluded outputs, MAPQ10/30 equivalence and deterministic metric-helper checks passed. See acceptance.json (historical workspace: `../results/dapseq-sensitivity/acceptance.json`).
 
-**Warnings/ambiguity retained:** ten Picard optical read-name parsing warnings (one per representation) are in [warnings.tsv](../results/dapseq-sensitivity/warnings.tsv); optical-duplicate zeros are not validated. Successful SPP exits do not resolve negative/near-singular control RSC values. No command failure was patched, retried into invisibility, or converted into a biological judgment. No production test was weakened. Full pipeline checks were not rerun because no production source/dependency/test code changed; this report claims only the executed experiment and content checks.
+**Warnings/ambiguity retained:** ten Picard optical read-name parsing warnings (one per representation) are in warnings.tsv (historical workspace: `../results/dapseq-sensitivity/warnings.tsv`); optical-duplicate zeros are not validated. Successful SPP exits do not resolve negative/near-singular control RSC values. No command failure was patched, retried into invisibility, or converted into a biological judgment. No production test was weakened. Full pipeline checks were not rerun because no production source/dependency/test code changed; this report claims only the executed experiment and content checks.
 
 **Files added:** this report; compact summary TSVs and raw evidence under `results/dapseq-sensitivity/`; standalone experiment scripts under `scratch/dapseq-sensitivity/`. The main summaries are treatment-summary.tsv, library-metrics.tsv, mapq-distributions.tsv, spp.tsv, peak-widths.tsv, quantification-effects.tsv and branch-resources.tsv. Controls do not receive treatment peak calls/quantification; their library/SPP metrics and one-per-branch cost are retained. No original audit or production file was modified. No commit or push was requested or performed for this experiment.
