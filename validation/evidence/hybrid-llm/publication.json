@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "verified_utc": "2026-10-09T23:52:49.161618+00:00",
+  "repository": "YaoxiangLi/genesis-preprocessing",
+  "branch": "main",
+  "published_commit": "eef9d975d9f15aec94bd7d005e5f9549da5c54e3",
+  "git_remote_commit": "eef9d975d9f15aec94bd7d005e5f9549da5c54e3",
+  "github_api_commit": "eef9d975d9f15aec94bd7d005e5f9549da5c54e3",
+  "readme_blob": "316e94707dc0da6d5784c22e37e4f475f7eae686",
+  "readme_url": "https://github.com/YaoxiangLi/genesis-preprocessing/blob/main/README.md",
+  "report_blob": "e32ff8f6b6d3c56e1f8e450a40c994a5b643a36f",
+  "report_url": "https://github.com/YaoxiangLi/genesis-preprocessing/blob/main/validation/reports/hybrid-llm-validation.md",
+  "note": "This receipt will be included in a subsequent documentation-only commit; implementation and README content remain unchanged."
+}

@@ -1,99 +1,211 @@
-# Genesis plant DAP-seq pipeline
+# Genesis plant sequencing and curation
 
-Genesis is a Nextflow DSL2 pipeline for single-end and paired-end plant DAP-seq.
-It downloads libraries, derives reference indexes and chromosome sizes, aligns
-with bwa-mem2, runs SPP and alignment QC, generates deepTools coverage tracks,
-calls MACS3 peaks against each treatment's assigned control, and quantifies peaks.
+Genesis processes plant **DAP-seq** and **paired-end bulk ATAC-seq** into QC reports,
+peaks and signal tracks. It also validates artifacts, catalogs scientific provenance,
+supports human review, and optionally uses external APIs or private LLM services for
+metadata proposals and failure explanations. Use one server or a controller with
+independent authenticated workers. Nextflow remains responsible for scientific computation.
 
-| Sample sheet | Layout | Libraries | Treatments |
-| --- | --- | ---: | ---: |
-| `01-Arabidopsis_thaliana-GSE60141.tsv` | SE | 936 | 934 |
-| `15-Arabidopsis_lyrata-PRJNA1177479.tsv` | PE | 405 | 378 |
-| `16-Arabidopsis_thaliana-PRJNA1177481.tsv` | PE | 800 | 748 |
-| `24-Sorghum_bicolor-PRJNA1177471.tsv` | PE | 142 | 134 |
+## Architecture and Current Capabilities
 
-The six-column sheets preserve the original sample IDs, URLs, and control
-assignments. The retired Bash pipeline and metadata script are available in Git
-history. Stock Bowtie 1 comparison modules remain available in `modules/`, but
-are not imported or run by the main workflow.
+Start with a prepared study: register inputs, optionally review metadata, inspect a
+campaign plan, run scientific processing, and collect validated results for review
+and export. Run on one server or distribute independent datasets across authenticated
+workers. The standalone pipeline commands remain available.
 
-## Install and run
+[![Genesis architecture: plant reads and explicit references enter DAP-seq or bulk ATAC-seq pipelines; results feed validation, registry, human review and reviewed export. Optional AI exchanges evidence and proposals; a controller supports local or SSH workers.](docs/images/genesis_architecture_overview.svg)](docs/images/genesis_architecture_overview.svg)
 
-Install [Pixi](https://pixi.sh/), then install the project and its Python tools:
+**AI is optional.** Models suggest metadata and explanations; deterministic checks
+and accountable human review govern changes. Core processing and manual curation
+work without AI. [Open the full-size, editable diagram](docs/images/genesis_architecture_overview.svg).
+
+**Implemented** means code is available. **Validated** names the evidence and its
+limits. **Planned** identifies remaining validation, not completed work. Evidence
+snapshot: **2026-10-10**.
+
+| Capability | Implemented | Validated | Planned / next validation |
+| --- | --- | --- | --- |
+| [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Historical Docker runs and public ATAC subsets; current regressions ([scientific evidence](validation/reports/supported-atac-execution-validation.md), [current checks](validation/reports/hybrid-llm-validation.md)) | — |
+| [Single-cell ATAC fragments](docs/usage/scatac.md) | Inventory, ingestion, replicate-preserving pseudobulks and model exports | Deterministic fixtures, pinned peak/track tools and both model loaders ([evidence](validation/reports/scatac-delivery-validation.md)) | Reference/annotation resolution and reviewed Arabidopsis/Sorghum release |
+| [Controller / workers](docs/usage/execution.md) | Yes | Local isolation, retries, recovery and deployment-profile parsing ([evidence](validation/reports/supported-atac-execution-validation.md)) | Live SSH / scheduler site acceptance |
+| [Complete prepared-study workflow](docs/usage/studies.md) | Yes | Input review → immutable plans → local workers → automatic collection → reviewed export, with synthetic output writers and real bigWig validation ([evidence](validation/reports/study-workflow-validation.md)) | Live SSH and real sequencing acceptance through the new coordinator |
+| [Validation / registry](docs/usage/curation.md) | Yes | Binary formats, provenance, migrations, backup/restore and installed-package checks ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
+| [QC / human review / export](docs/usage/curation.md) | Yes | Offline workflow, stale-decision rejection, export eligibility and immutable history ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
+| [Metadata / AI assistant / diagnosis](docs/usage/ai-providers.md) | Yes | Synthetic cases, mock providers and fake HTTP; real biological accuracy **not evaluated** ([evidence](validation/reports/hybrid-llm-validation.md)) | Live provider acceptance and expert-reviewed metadata evaluation |
+| [Private LLM deployment](docs/usage/llm-deployment.md) | Yes | Offline lifecycle, resource conflicts, ownership and failure simulations; live GPU/SSH **not run** ([evidence](validation/reports/hybrid-llm-validation.md)) | Real GPU / SSH deployment acceptance |
+
+## Contents
+
+- [Architecture and Current Capabilities](#architecture-and-current-capabilities)
+- [DAP-seq reference and upgrade](#dap-seq-reference-and-upgrade)
+- [Install and check your environment](#install-and-check-your-environment)
+- [Try the complete offline tutorial](#try-the-complete-offline-tutorial)
+- [Run a prepared study from inputs to reviewed results](#run-a-prepared-study-from-inputs-to-reviewed-results)
+- [Process DAP-seq](#process-dap-seq)
+- [Process bulk ATAC-seq](#process-bulk-atac-seq)
+- [Run on a cluster or independent workers](#run-on-a-cluster-or-independent-workers)
+- [Validate inputs and artifacts](#validate-inputs-and-artifacts)
+- [Import, search and back up the registry](#import-search-and-back-up-the-registry)
+- [Assess QC, review and export](#assess-qc-review-and-export)
+- [Configure mock, API or private providers](#configure-mock-api-or-private-providers)
+- [Harmonize metadata with evidence](#harmonize-metadata-with-evidence)
+- [Ask read-only catalog questions](#ask-read-only-catalog-questions)
+- [Inspect and deploy a private model](#inspect-and-deploy-a-private-model)
+- [Diagnose a failed job](#diagnose-a-failed-job)
+- [Create figures and benchmark methods](#create-figures-and-benchmark-methods)
+- [Validation, troubleshooting and rollback](#validation-troubleshooting-and-rollback)
+
+## DAP-seq reference and upgrade
+
+The original DAP-seq documentation remains in the detailed guide. Its sample
+counts, control rules, scientific choices, output definitions and resource guidance
+are preserved alongside the newer functionality. Use these links for the full detail:
+
+<a id="install-and-run"></a>
+<a id="sample-sheet"></a>
+<a id="analysis-choices"></a>
+<a id="outputs-and-resources"></a>
+<a id="environments-and-docker-builds"></a>
+<a id="verification"></a>
+
+| Original README section | Current detailed instructions |
+| --- | --- |
+| Install and run | [Profiles, references, workspace and resume](docs/usage/dapseq-reference.md#install-and-run) |
+| Sample sheet | [Six columns, sample counts, mates and assigned controls](docs/usage/dapseq-reference.md#sample-sheet) |
+| Analysis choices | [BWA, SPP, MACS3, duplicates, tracks, RPM and RPKM](docs/usage/dapseq-reference.md#analysis-choices) |
+| Outputs and resources | [Published files, FastQC/MultiQC and task resources](docs/usage/dapseq-reference.md#outputs-and-resources) |
+| Environments and Docker builds | [Pixi/uv, pinned images and explicit builds](docs/usage/dapseq-reference.md#environments-and-docker-builds) |
+| Verification | [Checks, real-tool fixtures and limits of the evidence](docs/usage/dapseq-reference.md#verification) |
+
+**Upgrading an existing DAP checkout?** Read the
+[upgrade notes](docs/usage/dapseq-reference.md#upgrade-from-the-dap-only-release)
+for explicit execution profiles, reference-cache verification and the added QC
+reports. The [original lab README at `fb60096`](docs/history/dapseq-readme-fb60096.md)
+is also preserved as a dated archive, including its historical validation results.
+
+## Install and check your environment
+
+Install [Pixi](https://pixi.sh/) and make your chosen container runtime available to
+your existing user. Standalone scientific execution defaults to local Docker.
+Do not run installation or analysis as root.
 
 ```bash
+git clone https://github.com/kundajelab/genesis-preprocessing.git
+cd genesis-preprocessing
 pixi run install-all
+pixi run genesis doctor
+pixi run genesis --help
 ```
 
-Place each sheet's gzipped reference FASTA under `references/`, using the exact
-basename in `reference_fasta`. Reference genomes are not downloaded automatically.
-Nextflow builds missing chromosome-size files and bwa-mem2 indexes once per
-reference, and copies them back to that directory. The first resume after generating references can rerun downstream
-tasks as inputs move to their published cache paths; subsequent resumes reuse
-those task results. Existing nonempty size files
-and complete indexes are reused. Remove derived files and use a fresh work
-directory when replacing a reference; cached reference products are not checked
-against the FASTA's contents.
+Pixi supplies Nextflow and uv; the Python project uses Python **3.14 or newer**.
+`pixi run genesis` invokes the existing controller CLI. An installed Python wheel
+also exposes `genesis` and the existing `genesis-tools` task helpers. Curation and
+HTTP inference have no torch/vLLM dependency. Private model serving uses a separate
+pinned runtime and an already available Docker image.
 
-Run exactly one sheet per invocation:
+Commands below run from this checkout. Replace uppercase IDs/hashes and example
+paths with recorded values. Curation/AI commands print JSON by default and accept
+`--json`; use `--help` on each subcommand. First-time environment installation can
+need network access; the subsequent offline tutorial does not.
+
+**Continuing development on another server?** Follow the
+[development handoff](docs/development.md) for a fresh clone, environment setup,
+checks, implementation context and the boundary between Git and local run data.
+
+## Try the complete offline tutorial
+
+This creates two tiny, explicitly synthetic DAP/ATAC artifact catalogs, verifies
+their files, imports them, proposes metadata with a mock provider, demonstrates
+individual review/apply, assesses QC, exports the selected catalog, diagnoses a
+synthetic log, and checks backup/restore. It runs no sequencing pipeline or model.
+It approves only the two newly created synthetic fixtures, with that limitation
+recorded in every decision.
 
 ```bash
-# Show wrapper options.
-pixi run pipeline --help
-
-
-# Run test data with default profile: inferred from the environment (see below).
-pixi run pipeline test-Sorghum_bicolor-PRJNA1177471.tsv
-
-# Local execution with micromamba/conda environments.
-pixi run pipeline -p local,conda 15-Arabidopsis_lyrata-PRJNA1177479.tsv
-
-# Continue a previous run using Nextflow's task cache.
-pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -resume
-
-# Submit tasks from Sherlock using accessible container images.
-pixi run pipeline -p sherlock,apptainer 15-Arabidopsis_lyrata-PRJNA1177479.tsv
+pixi run uv run --frozen --project genesis_tools python \
+  examples/curation/offline_workflow.py /tmp/genesis-curation-demo
+pixi run genesis registry search /tmp/genesis-curation-demo/catalog
 ```
 
-Run through the root Pixi environment so Nextflow can find micromamba. Without
-`-p`/`--profile` (or a Nextflow `-profile`), `scripts/get-default-profile.sh`
-chooses `sherlock,apptainer` where `sbatch` exists, else `local,docker` where
-`docker` exists, else `local,conda`. Choose an executor and a software
-environment together. `sherlock` uses SLURM and the
-`normal` queue; select another queue with `--slurm_queue`. Locally built images
-must be published with approval, or made available on the cluster, before
-Sherlock's Apptainer can use them. Cluster work, cache, reference, and output
-paths must be visible to compute nodes and writable by the user.
-
-Each run lives in `WORKSPACE/RUN_NAME/`, where `RUN_NAME` defaults to the sheet's
-basename without `.tsv` (override with `-n`/`--run-name`). The default workspace,
-from `scripts/get-default-workspace.sh`, is `$SCRATCH/workspace` when `$SCRATCH`
-is set and `workspace/` in this repository otherwise; override it with
-`-w`/`--workspace`. A run folder contains:
-
-- `work/`: the Nextflow work directory.
-- `output/`: published results.
-- `trace/`: timestamped execution report, timeline, trace, and DAG files.
-- `.nextflow.log` and `.nextflow/`: the wrapper launches Nextflow from the run
-  folder, so `-resume` uses that run's history.
-
-Use `--references /absolute/path` to choose the reference location (default
-`references/` in this repository). Relative paths in Nextflow arguments resolve
-against the run folder. Nextflow retains intermediate FASTQs and BAMs under its
-work directory for caching; retain it for `-resume` and clean it only when those
-intermediates are no longer needed. Task scripts run with `bash -euxo pipefail`,
-so each task's `.command.log` records the commands it ran.
+Choose a **new** directory each time. Expect `status: PASS`, two selected/included
+datasets, six demonstration decisions and files `reviewed.json`, `diagnosis.json`,
+`backup.sqlite`, and `acceptance.json`. The reported pipeline/live-inference status
+is `NOT RUN`. To create fixtures for a step-by-step manual exercise instead:
 
 ```bash
-# Path to the most recent execution report (optional argument: WORKSPACE).
-pixi run get-latest-report
-# Follow a task's log by the hash Nextflow prints, hiding `set -x` lines.
-pixi run watch-log ab/123456
+pixi run uv run --frozen --project genesis_tools python \
+  examples/curation/create_demo.py /tmp/genesis-manual-demo
+pixi run genesis registry init /tmp/genesis-manual-demo/catalog
+pixi run genesis registry import /tmp/genesis-manual-demo/catalog \
+  --bundle /tmp/genesis-manual-demo/bundle.json
 ```
 
-## Sample sheet
+The workflow script is a runnable example of the commands described below.
+Synthetic structural correctness is not evidence of real biological quality.
 
-The header and column order are fixed:
+## Run a prepared study from inputs to reviewed results
+
+The `study` commands join input registration, optional metadata review, campaign
+execution and automatic result collection. Begin with an existing valid sample
+sheet and explicit references. Install Genesis on each selected worker and keep
+its checkout clean at the configured full Git SHA.
+
+Copy [the worker template](examples/curation/study-execution.local.json) outside
+the checkout, then replace its commit placeholder and every example path with
+your server's values. `git rev-parse HEAD` gives the revision to pin. Choose
+controller-local storage for the study directory and registry.
+
+```bash
+cp examples/curation/study-execution.local.json /local/study-execution.json
+pixi run genesis study init /local/studies/atac-A --study-id atac-A --assay bulk-ATAC \
+  --sheet /data/atac-A.tsv --references /data/references.json
+pixi run genesis study plan /local/studies/atac-A \
+  --execution /local/study-execution.json --output /local/atac-plan-v1.json
+# Inspect the plan's status, blockers, jobs, paths and commands before running.
+pixi run genesis study run /local/studies/atac-A --plan /local/atac-plan-v1.json
+pixi run genesis study status /local/studies/atac-A
+# Reconnect after a controller restart; existing attempts are retained.
+pixi run genesis study resume /local/studies/atac-A
+```
+
+For DAP use `--assay DAP-seq --sheet /data/dap.tsv --references /data/references`
+at registration; planning and execution use the same interface. ATAC libraries
+retain every technical lane. DAP treatments sharing a control run together and
+remain separate library records. SSH workers use explicit input-path mappings
+and already staged data; the controller transfers only bounded documents and receipts.
+
+| Functionality | Command and instructions |
+| --- | --- |
+| Register or revise inputs | `study init`; [input versions and identities](docs/usage/studies.md#1-register-prepared-inputs) |
+| Review metadata before execution | Existing `metadata` / `review` commands with `--scope inputs`; [individual review/apply](docs/usage/studies.md#2-review-input-metadata-when-needed) |
+| Compile a campaign | `study plan`; [worker configuration and plan inspection](docs/usage/studies.md#3-configure-workers-and-inspect-a-plan) |
+| Execute, resume and inspect | `study run`, `resume`, `status`; [reconnect and failure recovery](docs/usage/studies.md#4-execute-and-reconnect) |
+| Collect or revalidate results | Automatic during run/resume, or `study collect`; [budgets, readers and collection-only retries](docs/usage/studies.md#5-collect-validate-and-assess-results) |
+| Review and export | `study export --dataset ID` or `--selection FILE`; [evidence, approvals and exclusions](docs/usage/studies.md#6-review-and-export-a-selected-catalog) |
+
+Initial collection performs metadata-level inspection. Full validation needs an
+explicit scan budget and the appropriate artifact reader on each worker:
+
+```bash
+pixi run genesis study collect /local/studies/atac-A --level full \
+  --reader local=/path/to/track-environment/bin/python \
+  --max-bytes 10737418240 --max-records 10000000 --max-seconds 1800
+# After reviewing metadata, QC and eligibility using the linked guide:
+pixi run genesis study export /local/studies/atac-A --dataset DATASET_ID \
+  --output /local/reviewed-atac-v1.json
+```
+
+Revalidation does not rerun sequencing. Execution, collection, structural validity,
+scientific QC and approval have separate states; `SUCCEEDED` does not approve a
+dataset. Default exports exclude incomplete validation and missing approvals. DAP's
+existing output provenance can remain incomplete after a full scan; an explicit
+reviewed catalog exception is required to export it for a suitable purpose.
+The [complete guide](docs/usage/studies.md) covers both assays, optional AI/manual
+metadata curation, monitoring, migration, backup and continuation on another server.
+
+## Process DAP-seq
+
+Supply a tab-separated sheet with exactly these columns:
 
 ```tsv
 sample_id	species	read1_url	read2_url	control_sample	reference_fasta
@@ -101,163 +213,486 @@ treatment	Arabidopsis_thaliana	https://example.org/treatment.fastq.gz	-	control	
 control	Arabidopsis_thaliana	https://example.org/control.fastq.gz	-	-	TAIR10.fa.gz
 ```
 
-Use `-` for an absent mate or control. A mate URL selects paired-end processing.
-Sample IDs must be unique within the sheet. Every assigned control must appear
-in the same sheet, have `control_sample = -`, and match the treatment's species,
-reference, and layout. Controls receive alignment, QC, and tracks; treatments
-also receive peaks and quantification. Multiple treatments can share a control.
-Validation completes before downloads start.
-
-Reference names are gzipped FASTA basenames ending in `.fa.gz`, `.fasta.gz`, or
-`.fna.gz`. Identifiers and filenames may contain letters, digits, underscores,
-periods, and hyphens, with a letter, digit, or underscore first. Read URLs must
-be HTTP or HTTPS. Reads are downloaded in batches of `--download_batch_size`
-samples (default 8), one batch at a time; mates with matching basenames are fine.
-
-## Analysis choices
-
-Main and first-read QC alignments use **full reads**; only SPP's input is cut
-(see below). Read length is inferred
-from up to the first 100 reads per mate and recorded as metadata; it is not a
-trimming instruction. Inspected reads must be nonempty, structurally valid, and
-uniform in length across mates. Remote reads are fetched with parallel aria2c
-connections and fully decompressed with bgzip, which checks gzip integrity; first-read
-line counts must be divisible by four, and paired FASTQs must have equal line
-counts. Genome size is the sum of chromosome sizes derived from the FASTA.
-
-The main bwa-mem2 BAM retains primary mapped alignments, including **MAPQ 0**.
-`samtools view -F 2308` excludes unmapped, secondary, and supplementary records.
-There is no MAPQ threshold, NH weighting, or separate deduplication step in the
-bwa-mem2 alignment. QC aligns full first reads as an unpaired library, used for
-first-read statistics and tracks. A third alignment, for SPP only, uses first
-reads cut to their first 50 bases (`--spp_read_length`). Each sample's alignment
-provenance records the bwa-mem2 version, layout, read length, flag exclusion,
-options, and the QC and SPP read policies.
-
-BWA defaults are `-K 10000000 -k 19 -c 10000 -T 30`. Override them with
-`--bwa_batch_size`, `--bwa_seed_length`, `--bwa_max_seed_occurrences`, and
-`--bwa_score_threshold`; each must be a positive integer.
-Parameters are validated against `nextflow_schema.json` (nf-schema) before any
-task runs, and parameters that differ from the defaults are logged at startup.
-
-SPP uses the unmodified, vendored upstream `run_spp.R` revision
-[`6984a713aba0218b76bacc63f2fb5087425fd6a3`](https://github.com/kundajelab/phantompeakqualtools/blob/6984a713aba0218b76bacc63f2fb5087425fd6a3/run_spp.R),
-with shift range `-s=-0:2:400`, GNU awk, and first reads cut to 50 bases
-before alignment, as in ENCODE's cross-correlation QC. With full-length reads as
-long as the fragments (e.g. 151-base reads of ~140-base DAP-seq fragments), the
-read-length phantom peak hides the fragment peak and SPP cannot estimate a
-fragment length. Cutting before alignment, not after, puts the phantom peak at
-the cut length, so NSC and RSC keep their usual meaning. If SPP still finds no
-fragment peak, QC records a row with `NA` estimates instead of failing.
-The provenance and differences from the historical Sherlock script are explained
-in [vendor/phantompeakqualtools/README.md](vendor/phantompeakqualtools/README.md).
-SPP scores can differ from the old workflow because of the aligner, read lengths,
-and upstream correlation-baseline changes.
-
-MACS3 uses `BAM` for SE and `BAMPE` for PE, the assigned control, inferred genome
-size, and its remaining defaults. In particular, MACS3's default `--keep-dup=1`
-limits identical-position/strand SE tags or identical PE fragments during peak
-calling. It still reads alignments carrying the BAM duplicate flag; marking a
-BAM is not the same as excluding those records. Thus retaining duplicates in the
-alignment BAM does not mean peak calling retains every duplicate observation.
-
-Tracks and primary-weighted quantification use the retained BAM, without a
-separate duplicate filter; paired read ends count independently in quantification.
-Consequently, excluding duplicate records can change coverage and quantification
-even when peak calls remain unchanged. These behaviors describe the current
-implementation, not a recommendation to remove duplicates from DAP-seq libraries.
-
-deepTools produces total and strand-specific
-CPM coverage and strand-specific 5-prime counts at one-base resolution. PE
-libraries additionally receive first-read tracks. Tracks have no MAPQ filter.
-Strand CPM uses the total alignment count as its shared scaling denominator.
-
-Peak RPM counts overlapping retained primary **read ends**, dividing by all
-retained mapped read ends and multiplying by one million; paired ends count
-independently. Mean RPKM is the length-weighted average of deepTools' RPKM
-bedGraph over each peak, including uncovered bases as zero. Both score files
-preserve the narrowPeak rows and append one value. Mean coverage RPKM is a
-coverage statistic and differs from read-end RPM divided by peak length in kb.
-A single `QUANTIFY` task reads the BAM with pysam and the bedGraph directly,
-with no SAM or BED intermediates; overlaps follow `bedtools intersect` (at least
-one shared base). The standalone `genesis-tools peak-rpm` command also supports
-explicit NH fractional weighting when input alignments have valid NH tags.
-
-## Outputs and resources
-
-Published results live at `WORKSPACE/RUN_NAME/output/<species>/<sample_id>/`:
-
-- FASTQ line counts, metadata, and alignment provenance TSVs.
-- SPP TSV/PDF, samtools flagstat, idxstats, and alignment statistics; PE insert-length distributions.
-- CPM and 5-prime count bigWigs, including PE first-read tracks.
-- Treatment MACS3 outputs, including gzipped narrowPeak files.
-- Treatment `.peaks.RPM.tsv` and `.peaks.mean_RPKM.tsv` scores.
-
-**FASTQs, BAMs, BAM indexes, and bedGraphs are excluded from published results.** Derived reference files
-are published separately under the reference directory.
-
-bwa-mem2 indexing and alignment size their own requests. Indexing reads the
-gzipped FASTA directly on one CPU, with 1 GB plus 32 bytes per reference base
-(it peaks near 28) and one hour plus an hour per Gbp. Alignment uses eight CPUs,
-memory from the genome size, and one hour plus an hour per GB of compressed
-reads. Both retry twice with doubled, then tripled, requests when killed for
-memory or walltime. QC and tracks default to two CPUs, 8 GB, and four hours,
-configurable with `--cpus`, `--memory`, and `--time`. Other modules declare their
-own resources. The `local` profile caps requests at the machine's CPUs and memory.
-The `test` profile caps every task at two CPUs, 2 GB, and five minutes; it does
-not select a sample subset or replace tools. For agent-submitted Sherlock validation, every task must explicitly stay
-within five minutes, two CPUs, and 8 GB. Run computation on allocated nodes.
-
-## Environments and Docker builds
-
-Pure tool environments are defined in `environments/*.yaml`; their matching
-Pixi manifests and locks support container builds. `genesis_tools/` is a typed
-Python 3.14.5 uv project that reads BAMs with pysam. Its conda equivalent installs the local
-Python project; containers use the dedicated uv Dockerfile. Each Nextflow module
-declares its environment and reads its image from `.env` using nf-dotenv.
-
-Keep the original Docker discovery/build scripts and run them through Pixi:
+Replace the example URLs with actual public FASTQs. Use `-` for an absent mate or
+control. Controls must occur in the same sheet and match species, layout and
+reference. Place the exact named gzipped FASTA in your reference directory; Genesis
+does not choose/download a replacement assembly. Derived references carry checksum
+provenance; stale/unproven cached products stop the run.
 
 ```bash
-pixi run build-dockers --no-push
-pixi run build-dockers --no-push -- dap_seq_alignment genesis_tools
+pixi run genesis validate inputs dap.tsv --assay DAP-seq --references /data/references
+pixi run pipeline -w /scratch/genesis -n study-A dap.tsv --references /data/references
+pixi run pipeline -w /scratch/genesis -n study-A dap.tsv --references /data/references -resume
 ```
 
-Every build targets `linux/amd64` and `linux/arm64`. The original scripts default
-to pushing: always pass `--no-push` for local builds. Tags default to the latest
-Git tag (`0.1.0`); use `--tag` to override. The scripts update `.env` with image
-digests and preserve unrelated entries. Publishing images requires approval.
-The reference Dockerfiles and pinned base images are retained.
+Results are in `/scratch/genesis/study-A/output/`, intermediates in `work/`, and
+Nextflow reports in `trace/`. Retain the work directory for resume. Treatment
+libraries receive control-based peaks/quantification; controls receive QC/tracks.
+The existing read, MAPQ, duplicate, SPP and peak-calling policies remain explicit
+and unchanged by curation or AI.
 
-## Verification
+![DAP-seq workflow](docs/images/genesis_metro_map_animated.svg)
+
+[Complete DAP input, output and scientific-policy guide](docs/usage/dapseq-reference.md).
+
+## Process bulk ATAC-seq
+
+Use one row per paired-end technical lane with these exact TSV columns:
+
+```text
+library_id sample_id biological_replicate lane_id reference_id read1 read2 read1_sha256 read2_sha256 mapq duplicates adapter_r1 adapter_r2
+```
+
+The displayed names are space-separated for readability; the actual sheet must
+use tabs. `read1/read2` are local gzipped FASTQs or public HTTPS URLs; SHA256 hashes
+refer to compressed files. `mapq` is the approved threshold (0–254), `duplicates`
+is `retain` or `exclude`, and both adapter fields are `-` when no trimming is chosen.
+Repeated library IDs combine technical lanes only; biological replicates stay separate.
+
+Supply `references.json` with `schema_version: 1` and a `references` list. Each
+entry declares `reference_id`, species, assembly, annotation release, exact gzipped
+FASTA/TSS paths and SHA256 values, positive effective `genome_size` with its method,
+and separate mitochondrial/plastid contig lists. TSS rows are contig, **zero-based**
+position and strand. Derive them from the recorded annotation; do not invent TSS or
+organellar assignments. Stage authenticated inputs locally before constructing sheets.
+
+```bash
+pixi run genesis validate inputs atac.tsv --assay bulk-ATAC --references references.json
+pixi run pipeline-atac atac.tsv --references references.json --outdir /scratch/atac-run
+pixi run pipeline-atac atac.tsv --references references.json --outdir /scratch/atac-run --resume
+```
+
+Each library publishes raw-read/alignment QC, fragments, raw Tn5 cut-count bigWig,
+MACS3 peaks, enrichment/complexity metrics and MultiQC. Run-level files record inputs,
+checksums, comparisons and provenance. Changed sheets/references require a new run
+folder. A zero-peak result can be structurally valid. No universal plant QC threshold
+or single-cell barcode processing is implied.
+
+![Bulk ATAC workflow](docs/images/genesis_atac_metro_map_animated.svg)
+
+[Exact column/reference definitions and output paths](docs/usage/bulk-atac.md).
+
+## Run on a cluster or independent workers
+
+For scheduler execution, copy a site template from `conf/sites/` outside the checkout,
+set authorized account/partition/resources/paths, and select the profile explicitly:
+
+```bash
+pixi run pipeline-atac atac.tsv --references references.json \
+  --profile slurm,apptainer --config /local/site.config --outdir /scratch/atac-run
+pixi run pipeline -p slurm,apptainer dap.tsv -c /local/site.config
+```
+
+Profiles also cover Sherlock, NERSC, PBS Pro, LSF and SGE; see the
+[execution guide](docs/usage/execution.md) for site/runtime requirements. Inputs,
+checkout and work paths must be visible to scheduler tasks. Site access/authorization
+is not established by local tests.
+
+For independent servers, stage inputs with your approved transfer tools and install
+the same pinned clean checkout on each worker. A minimal campaign configuration is:
+
+```json
+{
+  "schema_version": 1,
+  "workers": {
+    "worker-A": {
+      "transport": "ssh", "host": "existing-ssh-alias", "slots": 1,
+      "repo": "/project/genesis",
+      "python": "/project/genesis/genesis_tools/.venv/bin/python",
+      "root": "/scratch/genesis-jobs"
+    }
+  },
+  "jobs": [{
+    "id": "library-1", "worker": "worker-A",
+    "payload": {
+      "git_sha": "REPLACE_WITH_FULL_40_CHARACTER_COMMIT",
+      "inputs": [{"path": "/data/atac.tsv", "sha256": "REPLACE_WITH_SHA256"},
+                 {"path": "/data/references.json", "sha256": "REPLACE_WITH_SHA256"}],
+      "argv": ["/absolute/path/to/pixi", "run", "pipeline-atac", "/data/atac.tsv",
+               "--references", "/data/references.json", "--outdir", "/scratch/library-1", "--resume"]
+    }
+  }]
+}
+```
+
+Use `transport: local` without `host` for the same protocol on one server. Include
+all input/config hashes. One ATAC job includes a library's lanes; shared-control
+DAP treatments should share one job. Paths are worker-local; no shared filesystem
+or implicit data transfer is assumed. `slots` limits job count, not RAM/GPU use.
+
+```bash
+pixi run genesis run /local/campaign --manifest campaign.json
+pixi run genesis status /local/campaign
+pixi run genesis issues /local/campaign
+pixi run genesis resume /local/campaign
+pixi run genesis serve /local/campaign --port 8765
+```
+
+The read-only page binds to `127.0.0.1`. Confirmed exit-75 failures have at most two
+automatic retries. Other failures need review; `UNKNOWN` retains capacity and
+prevents duplicate submission. After correcting a confirmed failure:
+
+```bash
+pixi run genesis resolve /local/campaign library-1 --note 'Cause corrected; retry approved'
+pixi run genesis resume /local/campaign
+```
+
+If a supervisor was lost, independently verify its processes/scheduler jobs have
+stopped before `genesis reconcile ... --confirmed-stopped --note ...`. A fresh
+heartbeat blocks reconciliation. Changed inputs/resources require a new campaign;
+never edit an existing campaign to smuggle in new configuration.
+
+## Validate inputs and artifacts
+
+Validation, execution success, scientific QC, metadata approval and export eligibility
+are separate statuses. Run artifact validation on the machine holding the files:
+
+```bash
+pixi run genesis validate run /scratch/atac-run --assay bulk-ATAC \
+  --source-id study-A --study study-A --worker worker-A --output inspection.json
+pixi run genesis validate run /scratch/atac-run --assay bulk-ATAC \
+  --source-id study-A --study study-A --worker worker-A --level full \
+  --bigwig-python /absolute/track-environment/bin/python \
+  --max-bytes 10737418240 --max-records 10000000 --max-seconds 1800 \
+  --output validated.json
+# DAP adapters additionally need the executed sheet and reference directory:
+pixi run genesis validate run /scratch/genesis/study-A --assay DAP-seq \
+  --source-id study-B --worker worker-A --sheet /data/dap.tsv \
+  --references /data/references --output dap-inspection.json
+pixi run genesis validate manifest validated.json --json
+```
+
+Metadata-level inspection is the default. Full scans explicitly check hashes,
+references, interval bounds/order, declared BAMs, bigWigs and metric semantics within
+budgets. Install pyBigWig only in the separately selected track interpreter; Genesis
+does not install a reader automatically. Partial scans report `NOT_EVALUATED` and
+cannot claim completeness. Optional/pruned outputs differ from corrupt files;
+missing measurements differ from zero. Historical DAP evidence can remain incomplete.
+
+Exit 0 means the requested check found no errors; it is not scientific approval.
+Exit 1 indicates structural errors, 2 invalid input, and 3 an incomplete full scan.
+Use new output filenames for new observations. Repeated scans with changed bytes
+invalidate old evidence/review. See [validation contracts and budgets](docs/usage/curation.md).
+
+## Import, search and back up the registry
+
+Keep the registry on **controller-local disk**, separate from campaign `state.sqlite`.
+Transfer validated JSON bundles explicitly; workers never write a shared SQLite file.
+
+```bash
+pixi run genesis registry init /local/catalog
+pixi run genesis registry import /local/catalog --bundle validated.json
+pixi run genesis registry import /local/catalog --campaign /local/campaign
+pixi run genesis registry search /local/catalog --filter assay=bulk-ATAC \
+  --filter availability=available --text leaf --limit 100
+pixi run genesis registry show /local/catalog DATASET_ID
+pixi run genesis registry history /local/catalog DATASET_ID --limit 100 --after 0
+pixi run genesis registry search /local/catalog --filter study=study-A --format tsv
+pixi run genesis registry backup /local/catalog --output catalog-backup.sqlite
+pixi run genesis registry restore /local/restored-catalog --backup catalog-backup.sqlite
+```
+
+Filters include species, assay, study, reference_id, worker, availability and
+biological_context; add `--qc-status` or `--review-status --category metadata|qc|eligibility`.
+Follow `next_after` with `--after` for pagination. Search is literal text, never model
+SQL. Dataset/library IDs, accessions, lanes and job attempts remain distinct.
+`/data/file.bw` on two workers is two locations, even if the bytes match.
+
+Imports are transactional/idempotent and preserve decisions. Schema upgrades run
+through `registry init`, which takes a pre-migration backup. Restore uses a new
+folder. Large sequencing files remain outside the database. To inspect any immutable
+record by its version: `genesis registry show /local/catalog VERSION --kind invocation`
+(or `proposal`, `diagnosis`, `deployment`, `source`, etc.).
+
+## Assess QC, review and export
+
+```bash
+pixi run genesis qc evaluate /local/catalog DATASET_ID
+pixi run genesis review queue /local/catalog --category metadata
+pixi run genesis review show /local/catalog DATASET_ID
+```
+
+The shipped plant policy leaves biological thresholds **UNSPECIFIED**. It preserves
+units, metric definitions, denominators and depth; missing/incompatible values do
+not become passes. Use `qc evaluate ... --policy reviewed-policy.json` for an
+explicitly authored/versioned policy. Reassessment does not rerun sequencing.
+
+Review selected evidence and save `evidence.json` with exact stored references:
+
+```json
+{"evidence":[{"location":"/data/source.json","worker":"local",
+  "sha256":"REPLACE_WITH_RECORDED_SHA256","locator":"/tissue"}]}
+```
+
+A locator is a JSON pointer, `line:N`, or `$` for a whole recorded source/artifact.
+Use the fresh `status.token` from `review show` **after each change/decision**:
+
+```bash
+pixi run genesis review approve /local/catalog DATASET_ID --category metadata \
+  --token CURRENT_TOKEN --reason 'State what the reviewed evidence establishes' --evidence evidence.json
+pixi run genesis review approve /local/catalog DATASET_ID --category qc \
+  --token NEW_TOKEN --reason 'Record the QC judgment and any exception' --evidence evidence.json
+pixi run genesis review approve /local/catalog DATASET_ID --category eligibility \
+  --token NEWEST_TOKEN --reason 'Accepted for this catalog purpose' --evidence evidence.json
+pixi run genesis review history /local/catalog DATASET_ID
+pixi run genesis registry search /local/catalog --filter study=study-A \
+  --selection-output selected.json
+pixi run genesis registry export /local/catalog --selection selected.json \
+  --reviewed --output reviewed-catalog.json
+pixi run genesis serve /local/campaign --registry /local/catalog --port 8765
+```
+
+`reject`/`request-info` use the same category/token/reason interface. Reviewer identity
+comes from the OS, never an LLM field. Shared accounts cannot distinguish humans.
+Source/manifest/policy changes invalidate affected approvals; corruption cannot be
+waived. `resolve` authorizes an execution retry, not QC approval.
+
+Inspect the explicit selection before export; it is one search page, not an implicit
+whole catalog. Reviewed exports include candidates, exclusions, missing evidence,
+exceptions, exact denominators, metadata/source revisions and decisions. They are
+manifest catalogs, not copied sequencing files or training arrays. Omitting
+`--reviewed` produces an ungated bundle. [Detailed review/export instructions](docs/usage/curation.md).
+
+## Configure mock, API or private providers
+
+```bash
+pixi run genesis ai providers list --config examples/curation/providers.mock.json
+pixi run genesis ai providers check /local/catalog \
+  --config examples/curation/providers.mock.json --provider mock
+```
+
+For live inference, copy [providers.live.example.json](examples/curation/providers.live.example.json)
+outside the checkout, then set the approved endpoint/model, credential reference,
+tasks, source classifications, limits and capabilities. The adapter uses
+OpenAI-compatible **Chat Completions**. External services require HTTPS; private
+HTTP endpoints must use loopback, normally through an SSH tunnel. Credentials are
+existing environment-variable names or owned `0600` file references, never literal
+keys in configuration or command arguments.
+
+```bash
+pixi run genesis ai providers check /local/catalog --config /local/providers.json --provider api
+pixi run genesis ai providers check /local/catalog --config /local/providers.json --provider private
+```
+
+`mode` is `disabled`, `mock` or `live`. Choose a provider explicitly per operation.
+Local-only data cannot fall back to an external API. Context/output budgets,
+timeouts, concurrency limits, bounded retries, redaction and local schema validation
+apply to requests. JSON Schema/tool/streaming capabilities are probed independently
+when declared. Unknown capabilities/usage/cost stay unknown; mock success is labeled
+`MOCK_PASS`. Failed responses remain available through their invocation version.
+[All configuration fields, failure handling and provenance](docs/usage/ai-providers.md).
+
+## Harmonize metadata with evidence
+
+```bash
+pixi run genesis metadata ingest /local/catalog DATASET_ID \
+  --source metadata.json --source paper-excerpt.txt --classification local-only
+pixi run genesis metadata propose /local/catalog DATASET_ID --output proposal.json
+# Optional: replace deterministic-only proposal generation with an explicit provider.
+pixi run genesis metadata propose /local/catalog DATASET_ID \
+  --config /local/providers.json --provider private --output ai-proposal.json
+pixi run genesis metadata diff /local/catalog DATASET_ID --target PROPOSAL_VERSION
+```
+
+Local JSON/CSV/TSV/text and explicit public ENA/GEO accessions are supported; use
+`metadata ingest ... --accession SRR123456 --classification public` for bounded
+network retrieval. Never represent an inaccessible paper as read.
+
+Proposals retain raw/current values, candidate status, vocabulary versions, exact
+source hashes/locators/quotes and rationale. Unknown treatment stays unknown;
+technical lanes and biological replicates remain separate. DAP TF-source organism
+and assayed DNA organism are distinct. Ambiguous ATAC/GRO/5-prime protocols enter
+review. Unknown author terms are preserved without invented ontology IDs.
+
+Review the diff and `proposal.data.evidence`, then save that evidence array as
+`{"evidence":[...]}`. Approval targets the exact proposal; version 2 application is separate:
+
+```bash
+pixi run genesis review show /local/catalog DATASET_ID
+pixi run genesis review approve /local/catalog DATASET_ID --category metadata \
+  --target PROPOSAL_VERSION --token CURRENT_TOKEN --reason 'Explain the reviewed mapping' \
+  --evidence evidence.json
+pixi run genesis metadata apply /local/catalog DATASET_ID --target PROPOSAL_VERSION \
+  --output canonical-metadata.json
+```
+
+Until apply, status is `PENDING_APPLY`. Apply creates an immutable metadata revision
+and a compiled input description referencing the original scientific inputs.
+It never changes executed sheets, reference/control assignments or campaigns.
+Reassess QC/eligibility afterward. For entirely manual corrections, supply
+`metadata propose --fields curated-fields.json` with evidence-backed field entries;
+[the guide explains the exact field format and legacy manual proposal behavior](docs/usage/curation.md#evidence-backed-metadata-harmonization).
+
+## Ask read-only catalog questions
+
+```bash
+pixi run genesis registry search /local/catalog --text leaf --limit 10
+pixi run genesis ai ask /local/catalog 'What tissue and treatment evidence is recorded?' \
+  --dataset DATASET_ID --config /local/providers.json --provider private \
+  --classification local-only
+```
+
+Select 1–10 datasets explicitly. Answers cite selected record hashes and use bounded
+read-only catalog tools. They cannot query arbitrary SQL, launch jobs, approve data,
+edit policies or run shell commands. Source instructions are treated as untrusted
+data. Read the evidence before relying on an interpretation.
+
+## Inspect and deploy a private model
+
+Use existing authorized Linux nodes and separately pinned serving environments.
+Docker/NVIDIA access, a digest-pinned local vLLM image, an external `hf` CLI, existing
+node-local secret files, reviewed license/access and adequate resources are prerequisites.
+Genesis does not provision them. Multiple serving nodes are independent endpoints;
+cross-host model sharding and public listeners are not supported.
+
+```bash
+# Read metadata, resolve an immutable revision; no weight download.
+pixi run genesis ai model inspect NAMESPACE/MODEL --revision REVISION --output model.json
+# Copy/edit the template with your actual node, image digest, budgets and reviewed model.
+pixi run genesis ai deployment plan --config /local/deployment.json \
+  --model model.json --output plan.json
+# Only after reviewing the complete plan: authorize this exact plan hash.
+pixi run genesis ai deployment apply /local/catalog --plan plan.json --authorize EXACT_PLAN_HASH
+pixi run genesis ai deployment status /local/catalog --plan plan.json
+pixi run genesis ai deployment logs /local/catalog --plan plan.json
+pixi run genesis ai deployment stop /local/catalog --plan plan.json
+pixi run genesis ai deployment status /local/catalog --plan plan.json
+```
+
+Start from [deployment.example.json](examples/curation/deployment.example.json), which
+contains synthetic placeholders and is not a production recommendation. Set existing
+worker paths/SSH alias, physical GPU UUIDs, CPU/RAM/disk/VRAM reservations, context and
+concurrency, KV/runtime overhead, compatible architectures, license confirmation,
+secret-file references and allocation expiry when applicable. Prefer dedicated GPUs;
+shared nodes need explicit separate pipeline reservations. Reusing campaign `slots`
+alone does not allocate RAM/GPUs.
+
+Apply stages only revision-pinned selected model files, verifies their hashes and
+starts a separately supervised owned container. Host binding is loopback-only;
+remote status opens/checks an authenticated owned SSH tunnel. Readiness needs real
+structured inference from the expected model. `UNKNOWN` retains reservations;
+controller restart/repeated apply cannot duplicate the server. Stop verifies
+ownership and preserves caches/logs. A changed model/context/config needs a new plan.
+No automatic OOM fallback or scientific parameter change is permitted.
+
+A vLLM API key does not protect all routes. This backend uses container isolation
+and loopback/SSH networking; broader exposure requires a separately secured site
+gateway. [Deployment configuration, state machine, recovery and rollback](docs/usage/llm-deployment.md)
+explain every prerequisite and limit. Real GPU/SSH/API acceptance remains opt-in.
+
+## Diagnose a failed job
+
+```bash
+pixi run genesis ai diagnose /local/catalog --root /scratch/atac-run \
+  --log .nextflow.log --log work/ab/task/.command.err \
+  --dataset DATASET_ID --output diagnosis.json
+# Optional model explanation; deterministic classification still runs first.
+pixi run genesis ai diagnose /local/catalog --root /scratch/atac-run \
+  --log .nextflow.log --config /local/providers.json --provider private
+```
+
+Use `--facts diagnostic-facts.json` for measured exit/worker/resource facts and
+campaign/job/attempt identity. Exit 137 alone is not confirmed OOM. Remote collection
+uses `--worker-config worker.json --worker-id worker-A` and approved diagnostic roots.
+Only 16 explicitly selected logs and their last 64 KiB each are collected/redacted;
+there is no recursive filesystem upload.
+
+The result separates deterministic evidence from optional model hypotheses and
+proposes a typed action with preconditions. It **never executes a retry or repair**.
+Recheck evidence/target versions, reconcile uncertain workers, and use the existing
+review/retry mechanism. Resources or input changes require a new campaign.
+[Diagnostic categories, evidence and limitations](docs/usage/curation.md#failure-diagnosis).
+
+## Create figures and benchmark methods
+
+```bash
+pixi run genesis schematic --workflow atac --output atac.svg
+pixi run genesis schematic --workflow execution --theme dark --animate --output execution.svg
+pixi run genesis schematic --workflow dap --template dap-template.json
+pixi run genesis schematic --spec dap-template.json --output edited-dap.svg
+pixi run benchmark --help
+pixi run benchmark plan --help
+pixi run benchmark run --help
+pixi run benchmark compare --help
+pixi run benchmark report --help
+```
+
+With the benchmark's required pinned images already present, a synthetic
+post-alignment comparison can be prepared and run explicitly:
+
+```bash
+pixi run benchmark fixture --out /scratch/benchmark-fixture
+pixi run benchmark plan /scratch/benchmark-fixture/experiment.toml
+pixi run benchmark run /scratch/benchmark-fixture/experiment.toml --out /scratch/benchmark-run
+pixi run benchmark run /scratch/benchmark-fixture/experiment.toml --out /scratch/benchmark-run --resume
+pixi run benchmark report /scratch/benchmark-run
+pixi run benchmark compare /scratch/candidate-run --against /scratch/reference-run
+```
+
+The last command needs two completed runs with matching source bytes/reference.
+Public input acquisition is a separate `benchmark fetch` step for a fully resolved,
+READY dataset manifest with exact sizes and hashes; unresolved catalog candidates
+are refused. Inspect `benchmark fetch --help` and the catalog blockers first.
+
+Schematics are self-contained SVGs with bundled licensed artwork; animations show
+workflow connections, not live state. [Figure templates and options](docs/usage/schematics.md).
+Benchmark `fixture|plan|fetch|run|compare|report` commands compare explicit methods
+using retained inputs and common metrics. Planning does not fetch or run workflows;
+follow the [benchmark recipes](benchmarks/README.md) to prepare a spec, execute the
+selected experiments and inspect reports. Benchmark evidence does not silently
+change production scientific policies.
+
+## Validation, troubleshooting and rollback
 
 ```bash
 pixi run checks
-# Opt-in real-tool validation using existing local Docker images:
-pixi run validate-docker
-# Retain fixtures, full logs, traces, and intermediate outputs for inspection:
+pixi run uv run --frozen --project genesis_tools python tests/evaluate_metadata.py
+# Separate opt-in real scientific-container acceptance:
 pixi run validate-docker --keep
+pixi run validate-atac --keep
 ```
 
-The default suite runs ShellCheck, Ruff, ty, quantification and mocked Docker
-build regressions, sample-sheet and metadata cases, and actual Nextflow SE/PE
-stub workflows. It checks control fan-out, per-reference generation and cache
-reuse, `-resume`, invalid inputs, and publication boundaries. Mock builds cover
-both architectures and `--no-push` without contacting Docker or a registry.
+The fast suite includes scientific regressions, contracts, registry migration,
+review, fake HTTP, metadata evidence and model lifecycle simulations. Installed-wheel
+acceptance checks packaged schemas/prompts/vocabularies outside the repository.
+Synthetic gold fixtures report field/evidence/conflict/abstention results; real
+biological accuracy, human corrections, API charges and GPU performance stay unmeasured.
+[Foundations evidence](validation/reports/curation-foundations-validation.md) and
+[hybrid extension evidence](validation/reports/hybrid-llm-validation.md) distinguish
+PASS, FAIL, BLOCKED and NOT RUN and record commands/revisions/limitations.
 
-Docker validation runs the real download/staging, indexing, bwa-mem2, samtools,
-SPP, deepTools, MACS3, and Python tools on deterministic 75-base SE/PE
-fixtures with enriched regions and duplicated sequence. It checks nonempty peaks,
-finite positive scores, provenance, read lengths (full, and 50 bases for SPP),
-outputs, and resume.
-Validated on 2026-10-06 with the existing linux/arm64 images: all 45 initial
-tasks completed, each of the three treatments produced 200 peaks, and all 41
-tasks on the stable resume were cached. BAM inspection confirmed retained MAPQ 0
-alignments, full 75-base sequences, and unpaired first-read QC alignments. No
-FASTQs or BAMs appeared in published outputs. Tool logs contained no warnings.
+| Symptom | Next step |
+| --- | --- |
+| Docker unavailable | Run `genesis doctor`; use an existing authorized runtime/profile. |
+| Input/reference checksum changed | Investigate and create a new explicit input/run revision. |
+| Full validation incomplete | Inspect findings, reader availability and scan budgets; do not call it a pass. |
+| Approval is stale | Inspect the current diff/evidence and obtain a fresh review token. |
+| Export contains no datasets | Read exclusions and candidate denominators; approvals/validation may be missing. |
+| Provider unavailable or schema rejected | Inspect the saved invocation; adjust the explicit approved config or use manual curation. |
+| Service UNKNOWN or tunnel lost | Restore access, inspect status/ownership and keep reservations until termination is known. |
+| Model OOM/startup failure | Inspect logs and plan a reviewed resource/model configuration; no automatic fallback occurs. |
+| Nextflow plugin registry unavailable | Restore access or use verified pinned cached plugins; never skip scientific checks. |
 
-These small synthetic runs validate integration; comparisons of biological
-outputs on the full public datasets remain a separate validation task. Native
-macOS stub traces do not include task runtime metrics; Docker traces do.
+To roll back the registry, stop writes and restore a consistent pre-migration backup
+into a new directory with the corresponding code revision. Preserve external
+artifacts, source bundles, plans and node caches. Stop and confirm owned model
+services before reverting their code/resources; disabling providers alone does
+not stop them. Existing preprocessing remains usable with all optional curation/AI
+commands omitted. No production policy changes are required by this extension.
 
-See [docs/nextflow-style.md](docs/nextflow-style.md) for module conventions.
+Optional live acceptance has separate runners, deliberately excluded from `checks`:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python tests/accept_provider_live.py \
+  --registry /local/catalog --config /local/providers.json --provider api \
+  --authorize-egress public --output live-provider-acceptance.json
+pixi run uv run --frozen --project genesis_tools python tests/accept_llm_live.py \
+  --registry /local/catalog --plan acceptance-plan.json --authorize EXACT_PLAN_HASH \
+  --config /local/providers.json --provider private --timeout 300 \
+  --output live-deployment-acceptance.json
+```
+
+The first sends a bounded public probe; the second downloads/launches the exact
+reviewed plan, checks real inference and safely stops its owned service. Run them
+only with approved credentials, budgets and hardware. Neither has been represented
+as passed by the offline tests.

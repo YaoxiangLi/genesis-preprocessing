@@ -15,6 +15,7 @@ process BWA_MEM2_INDEX {
     publishDir params.references, mode: 'copy', pattern: '*.bwa-mem2'
     input:
     tuple val(ref), path(fasta)
+    path provenanceScript
     output:
     tuple val(ref), path("${ref.id}.bwa-mem2"), emit: index
     script:
@@ -25,6 +26,9 @@ process BWA_MEM2_INDEX {
     for suffix in .0123 .amb .ann .bwt.2bit.64 .pac; do
         test -s '${ref.id}.bwa-mem2/genome'"\$suffix"
     done
+    python '${provenanceScript}' --fasta '${fasta}' --artifact '${ref.id}.bwa-mem2' \\
+        --kind bwa-mem2 --mode real --container '${ref.generator_container}' \\
+        --recipe '${ref.index_recipe}'
     """
     stub:
     """
@@ -32,5 +36,8 @@ process BWA_MEM2_INDEX {
     for suffix in .0123 .amb .ann .bwt.2bit.64 .pac; do
         printf 'stub\\n' > '${ref.id}.bwa-mem2/genome'"\$suffix"
     done
+    python '${provenanceScript}' --fasta '${fasta}' --artifact '${ref.id}.bwa-mem2' \\
+        --kind bwa-mem2 --mode stub --container '${ref.generator_container}' \\
+        --recipe '${ref.index_recipe}'
     """
 }

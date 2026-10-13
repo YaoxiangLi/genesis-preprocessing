@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<title>Genesis benchmark — TITLE</title>
+<style>
+body{font:15px system-ui,sans-serif;margin:2rem;color:#172936;background:#fafcfd}
+h1{font-size:1.8rem}p{max-width:90ch;line-height:1.5}select,input{padding:.5rem;margin:.4rem}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:.5rem;border-bottom:1px solid #d8e3e9}
+th{background:#e6eef3;position:sticky;top:0}a{color:#075da0}svg{background:white;border:1px solid #d8e3e9;max-width:100%}
+.note{padding:1rem;background:#fff3d4}details{margin:1rem 0}.scroll{max-height:65vh;overflow:auto}
+</style><h1>Genesis benchmark — TITLE</h1>
+<p class="note">EVIDENCE. Plant biological thresholds: UNSPECIFIED. A baseline comparison measures change;
+it does not establish biological truth. Read ends and fragments have different denominators.</p>
+<p>STATUS · Experiment ID: <code>IDENTITY</code></p>
+<p><a href="experiment.json">Resolved experiment</a> · <a href="results.json">Full results</a> ·
+<a href="metrics.tsv">Metric TSV</a> · <a href="metrics.json">Metric JSON</a> ·
+<a href="distributions.tsv">Distributions</a> · <a href="counts.tsv">Counts</a> ·
+<a href="resources.tsv">Resources</a></p>
+<p>Tool wall times include container startup. Repetitions describe computational variability,
+not biological replication. Container memory includes page cache; host RSS is recorded separately.</p>
+<label>Metric <select id="metric"></select></label><label>Library <select id="sample"></select></label>
+<label>Filter <input id="filter" placeholder="arm, definition or status"></label>
+<p id="description"></p><svg id="chart" role="img" aria-label="Selected metric by experiment arm" width="1000" height="300"></svg>
+<details><summary>Runtime observations (all attempts)</summary><div id="costs"></div></details>
+<div class="scroll"><table><thead><tr><th>Arm</th><th>Repeat</th><th>Library</th><th>Value</th><th>Unit</th><th>Status / reason</th></tr></thead><tbody id="rows"></tbody></table></div>
+<script>
+const data=DATA,resources=RESOURCES;
+const metric=document.querySelector('#metric'),sample=document.querySelector('#sample'),filter=document.querySelector('#filter');
+for(const [el,values] of [[metric,[...new Set(data.map(d=>d.metric))].sort()],[sample,['All',...[...new Set(data.map(d=>d.library))].sort()]]]){
+for(const v of values){const o=document.createElement('option');o.value=v;o.textContent=v;el.append(o);}}
+function refresh(){const selected=data.filter(d=>d.metric===metric.value&&(sample.value==='All'||d.library===sample.value)&&JSON.stringify(d).toLowerCase().includes(filter.value.toLowerCase()));
+const body=document.querySelector('#rows');body.replaceChildren();
+for(const d of selected){const tr=document.createElement('tr');for(const v of [d.arm,d.repetition,d.library,d.value===null?'undefined':d.value,d.unit,[d.status,d.reason].filter(Boolean).join(': ')]){const td=document.createElement('td');td.textContent=String(v);tr.append(td);}body.append(tr);}
+document.querySelector('#description').textContent=selected[0]?.definition||'No measurements';
+const svg=document.querySelector('#chart');svg.replaceChildren();
+const finite=selected.filter(d=>typeof d.value==='number'&&Number.isFinite(d.value));const min=Math.min(0,...finite.map(d=>d.value)),max=Math.max(0,...finite.map(d=>d.value));const range=max-min||1;
+const width=900/Math.max(1,finite.length);finite.forEach((d,i)=>{const bar=document.createElementNS('http://www.w3.org/2000/svg','rect');const zero=230-180*(0-min)/range,y=230-180*(d.value-min)/range;bar.setAttribute('x',String(50+i*width));bar.setAttribute('y',String(Math.min(zero,y)));bar.setAttribute('width',String(Math.max(1,width-3)));bar.setAttribute('height',String(Math.max(1,Math.abs(y-zero))));bar.setAttribute('fill','#168a89');const title=document.createElementNS(svg.namespaceURI,'title');title.textContent=`${d.arm} / ${d.library} / repeat ${d.repetition}: ${d.value}`;bar.append(title);svg.append(bar);});}
+metric.onchange=sample.onchange=filter.oninput=refresh;refresh();
+const costs=document.querySelector('#costs');for(const r of resources){const p=document.createElement('p');p.textContent=`${r.task} (${r.attempt}): ${r.wall_seconds.toFixed(3)} s, ${r.status}`;costs.append(p);}
+</script></html>

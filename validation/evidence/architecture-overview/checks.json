@@ -1,0 +1,101 @@
+{
+  "recorded_utc": "2026-10-10T00:31:47.728300+00:00",
+  "base_commit": "2c25645adec6157db2e91b2beaca2446d367f07c",
+  "files_sha256": {
+    "README.md": "f8594f70bafb344b5aa350731d992d97ca4daef15b22175d79725d8726ba12ee",
+    "docs/images/genesis_architecture_overview.svg": "a1bacc81dfec5e949d8436d741132053bc10abdceccb20aba2422e07170e250d"
+  },
+  "svg_checks": {
+    "status": "PASS",
+    "viewBox": "0 0 1600 1120",
+    "accessible_title_and_description": true,
+    "licensed_asset_hashes_verified": 11,
+    "embedded_license_notices": true,
+    "scripts_foreign_objects_remote_images_or_fonts": false
+  },
+  "browser": {
+    "browser": "148.0.7778.96",
+    "geometry": {
+      "text_count": 57,
+      "outside_panels": [],
+      "overlaps": [],
+      "connector_text_crossings": []
+    },
+    "cases": [
+      {
+        "width": 1040,
+        "theme": "light",
+        "document_width": 1040,
+        "viewport": 1040,
+        "image_width": 935.96875,
+        "loaded": true,
+        "linked": true
+      },
+      {
+        "width": 1040,
+        "theme": "dark",
+        "document_width": 1040,
+        "viewport": 1040,
+        "image_width": 935.96875,
+        "loaded": true,
+        "linked": true
+      },
+      {
+        "width": 390,
+        "theme": "light",
+        "document_width": 390,
+        "viewport": 390,
+        "image_width": 357.984375,
+        "loaded": true,
+        "linked": true
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "document_width": 390,
+        "viewport": 390,
+        "image_width": 357.984375,
+        "loaded": true,
+        "linked": true
+      }
+    ],
+    "page_errors": [],
+    "remote_requests": [],
+    "note": "Native SVG geometry plus local README-style embedding; GitHub rendering is verified separately after publication."
+  },
+  "github_markdown_api_preview": {
+    "headers": [
+      "Architecture and Current Capabilities"
+    ],
+    "columns": [
+      "Capability",
+      "Implemented",
+      "Validated",
+      "Planned / next validation"
+    ],
+    "capability_rows": 6,
+    "linked_svg": true,
+    "text": true,
+    "mobile": {
+      "viewport": 390,
+      "document_width": 390,
+      "table_scrolls": true
+    }
+  },
+  "commands": [
+    {
+      "command": "genesis_tools/.venv/bin/python tests/verify_readme.py",
+      "exit_status": 0,
+      "result": "PASS: 130 documented CLI commands parse; local documentation links resolve"
+    },
+    {
+      "command": "git diff --check",
+      "exit_status": 0
+    }
+  ],
+  "limits": [
+    "Native diagram and local README-style previews were visually inspected; the Markdown API provides GitHub-parsed content, not the complete live GitHub page.",
+    "At phone width, open the linked full-size SVG to read detailed labels; the table uses horizontal scrolling.",
+    "No application, pipeline, schema, CLI, dependency or existing schematic changed. Full scientific/live API/GPU/SSH tests were not rerun for this documentation-only update."
+  ]
+}

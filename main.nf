@@ -1,13 +1,16 @@
 nextflow.enable.dsl = 2
 
 include { validateParameters; paramsSummaryLog } from 'plugin/nf-schema'
+include { dotenv } from 'plugin/nf-dotenv'
 include { VALIDATE_SHEET } from './modules/validate_sheet'
 include { CHROM_SIZES } from './modules/chrom_sizes'
 include { BWA_MEM2_INDEX } from './modules/bwa_mem2_index'
 include { DOWNLOAD } from './modules/download'
+include { FASTQC } from './modules/fastqc'
 include { METADATA } from './modules/metadata'
 include { BWA_MEM2_ALIGN } from './modules/bwa_mem2_align'
 include { QC } from './modules/qc'
+include { MULTIQC } from './modules/multiqc'
 include { TRACKS } from './modules/tracks'
 include { CALL_PEAKS } from './modules/call_peaks'
 include { QUANTIFY } from './modules/quantify'
@@ -25,7 +28,21 @@ workflow {
         max_seed_occurrences: params.bwa_max_seed_occurrences,
         score_threshold: params.bwa_score_threshold
     ]
-    VALIDATE_SHEET(Channel.value(sheet), Channel.value(referencesDir),
+    def provenanceScript = file("${projectDir}/genesis_tools/src/genesis_tools/reference_cache.py")
+    def recipeHash = { module ->
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        digest.update(file("${projectDir}/modules/${module}.nf").bytes)
+        digest.update(provenanceScript.bytes)
+        digest.digest().encodeHex().toString()
+    }
+    def generator = dotenv('DAP_SEQ_ALIGNMENT_IMAGE')
+    def sizesRecipe = recipeHash('chrom_sizes')
+    def indexRecipe = recipeHash('bwa_mem2_index')
+    def recipes = [
+        'chrom-sizes': [container: generator, recipe_sha256: sizesRecipe],
+        'bwa-mem2': [container: generator, recipe_sha256: indexRecipe]
+    ]
+    VALIDATE_SHEET(Channel.value(sheet), Channel.value(referencesDir), recipes,
                    file("${projectDir}/genesis_tools/src"))
     samples = VALIDATE_SHEET.out.sheet.splitCsv(header: true, sep: '\t')
         .map { row ->
@@ -37,7 +54,9 @@ workflow {
         }
     referenceInputs = samples.unique { sample -> sample.ref_id }
         .map { meta ->
-            def ref = [id: meta.ref_id, filename: meta.reference_fasta]
+            def ref = [id: meta.ref_id, filename: meta.reference_fasta,
+                       generator_container: generator, sizes_recipe: sizesRecipe,
+                       index_recipe: indexRecipe]
             tuple(ref, file("${referencesDir}/${ref.filename}", checkIfExists: true))
         }
     sizesBranches = referenceInputs.branch { ref, _fasta ->
@@ -45,7 +64,7 @@ workflow {
                 file("${referencesDir}/${ref.id}.chrom.sizes").size() > 0
         missing: true
     }
-    CHROM_SIZES(sizesBranches.missing)
+    CHROM_SIZES(sizesBranches.missing, provenanceScript)
     sizes_ch = sizesBranches.cached.map { ref, _fasta ->
             tuple(ref.id, ref, file("${referencesDir}/${ref.id}.chrom.sizes"))
         }
@@ -64,7 +83,7 @@ workflow {
     indexInputs = indexBranches.missing.map { ref, fasta -> tuple(ref.id, ref, fasta) }
         .join(genomeLengths, by: 0, failOnDuplicate: true)
         .map { _id, ref, fasta, length -> tuple(ref + [length: length], fasta) }
-    BWA_MEM2_INDEX(indexInputs)
+    BWA_MEM2_INDEX(indexInputs, provenanceScript)
     indexes = indexBranches.cached.map { ref, _fasta ->
             tuple(ref.id, ref, file("${referencesDir}/${ref.id}.bwa-mem2"))
         }
@@ -79,6 +98,15 @@ workflow {
             tuple(meta.id, meta, mates.size() == 1 ? mates[0] : mates)
         }
     }
+    // Observe each raw mate independently; alignment continues to consume the original reads.
+    fastqcInputs = downloaded.flatMap { _id, meta, reads ->
+        def files = reads instanceof List ? reads : [reads]
+        files.collect { read ->
+            def mate = read.name.endsWith('.read2.fastq.gz') ? 'read2' : 'read1'
+            tuple(meta, mate, read)
+        }
+    }
+    FASTQC(fastqcInputs)
     metadataInputs = downloaded.map { _id, meta, reads -> tuple(meta.ref_id, meta, reads) }
         .combine(sizes_ch, by: 0)
         .map { _refId, meta, reads, _ref, path -> tuple(meta, reads, path) }
@@ -107,6 +135,36 @@ workflow {
             tuple(meta, bam, bai, qcBam, qcBai, sppBam)
         }
     QC(qcInputs, resources, file(params.spp_script))
+    // Collect channels, not publishDir contents: wait for every library's QC and metadata.
+    multiqcFiles = FASTQC.out.reports.map { _meta, _mate, _html, zip -> zip }
+        .mix(QC.out.reports.map { _meta, reports -> reports })
+        .mix(METADATA.out.metadata.map { _meta, path -> path })
+        .flatten().collect().map { paths -> paths.sort { it.name } }
+    multiqcSamples = samples.map { meta ->
+        [id: meta.id, species: meta.species, ref_id: meta.ref_id,
+         reference_fasta: meta.reference_fasta, layout: meta.layout, control: meta.control]
+    }.collect().map { rows -> rows.sort { it.id } }
+    // Local Nextflow runs can have a null commitId. Git is needed only for provenance.
+    def gitSha = workflow.commitId ?: 'UNKNOWN'
+    def sourceStatus = 'UNKNOWN'
+    try {
+        def revision = ['git', '-C', projectDir.toString(), 'rev-parse', 'HEAD'].execute()
+        def revisionText = revision.text.trim()
+        if (revision.waitFor() == 0) {
+            gitSha = revisionText
+            def status = ['git', '-C', projectDir.toString(), 'status', '--porcelain',
+                          '--untracked-files=no'].execute()
+            def statusText = status.text.trim()
+            if (status.waitFor() == 0) sourceStatus = statusText ? 'dirty' : 'clean'
+        }
+    } catch (IOException ignored) {
+        log.warn('Git unavailable: MultiQC source provenance may be UNKNOWN')
+    }
+    def reportProvenance = [name: file(params.run_dir).name, git_sha: gitSha,
+                           source_status: sourceStatus, pipeline_version: workflow.manifest.version]
+    MULTIQC(multiqcFiles, multiqcSamples, reportProvenance,
+            file("${projectDir}/multiqc_config.yaml"),
+            file("${projectDir}/genesis_tools/src/genesis_tools/multiqc_reporting.py"))
     TRACKS(aligned, resources)
     treatments = mainBams.filter { meta, _bam, _bai -> meta.control != '-' }
         .map { meta, bam, bai -> tuple(meta.control, meta, bam, bai) }

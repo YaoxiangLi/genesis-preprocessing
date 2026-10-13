@@ -1,0 +1,60 @@
+[
+  {
+    "command": [
+      "pixi",
+      "run",
+      "checks"
+    ],
+    "git_sha": "78ea67231a1f246aee4c7d0b80c4eede1c5fb584",
+    "utc": "2026-10-09T19:20:18.955331+00:00",
+    "elapsed_seconds": 113.69971844396787,
+    "exit_status": 0,
+    "label": "schematic-release-checks",
+    "peak_RSS_KiB": 659264,
+    "log_checksums": {
+      "results/incremental-prs/schematic-release-checks/stdout": "ae86a46803019eb1841be1c532ac375911b53b21f797899a2b03c6ff31f9b4f3",
+      "results/incremental-prs/schematic-release-checks/stderr": "921cd8686640afa4203096ca36c1c89eb6419c81189aee06305590cdaea8d8aa",
+      "results/incremental-prs/schematic-release-checks/time.txt": "9ae0e10cc8ba75f23b609b0f182d41bf12d6183e14164fc25a0e5d765f429606"
+    }
+  },
+  {
+    "command": [
+      "python",
+      "../scratch/schematics/browser.py"
+    ],
+    "git_sha": "78ea67231a1f246aee4c7d0b80c4eede1c5fb584",
+    "utc": "2026-10-09T19:20:20.130306+00:00",
+    "elapsed_seconds": 37.51491092098877,
+    "exit_status": 0,
+    "label": "schematic-release-browser",
+    "peak_RSS_KiB": 421172,
+    "log_checksums": {
+      "results/incremental-prs/schematic-release-browser/stdout": "4322ddd1f5e3c108a9cc4f8b45c939dbc0e579db56ddde37c6781efe92b0fc1f",
+      "results/incremental-prs/schematic-release-browser/stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "results/incremental-prs/schematic-release-browser/time.txt": "93cf59f9d847266346108a24c3de7ab33618c7c446264802bee76bcea5112420"
+    }
+  },
+  {
+    "command": [
+      "pixi",
+      "run",
+      "uv",
+      "build",
+      "--offline",
+      "genesis_tools",
+      "--out-dir",
+      "../results/schematics/dist-publish"
+    ],
+    "git_sha": "78ea67231a1f246aee4c7d0b80c4eede1c5fb584",
+    "utc": "2026-10-09T19:20:21.295690+00:00",
+    "elapsed_seconds": 1.627189128950704,
+    "exit_status": 0,
+    "label": "schematic-release-package",
+    "peak_RSS_KiB": 53676,
+    "log_checksums": {
+      "results/incremental-prs/schematic-release-package/stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "results/incremental-prs/schematic-release-package/stderr": "23d569678f86f6d28fb81796b4924029d89f31cb3bdf2a994b1b47c0ac13028e",
+      "results/incremental-prs/schematic-release-package/time.txt": "bf2ecc339efea67225f02878bc6a6ef280617036cc0655a5dc15da779c64e980"
+    }
+  }
+]

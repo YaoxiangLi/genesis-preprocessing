@@ -1,0 +1,7 @@
+name: dap_seq_fastqc
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - bioconda::fastqc=0.12.1

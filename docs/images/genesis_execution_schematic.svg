@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1340 908" role="img" aria-labelledby="title description">
+<title id="title">Genesis / Run and review</title>
+<desc id="description">Start on one Linux server. Distribute independent datasets as capacity grows.. Arrows show selected data dependencies; this is not a live execution graph.</desc>
+<style>
+    svg{background:#f6f4ed;font-family:Arial,Helvetica,sans-serif;color:#173c32}
+    text{fill:#173c32}.detail,.subtitle,.note{fill:#52685f}
+    .card{fill:#ffffff;stroke:#d4ddd3;stroke-width:1.5}
+    .route{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+    .flow{fill:none;stroke:#173c32;stroke-width:2;stroke-dasharray:2 24;
+    animation:flow 10s linear infinite}
+    @keyframes flow{to{stroke-dashoffset:-260}}
+    @media(prefers-reduced-motion:reduce){.flow{display:none}}
+    @media print{.flow{display:none}}
+    </style><rect width="1340" height="908" fill="#f6f4ed"/>
+<svg x="54" y="28" width="100" height="120" viewBox="0 0 24 24" fill="none" stroke="#173c32" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V10M12 12C4 13 2 8 3 3C9 3 13 6 12 12ZM12 9C12 4 16 2 21 2C21 8 18 11 12 9Z" />
+<path d="M6 6L12 12M18 5L12 10M8 14C18 16 6 20 16 22M16 14C6 16 18 20 8 22M10 16H14M10 20H14" />
+</svg>
+<text x="180" y="55" font-size="14" letter-spacing="4">GENESIS / PLANT GENOMICS</text>
+<text class="heading" x="180" y="99" font-size="32" font-weight="700">Run and review</text>
+<text class="subtitle" x="180" y="130" font-size="16">Start on one Linux server. Distribute independent datasets as capacity grows.</text>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="context-stroke" stroke-width="1.5"/></marker></defs>
+<path d="M 314 472 L 349 472 L 349 472 L 384 472" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="datasets" data-to="controller" d="M 314 472 L 349 472 L 349 472 L 384 472" stroke="#147d79" marker-end="url(#arrow)"/>
+<path d="M 634 439 L 683 439 L 683 305.6 L 704 305.6" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="controller" data-to="local" d="M 634 439 L 683 439 L 683 305.6 L 704 305.6" stroke="#3c805c" marker-end="url(#arrow)"/>
+<path d="M 634 472 L 669 472 L 669 472 L 704 472" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="controller" data-to="scheduler" d="M 634 472 L 669 472 L 669 472 L 704 472" stroke="#3c805c" marker-end="url(#arrow)"/>
+<path d="M 634 505 L 655 505 L 655 638.4 L 704 638.4" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="controller" data-to="workers" d="M 634 505 L 655 505 L 655 638.4 L 704 638.4" stroke="#3c805c" marker-end="url(#arrow)"/>
+<path d="M 954 299 L 975 299 L 975 432.4 L 1024 432.4" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="local" data-to="results" d="M 954 299 L 975 299 L 975 432.4 L 1024 432.4" stroke="#3c805c" marker-end="url(#arrow)"/>
+<path d="M 954 472 L 989 472 L 989 472 L 1024 472" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="scheduler" data-to="results" d="M 954 472 L 989 472 L 989 472 L 1024 472" stroke="#3c805c" marker-end="url(#arrow)"/>
+<path d="M 954 645 L 1003 645 L 1003 511.6 L 1024 511.6" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="workers" data-to="results" d="M 954 645 L 1003 645 L 1003 511.6 L 1024 511.6" stroke="#3c805c" marker-end="url(#arrow)"/>
+<path d="M 1124 538 L 1124 612" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="results" data-to="monitor" d="M 1124 538 L 1124 612" stroke="#aa6927" marker-end="url(#arrow)"/>
+<path d="M 484 538 L 484 612" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="controller" data-to="review" d="M 484 538 L 484 612" stroke="#3c805c" marker-end="url(#arrow)"/>
+<path d="M 534 612 L 534 538" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="review" data-to="controller" d="M 534 612 L 534 538" stroke="#8a63a5" marker-end="url(#arrow)"/>
+<path d="M 534 406 L 534 332" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="controller" data-to="retry" d="M 534 406 L 534 332" stroke="#3c805c" marker-end="url(#arrow)"/>
+<path d="M 484 332 L 484 406" fill="none" stroke="#f6f4ed" stroke-width="7" stroke-linejoin="round"/>
+<path class="route" data-from="retry" data-to="controller" d="M 484 332 L 484 406" stroke="#3c805c" marker-end="url(#arrow)"/>
+<g id="stage-retry" class="stage"><rect class="card" x="384" y="200" width="250" height="132" rx="16"/><path d="M402 200 H616" stroke="#3c805c" stroke-width="4"/><svg x="402" y="221" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3c805c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+  <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+</svg>
+<text class="label" x="452" y="232" font-size="18" font-weight="700">Bounded retries</text>
+<text class="detail" x="402" y="288" font-size="14">Confirmed temporary failures</text>
+</g>
+<g id="stage-local" class="stage"><rect class="card" x="704" y="200" width="250" height="132" rx="16"/><path d="M722 200 H936" stroke="#3c805c" stroke-width="4"/><svg x="722" y="221" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3c805c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-2" />
+  <path d="M3 15a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3l0 -2" />
+  <path d="M7 8l0 .01" />
+  <path d="M7 16l0 .01" />
+</svg>
+<text class="label" x="772" y="232" font-size="18" font-weight="700">Local Linux</text>
+<text class="detail" x="722" y="288" font-size="14">Default Docker execution</text>
+</g>
+<g id="stage-datasets" class="stage"><rect class="card" x="64" y="406" width="250" height="132" rx="16"/><path d="M82 406 H296" stroke="#147d79" stroke-width="4"/><svg x="82" y="427" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#147d79" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V10M12 12C4 13 2 8 3 3C9 3 13 6 12 12ZM12 9C12 4 16 2 21 2C21 8 18 11 12 9Z" />
+<path d="M6 6L12 12M18 5L12 10M8 14C18 16 6 20 16 22M16 14C6 16 18 20 8 22M10 16H14M10 20H14" />
+</svg>
+<text class="label" x="132" y="438" font-size="18" font-weight="700">Plant datasets</text>
+<text class="detail" x="82" y="494" font-size="14">Exact references and metadata</text>
+</g>
+<g id="stage-controller" class="stage"><rect class="card" x="384" y="406" width="250" height="132" rx="16"/><path d="M402 406 H616" stroke="#3c805c" stroke-width="4"/><svg x="402" y="427" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3c805c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 0 12 0a6 6 0 0 0 -12 0" />
+  <path d="M12 3c1.333 .333 2 2.333 2 6s-.667 5.667 -2 6" />
+  <path d="M12 3c-1.333 .333 -2 2.333 -2 6s.667 5.667 2 6" />
+  <path d="M6 9h12" />
+  <path d="M3 20h7" />
+  <path d="M14 20h7" />
+  <path d="M10 20a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+  <path d="M12 15v3" />
+</svg>
+<text class="label" x="452" y="438" font-size="18" font-weight="700">Controller</text>
+<text class="detail" x="402" y="494" font-size="14">Persistent queue and job state</text>
+</g>
+<g id="stage-scheduler" class="stage"><rect class="card" x="704" y="406" width="250" height="132" rx="16"/><path d="M722 406 H936" stroke="#3c805c" stroke-width="4"/><svg x="722" y="427" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3c805c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 0 12 0a6 6 0 0 0 -12 0" />
+  <path d="M12 3c1.333 .333 2 2.333 2 6s-.667 5.667 -2 6" />
+  <path d="M12 3c-1.333 .333 -2 2.333 -2 6s.667 5.667 2 6" />
+  <path d="M6 9h12" />
+  <path d="M3 20h7" />
+  <path d="M14 20h7" />
+  <path d="M10 20a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+  <path d="M12 15v3" />
+</svg>
+<text class="label" x="772" y="438" font-size="18" font-weight="700">Cluster scheduler</text>
+<text class="detail" x="722" y="494" font-size="14">Site-managed allocations</text>
+</g>
+<g id="stage-results" class="stage"><rect class="card" x="1024" y="406" width="250" height="132" rx="16"/><path d="M1042 406 H1256" stroke="#aa6927" stroke-width="4"/><svg x="1042" y="427" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#aa6927" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4" />
+  <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+  <path d="M9 17h6" />
+  <path d="M9 13h6" />
+</svg>
+<text class="label" x="1092" y="438" font-size="18" font-weight="700">Results</text>
+<text class="detail" x="1042" y="494" font-size="14">QC, signal and provenance</text>
+</g>
+<g id="stage-review" class="stage"><rect class="card" x="384" y="612" width="250" height="132" rx="16"/><path d="M402 612 H616" stroke="#8a63a5" stroke-width="4"/><svg x="402" y="633" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8a63a5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
+  <path d="M15 19l2 2l4 -4" />
+</svg>
+<text class="label" x="452" y="644" font-size="18" font-weight="700">Human review</text>
+<text class="detail" x="402" y="700" font-size="14">Investigate and approve retry</text>
+</g>
+<g id="stage-workers" class="stage"><rect class="card" x="704" y="612" width="250" height="132" rx="16"/><path d="M722 612 H936" stroke="#3c805c" stroke-width="4"/><svg x="722" y="633" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3c805c" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-2" />
+  <path d="M3 15a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3l0 -2" />
+  <path d="M7 8l0 .01" />
+  <path d="M7 16l0 .01" />
+</svg>
+<text class="label" x="772" y="644" font-size="18" font-weight="700">SSH workers</text>
+<text class="detail" x="722" y="700" font-size="14">Existing verified access</text>
+</g>
+<g id="stage-monitor" class="stage"><rect class="card" x="1024" y="612" width="250" height="132" rx="16"/><path d="M1042 612 H1256" stroke="#8a63a5" stroke-width="4"/><svg x="1042" y="633" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#8a63a5" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
+  <path d="M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2" />
+  <path d="M9 17v-5" />
+  <path d="M12 17v-1" />
+  <path d="M15 17v-3" />
+</svg>
+<text class="label" x="1092" y="644" font-size="18" font-weight="700">Monitor</text>
+<text class="detail" x="1042" y="700" font-size="14">Read-only local status page</text>
+</g>
+<path d="M64 825 H1274" stroke="#d4ddd3"/>
+<text class="note" x="64" y="853" font-size="14">Use existing authenticated access. Healthy jobs continue while failed datasets enter review.</text>
+<text class="note" x="64" y="875" font-size="14">Cluster and SSH deployment require site acceptance. Animation illustrates routes, not live status.</text>
+<metadata>{&quot;assets&quot;: {&quot;file-description&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;file-description.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;1db30f85efbd331fa3035d638c61deb2f346eac8c5d301aafff11bdecbe6c679&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/file-description.svg&quot;}, &quot;genesis-seed&quot;: {&quot;author&quot;: &quot;Yaoxiang Li&quot;, &quot;file&quot;: &quot;genesis-seed.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;1&quot;, &quot;sha256&quot;: &quot;ed7898be10c34a57af8e4c88cbaa300800197c4fea73d95a00c167ecc7a1b292&quot;, &quot;source&quot;: &quot;Original Genesis seedling and DNA vector artwork&quot;}, &quot;network&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;network.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;41a8ff03ae456bdbb860aa664ec2c572ef316a60e86bab223e6037b841403d78&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/network.svg&quot;}, &quot;refresh&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;refresh.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;9dd8ab8cac268489501cbb0a106d93cc3f367add493d20c47ec1e1d9804c760a&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/refresh.svg&quot;}, &quot;report-analytics&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;report-analytics.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;eb2c36226f43949a8ce75413d6b4ce8a1d84d23631fe2e20c6f119e4366252ce&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/report-analytics.svg&quot;}, &quot;server&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;server.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;6c4aa71ca6fd11a738abf7972ad893f808e2e25d6181b5b329784050f95490d2&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/server.svg&quot;}, &quot;user-check&quot;: {&quot;author&quot;: &quot;Pawe\u0142 Kuna and Tabler contributors&quot;, &quot;file&quot;: &quot;user-check.svg&quot;, &quot;license&quot;: &quot;MIT&quot;, &quot;revision&quot;: &quot;a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d&quot;, &quot;sha256&quot;: &quot;bbbea83573b85525e35cac636928032ba27d830bee9cbfd229319bff5ccf2251&quot;, &quot;source&quot;: &quot;https://raw.githubusercontent.com/tabler/tabler-icons/a4ce1404bc6d24d3c365afe7b258d6bf6f48d62d/icons/outline/user-check.svg&quot;}}, &quot;licenses&quot;: {&quot;GENESIS-ART-LICENSE.txt&quot;: &quot;MIT License\n\nCopyright (c) 2026 Yaoxiang Li\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \&quot;Software\&quot;), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \&quot;AS IS\&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n&quot;, &quot;TABLER-LICENSE.txt&quot;: &quot;MIT License\n\nCopyright (c) 2020-2026 Pawe\u0142 Kuna\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \&quot;Software\&quot;), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \&quot;AS IS\&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n&quot;}, &quot;renderer&quot;: &quot;Genesis botanical schematic v1&quot;, &quot;spec_sha256&quot;: &quot;dd2289dc9b6d2c70f5a7903f534356915019cf0ed455dda22ec17a68d9a01b99&quot;, &quot;theme&quot;: &quot;light&quot;}</metadata></svg>

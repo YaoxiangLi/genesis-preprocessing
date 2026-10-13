@@ -17,6 +17,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import zipfile
 from collections import Counter
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -453,6 +454,8 @@ def check_outputs(work: Path, *, docker: bool) -> None:
         "CHROM_SIZES": 2,
         "BWA_MEM2_INDEX": 2,
         "DOWNLOAD": 3,
+        "FASTQC": 7,
+        "MULTIQC": 1,
         "METADATA": 5,
         "BWA_MEM2_ALIGN": 5,
         "QC": 5,
@@ -480,6 +483,45 @@ def check_outputs(work: Path, *, docker: bool) -> None:
             "alignments.bed",
             "indexed_peaks.bed",
         ), path
+    aggregate = published / "multiqc"
+    assert (aggregate / "multiqc_report.html").stat().st_size > 0
+    assert len(list(aggregate.glob("*.html"))) == 1
+    provenance = json.loads((aggregate / "multiqc_data/genesis_provenance.json").read_text())
+    assert provenance["run"]["name"] == "samples"
+    assert provenance["run"]["pipeline_version"] == "0.1.0"
+    assert len(provenance["run"]["git_sha"]) == 40
+    identities = {sample["id"]: sample for sample in provenance["samples"]}
+    assert set(identities) == set(SAMPLES)
+    assert (
+        identities["se_treatment"]["control"] == identities["se_second"]["control"] == "se_control"
+    )
+    if docker:
+        html = (aggregate / "multiqc_report.html").read_text()
+        assert provenance["run"]["git_sha"] in html
+        for section in ("fastqc", "samtools-stats", "samtools-flagstat", "samtools-idxstats"):
+            assert f'id="{section}"' in html, section
+        data = json.loads((aggregate / "multiqc_data/multiqc_data.json").read_text())
+        parsed = data["report_saved_raw_data"]
+        assert len(parsed["multiqc_fastqc"]) == 7
+        assert len(parsed["multiqc_samtools_stats"]) == 10
+        assert len(parsed["multiqc_samtools_flagstat"]) == 5
+        assert len(parsed["multiqc_samtools_idxstats"]) == 5
+        assert set(parsed["multiqc_genesis_metadata"]) == set(SAMPLES)
+        for sample, layout in SAMPLES.items():
+            reads = 6000 if sample.endswith("control") else 32000
+            assert parsed["multiqc_samtools_stats"][f"{sample}.qc.report.main.stats.txt"][
+                "raw_total_sequences"
+            ] == reads * (2 if layout == "PE" else 1)
+            assert (
+                parsed["multiqc_samtools_stats"][f"{sample}.qc.report.read1.stats.txt"][
+                    "raw_total_sequences"
+                ]
+                == reads
+            )
+            assert parsed["multiqc_samtools_flagstat"][f"{sample}.qc.report.flagstat.txt"][
+                "flagstat_total"
+            ] == reads * (2 if layout == "PE" else 1)
+            assert "chr1" in parsed["multiqc_samtools_idxstats"][f"{sample}.qc.report.idxstats.tsv"]
     for sample, layout in SAMPLES.items():
         folder = published / f"Plant_{layout}" / sample
         assert folder.is_dir(), folder
@@ -504,6 +546,28 @@ def check_outputs(work: Path, *, docker: bool) -> None:
             assert provenance["qc_reads"] == "full_read1_unpaired"
             assert provenance["spp_reads"] == "read1_first_50bp_unpaired"
             assert provenance["bwa_options"] == "-K 10000000 -k 19 -c 10000 -T 30"
+        mates = ("read1", "read2") if layout == "PE" else ("read1",)
+        fastqc = folder / "qc" / "fastqc"
+        assert len(list(fastqc.glob("*_fastqc.html"))) == len(mates)
+        assert len(list(fastqc.glob("*_fastqc.zip"))) == len(mates)
+        assert len(list(fastqc.iterdir())) == 3 * len(mates)
+        for mate in mates:
+            stem = f"{sample}.{mate}_fastqc"
+            assert (fastqc / f"{stem}.html").stat().st_size > 0
+            assert (fastqc / f"{stem}.zip").stat().st_size > 0
+            if docker:
+                assert (fastqc / f"{sample}.{mate}.fastqc.version.txt").read_text().strip() == (
+                    "FastQC v0.12.1"
+                )
+                with zipfile.ZipFile(fastqc / f"{stem}.zip") as archive:
+                    assert archive.testzip() is None
+                    data = archive.read(f"{stem}/fastqc_data.txt").decode()
+                    assert data.startswith("##FastQC\t0.12.1")
+                    assert f"Filename\t{sample}.{mate}.fastq.gz" in data
+                    expected_reads = 6000 if sample.endswith("control") else 32000
+                    assert f"Total Sequences\t{expected_reads}\n" in data
+                    assert "Sequence length\t75\n" in data
+                    assert archive.read(f"{stem}/summary.txt")
         if sample.endswith("control"):
             assert not list(folder.glob("*.macs3*")) and not list(folder.glob("*.peaks.*.tsv"))
             continue
@@ -515,6 +579,31 @@ def check_outputs(work: Path, *, docker: bool) -> None:
             assert [line.rsplit("\t", 1)[0] for line in scores] == peaks
             assert all(math.isfinite(float(line.rsplit("\t", 1)[1])) for line in scores)
             assert any(float(line.rsplit("\t", 1)[1]) > 0 for line in scores) if docker else True
+    fastqc_tasks = [row for row in rows if row["name"].startswith("FASTQC ")]
+    expected_tags = {
+        f"FASTQC ({sample}:{mate})"
+        for sample, layout in SAMPLES.items()
+        for mate in (("read1", "read2") if layout == "PE" else ("read1",))
+    }
+    assert {row["name"] for row in fastqc_tasks} == expected_tags
+    if docker:
+        # Verify compressed bytes through serving, downloading, and FastQC staging.
+        for row in fastqc_tasks:
+            prefix = work / "work" / row["hash"]
+            folders = list(prefix.parent.glob(prefix.name + "*"))
+            assert len(folders) == 1
+            reads = list(folders[0].glob("*.fastq.gz"))
+            assert len(reads) == 1
+            read = reads[0]
+            sample, mate = read.name.removesuffix(".fastq.gz").rsplit(".", 1)
+            original = work / "inputs" / sample
+            if mate == "read2":
+                original /= "mate"
+            original /= "reads.fastq.gz"
+            assert (
+                hashlib.sha256(read.read_bytes()).digest()
+                == hashlib.sha256(original.read_bytes()).digest()
+            ), read
     # Inspect executed commands, so changes to workflow wiring cannot bypass assertions.
     for command in (work / "work").glob("*/*/.command.sh"):
         source = command.read_text()
@@ -546,20 +635,40 @@ def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
         for path in references.rglob("*")
         if path.is_file()
     }
+    fastqc_before = {
+        path: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (work / "published").glob("samples/output/*/*/qc/fastqc/*")
+    }
+    assert len(fastqc_before) == 21
     assert run_pipeline(work, sheet, docker=docker, resume=True).returncode == 0
     rows = trace_rows(work, "resume")
     names = {row["name"].split(" ")[0] for row in rows}
     assert not names.intersection({"CHROM_SIZES", "BWA_MEM2_INDEX"}), names
+    fastqc_tasks = [row for row in rows if row["name"].split(" ")[0] == "FASTQC"]
+    assert len(fastqc_tasks) == 7 and all(row["status"] == "CACHED" for row in fastqc_tasks)
     # Newly published references change staged input paths on the first resume.
     # A second resume must cache all downstream computation at those stable paths.
     downloads = [row for row in rows if row["name"].split(" ")[0] == "DOWNLOAD"]
     assert len(downloads) == 3 and all(row["status"] == "CACHED" for row in downloads)
+    multiqc_before = {
+        str(path.relative_to(work / "published")): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (work / "published/samples/output/multiqc").rglob("*")
+        if path.is_file()
+    }
     assert run_pipeline(work, sheet, docker=docker, resume=True, suffix="stable").returncode == 0
     rows = trace_rows(work, "stable")
-    for process in ("DOWNLOAD", "BWA_MEM2_ALIGN", "QUANTIFY"):
+    for process in ("DOWNLOAD", "FASTQC", "MULTIQC", "BWA_MEM2_ALIGN", "QUANTIFY"):
         tasks = [row for row in rows if row["name"].split(" ")[0] == process]
         assert tasks and all(row["status"] == "CACHED" for row in tasks), tasks
+    assert multiqc_before == {
+        str(path.relative_to(work / "published")): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (work / "published/samples/output/multiqc").rglob("*")
+        if path.is_file()
+    }
     assert before == {path: (path.stat().st_mtime_ns, path.read_bytes()) for path in before}
+    assert fastqc_before == {
+        path: hashlib.sha256(path.read_bytes()).hexdigest() for path in fastqc_before
+    }
 
 
 def check_failures(work: Path, sheet: Path) -> None:
@@ -593,23 +702,41 @@ def check_failures(work: Path, sheet: Path) -> None:
     assert "Supply exactly one" in (work / "output-multiple-sheets.log").read_text()
 
 
-def check_reference_collision(work: Path, sheet: Path, *, docker: bool) -> None:
-    """Colliding basenames must fail in the actual staged validator before DOWNLOAD."""
-    with sheet.open() as stream:
-        rows = list(csv.DictReader(stream, delimiter="\t"))
-    references = work / "references"
-    source = references / rows[0]["reference_fasta"]
-    alias = source.with_name(source.name.replace(".fa.gz", ".fna.gz"))
-    shutil.copyfile(source, alias)
-    bad = work / "reference-collision.tsv"
-    first = {**rows[0], "control_sample": "-"}
-    second = {**first, "sample_id": "other", "reference_fasta": alias.name}
-    write_sheet(bad, [first, second])
-    run_pipeline(work, bad, docker=docker, suffix="reference-collision", expect_failure=True)
-    assert "reference ID collision" in (work / "output-reference-collision.log").read_text()
-    tasks = trace_rows(work, "reference-collision")
-    assert len(tasks) == 1 and tasks[0]["name"] == "VALIDATE_SHEET"
-    assert tasks[0]["status"] == "FAILED"
+def check_download_failures(work: Path, base_url: str) -> None:
+    """Empty or corrupt raw libraries must fail before reaching FastQC or alignment."""
+    for name, contents in {
+        "empty": gzip.compress(b"", mtime=0),
+        "corrupt": b"\x1f\x8b\x08\x00truncated",
+    }.items():
+        raw = work / "inputs" / f"{name}.fastq.gz"
+        raw.write_bytes(contents)
+        case = work / f"download-{name}"
+        case.mkdir()
+        (case / "references").symlink_to(work / "references", target_is_directory=True)
+        shutil.copyfile(work / "limits.config", case / "limits.config")
+        sheet = case / "samples.tsv"
+        write_sheet(
+            sheet,
+            [
+                {
+                    "sample_id": "bad_control",
+                    "species": "Plant_SE",
+                    "read1_url": f"{base_url}/{raw.name}",
+                    "read2_url": "-",
+                    "control_sample": "-",
+                    "reference_fasta": "se.fa.gz",
+                }
+            ],
+        )
+        assert run_pipeline(case, sheet, docker=True, expect_failure=True).returncode != 0
+        rows = trace_rows(case)
+        assert any(
+            row["name"].startswith("DOWNLOAD ") and row["status"] == "FAILED" for row in rows
+        ), rows
+        assert not any(row["name"].split(" ")[0] in {"FASTQC", "BWA_MEM2_ALIGN"} for row in rows), (
+            rows
+        )
+        assert raw.read_bytes() == contents
 
 
 def check_bams(work: Path) -> None:
@@ -656,6 +783,54 @@ def check_bams(work: Path) -> None:
                 assert all(not int(fields[1]) & 1 for fields in records), bam
 
 
+def check_reference_failures(work: Path, sheet: Path, *, docker: bool) -> None:
+    """Reject bad reference caches before DOWNLOAD, using copies of synthetic references."""
+    parent = work / "reference-failures"
+    parent.mkdir()
+    original = {
+        p.relative_to(work / "references"): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in (work / "references").rglob("*")
+        if p.is_file()
+    }
+    for scenario in ("changed-fasta", "missing-provenance", "damaged-index", "id-collision"):
+        case = parent / scenario
+        case.mkdir()
+        references = case / "references"
+        shutil.copytree(work / "references", references)
+        shutil.copy2(work / "limits.config", case / "limits.config")
+        samples = list(csv.DictReader(sheet.open(), delimiter="\t"))
+        if scenario == "changed-fasta":
+            fasta = references / "se.fa.gz"
+            old = fasta.stat()
+            content = gzip.decompress(fasta.read_bytes())
+            fasta.write_bytes(gzip.compress(content.replace(b"A", b"T", 1), mtime=0))
+            os.utime(fasta, ns=(old.st_atime_ns, old.st_mtime_ns))
+        elif scenario == "missing-provenance":
+            (references / "se.chrom.sizes.provenance.json").unlink()
+        elif scenario == "damaged-index":
+            (references / "se.bwa-mem2/genome.ann").write_text("damaged\n")
+        else:
+            shutil.copy2(references / "se.fa.gz", references / "se.fna.gz")
+            control = next(row for row in samples if row["sample_id"] == "se_control")
+            samples.append({**control, "sample_id": "collision", "reference_fasta": "se.fna.gz"})
+        candidate = case / "samples.tsv"
+        write_sheet(candidate, samples)
+        assert run_pipeline(case, candidate, docker=docker, expect_failure=True).returncode != 0
+        diagnostic = (
+            "reference ID collision" if scenario == "id-collision" else "Unverified reference cache"
+        )
+        assert diagnostic in (case / "output-run.log").read_text()
+        tasks = trace_rows(case)
+        assert len(tasks) == 1, tasks
+        assert tasks[0]["name"].split(" ")[0] == "VALIDATE_SHEET", tasks
+        assert tasks[0]["status"] == "FAILED", tasks
+    assert original == {
+        p.relative_to(work / "references"): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in (work / "references").rglob("*")
+        if p.is_file()
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -670,6 +845,7 @@ def main() -> None:
     runs = ROOT / "tests" / ".runs"
     runs.mkdir(exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix="docker-" if args.docker else "regression-", dir=runs))
+    passed = False
     try:
         assert (
             hashlib.sha256(
@@ -684,18 +860,58 @@ def main() -> None:
         (work / "inputs").mkdir()
         with serve(work / "inputs", docker=args.docker) as base_url:
             sheet = create_fixture(work, base_url, docker=args.docker)
+            raw_before = {
+                str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in (work / "inputs").rglob("*.fastq.gz")
+            }
+            (work / "raw-input-sha256.json").write_text(json.dumps(raw_before, indent=2) + "\n")
             assert run_pipeline(work, sheet, docker=args.docker).returncode == 0
             check_outputs(work, docker=args.docker)
             if args.docker:
                 check_bams(work)
             check_resume(work, sheet, docker=args.docker)
-            check_reference_collision(work, sheet, docker=args.docker)
-            if not args.docker:
+            check_reference_failures(work, sheet, docker=args.docker)
+            assert raw_before == {
+                path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in raw_before
+            }
+            if args.docker:
+                check_download_failures(work, base_url)
+            else:
                 check_failures(work, sheet)
+        if args.docker:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "tests/verify_fastqc.py"),
+                    "--work",
+                    str(work / "fastqc-cases"),
+                ],
+                check=True,
+                timeout=900,
+            )
+        if args.docker:
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "tests/verify_multiqc.py"),
+                    "--source",
+                    str(work / "published/samples/output"),
+                    "--manifest",
+                    str(
+                        work
+                        / "published/samples/output/multiqc/multiqc_data/genesis_provenance.json"
+                    ),
+                    "--work",
+                    str(work / "multiqc-cases"),
+                ],
+                check=True,
+                timeout=900,
+            )
         label = "Real-tool Docker end-to-end" if args.docker else "Nextflow regression"
         print(f"{label} validation passed.", flush=True)
+        passed = True
     finally:
-        if args.keep:
+        if args.keep or not passed:
             print(f"Artifacts retained: {work}", flush=True)
         else:
             shutil.rmtree(work)

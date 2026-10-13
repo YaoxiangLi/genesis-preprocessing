@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "published_revision": "a85ba7fe6ee1690f318136f8beb7d4145195afc1",
+  "files_sha256": {
+    "README.md": "34380556b721cdd238c85a3fbebe0307add809210ce8ffa17a900dbe7e32068e",
+    "docs/usage/studies.md": "a61daa86ea92fbb83ea2cfab035d5d40118134b0dc1c8940e2ab5572e6f3c74a",
+    "docs/images/genesis_architecture_overview.svg": "61dc541964bb2fbce85f682ae5e438c19227a96ca59fbf20ae972c20cecc149d",
+    "genesis_tools/src/genesis_tools/study/cli.py": "4cccfc9dba1a862a8d5fc06672a111da4e3a791a205f09545d57ed093191b594"
+  },
+  "github_markdown_render": "PASS: architecture, capability row, study workflow, and linked worker template present"
+}

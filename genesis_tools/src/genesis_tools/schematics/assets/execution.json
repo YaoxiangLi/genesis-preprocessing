@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "title": "Run and review",
+  "subtitle": "Start on one Linux server. Distribute independent datasets as capacity grows.",
+  "notes": [
+    "Use existing authenticated access. Healthy jobs continue while failed datasets enter review.",
+    "Cluster and SSH deployment require site acceptance. Animation illustrates routes, not live status."
+  ],
+  "nodes": [
+    {
+      "id": "retry",
+      "title": "Bounded retries",
+      "detail": "Confirmed temporary failures",
+      "icon": "refresh",
+      "col": 1,
+      "row": 0,
+      "kind": "execution"
+    },
+    {
+      "id": "local",
+      "title": "Local Linux",
+      "detail": "Default Docker execution",
+      "icon": "server",
+      "col": 2,
+      "row": 0,
+      "kind": "execution"
+    },
+    {
+      "id": "datasets",
+      "title": "Plant datasets",
+      "detail": "Exact references and metadata",
+      "icon": "genesis-seed",
+      "col": 0,
+      "row": 1,
+      "kind": "reads"
+    },
+    {
+      "id": "controller",
+      "title": "Controller",
+      "detail": "Persistent queue and job state",
+      "icon": "network",
+      "col": 1,
+      "row": 1,
+      "kind": "execution"
+    },
+    {
+      "id": "scheduler",
+      "title": "Cluster scheduler",
+      "detail": "Site-managed allocations",
+      "icon": "network",
+      "col": 2,
+      "row": 1,
+      "kind": "execution"
+    },
+    {
+      "id": "results",
+      "title": "Results",
+      "detail": "QC, signal and provenance",
+      "icon": "file-description",
+      "col": 3,
+      "row": 1,
+      "kind": "results"
+    },
+    {
+      "id": "review",
+      "title": "Human review",
+      "detail": "Investigate and approve retry",
+      "icon": "user-check",
+      "col": 1,
+      "row": 2,
+      "kind": "qc"
+    },
+    {
+      "id": "workers",
+      "title": "SSH workers",
+      "detail": "Existing verified access",
+      "icon": "server",
+      "col": 2,
+      "row": 2,
+      "kind": "execution"
+    },
+    {
+      "id": "monitor",
+      "title": "Monitor",
+      "detail": "Read-only local status page",
+      "icon": "report-analytics",
+      "col": 3,
+      "row": 2,
+      "kind": "qc"
+    }
+  ],
+  "edges": [
+    [
+      "datasets",
+      "controller"
+    ],
+    [
+      "controller",
+      "local"
+    ],
+    [
+      "controller",
+      "scheduler"
+    ],
+    [
+      "controller",
+      "workers"
+    ],
+    [
+      "local",
+      "results"
+    ],
+    [
+      "scheduler",
+      "results"
+    ],
+    [
+      "workers",
+      "results"
+    ],
+    [
+      "results",
+      "monitor"
+    ],
+    [
+      "controller",
+      "review"
+    ],
+    [
+      "review",
+      "controller"
+    ],
+    [
+      "controller",
+      "retry"
+    ],
+    [
+      "retry",
+      "controller"
+    ]
+  ]
+}
