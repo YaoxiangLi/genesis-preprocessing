@@ -14,6 +14,7 @@ process QC {
     val resources
     path spp_script
     output:
+    path "*.genesis-task.json", emit: receipt
     tuple val(meta), path("${meta.id}.qc.report.*"), emit: reports
     script:
     def insert = meta.layout == 'PE' ? """
@@ -23,6 +24,7 @@ process QC {
             '${meta.id}.qc.report.main.stats.txt' > '${meta.id}.qc.report.insert_lengths.tsv'
         """ : ''
     """
+    ${DapReceipt.command(task, 'QC', [meta.id], workflow.containerEngine, false)}
     samtools flagstat '${bam}' > '${meta.id}.qc.report.flagstat.txt'
     samtools idxstats '${bam}' > '${meta.id}.qc.report.idxstats.tsv'
     samtools stats '${bam}' > '${meta.id}.qc.report.main.stats.txt'
@@ -51,6 +53,7 @@ process QC {
     """
     stub:
     """
+    ${DapReceipt.command(task, 'QC', [meta.id], workflow.containerEngine, true)}
     printf 'stub\\n' > '${meta.id}.qc.report.spp.tsv'
     touch '${meta.id}.qc.report.spp.pdf' '${meta.id}.qc.report.flagstat.txt'
     """

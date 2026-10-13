@@ -322,6 +322,14 @@ def from_dap(
     path = root / "output/multiqc/multiqc_data/genesis_provenance.json"
     provenance = load(path)
     sources = [snapshot(path, worker)]
+    run_path = root / "output/provenance/dap-run.json"
+    run_evidence: dict[str, Any] | None = None
+    limitations = ["Legacy DAP run has no versioned execution evidence"]
+    if run_path.exists():
+        from .dap import read_run
+
+        run_evidence, limitations = read_run(run_path, provenance["samples"], sheet)
+        sources.append(snapshot(run_path, worker))
     rows: dict[str, dict[str, str]] = {}
     if sheet:
         with sheet.open() as stream:
@@ -350,6 +358,14 @@ def from_dap(
                 else None,
             }
         )
+        if run_evidence is not None:
+            matching = next(r for r in run_evidence["references"] if r["id"] == sample["ref_id"])
+            ref.update(
+                version=matching["sizes_cache"]["compressed_fasta_sha256"],
+                fasta_sha256=matching["sizes_cache"]["compressed_fasta_sha256"],
+                contigs=matching["contigs"],
+                genome_size=sum(matching["contigs"].values()),
+            )
         folder = root / "output" / species / name
         artifacts = []
 
@@ -450,6 +466,12 @@ def from_dap(
                 ref["id"],
             )
         )
+        if run_evidence is not None:
+            for item in artifacts:
+                relative = Path(item["path"]).relative_to(root / "output").as_posix()
+                if relative not in run_evidence["outputs"]:
+                    raise ValueError(f"DAP provenance missing published artifact: {relative}")
+                item["sha256"] = run_evidence["outputs"][relative]["sha256"]
         result.append(
             ArtifactManifest(
                 source_id,
@@ -468,9 +490,11 @@ def from_dap(
                     "job_id": None,
                     "attempt": None,
                     "execution_state": "UNKNOWN",
-                    "git_sha": provenance.get("run", {}).get("git_sha"),
-                    "parameters": {},
-                    "provenance_complete": False,
+                    "git_sha": run_evidence["context"]["git_sha"]
+                    if run_evidence
+                    else provenance.get("run", {}).get("git_sha"),
+                    "parameters": run_evidence["context"]["parameters"] if run_evidence else {},
+                    "provenance_complete": run_evidence is not None and not limitations,
                     "root": str(root),
                 },
                 {
@@ -479,6 +503,7 @@ def from_dap(
                     "role": "control" if control == "-" else "assay",
                     "original_sample": rows.get(name),
                     "output_contract": "genesis-published-v1",
+                    "provenance_limitations": limitations,
                 },
                 artifacts,
                 sources + qc_sources,

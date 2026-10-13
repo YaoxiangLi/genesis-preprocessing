@@ -27,7 +27,7 @@ process BWA_MEM2_INDEX {
         test -s '${ref.id}.bwa-mem2/genome'"\$suffix"
     done
     python '${provenanceScript}' --fasta '${fasta}' --artifact '${ref.id}.bwa-mem2' \\
-        --kind bwa-mem2 --mode real --container '${ref.generator_container}' \\
+        --kind bwa-mem2 --mode real --container '${task.container}' --engine '${workflow.containerEngine ?: 'none'}' \\
         --recipe '${ref.index_recipe}'
     """
     stub:
@@ -37,7 +37,7 @@ process BWA_MEM2_INDEX {
         printf 'stub\\n' > '${ref.id}.bwa-mem2/genome'"\$suffix"
     done
     python '${provenanceScript}' --fasta '${fasta}' --artifact '${ref.id}.bwa-mem2' \\
-        --kind bwa-mem2 --mode stub --container '${ref.generator_container}' \\
+        --kind bwa-mem2 --mode stub --container '${task.container}' --engine '${workflow.containerEngine ?: 'none'}' \\
         --recipe '${ref.index_recipe}'
     """
 }

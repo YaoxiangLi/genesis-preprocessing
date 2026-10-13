@@ -64,14 +64,8 @@ def verify_adapters(folder: Path) -> None:
     assert raw == {path: digest(path) for path in raw}
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--keep", action="store_true")
-    args = parser.parse_args()
-    base = ROOT / "tests/.runs"
-    base.mkdir(exist_ok=True)
-    folder = Path(tempfile.mkdtemp(prefix="supported-atac-", dir=base))
-    print(f"ATAC regression evidence: {folder}", flush=True)
+def create_study_fixture(folder: Path) -> tuple[Path, Path, Path]:
+    """The same real, two-library/multi-lane fixture for standalone and study validation."""
     fixture = folder / "fixture"
     create(fixture, assay="bulk-ATAC")
     ref = {
@@ -126,6 +120,18 @@ def main() -> None:
         writer = csv.DictWriter(stream, fieldnames=sorted(FIELDS), delimiter="\t")
         writer.writeheader()
         writer.writerows(rows)
+    return sheet, registry, fixture
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--keep", action="store_true")
+    args = parser.parse_args()
+    base = ROOT / "tests/.runs"
+    base.mkdir(exist_ok=True)
+    folder = Path(tempfile.mkdtemp(prefix="supported-atac-", dir=base))
+    print(f"ATAC regression evidence: {folder}", flush=True)
+    sheet, registry, fixture = create_study_fixture(folder)
     before = {str(p): digest(p) for p in fixture.rglob("*") if p.is_file()}
     run = folder / "run"
     checkout = folder / "checkout"

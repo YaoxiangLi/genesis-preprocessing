@@ -189,6 +189,8 @@ def collect(target: Path, payload: dict[str, Any], request: dict[str, Any], fold
     evidence = record("source", evidence["data"], evidence["id"])
     for index, manifest in enumerate(manifests):
         data = manifest["data"]
+        if data["run"]["provenance_complete"] and data["run"]["git_sha"] != payload["git_sha"]:
+            raise ValueError("Published provenance differs from the planned pipeline revision")
         data["run"].update(
             campaign_id=request["campaign"],
             job_id=request["job"],
@@ -201,6 +203,8 @@ def collect(target: Path, payload: dict[str, Any], request: dict[str, Any], fold
             None,
         )
         if expected_hash:
+            if data["reference"]["fasta_sha256"] not in {None, expected_hash}:
+                raise ValueError("Published reference differs from the planned FASTA checksum")
             data["reference"]["fasta_sha256"] = expected_hash
             data["reference"]["version"] = expected_hash
         data["sources"].append(evidence)

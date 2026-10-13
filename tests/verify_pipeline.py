@@ -462,6 +462,7 @@ def check_outputs(work: Path, *, docker: bool) -> None:
         "TRACKS": 5,
         "CALL_PEAKS": 3,
         "QUANTIFY": 3,
+        "DAP_PROVENANCE": 1,
     }, counts
     reports = list((work / "published" / "samples" / "trace").glob("execution_report_*.html"))
     assert len(reports) == 1, reports
@@ -490,6 +491,20 @@ def check_outputs(work: Path, *, docker: bool) -> None:
     assert provenance["run"]["name"] == "samples"
     assert provenance["run"]["pipeline_version"] == "0.1.0"
     assert len(provenance["run"]["git_sha"]) == 40
+    from genesis_tools.contracts.dap import read_run
+
+    run_record, limitations = read_run(
+        published / "provenance/dap-run.json",
+        provenance["samples"],
+        work / "samples.tsv",
+    )
+    assert len(run_record["inputs"]) == 7
+    assert len(run_record["tasks"]) == 37  # Every scientific task, excluding reference setup.
+    assert all(t["observed"] is None for t in run_record["tasks"])
+    if not docker:
+        assert limitations and all(t["mode"] == "stub" for t in run_record["tasks"])
+    for relative, expected in run_record["outputs"].items():
+        assert hashlib.sha256((published / relative).read_bytes()).hexdigest() == expected["sha256"]
     identities = {sample["id"]: sample for sample in provenance["samples"]}
     assert set(identities) == set(SAMPLES)
     assert (
@@ -657,7 +672,14 @@ def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
     }
     assert run_pipeline(work, sheet, docker=docker, resume=True, suffix="stable").returncode == 0
     rows = trace_rows(work, "stable")
-    for process in ("DOWNLOAD", "FASTQC", "MULTIQC", "BWA_MEM2_ALIGN", "QUANTIFY"):
+    for process in (
+        "DOWNLOAD",
+        "FASTQC",
+        "MULTIQC",
+        "BWA_MEM2_ALIGN",
+        "QUANTIFY",
+        "DAP_PROVENANCE",
+    ):
         tasks = [row for row in rows if row["name"].split(" ")[0] == process]
         assert tasks and all(row["status"] == "CACHED" for row in tasks), tasks
     assert multiqc_before == {

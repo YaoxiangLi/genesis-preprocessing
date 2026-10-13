@@ -7,7 +7,7 @@ process MULTIQC {
     conda "environments/DAP_SEQ_MULTIQC.yaml"
     container "${dotenv('DAP_SEQ_MULTIQC_IMAGE')}"
     tag "${provenance.name}"
-    publishDir "${params.run_dir}/output/multiqc", mode: 'copy'
+    publishDir "${params.run_dir}/output/multiqc", mode: 'copy', pattern: 'multiqc*'
     input:
     path reports, stageAs: 'inputs/*'
     val samples
@@ -15,11 +15,13 @@ process MULTIQC {
     path config
     path driver
     output:
+    path "*.genesis-task.json", emit: receipt
     path 'multiqc_report.html', emit: html
     path 'multiqc_data', emit: data
     script:
     def manifestJson = groovy.json.JsonOutput.toJson([run: provenance, samples: samples])
     """
+    ${DapReceipt.command(task, 'MULTIQC', ['run'], workflow.containerEngine, false)}
     cat > genesis_manifest.json << 'GENESIS_MANIFEST'
 ${manifestJson}
 GENESIS_MANIFEST
@@ -30,6 +32,7 @@ GENESIS_MANIFEST
     stub:
     def manifestJson = groovy.json.JsonOutput.toJson([run: provenance, samples: samples])
     """
+    ${DapReceipt.command(task, 'MULTIQC', ['run'], workflow.containerEngine, true)}
     mkdir multiqc_data
     printf '<html>MultiQC stub</html>\\n' > multiqc_report.html
     cat > multiqc_data/genesis_provenance.json << 'GENESIS_MANIFEST'

@@ -26,6 +26,7 @@ uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_schem
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_curation.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_curation_artifacts.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_curation_adapters.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_dap_provenance.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_ai.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_llm_deployment.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/evaluate_metadata.py"

@@ -14,6 +14,7 @@ include { MULTIQC } from './modules/multiqc'
 include { TRACKS } from './modules/tracks'
 include { CALL_PEAKS } from './modules/call_peaks'
 include { QUANTIFY } from './modules/quantify'
+include { DAP_PROVENANCE } from './modules/dap_provenance'
 
 // Bowtie 1 modules deliberately have no imports or calls here.
 workflow {
@@ -188,4 +189,68 @@ workflow {
             tuple(meta, peaks, bam, coverage, path)
         }
     QUANTIFY(quantificationInputs)
+
+    // Feed completed channels, never an asynchronously published output directory.
+    def entries = { meta, paths, suffix = '' ->
+        (paths instanceof List ? paths : [paths]).collect { path ->
+            [relative: "${meta.species}/${meta.id}/${suffix}${path.name}".toString(), file: path]
+        }
+    }
+    provenanceProducts = DOWNLOAD.out.downloads.flatMap { batch, _reads, counts ->
+            (counts instanceof List ? counts : [counts]).collect { path ->
+                def meta = batch.find { "${it.id}.fastq.lines" == path.name }
+                entries(meta, path)[0]
+            }
+        }
+        .mix(FASTQC.out.reports.flatMap { meta, _mate, html, zip -> entries(meta, [html, zip], 'qc/fastqc/') })
+        .mix(FASTQC.out.version.flatMap { meta, _mate, path -> entries(meta, path, 'qc/fastqc/') })
+        .mix(METADATA.out.metadata.flatMap { meta, path -> entries(meta, path) })
+        .mix(BWA_MEM2_ALIGN.out.provenance.flatMap { meta, path -> entries(meta, path) })
+        .mix(QC.out.reports.flatMap { meta, paths -> entries(meta, paths) })
+        .mix(TRACKS.out.tracks.flatMap { meta, paths -> entries(meta, paths) })
+        .mix(CALL_PEAKS.out.results.flatMap { meta, paths -> entries(meta, paths) })
+        .mix(QUANTIFY.out.quantified.flatMap { meta, rpm, rpkm -> entries(meta, [rpm, rpkm]) })
+        .mix(MULTIQC.out.html.map { path -> [relative: 'multiqc/multiqc_report.html', file: path] })
+        .mix(MULTIQC.out.data.map { path -> [relative: 'multiqc/multiqc_data', file: path] })
+        .collect().map { rows ->
+            def ordered = rows.sort { it.relative }
+            tuple(ordered.collect { it.relative }, ordered.collect { it.file })
+        }
+    taskReceipts = DOWNLOAD.out.receipt.mix(FASTQC.out.receipt, METADATA.out.receipt,
+        BWA_MEM2_ALIGN.out.receipt, QC.out.receipt, TRACKS.out.receipt, CALL_PEAKS.out.receipt,
+        QUANTIFY.out.receipt, MULTIQC.out.receipt).collect().map { paths -> paths.sort { it.name } }
+    readReceipts = DOWNLOAD.out.checksums.collect().map { paths -> paths.sort { it.name } }
+    def digestFile = { path ->
+        java.security.MessageDigest.getInstance('SHA-256').digest(path.bytes).encodeHex().toString()
+    }
+    referenceReceipts = sizes_ch.combine(indexes, by: 0).map { id, ref, sizes, _indexRef, index ->
+        def parse = { path -> new groovy.json.JsonSlurper().parseText(path.text) }
+        [id: id, filename: ref.filename,
+         contigs: sizes.readLines().collectEntries { line ->
+             def fields = line.split('\t'); [(fields[0]): fields[1].toLong()]
+         },
+         contig_order: sizes.readLines().collect { it.split('\t')[0] },
+         sizes_sha256: digestFile(sizes),
+         sizes_cache: parse(file("${sizes}.provenance.json")),
+         index_cache: parse(index.resolve('provenance.json'))]
+    }.collect().map { rows -> rows.sort { it.id } }
+    // Hash the implementation and locked tool definitions, including dirty working copies.
+    // Clean Git identity is required for complete provenance; dirty runs remain inspectable.
+    def sourceFiles = [file("${projectDir}/main.nf"), file("${projectDir}/nextflow.config"),
+        file("${projectDir}/.env"), file("${projectDir}/multiqc_config.yaml"), file(params.spp_script)] +
+        file("${projectDir}/modules/*.nf") + file("${projectDir}/lib/*.groovy") +
+        file("${projectDir}/environments/*.yaml") + file("${projectDir}/environments/*.lock") +
+        [provenanceScript, file("${projectDir}/genesis_tools/src/genesis_tools/dap_provenance.py"),
+         file("${projectDir}/genesis_tools/uv.lock")]
+    def runContext = [schema_version: 1, git_sha: gitSha, source_status: sourceStatus,
+        nextflow_version: nextflow.version.toString(), profile: workflow.profile,
+        source_hashes: sourceFiles.collectEntries { path -> [(path.toString()): digestFile(path)] },
+        parameters: [bwa: bwaOptions, spp_read_length: params.spp_read_length,
+            spp_script_sha256: digestFile(file(params.spp_script)), download_batch_size: params.download_batch_size,
+            mapq_filter: 'none', flag_exclude: 2308, alignment_duplicates: 'retain',
+            peak_duplicates: 'MACS3 default keep-dup=1', peak_format: 'SE:BAM;PE:BAMPE',
+            quantification_unit: 'primary mapped read ends', track_normalization: 'CPM',
+            track_bin_size: 1, strand_denominator: 'all retained mapped read ends']]
+    DAP_PROVENANCE(provenanceProducts, taskReceipts, readReceipts, referenceReceipts,
+        runContext, sheet, file("${projectDir}/genesis_tools/src/genesis_tools/dap_provenance.py"))
 }

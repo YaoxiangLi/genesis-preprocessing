@@ -63,7 +63,15 @@ def validate_provenance(manifest: Mapping[str, object]) -> None:
         raise ValueError("empty generator version output")
 
 
-def record(fasta: Path, artifact: Path, kind: str, mode: str, container: str, recipe: str) -> None:
+def record(
+    fasta: Path,
+    artifact: Path,
+    kind: str,
+    mode: str,
+    container: str,
+    recipe: str,
+    engine: str = "unknown",
+) -> None:
     """Write a manifest only after all expected products exist and are nonempty."""
     paths = products(artifact, kind)
     if any(not path.is_file() or path.stat().st_size == 0 for path in paths):
@@ -83,6 +91,7 @@ def record(fasta: Path, artifact: Path, kind: str, mode: str, container: str, re
         "compressed_fasta_sha256": sha256(fasta),
         "generator": {
             "container": container,
+            "engine": engine,
             "recipe_sha256": recipe,
             "version": version,
             "version_stderr": version_stderr,
@@ -166,8 +175,11 @@ def main() -> None:
     parser.add_argument("--mode", required=True, choices=("real", "stub"))
     parser.add_argument("--container", required=True)
     parser.add_argument("--recipe", required=True)
+    parser.add_argument("--engine", default="unknown")
     args = parser.parse_args()
-    record(args.fasta, args.artifact, args.kind, args.mode, args.container, args.recipe)
+    record(
+        args.fasta, args.artifact, args.kind, args.mode, args.container, args.recipe, args.engine
+    )
 
 
 if __name__ == "__main__":

@@ -18,6 +18,8 @@ process DOWNLOAD {
     input:
     val samples
     output:
+    path "*.genesis-task.json", emit: receipt
+    path "*.reads.sha256", emit: checksums
     tuple val(samples), path('*.read*.fastq.gz'), path('*.fastq.lines'), emit: downloads
     script:
     def reads = samples.collectMany { meta ->
@@ -33,6 +35,7 @@ process DOWNLOAD {
             count
     }.join('\n')
     """
+    ${DapReceipt.command(task, 'DOWNLOAD', samples.collect { it.id }, workflow.containerEngine, false)}
     aria2c_input_file=aria2c-input.txt
     cat > "\${aria2c_input_file}" << 'END_OF_URLS'
 ${aria2cInput}
@@ -51,6 +54,7 @@ END_OF_URLS
         bgzip --decompress --stdout --threads ${task.cpus} "\$1" | wc -l | tr -d ' '
     }
 ${checks}
+    sha256sum -- *.read*.fastq.gz > '${samples[0].id}.reads.sha256'
     """
     stub:
     def fakes = samples.collect { meta ->
@@ -59,6 +63,8 @@ ${checks}
             "printf '4\\n' > '${meta.id}.fastq.lines'" + second
     }.join('\n')
     """
+    ${DapReceipt.command(task, 'DOWNLOAD', samples.collect { it.id }, workflow.containerEngine, true)}
 ${fakes}
+    sha256sum -- *.read*.fastq.gz > '${samples[0].id}.reads.sha256'
     """
 }

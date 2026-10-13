@@ -7,15 +7,17 @@ process FASTQC {
     conda "environments/DAP_SEQ_FASTQC.yaml"
     container "${dotenv('DAP_SEQ_FASTQC_IMAGE')}"
     tag "${meta.id}:${mate}"
-    publishDir "${params.run_dir}/output/${meta.species}/${meta.id}/qc/fastqc", mode: 'copy'
+    publishDir "${params.run_dir}/output/${meta.species}/${meta.id}/qc/fastqc", mode: 'copy', pattern: '*fastqc*'
     input:
     tuple val(meta), val(mate), path(read)
     output:
+    path "*.genesis-task.json", emit: receipt
     tuple val(meta), val(mate), path("${meta.id}.${mate}_fastqc.html"),
         path("${meta.id}.${mate}_fastqc.zip"), emit: reports
     tuple val(meta), val(mate), path("${meta.id}.${mate}.fastqc.version.txt"), emit: version
     script:
     """
+    ${DapReceipt.command(task, 'FASTQC', ["${meta.id}.${mate}"], workflow.containerEngine, false)}
     # Fontconfig must not attempt a cache under the container's unwritable default HOME.
     export XDG_CACHE_HOME="\$PWD/.cache"
     mkdir -p "\$XDG_CACHE_HOME"
@@ -27,6 +29,7 @@ process FASTQC {
     """
     stub:
     """
+    ${DapReceipt.command(task, 'FASTQC', ["${meta.id}.${mate}"], workflow.containerEngine, true)}
     printf '<html>stub</html>\\n' > '${meta.id}.${mate}_fastqc.html'
     printf 'stub\\n' > '${meta.id}.${mate}_fastqc.zip'
     printf 'stub\\n' > '${meta.id}.${mate}.fastqc.version.txt'

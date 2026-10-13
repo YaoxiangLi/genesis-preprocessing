@@ -12,11 +12,13 @@ process METADATA {
     input:
     tuple val(meta), path(reads), path(chrom_sizes)
     output:
+    path "*.genesis-task.json", emit: receipt
     tuple val(meta), path("${meta.id}.metadata.tsv"), emit: metadata
     script:
     def files = reads instanceof List ? reads.sort { it.name } : [reads]
     def mate = meta.layout == 'PE' ? "--read2 '${files[1]}'" : ''
     """
+    ${DapReceipt.command(task, 'METADATA', [meta.id], workflow.containerEngine, false)}
     genesis-tools metadata --sample-id '${meta.id}' \
         --species '${meta.species}' --reference-fasta '${meta.reference_fasta}' \
         --chrom-sizes '${chrom_sizes}' \
@@ -26,6 +28,7 @@ process METADATA {
     def files = reads instanceof List ? reads.sort { it.name } : [reads]
     def mate = meta.layout == 'PE' ? "--read2 '${files[1]}'" : ''
     """
+    ${DapReceipt.command(task, 'METADATA', [meta.id], workflow.containerEngine, true)}
     genesis-tools metadata --sample-id '${meta.id}' \
         --species '${meta.species}' --reference-fasta '${meta.reference_fasta}' \
         --chrom-sizes '${chrom_sizes}' \

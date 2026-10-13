@@ -20,6 +20,7 @@ micromamba = ">=2.5,<2.6"
 [tasks]
 genesis = "uv run --frozen --project genesis_tools python -m genesis_tools.execution.controller"
 pipeline-atac = { cmd = "scripts/run-atac.sh", description = "Process paired-end bulk ATAC sample sheets." }
+validate-study = "uv run --frozen --project genesis_tools python tests/validate_study.py"
 validate-atac = "uv run --frozen --project genesis_tools python tests/validate_supported_atac.py"
 validate-atac-legacy = "uv run --frozen --project genesis_tools python tests/verify_atac.py --docker"
 benchmark = { cmd = "uv run --frozen --project genesis_tools python -m genesis_tools.benchmark", description = "Plan, run and compare explicit plant benchmark experiments." }

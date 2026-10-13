@@ -20,14 +20,14 @@ process CHROM_SIZES {
     samtools faidx reference.fa
     cut -f1,2 reference.fa.fai > '${ref.id}.chrom.sizes'
     python '${provenanceScript}' --fasta '${fasta}' --artifact '${ref.id}.chrom.sizes' \\
-        --kind chrom-sizes --mode real --container '${ref.generator_container}' \\
+        --kind chrom-sizes --mode real --container '${task.container}' --engine '${workflow.containerEngine ?: 'none'}' \\
         --recipe '${ref.sizes_recipe}'
     """
     stub:
     """
     printf 'chr1\\t1000\\n' > '${ref.id}.chrom.sizes'
     python '${provenanceScript}' --fasta '${fasta}' --artifact '${ref.id}.chrom.sizes' \\
-        --kind chrom-sizes --mode stub --container '${ref.generator_container}' \\
+        --kind chrom-sizes --mode stub --container '${task.container}' --engine '${workflow.containerEngine ?: 'none'}' \\
         --recipe '${ref.sizes_recipe}'
     """
 }
