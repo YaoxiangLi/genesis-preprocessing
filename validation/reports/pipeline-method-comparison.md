@@ -31,12 +31,19 @@ retains MAPQ 0 primary alignments and assigned controls. ATAC requires both mate
 at MAPQ 30 or higher, excludes unknown MAPQ 255, duplicates and declared Mt/Pt
 contigs, and uses nuclear ACGT count for MACS genome size. Tool arguments and
 remaining model differences are documented in the [benchmark guide](../../benchmarks/README.md).
+For ATAC, Genrich uses cut-site windows, minimum AUC 200 and full BAM-header
+genome length; MACS uses fragment pileup and the declared nuclear ACGT count.
+The caller comparison does not match those background models or exercise
+Genrich's joint-replicate/multimapping features.
 
 Three fresh, seeded-order technical repetitions measure timing at one million
 templates. They are not extra biological replicates. The OS cache is not flushed.
 Reference indexing, tool commands, Python processing and common assessment have
 separate timing scopes. Sampled process-group RSS can count shared pages twice
 and miss brief peaks; it is not whole-host memory consumption.
+Input acquisition and occasional installation, verification and figure work ran
+on the other two assigned CPUs. They shared host storage and the OS cache with
+the measurements; the host was not otherwise idle.
 
 ## Production identity correction
 
@@ -50,6 +57,13 @@ Early `v4` experiments used the older package as baseline. Those records remain
 labelled as older-package comparisons. The public `v4` campaign was stopped when
 the discrepancy was found. Final `v5` manifests verify the production executable
 hashes before execution; older results are not relabelled or pooled with them.
+
+The native samtools and htslib package artifacts also match production. MACS3 is
+3.0.5 in both environments, with a Python 3.13 build in production and a Python
+3.12 build in the comparison. Those artifacts differ. The
+[package record](../../benchmarks/experiments/plant-methods-20261013/sources/production-method-package-identity.json)
+keeps the build identities; the complete-workflow measurements use the production
+containers themselves.
 
 ## Synthetic correctness checks
 
