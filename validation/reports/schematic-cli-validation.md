@@ -5,7 +5,6 @@
 > paths identify the original test environment.
 
 Date: 2026-10-09. Base: `78ea67231a1f246aee4c7d0b80c4eede1c5fb584`.
-Branch: `feature/schematic-cli`.
 Implementation commit: `e0b71e452493de99474bc226993ca01d546fb32f`.
 
 ## Change

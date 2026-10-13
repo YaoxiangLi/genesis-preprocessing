@@ -9,7 +9,7 @@ explains the commands, failures found and repaired, limits and rollback.
 - `study-commands.json` records all 145 public CLI calls and hashes of their full logs, archived verbatim in `study-cli-logs.tar.gz`.
   `study-summary.json` records all export denominators, job/task counts and provenance identities.
 - `scientific-invariance.json` records 59 exact scientific artifact hashes compared with the
-  preceding lab revision; narrowPeak gzip payloads are compared after decompression.
+  comparison baseline; narrowPeak gzip payloads are compared after decompression.
 - Raw trace TSVs preserve measured task resources. Requested reservations, process peak RSS,
   host memory and network traffic are different quantities; no host/network claim is made.
 - `initial-*.log` retains failures discovered before the fixes. None is counted as a pass.
@@ -20,9 +20,8 @@ Large synthetic inputs, FASTQs/BAMs, Nextflow work directories, environments and
 are not a GitHub backup. All review decisions in acceptance were explicitly synthetic.
 The ordinary test suite remains Docker-free; real tools require the opt-in command.
 
-`publication.json` verifies the lab and fork remote heads. `fresh-clone*` and
-`final-docs*` record the published checkout handoff and documentation checks.
-The final evidence-only commit leaves the tested implementation unchanged.
+`fresh-clone*` and `final-docs*` record installation from a clean checkout and
+documentation checks at the tested revision.
 
 `study-cli-logs.tar.gz` contains all 290 CLI stdout/stderr files; each digest matches
 `study-commands.json`. The owned temporary checkouts, environments, registries and large

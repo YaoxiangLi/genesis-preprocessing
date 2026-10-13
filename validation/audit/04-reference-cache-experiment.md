@@ -8,7 +8,7 @@ This is a dated validation record. Files labeled “historical workspace” were
 retained on the original test machine and are not included in this checkout.
 Use the [validation index](../README.md) for current reproduction instructions.
 
-Observed 2026-10-07. Upstream SHA: **`4468c712e4c171b573e2ec2806fdc5327b5379e9`**. Local branch: `validation/reference-cache-experiment`, created at that unchanged SHA before adding the experiment driver outside the repository.
+Observed 2026-10-07. Upstream SHA: **`4468c712e4c171b573e2ec2806fdc5327b5379e9`**. The experiment driver ran separately from the unchanged source checkout.
 
 **Finding: HIGH severity silent reference inconsistency, empirically reproduced.** Replacing a synthetic FASTA with different contents under the same filename did not regenerate chromosome sizes or the bwa-mem2 index. All six non-reference tasks, including sample validation, remained cached. A separate run with an empty Nextflow task cache recomputed all six tasks but still used the stale reference products. Renaming the identical replacement FASTA to a new basename caused both products to rebuild correctly.
 
@@ -184,10 +184,10 @@ The same immutable images as audit03 were inspected locally again. BWA package m
 
 - **Deterministic fixture: PASS.** Both FASTAs re-generated in memory to the same compressed hashes; fixed gzip metadata, seeds, interpreter and read hashes are recorded.
 - **Empirical cache reproduction: PASS.** Ten unmodified workflow runs; direct before/after hashes/mtimes, actual task traces, index annotations, BAM dictionaries and named-read counts agree. All original A-derived hashes/mtimes remained unchanged in every phase. Run success did not imply reference correctness.
-- **Safety/scope: PASS.** Every `--references` argument and every run/work/output directory resolves under this experiment's scratch root. Only generated synthetic references were replaced, touched or renamed. Source SHA and all 73 tracked files remain unchanged; Git working tree is clean. The local branch name changed deliberately; no source commit was made.
+- **Safety/scope: PASS.** Every `--references` argument and every run/work/output directory resolves under this experiment's scratch root. Only generated synthetic references were replaced, touched or renamed. Source SHA and all 73 tracked files remain unchanged; Git working tree is clean.
 - **Scientific correctness: FAIL for same-name content replacement**, including fresh task-cache execution; no stale-reference warning was issued.
 - **Limits:** one small SE fixture, one added-contig content change and a previously unused new basename. Same-length substitutions, all possible file-metadata adversarial edits, basename collisions, concurrent writers, corrupt indexes, real assemblies and official reference-pipeline comparisons were not tested. No biological thresholds or general-purpose repair were inferred.
 
 Evidence root: scratch/reference-cache-experiment (historical workspace: `../scratch/reference-cache-experiment/`). `fixture-provenance.json`, `empirical-review.json`, `scope-and-invariants.json`, `deterministic-reference-check.json` and each phase's snapshots/logs contain raw observations. Interpretation and proposed remediation are separated above. `evidence-manifest.json` supplies artifact SHA256 values; `final-acceptance.json` records final Git/source verification.
 
-Files created: this audit, the scratch-only experiment driver/config/fixtures, and retained reference, task, output and log snapshots. The upstream branch was created at the unchanged baseline SHA; no production files, tests, dependencies or real references changed. No fixes were made. Stop after reporting.
+Files created: this audit, the scratch-only experiment driver/config/fixtures, and retained reference, task, output and log snapshots. Production files, tests, dependencies and real references remained unchanged at the baseline revision. The experiment did not implement a fix.

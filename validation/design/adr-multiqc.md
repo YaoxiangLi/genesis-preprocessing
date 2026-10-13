@@ -3,8 +3,8 @@
 > Design record. Check the [current task guides](../../docs/README.md) for
 > implemented commands and the [validation index](../README.md) for tested behavior.
 
-Date: 2026-10-07. Status: implemented and validated; local commit `af0bbfb50806babd78b8e9f88df2a55aab0a2a13`. Design preceded implementation.
-Base commit: `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`; branch `validation/multiqc`.
+Date: 2026-10-07. Status: implemented and validated; revision `af0bbfb50806babd78b8e9f88df2a55aab0a2a13`. Design preceded implementation.
+Base commit: `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`.
 
 ## Native recognition investigation
 
@@ -70,7 +70,7 @@ Negative cases remove a required file, hide a parser, duplicate a report identit
 and introduce collision-prone names. Verify safe failure or distinct entries.
 Compare existing BAM/peak/quantification outputs with the prior baseline. Run
 focused tests, full `pixi run checks`, and Docker validation, retaining failures,
-resources and warnings. Commit source locally only; no image or Git push.
+resources and warnings.
 
 SPP custom-content support could preserve NA strings with an explicitly labelled
 Genesis table and no inherited ChIP-seq thresholds. It is deferred here pending a

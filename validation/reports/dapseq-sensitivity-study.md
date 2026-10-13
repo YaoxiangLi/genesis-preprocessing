@@ -10,7 +10,7 @@ Use the [validation index](../README.md) for current reproduction instructions.
 
 Date: 2026-10-07. **Computational fixture study completed; no production default changes.** The user explicitly selected retained fixtures and requested that biological limits be documented. These results support configurable sensitivity experiments, not a biological recommendation to discard ambiguous or duplicate reads.
 
-Genesis SHA: `af0bbfb50806babd78b8e9f88df2a55aab0a2a13`. Dedicated local branch: `validation/dapseq-sensitivity`; repository remains clean. No source, production tests, dependency manifests, credentials, Docker configuration or original inputs were changed. No push, sudo, new reference download, biological replicate pooling or trimming was performed.
+Genesis SHA: `af0bbfb50806babd78b8e9f88df2a55aab0a2a13`. Source, production tests, dependency manifests, Docker configuration and original inputs were unchanged. No new reference download, biological replicate pooling or trimming was performed.
 
 ## Subset and scope
 
@@ -187,4 +187,4 @@ No policy receives “change default.” Plant/DAP-seq QC thresholds remain **UN
 
 **Warnings/ambiguity retained:** ten Picard optical read-name parsing warnings (one per representation) are in warnings.tsv (historical workspace: `../results/dapseq-sensitivity/warnings.tsv`); optical-duplicate zeros are not validated. Successful SPP exits do not resolve negative/near-singular control RSC values. No command failure was patched, retried into invisibility, or converted into a biological judgment. No production test was weakened. Full pipeline checks were not rerun because no production source/dependency/test code changed; this report claims only the executed experiment and content checks.
 
-**Files added:** this report; compact summary TSVs and raw evidence under `results/dapseq-sensitivity/`; standalone experiment scripts under `scratch/dapseq-sensitivity/`. The main summaries are treatment-summary.tsv, library-metrics.tsv, mapq-distributions.tsv, spp.tsv, peak-widths.tsv, quantification-effects.tsv and branch-resources.tsv. Controls do not receive treatment peak calls/quantification; their library/SPP metrics and one-per-branch cost are retained. No original audit or production file was modified. No commit or push was requested or performed for this experiment.
+**Files added:** this report; compact summary TSVs and raw evidence under `results/dapseq-sensitivity/`; standalone experiment scripts under `scratch/dapseq-sensitivity/`. The main summaries are treatment-summary.tsv, library-metrics.tsv, mapq-distributions.tsv, spp.tsv, peak-widths.tsv, quantification-effects.tsv and branch-resources.tsv. Controls do not receive treatment peak calls/quantification; their library/SPP metrics and one-per-branch cost are retained. No original audit or production file was modified.

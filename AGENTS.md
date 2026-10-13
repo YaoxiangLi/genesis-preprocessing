@@ -11,18 +11,13 @@ The main project environment is managed by pixi. There are subprojects:
 - environments/DAP_SEQ_QC.yaml defines a conda environment used for QC.
 
 ### Compute resources
-The project is intended to be used locally on macOS or Linux, or on a SLURM cluster, specifically
-`sherlock`.
-- Use existing SSH authentication to access sherlock. If authentication fails, report the issue;
+The project runs locally on macOS or Linux and on supported scheduler profiles.
+- Use existing SSH authentication. If authentication fails, report the issue;
   do not create or modify credentials, keys, or SSH configuration.
-- Notable slurm queues:
-  - normal: the main submission queue
-  - akundaje: a submission queue for the group that I am in
-  - owners: a preemptible queue that will usually launch jobs more quickly
-  - dev: a queue for testing short-duration low-resource jobs
-- On sherlock there is access a network disk called `/oak/`
-  - Do not edit files on `/oak/` without permission.
-  - Do not access files on `/oak/` outside of `/oak/stanford/groups/akundaje/` without permission.
+- Use only accounts, queues and allocations authorized for the task. Keep local
+  account names and filesystem configuration outside the repository.
+- Access shared project storage only within the explicitly authorized scope;
+  modifications require authorization. Do not infer access from mounted paths.
 
 ## Coding Standards
 - Follow Python best practices and use type annotations.

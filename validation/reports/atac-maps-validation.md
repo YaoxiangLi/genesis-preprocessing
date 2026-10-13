@@ -4,7 +4,7 @@
 > [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
 > paths identify the original test environment.
 
-Date: 2026-10-09. Base fork commit: `003c9457161d9588421074f37b50bea6050daf45`. Original ATAC prototype: `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`.
+Date: 2026-10-09. Baseline revision: `003c9457161d9588421074f37b50bea6050daf45`. Original ATAC prototype: `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`.
 
 ## Scope and implementation
 

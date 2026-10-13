@@ -208,7 +208,7 @@ found a Git-provenance assumption; the isolated fix at `857ce3e` passed a fresh
 wheel test outside the repository. The fix records installed source hashes and
 an unknown Git revision rather than borrowing a nearby checkout's identity.
 
-The merged release at `a85211237470d7146457167e1723b04a7ebf3cff` also passed
+Revision `a85211237470d7146457167e1723b04a7ebf3cff` also passed
 `pixi run checks` and fresh installed-wheel acceptance outside the repository.
 The wheel's offline tutorial completed metadata review, QC, reviewed export and
 backup/restore for two synthetic datasets. The release additionally refuses to

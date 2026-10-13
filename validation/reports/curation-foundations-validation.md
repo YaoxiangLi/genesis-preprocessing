@@ -4,12 +4,9 @@
 > [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
 > paths identify the original test environment.
 
-Date: 2026-10-09. Scope: the agreed Prompts **0–3** (audit, contracts,
-scientific registry, QC and manual review). Source baseline:
-`bb16baca5d9bb09bfff8825fc537fcb125809c07`, branch `main`.
-Implementation changes were uncommitted when this evidence was captured; the
-foundation milestone was subsequently committed as `117e5dc`. No release was
-claimed by the original validation run.
+Date: 2026-10-09. Scope: contracts, scientific registry, QC and manual review.
+Source baseline: `bb16baca5d9bb09bfff8825fc537fcb125809c07`. Tests captured
+implementation hashes before revision `117e5dc` was recorded.
 The exact implementation/test/resource hashes, dependency versions and final wheel
 digest are in [environment-and-source.json](../evidence/curation/environment-and-source.json).
 
@@ -41,7 +38,7 @@ times, network bytes, host-wide RAM and costs remain unknown.
 | `uv run --frozen --project genesis_tools python tests/verify_curation_artifacts.py --bigwig-python /tmp/genesis-bigwig-env/bin/python` | PASS, exit 0 | [Binary check log](../evidence/curation/binary-checks.log) |
 | `uv run --frozen --project genesis_tools python tests/benchmark_curation.py --libraries 10000 --batch-size 100 --output /tmp/genesis-catalog-scale.json` | PASS, exit 0 | [Measurements](../evidence/curation/catalog-scale.json) |
 | Build final wheel; install it in `/tmp/genesis-curation-installed` with locked runtime dependencies | PASS, exit 0 | [Source/wheel digest](../evidence/curation/environment-and-source.json) |
-| From `/tmp`: `/tmp/genesis-curation-installed/bin/python -I /data/homes/yl814/package/genesis/genesis-preprocessing/tests/verify_curation.py` | PASS, exit 0 | [Installed acceptance log](../evidence/curation/installed-acceptance.log) |
+| Run `tests/verify_curation.py` from `/tmp` with the installed interpreter and `-I` | PASS, exit 0 | [Installed acceptance log](../evidence/curation/installed-acceptance.log) |
 | From `/tmp`: installed import/resource/CLI probe, matching installed files to the implementation hashes | PASS | [Installed-wheel evidence](../evidence/curation/installed-wheel.json) |
 | `git diff --check` | PASS | Final local diff inspection |
 
@@ -144,7 +141,7 @@ environment, not a production scale guarantee or whole-host memory estimate.
 | `pixi run validate-docker --keep` full real-tool DAP pipeline | NOT RUN: Genesis scientific images were not installed; large image/tool acquisition was outside this milestone's local acceptance |
 | `pixi run validate-atac --keep` full real-tool ATAC pipeline | NOT RUN: same image/runtime acceptance limitation; actual local known-answer fragment tests did run |
 | Live SSH, site scheduler and remote artifact transport | NOT RUN: no authorized live worker/site acceptance was exercised; local worker simulation and command/profile checks ran |
-| GPUs, external APIs, model download/serving, AI diagnosis or harmonization | NOT RUN / outside Prompts 0–3; no inference or deployment is implemented here |
+| GPUs, external APIs, model download/serving, AI diagnosis or harmonization | NOT RUN; inference and deployment are outside this validation |
 | Real biological cohort thresholds or curation accuracy | NOT RUN: synthetic fixtures do not establish biological acceptance or measured curator accuracy |
 
 Legacy DAP provenance can remain incomplete and be excluded by the default reviewed
@@ -170,5 +167,5 @@ state and artifacts. Full instructions are in the [curation guide](../../docs/us
 Project decisions before biological use are the intended export profile and its
 required artifact roles; scientifically approved metric policies and exceptions;
 stable study/worker namespaces; and accountable reviewer OS identities. Providers
-and model deployment can build on these contracts in later milestones. Nothing
-was committed, pushed, deployed or executed against production datasets.
+and model deployment were outside the scope of this validation. Production
+datasets were not exercised.

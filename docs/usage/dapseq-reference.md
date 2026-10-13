@@ -23,7 +23,7 @@ assignments. The retired Bash pipeline and metadata script are available in Git
 history. Stock Bowtie 1 comparison modules remain available in `modules/`, but
 are not imported or run by the main workflow.
 
-This guide retains the six detailed sections from the original lab README.
+This guide retains the six detailed sections from the original DAP README.
 The [project README](../../README.md) introduces the architecture and other assays;
 the [archived README at `fb60096`](../history/dapseq-readme-fb60096.md) preserves
 the original wording and dated validation claim.
@@ -32,7 +32,7 @@ the original wording and dated validation claim.
 
 The full project update retains the sample sheets, assigned controls and DAP
 scientific defaults. Existing standalone commands remain available; curation and
-AI approval are optional additions. Operational changes since lab main `fb60096`:
+AI approval are optional additions. Changes since the DAP-only revision `fb60096`:
 
 | Area | Current behavior and migration |
 | --- | --- |
@@ -46,7 +46,7 @@ No command deletes old runs or rewrites executed campaign payloads as part of th
 upgrade. Back up live registries with the documented
 [registry backup/restore commands](curation.md#read-only-status-backup-and-rollback), and retain original
 references and run data separately from Git. See the
-[development handoff](../development.md) for a clean clone and dependency setup.
+[contributor guide](../development.md) for installation and dependency setup.
 
 ## Install and run
 
@@ -356,7 +356,7 @@ or the conda profile. Only Linux amd64 Docker execution has been validated here.
 
 ## Verification
 
-The [2026-10-12 lab-update acceptance](../../validation/reports/lab-main-promotion.md)
+The [2026-10-12 integration validation](../../validation/reports/integration-validation-20261012.md)
 records current Linux Docker results and exact source/image identities. Earlier
 ARM64 results remain in the archived README with their original date and revision.
 

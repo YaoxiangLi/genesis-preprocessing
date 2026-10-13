@@ -4,11 +4,11 @@
 > [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
 > paths identify the original test environment.
 
-Date: 2026-10-07. Branch: `validation/fastqc`.
+Date: 2026-10-07.
 Baseline SHA: `4468c712e4c171b573e2ec2806fdc5327b5379e9`.
 The baseline reports remain unchanged. This is the first intentional workflow change.
 Design was written before implementation in [ADR](../design/adr-fastqc.md).
-Final local commit: `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`. Working tree clean after commit. Nothing pushed.
+Tested revision: `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`.
 
 ## Change and acceptance
 
@@ -97,7 +97,8 @@ environments. Only the new FastQC manifest/lock were resolved.
 | DAP_SEQ_FASTQC_IMAGE | `sha256:97ca1e181a55a1d87653984956983fea3ff76cab5875f45ae2143168ff4fd73d` |
 
 FastQC's reference above is an immutable **local image/config ID**, not a registry
-manifest digest. `RepoDigests` is empty because the image has never been pushed.
+manifest digest. `RepoDigests` is empty; this local image is not available from a
+container registry.
 Remote pull/Apptainer use of that ID is not supported. The committed locks and
 existing Dockerfile provide a rebuild path; rebuilds may have a different image
 ID, which must be recorded and explicitly configured. Other image references are
@@ -209,6 +210,5 @@ Workspace documents: `design/adr-fastqc.md`, `reports/fastqc-validation.md`.
 Reproduction/inspection scripts are under `scratch/fastqc/`. Full successful and
 unsuccessful test evidence and large outputs are under `results/fastqc/`; original
 ignored test-run paths are symlinks to retained runs so absolute cache paths remain
-usable. `artifact-locations.json` records the mapping. No generated outputs are
-committed and nothing is pushed. These workspace audit documents are outside the
-upstream Git repository and are not part of the source commit.
+usable. `artifact-locations.json` records the mapping. These paths refer to the
+original validation workspace; large outputs are excluded from this repository.

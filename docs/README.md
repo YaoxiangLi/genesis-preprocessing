@@ -26,10 +26,10 @@ Choose the guide for the task you want to complete.
 
 ## Develop Genesis
 
-- [Developer setup and handoff](development.md): install a checkout, run checks and continue on another server.
+- [Contributor guide](development.md): install a development environment, run checks and test changes.
 - [Nextflow conventions](nextflow-style.md): module structure and pipeline changes.
 - [Diagram maintenance](diagrams/README.md): update the maintained workflow maps.
-- [Curation design](curation/IMPLEMENTATION_BRIEF.md) and [implementation checklist](curation/CHECKLIST.md): contributor background.
+- [Curation design](curation/IMPLEMENTATION_BRIEF.md): component ownership, contracts and compatibility.
 - [Original DAP README](history/dapseq-readme-fb60096.md): historical documentation, preserved for reference.
 
 Current guides describe the installed commands. Historical reports describe the

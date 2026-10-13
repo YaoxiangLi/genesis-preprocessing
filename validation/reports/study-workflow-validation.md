@@ -49,7 +49,7 @@ controller overhead were not measured.
 
 The full suite used Python 3.14.5, Pixi 0.81.0, uv 0.11.33, ruff 0.16.10 and ty 0.0.84.
 It used the existing verified Nextflow plugin cache with `NXF_OFFLINE=true`; the
-[handoff guide](../../docs/development.md#recovery-when-plugin-lookup-fails) records
+[contributor guide](../../docs/development.md#recovery-when-plugin-lookup-fails) records
 recovery instructions and exact pinned plugin hashes. Pixi emitted its existing
 `system-requirements` deprecation warning. No new code/type/lint warning was introduced.
 The separate binary reader was Python 3.12.3 with pyBigWig 0.3.26.
@@ -64,23 +64,16 @@ from that core environment. The optional binary reader remained a separate inter
 The existing offline tutorial exported two synthetic datasets with six explicit
 demonstration decisions; its pipeline/live-inference status remained `NOT RUN`.
 
-## GitHub handoff
+## Installation from a fresh checkout
 
-The implementation and documentation were published to GitHub `main` at
-`a85ba7fe6ee1690f318136f8beb7d4145195afc1`. GitHub's API returned matching bytes for
-the README, study guide, architecture SVG and study CLI. GitHub Markdown rendering
-included the new workflow section, capability row and linked execution template.
-[Publication receipt](../evidence/study-workflow/publication.json).
-
-A separate clone at `/tmp/genesis-study-github-msr5_g3m/repository` installed new
-project environments, passed help/doctor, the 170 documented recipes, study acceptance
-with the binary reader, and the existing two-dataset offline tutorial. All 411 tracked
-files matched the published checkout byte for byte; `git status --porcelain` was empty
-after the checks. [Per-step results](../evidence/study-workflow/github-checkout.json)
-and [timing/log receipt](../evidence/study-workflow/github-handoff.json) record exact
-commands. This used the same Linux host and existing package caches, not a different
-server or an uncached network installation. The follow-up publication adds this
-evidence and handoff documentation without changing the tested implementation.
+A fresh checkout of `a85ba7fe6ee1690f318136f8beb7d4145195afc1` installed new
+project environments and passed help/doctor, the 170 documented recipes, study
+acceptance with the binary reader and the two-dataset offline tutorial. All 411
+tracked files matched the source revision byte for byte, and the checkout remained
+clean after the checks. [Per-step results](../evidence/study-workflow/fresh-clone-details.json)
+and the [timing/log receipt](../evidence/study-workflow/fresh-clone.json) record the
+commands. These tests used the same Linux host and existing package caches; they
+do not measure an uncached installation or establish compatibility on other hosts.
 
 ## What the new acceptance establishes
 
@@ -146,7 +139,7 @@ pixi run uv run --frozen --project genesis_tools python tests/verify_study.py \
 
 The binary test needs an already available reader. The default test requires no
 Docker, scheduler, credentials, GPU or external service. Initial dependency/plugin
-installation may need network access. Follow the [development handoff](../../docs/development.md)
+installation may need network access. Follow the [contributor guide](../../docs/development.md)
 for a new server; paths in evidence receipts identify this test host only.
 
 Keep the previous registry's pre-migration backup. To roll back software, stop

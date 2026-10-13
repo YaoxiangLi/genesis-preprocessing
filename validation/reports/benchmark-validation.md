@@ -8,7 +8,7 @@ This is a dated validation record. Files labeled “historical workspace” were
 retained on the original test machine and are not included in this checkout.
 Use the [validation index](../README.md) for current reproduction instructions.
 
-Date: 2026-10-09. Branch: `validation/benchmark`. Starting production revision:
+Date: 2026-10-09. Starting production revision:
 `e8b37e281b4cace2522179ac7208cfef15cd4dea`. This is an opt-in experiment layer;
 no production Nextflow module, pipeline configuration, dependency lock or scientific
 default changed. See [design](../design/benchmark-spec.md) and
@@ -134,7 +134,7 @@ is 3.5.6, R is 4.4.3 and spp is 1.16.0. External workflow native software-versio
 files and per-task execution scripts are retained with the Nextflow traces.
 
 
-## Files and local contributions
+## Implementation and evidence
 
 Production workflow code and scientific defaults are unchanged. Added modules are
 under `repo/genesis_tools/src/genesis_tools/benchmark/`; offline tests are
@@ -145,9 +145,6 @@ the opt-in task, `scripts/check-projects.sh` includes the tests and shell lint, 
 public manifests, official metadata snapshots and user documentation. README links
 to those contracts. Workspace evidence is under `results/benchmarks/` and
 `results/incremental-prs/benchmark-*`. No generated BAMs or FASTQs were committed.
-
-Local commits use the configured Yaoxiang Li identity. Nothing was pushed and no
-issue/PR publishing queue was changed by this implementation.
 
 Evidence links: content inspection (historical workspace: `../results/benchmarks/inspection.json`),
 retained-study comparisons (historical workspace: `../results/benchmarks/retained-comparisons.json`),
@@ -199,7 +196,7 @@ treatments). The saved acceptance script checks that derivation and zero tool re
 
 ## Final acceptance
 
-Final local SHA: `a93c59cd4ed7daeb99dcbca8fe783704e06746f3`. Git working tree is clean. Full final
+Tested revision: `a93c59cd4ed7daeb99dcbca8fe783704e06746f3`. The full
 `pixi run checks` passed in 84.09 seconds; final command receipt (historical workspace: `../results/incremental-prs/benchmark-final-checks-3/run.json`).
 Docker real-tool regression passed in 329.68 seconds. Final cache-only changes
 were subsequently verified with the full checks, real SPP and ATAC fresh/resume
@@ -214,14 +211,4 @@ browser behavior, complete regression suite, and production-output preservation.
 BLOCKED: executable public plant panel, pending exact reference/input checksums and
 metadata decisions. UNRESOLVED: biological superiority of policies; no conclusion
 is inferred from synthetic success. Deferred metric domains are explicitly listed
-above. No production scientific setting changed and nothing was pushed.
-
-Final repository state and complete changed-file inventory (historical workspace: `../results/benchmarks/final-repository-state.json`).
-
-Local commits:
-
-- `a93c59cd4ed7daeb99dcbca8fe783704e06746f3 Yaoxiang Li <liyaoxiang@outlook.com> Separate SPP caches and verify workflow output history on resume`
-- `5db3cadeeca47e1b1e196b3b76294dcb88ede9fa Yaoxiang Li <liyaoxiang@outlook.com> Document benchmark contracts and curate blocked Arabidopsis pilot manifests`
-- `089775f7a8b363722ab02cc50d635046992a2dec Yaoxiang Li <liyaoxiang@outlook.com> Run isolated sensitivity and pinned workflow benchmarks with common metrics`
-- `09d1456603d1048aef358c6d46c731c678d944ba Yaoxiang Li <liyaoxiang@outlook.com> Add independently tested fragment metrics and deterministic paired subsampling`
-- `80bee414feb42bc6a44a509f87db94a0333e1d6d Yaoxiang Li <liyaoxiang@outlook.com> Validate benchmark manifests and record content-addressed execution evidence`
+above. Production scientific settings were unchanged.

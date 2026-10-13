@@ -4,7 +4,7 @@
 > [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
 > paths identify the original test environment.
 
-Historical report: the README overview was subsequently removed at the project owner’s request.
+Historical report: the README overview was subsequently removed from the README.
 The linked image is retained at its original Git revision.
 
 Date: 2026-10-10 UTC (2026-10-09 America/New_York).

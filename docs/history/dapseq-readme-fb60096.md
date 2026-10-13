@@ -1,6 +1,6 @@
-# Historical DAP-seq README — lab main before the full update
+# Historical DAP-seq README
 
-Archived on 2026-10-12 from lab commit
+Archived on 2026-10-12 from revision
 [`fb600968b3abf5d79756aaf7e6d1e4ff43a1b41d`](https://github.com/kundajelab/genesis-preprocessing/blob/fb600968b3abf5d79756aaf7e6d1e4ff43a1b41d/README.md).
 The original text below is preserved; its two relative documentation links now
 point to that exact revision. Commands, defaults and the reported 2026-10-06

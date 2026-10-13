@@ -4,10 +4,10 @@
 > [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
 > paths identify the original test environment.
 
-Date: 2026-10-07. Branch: `validation/multiqc`.
+Date: 2026-10-07.
 Parent/FastQC commit: `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`.
 Unmodified scientific baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9`.
-Final local commit: `af0bbfb50806babd78b8e9f88df2a55aab0a2a13` (clean working tree; nothing pushed).
+Tested revision: `af0bbfb50806babd78b8e9f88df2a55aab0a2a13`.
 Design was recorded before implementation: [ADR](../design/adr-multiqc.md).
 
 ## Result
@@ -203,7 +203,7 @@ unchanged. Detailed hashes and comparison rules are in
 | DAP_SEQ_MULTIQC_IMAGE | `sha256:3f8fc8c57e57994b95408cd02a7ced44a6fb90396b9067bbe2d2dcdebb396b50` |
 
 The new MultiQC reference is an immutable local image/config ID. RepoDigests is
-empty because it was not pushed; it is not a remotely pullable registry digest.
+empty; the image is local and has no remotely pullable registry digest.
 The existing FastQC image has the same local-only limitation. Other references
 remain their prior registry digests. Full version output, image IDs/architectures
 and new environment SHA256s are in `versions-detail.json` and `image-detail.json`.
@@ -224,8 +224,7 @@ The existing Dockerfile and pinned bases were reused unchanged:
 and
 `ubuntu@sha256:f3d28607ddd78734bb7f71f117f3c6706c666b8b76cbff7c9ff6e5718d46ff64`.
 The direct build avoids the previously documented tagless-wrapper failure. Other
-lock platforms resolve but were not executed. No image push, sudo, system software
-installation, Docker permission/group/daemon change or credential change occurred.
+lock platforms resolve but were not executed.
 
 ## Failures, warnings and unresolved scope
 
@@ -260,5 +259,4 @@ and `README.md`.
 
 Workspace documents: `design/adr-multiqc.md`, `reports/multiqc-validation.md`.
 Evidence/scripts: `results/multiqc/` and `scratch/multiqc/`. Large outputs are outside
-Git; these workspace documents are outside the upstream repository. No earlier
-baseline report was altered. Nothing was pushed.
+Git. These paths identify the original validation workspace.

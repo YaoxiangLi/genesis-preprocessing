@@ -8,7 +8,7 @@
 
 The local computational validation, reference-cache hardening, QC additions, isolated PE ATAC prototype, model-facing contracts and workflow diagrams are implemented and tested within their stated scope. This is **not full biological validation**. The exact Sorghum reference and Plant Data Sets workbook remain missing; no assembly or workbook was substituted. Synthetic data cannot settle plant MAPQ, duplication, motif or QC-threshold policies.
 
-Original upstream baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9`. DAP development branch: `validation/completion`. Isolated ATAC branch: `validation/bulk-atac-prototype`, commit `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`. Baseline observations in audit/00–06 remain separate from later changes. Exact current revisions, checksums, resource logs, container identities and artifact inventory are linked in results/completion/.
+Original baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9`. ATAC prototype revision: `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`. Baseline observations in audit/00–06 remain separate from later changes. Exact tested revisions, checksums, resource logs, container identities and artifact inventory were recorded in the original workspace under `results/completion/`.
 
 The combined DAP checks and real-container validation pass. All 15 compared BAMs remain byte-identical to the retained baseline; existing scientific output payloads match, with gzip/PDF metadata differences explicitly separated. The ATAC prototype and pinned nf-core benchmark agree on 31,554 usable synthetic fragments and 200 peak intervals. Those agreements establish computational behavior on this fixture, not plant biological optimality.
 
@@ -18,35 +18,35 @@ Pinned project environments/containers, DSL2 workflow structure, deterministic f
 
 ## Confirmed software defects
 
-| Finding | Severity | Evidence | Owner | Disposition |
-| --- | --- | --- | --- | --- |
-| Docker BAM-inspection helper used a different UID from caller-owned fixtures | MEDIUM | REPRODUCED, audit/03 | preprocessing team | Local fix; PR #2 |
-| Explicit image tags still required resolving a default Git tag | MEDIUM | REPRODUCED, incremental PR evidence | preprocessing team | Local fix; PR #4 |
-| Track plotting attempted unwritable default cache | LOW | OBSERVED in Docker logs | preprocessing team | Task-local cache fix; PR #6 |
-| Different accepted FASTA suffixes collapsed to one reference ID | HIGH | REPRODUCED with native and Docker rejection regression | preprocessing team | Local fix; PR #10 |
-| ENCODE_scatac fragment converter drops terminal coordinate group | HIGH | REPRODUCED component fixture | preprocessing team | Reference clone unchanged; do not import this logic without fix/tests |
-| ENCODE_scatac multimapper filter drops terminal query group | HIGH | REPRODUCED component fixture | preprocessing team | Reference clone unchanged; independent EOF tests required |
+| Finding | Severity | Evidence | Disposition |
+| --- | --- | --- | --- |
+| Docker BAM-inspection helper used a different UID from caller-owned fixtures | MEDIUM | REPRODUCED, audit/03 | Helper now uses the invoking user |
+| Explicit image tags still required resolving a default Git tag | MEDIUM | REPRODUCED in build regressions | Explicit tags bypass default-tag lookup |
+| Track plotting attempted unwritable default cache | LOW | OBSERVED in Docker logs | Cache moved into the task directory |
+| Different accepted FASTA suffixes collapsed to one reference ID | HIGH | REPRODUCED with native and Docker rejection regression | Ambiguous reference IDs are rejected |
+| ENCODE_scatac fragment converter drops terminal coordinate group | HIGH | REPRODUCED component fixture | Reference clone unchanged; do not import this logic without fix/tests |
+| ENCODE_scatac multimapper filter drops terminal query group | HIGH | REPRODUCED component fixture | Reference clone unchanged; independent EOF tests required |
 
 The two scATAC defects are in the pinned external reference implementation, not Genesis production code. Their isolated component tests do not establish full reference-workflow execution.
 
 ## Confirmed reproducibility risks
 
-| Risk | Severity | Evidence | Owner | Current handling |
-| --- | --- | --- | --- | --- |
-| Path/existence-based reference reuse can silently use stale derived files | HIGH | REPRODUCED, audit/04 | preprocessing team | Local content/generator/product verification; unverified cache stops |
-| Missing exact Sorghum assembly manifest/checksum | HIGH | OBSERVED prerequisite absence; identity unresolved | wet-lab/data producer | BLOCKED, audit/05; no substitution |
-| Local FastQC/MultiQC images are not portable published artifacts | MEDIUM | DOCUMENTED image IDs | infrastructure/admin | Exact local IDs recorded; no image push authorized/executed |
-| Launch-directory config/schema leakage between Nextflow projects | MEDIUM | OBSERVED during nf-core benchmark | preprocessing team | Isolated config and launch directory; failures retained |
-| Reference benchmark output directory implied narrow mode while command called broad peaks | MEDIUM | OBSERVED actual MACS2 argv | preprocessing team | Explicit CLI mode/q and separate matched run; no reference source edit |
-| nf-core version aggregation/MultiQC rerun on otherwise stable resume | LOW | OBSERVED 36/38 cached | preprocessing team | Reporting-layer rerun documented; biological tasks cached |
-| scATAC published mark-only doublet specification differs from the pinned filterDoublets call | MEDIUM | OBSERVED code/specification discrepancy | preprocessing team | Preserve distinction; no cell-loss estimate claimed |
-| Concurrent mutation of a reference during execution | HIGH | HYPOTHESIS; not tested | infrastructure/admin | Immutable-during-run requirement; launch hashes are not a lock |
+| Risk | Severity | Evidence | Current handling |
+| --- | --- | --- | --- |
+| Path/existence-based reference reuse can silently use stale derived files | HIGH | REPRODUCED, audit/04 | Content/generator/product verification; unverified cache stops |
+| Missing exact Sorghum assembly manifest/checksum | HIGH | OBSERVED prerequisite absence; identity unresolved | BLOCKED, audit/05; no substitution |
+| Local FastQC/MultiQC images are not portable published artifacts | MEDIUM | DOCUMENTED image IDs | Exact local IDs recorded; images are unavailable from a container registry at this revision |
+| Launch-directory config/schema leakage between Nextflow projects | MEDIUM | OBSERVED during nf-core benchmark | Isolated config and launch directory; failures retained |
+| Reference benchmark output directory implied narrow mode while command called broad peaks | MEDIUM | OBSERVED actual MACS2 argv | Explicit CLI mode/q and separate matched run; no reference source edit |
+| nf-core version aggregation/MultiQC rerun on otherwise stable resume | LOW | OBSERVED 36/38 cached | Reporting-layer rerun documented; biological tasks cached |
+| scATAC published mark-only doublet specification differs from the pinned filterDoublets call | MEDIUM | OBSERVED code/specification discrepancy | Preserve distinction; no cell-loss estimate claimed |
+| Concurrent mutation of a reference during execution | HIGH | HYPOTHESIS; not tested | Immutable-during-run requirement; launch hashes are not a lock |
 
 No cache manifests, tests or logs were weakened to hide these conditions. Legacy cache compatibility deliberately changes: old unverified products require preservation and regeneration in a fresh reference directory.
 
 ## Scientific design risks
 
-MAPQ, duplicate exclusion, trimming, reference choice, peak mode, Tn5 offsets and biological replicate pooling are scientific policies, not interchangeable bug fixes. Plant organellar identities must include plastids and cannot assume human chrM naming. QC metrics need exact numerators/denominators and annotation/coordinate conventions. Plant acceptance thresholds remain **UNSPECIFIED**. Decision owner for defaults is Ted/project lead with preprocessing/modeling input; current evidence is DOCUMENTED or synthetic REPRODUCED, not real-data validation.
+MAPQ, duplicate exclusion, trimming, reference choice, peak mode, Tn5 offsets and biological replicate pooling are scientific policies, not interchangeable bug fixes. Plant organellar identities must include plastids and cannot assume human chrM naming. QC metrics need exact numerators/denominators and annotation/coordinate conventions. Plant acceptance thresholds remain **UNSPECIFIED**. This report provides documented or reproduced synthetic evidence; it does not establish appropriate defaults for real biological datasets.
 
 ## DAP-seq findings
 
@@ -66,7 +66,7 @@ The nine-arm synthetic study compared no cutoff, MAPQ10 and MAPQ30 with three du
 
 ## Duplicate-handling findings
 
-Marked-but-retained BAMs preserve analysis payloads in the experiment. Exclusion changes quantification even where peaks remain unchanged. Genesis's MACS3 invocation inherits keep-dup=1, so retained BAM duplicates do not mean all duplicates contribute to peaks. Documentation was corrected separately (PR #8). Recommendation: retain the current DAP behavior pending real data; make every future policy explicit and regenerate affected analysis if changed.
+Marked-but-retained BAMs preserve analysis payloads in the experiment. Exclusion changes quantification even where peaks remain unchanged. Genesis's MACS3 invocation inherits keep-dup=1, so retained BAM duplicates do not mean all duplicates contribute to peaks. Recommendation: retain the current DAP behavior pending real data; make every future policy explicit and regenerate affected analysis if changed.
 
 ## Reference/assembly findings
 
@@ -92,9 +92,13 @@ Two biological replicates × three cell types yield exact counts r1=(3,1,1), r2=
 
 **BLOCKED:** inputs/Plant Data Sets.xlsx is absent. No worksheet counts, missingness, replicate reconstruction or candidate ranking are fabricated. reports/plant-data-inventory-audit.md records the exact resumption requirements. No bulk data download occurred.
 
-## Open ambiguities requiring project-level decisions
+## Evidence needed before biological use
 
-Only unresolved policy choices are collected in reports/questions-for-ted-draft.md, which has not been sent. Exact source files/manifests must be supplied before real-data gates can close. Default MAPQ/duplicate/adapter policies, plant QC acceptance, biological replicate/technical merge identities, supported initial scATAC chemistries and plant-compatible model bias strategy require project evidence/decisions. Code-discoverable questions were resolved in the audits rather than delegated to Ted.
+Real-data validation requires exact source files and manifests. MAPQ, duplicate and
+adapter policies, plant QC acceptance, biological replicate identities, technical
+merge rules, scATAC chemistry and model bias correction need evidence specific to
+the dataset and intended analysis. The synthetic results above cannot settle those
+choices.
 
 ## Recommended changes before scaling
 
@@ -110,4 +114,4 @@ Only unresolved policy choices are collected in reports/questions-for-ted-draft.
 
 Production scATAC/multiome, optical-duplicate/complexity expansions, automatic trimming, universal QC cutoffs, bulk replicate pooling/IDR and model training should wait for explicit data/protocol decisions and acceptance fixtures. Benefits are broader scope and biological evidence; risks are unvalidated assumptions and policy drift; effort is substantial. These would change or create scientific outputs and require versioned regeneration, not silent in-place updates.
 
-The current/animated metro SVG and separate architecture roadmap are in repo/docs/images/. Roadmap labels distinguish implemented DAP processing, experimental bulk ATAC, tested contracts and planned production routes. Small contributions remain isolated; publication is paced at least two hours apart, no automatic merge or container push is performed.
+The current/animated metro SVG and separate architecture roadmap are in repo/docs/images/. Roadmap labels distinguish implemented DAP processing, experimental bulk ATAC, tested contracts and planned production routes.

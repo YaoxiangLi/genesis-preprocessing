@@ -1,12 +1,15 @@
-# Files changed and delivered
+# Historical validation file inventory
 
 > Validation record for the revision and date below. Use the
 > [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
 > paths identify the original test environment.
 
-Exact SHA256s and repository states: results/completion/final-manifest.json. Large outputs remain under results/ and scratch/.
+This inventory records paths in the original validation workspace. Its
+`results/completion/final-manifest.json` recorded source revisions and SHA256s.
+Large outputs were retained under `results/` and `scratch/`; these are historical
+locations, not paths supplied by a fresh clone.
 
-## Combined DAP branch
+## DAP source and regression tests
 
 - `repo/README.md`
 - `repo/docs/diagrams/README.md`
@@ -76,11 +79,9 @@ Exact SHA256s and repository states: results/completion/final-manifest.json. Lar
 - `fixtures/reference-registry/validate.py`
 - `fixtures/reference-registry/verify_provenance.py`
 - `reports/GENESIS_PREPROCESSING_VALIDATION.md`
-- `reports/completion-ledger.md`
+- `reports/historical-validation-coverage.md`
 - `reports/reference-hardening-validation.md`
 - `reports/bulk-atac-prototype-validation.md`
 - `reports/contract-validation.md`
 - `reports/metro-map-validation.md`
 - `reports/plant-data-inventory-audit.md`
-- `reports/questions-for-ted-draft.md`
-- `reports/incremental-contribution-plan.md`

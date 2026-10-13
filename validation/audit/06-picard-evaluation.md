@@ -151,7 +151,7 @@ The synthetic generator does not model PCR amplification, yet endpoint duplicate
 - Warnings: SE insert-size empty-category warnings; optical read-name parsing warnings in duplicate tools. Their raw stderr is retained. No warning was hidden or converted into a biological fail threshold.
 - One experimental inspection-script run failed because a local variable shadowed the samtools executable path. Original stderr is preserved in `independent-checks-first.stderr`; only the standalone inspection helper was corrected, then rerun without changing assertions. No Picard, Genesis, or production-test failure was patched.
 - Missing evidence: real DAP-seq performance, large-genome memory/I/O scaling, optical-duplicate validity, multiple true libraries/read groups, nonzero error/indel/chimera cases, and biological meaning of estimated library size. These limit adoption, not the recorded small-fixture results.
-- Full Genesis regression suite was not rerun: this is a read-only standalone-tool experiment with no production edits; no claim of newly validating the pipeline suite is made. No local commit or branch change was needed for production code because none was changed.
+- Full Genesis regression suite was not rerun: this is a read-only standalone-tool experiment with no production edits; no claim of newly validating the pipeline suite is made.
 
 Files added: this audit, [ADR](../design/adr-picard.md), experiment scripts/environment/reference/source snapshots under `scratch/picard/`, and raw logs/metrics/marked copies/checksums under `results/picard/`. Genesis git diff/status remain empty. Complete artifact manifest: checksums.json (historical workspace: `../results/picard/checksums.json`).
 

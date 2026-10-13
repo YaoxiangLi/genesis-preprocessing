@@ -3,7 +3,7 @@
 > Design record. Check the [current task guides](../../docs/README.md) for
 > implemented commands and the [validation index](../README.md) for tested behavior.
 
-Status: accepted for the local validation branch; not merged upstream. Scientific reference files are immutable for the duration of a run.
+Status: implemented and tested in the [reference provenance validation](../reports/reference-hardening-validation.md). Scientific reference files are immutable for the duration of a run.
 
 The baseline experiment in `audit/04-reference-cache-experiment.md` reproduced silent reuse of derived products after a FASTA was replaced at the same path. Filename existence cannot establish assembly identity. Distinct accepted suffixes also allowed two filenames to collapse to one cache ID; this now fails sample validation.
 

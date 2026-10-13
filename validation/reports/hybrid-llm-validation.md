@@ -22,17 +22,16 @@ production model/runtime compatibility.
 The extension is integrated into the existing `pixi run genesis` dispatcher.
 It does not install a second scheduler or make preprocessing depend on AI/review.
 
-| Plan stage | Implemented behavior |
+| Component | Implemented behavior |
 | --- | --- |
-| 0: audit and boundary | Shared implementation brief, compatibility boundary, baseline evidence and checkpoints |
-| 1: contracts | Shipped versioned schemas, adapters, bounded artifact/reference validation, separate completeness and execution status |
-| 2: registry | Controller-local SQLite, immutable provenance, worker-qualified locations, search, migration, export, backup/restore |
-| 3: QC/review | Versioned declarative assessments, explicit missing values, stale-review rejection, metadata/QC/eligibility decisions, read-only summaries, reviewed export |
-| 4: providers | Disabled/manual, deterministic mock and configured live compatible HTTP providers; egress rules, redaction, budgets, retries, cancellation, capability probes, invocation history and read-only assistant |
-| 5: model services | HF metadata inspection, revision-pinned plans, local/SSH transport, isolated vLLM container backend, resource reservations, lifecycle reconciliation, private tunnels and ownership-checked stop |
-| 6: metadata | Bounded local/public source ingestion, deterministic extraction, evidence-checked optional proposals, vocabulary validation, separate approval/apply, immutable metadata revisions |
-| 7: diagnosis | Bounded redacted evidence, deterministic classification, optional cited explanation, typed proposed actions; no automatic repair or uncertain-job retry |
-| 8: integration | Offline example, synthetic evaluation, fake HTTP/lifecycle tests, separate opt-in live runners, full README recipes and detailed usage guides |
+| Contracts | Shipped versioned schemas, adapters, bounded artifact/reference validation, separate completeness and execution status |
+| Registry | Controller-local SQLite, immutable provenance, worker-qualified locations, search, migration, export, backup/restore |
+| QC/review | Versioned declarative assessments, explicit missing values, stale-review rejection, metadata/QC/eligibility decisions, read-only summaries, reviewed export |
+| Providers | Disabled/manual, deterministic mock and configured live compatible HTTP providers; egress rules, redaction, budgets, retries, cancellation, capability probes, invocation history and read-only assistant |
+| Model services | HF metadata inspection, revision-pinned plans, local/SSH transport, isolated vLLM container backend, resource reservations, lifecycle reconciliation, private tunnels and ownership-checked stop |
+| Metadata | Bounded local/public source ingestion, deterministic extraction, evidence-checked optional proposals, vocabulary validation, separate approval/apply, immutable metadata revisions |
+| Diagnosis | Bounded redacted evidence, deterministic classification, optional cited explanation, typed proposed actions; no automatic repair or uncertain-job retry |
+| Integration | Offline example, synthetic evaluation, fake HTTP/lifecycle tests, separate opt-in live runners, full README recipes and detailed usage guides |
 
 Schemas 1 and 2 remain readable where supported; the registry migrates to schema 3
 without rewriting historical decisions. Metadata proposal approval and application
@@ -89,7 +88,7 @@ actual command, revision, exit status, start time and elapsed time.
 | `genesis_tools/.venv/bin/python tests/evaluate_metadata.py --output /tmp/genesis-hybrid-metadata-evaluation-final.json` | PASS, synthetic software evaluation | [Measurements](../evidence/hybrid-llm/metadata-evaluation.json) |
 | `genesis_tools/.venv/bin/python tests/benchmark_curation.py --libraries 1000 --batch-size 100 --output /tmp/genesis-hybrid-catalog-scale-v2.json` | PASS, bounded local catalog measurement | [Measurements](../evidence/hybrid-llm/catalog-scale.json) |
 | `genesis_tools/.venv/bin/python tests/verify_readme.py` | PASS, 130 documented command invocations parse and local documentation links resolve | Full suite log; final documentation check |
-| `git diff --check` | PASS | Final publication checks |
+| `git diff --check` | PASS | Formatting check |
 
 The full suite runs shellcheck, lint/format and strict type checks, existing DAP
 Nextflow stub/resume/reference-failure checks, ATAC known-answer fixtures,

@@ -1,8 +1,8 @@
-# Lab main promotion evidence
+# Integration validation evidence — October 2026
 
-These receipts, logs and traces record the acceptance of merge `392ada4` on
+These receipts, logs and traces record the acceptance of revision `392ada4` on
 2026-10-12 in America/New_York (2026-10-13 UTC). See the
-[validation report](../../reports/lab-main-promotion.md) for scope and reproduction.
+[validation report](../../reports/integration-validation-20261012.md) for scope and reproduction.
 
 Trailing whitespace in logs is removed for clean diffs; no lines or diagnostics
 are omitted. Receipts record the committed log SHA256 and, where normalized, its

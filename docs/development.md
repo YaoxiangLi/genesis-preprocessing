@@ -1,9 +1,9 @@
-# Continue development on another server
+# Contributing to Genesis
 
-[`kundajelab/genesis-preprocessing`](https://github.com/kundajelab/genesis-preprocessing)
-`main` is the primary development handoff. Start new work from lab main; check the remote revision before making changes. Clone it to obtain the source, README,
-workflow figures, examples, test fixtures, validation evidence, project
-instructions and dependency locks. No Git LFS objects or submodules are required.
+This guide covers development setup, tests and contribution conventions.
+Clone [Genesis](https://github.com/kundajelab/genesis-preprocessing) to obtain the
+source, examples, fixtures and dependency locks. No Git LFS objects or submodules
+are required.
 
 ## Set up a fresh checkout
 
@@ -21,15 +21,14 @@ genesis doctor
 
 `install-all` uses the committed `pixi.lock`, `genesis_tools/uv.lock` and Python
 selection in `genesis_tools/.python-version` (currently Python 3.14.5 with the GIL).
-It creates environments on the new server. Initial installation needs network
-access or populated package caches. Do not copy `.pixi/` or `.venv/` from the old
-server: environment paths and binaries are machine-specific. The supported Pixi
+It creates environments for the checkout. Initial installation needs network
+access or populated package caches. Recreate `.pixi/` and `.venv/` when moving a
+checkout: environment paths and binaries are machine-specific. The supported Pixi
 platforms are Linux x86_64 and macOS x86_64/ARM64; private vLLM deployment requires
 an authorized Linux node and its separate serving environment.
 
 `doctor` reports the selected checkout, tools on the host and in Pixi, and Docker access.
-Docker, a GPU and API
-credentials are not prerequisites for the core development checks or mock tutorial;
+Docker, a GPU and API credentials are not prerequisites for the core development checks or mock tutorial;
 scientific-container and live-model acceptance have their own prerequisites.
 
 ### Command installation and maintenance
@@ -192,7 +191,7 @@ describes Docker-based scientific acceptance; the [provider](usage/ai-providers.
 and [model-service](usage/llm-deployment.md#opt-in-real-local-or-ssh-acceptance) guides describe
 live API/GPU checks. Mock tests do not establish acceptance on a remote site.
 
-## Move data and state separately
+## Data and configuration
 
 Git transfers code, locks, small fixtures, schemas, templates and validation reports.
 It does not transfer references, reads, analysis outputs, caches, live databases,
@@ -203,11 +202,7 @@ With orchestration stopped, preserve study state and worker attempt/output direc
 through your normal storage workflow. Keep worker-qualified paths accurate: a new
 checkout does not relocate data or reconnect jobs under a different identity.
 
-Keep personal provider/site configurations outside the checkout. Install dependencies
-from the locks on the new server, then run the baseline checks and offline tutorial
-above. A clean clone plus passing local checks is the minimum handoff; test SSH,
-schedulers and GPUs separately where they will actually run.
-
-[Earlier handoff records](history/development-handoffs.md) retain the tested revisions,
-measurements and links to evidence. [Current validation records](../validation/README.md)
-show which scientific and operational checks have been performed.
+Keep provider credentials and site-specific configurations outside the checkout.
+Test SSH, schedulers and GPUs in the environment where they will run; local checks
+do not establish remote compatibility. [Validation records](../validation/README.md)
+show which scientific and installation checks have been performed.

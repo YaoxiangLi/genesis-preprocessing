@@ -117,7 +117,7 @@ between tools or studies.
 | Host a private model on an existing node | [Model services](docs/usage/llm-deployment.md) |
 | Compare processing methods and inspect benchmark evidence | [Benchmarks](benchmarks/README.md) |
 | Draw a workflow schematic | [Figure commands](docs/usage/schematics.md) |
-| Continue development on another server | [Developer setup](docs/development.md) |
+| Set up a development environment or contribute | [Contributor guide](docs/development.md) |
 
 The [documentation index](docs/README.md) also links to reference material and
 validation records. Core processing, catalog queries and manual review work
@@ -179,8 +179,8 @@ The detailed DAP material remains available: [installation](docs/usage/dapseq-re
 [outputs and resources](docs/usage/dapseq-reference.md#outputs-and-resources),
 [environments](docs/usage/dapseq-reference.md#environments-and-docker-builds), and
 [verification](docs/usage/dapseq-reference.md#verification).
-The [original lab README](docs/history/dapseq-readme-fb60096.md) is preserved.
+The [original DAP README](docs/history/dapseq-readme-fb60096.md) is preserved.
 
-For checks, contribution conventions and GitHub/server handoff, use the
-[development guide](docs/development.md). The [validation index](validation/README.md)
+For checks and contribution conventions, use the
+[contributor guide](docs/development.md). The [validation index](validation/README.md)
 explains which tests were run and where their evidence is available.

@@ -4,7 +4,7 @@
 > [current task guides](../../docs/README.md) for a new analysis. Recorded temporary
 > paths identify the original test environment.
 
-Date: 2026-10-07T17:03:59.850074+00:00. Upstream SHA: `4468c712e4c171b573e2ec2806fdc5327b5379e9`. Local branch: `validation/reference-cache-experiment`.
+Date: 2026-10-07T17:03:59.850074+00:00. Upstream SHA: `4468c712e4c171b573e2ec2806fdc5327b5379e9`.
 
 Input: `repo/test-Sorghum_bicolor-PRJNA1177471.tsv`; SHA256 `b56fa04c5cd76817a2d85270d597e37572588b3046654b3c9c90167ac9b9a512`.
 
@@ -66,4 +66,4 @@ Host inspection tools: Python 3.12.12; ripgrep 15.2.0; git 2.43.0. No workflow/c
 - UNRESOLVED: authoritative checksum/size, assembly/annotation version mapping and file-specific policy/access. Local search was not exhaustive across inaccessible paths.
 - Biological quality: NOT ASSESSED. Neither sheet validity nor eventual computational success establishes biological quality. Plant-specific QC thresholds remain UNSPECIFIED.
 
-Created files: `audit/05-sorghum-reference-requirement.md`, `audit/05-sorghum-integration.md`, and preflight evidence under `scratch/sorghum-reference-check/`. No upstream file changed. Stop here as instructed; no reference acquisition attempted.
+Created files: `audit/05-sorghum-reference-requirement.md`, `audit/05-sorghum-integration.md`, and preflight evidence under `scratch/sorghum-reference-check/`. No upstream file changed. No reference acquisition was attempted.

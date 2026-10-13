@@ -10,25 +10,13 @@ Observed 2026-10-07. This is independent static inspection of the untouched chec
 
 - Clone: `git clone https://github.com/kundajelab/genesis-preprocessing ./repo`.
 - Exact current SHA: **`4468c712e4c171b573e2ec2806fdc5327b5379e9`**.
-- Branch: `main`; remote HEAD and `refs/heads/main` matched that SHA when queried.
-- Origin fetch and push URL: `https://github.com/kundajelab/genesis-preprocessing`. Nothing was pushed.
 - `git -C repo status --porcelain=v1 --untracked-files=all`: empty.
 - Tags: none locally; `git ls-remote --tags` also returned none. No historical checkout was made.
 - Clone elapsed 0.53 s, peak RSS 18,912 KiB, exit 0; Git 2.43.0. Clone logs and subsequent timed Git queries are in `../scratch/bootstrap-clone.*` and `../scratch/bootstrap-git.json`.
 
-Latest five commits, as returned by Git (author timestamps):
-
-| SHA | Timestamp | Subject |
-|---|---|---|
-| `4468c712e4c171b573e2ec2806fdc5327b5379e9` | 2026-10-07T10:25:12-04:00 | Bug fixes and clean-up |
-| `d607ef92e3a44db027b61a992ee9eb06a3e0f3ba` | 2026-10-06T14:16:33-04:00 | Made into nextflow repo |
-| `15e44a1c186d2b1a4648c896b4c1a4887ddaf1cf` | 2026-10-06T11:09:47-04:00 | Update AI safety rules |
-| `c52abe47ecb4d6160e53c3de3fe755ff376eb6de` | 2026-10-05T20:30:39-04:00 | Move input TSVs |
-| `d05709c7703ad1bf89dffbd827ac2bf0eb51070d` | 2026-10-05T19:53:01-04:00 | Bash version of pipeline |
-
 Read: README, AGENTS, root Pixi manifest/lock, Nextflow config/schema/main, all 12 modules, all 13 environment files, three Dockerfiles and `.dockerignore`, both test files, all 12 shell scripts, `.gitignore`, and `.env` with values withheld except strictly allowlisted public image references. Additional inspection covered Python implementations and manifest/lock, workflow style documentation, and relevant vendored SPP code/provenance. Locks were parsed in full, not just inferred from manifests. No test suite or workflow was executed. The host availability inventory is in [00-environment.md](00-environment.md).
 
-`AGENTS.md` requires focused checks for code changes and flags possible mutating check tasks. The actual current `check-projects.sh` uses Ruff check and format `--check`, not `--fix`. It prohibits credential changes and limits agent-submitted Sherlock tasks to two CPUs, 8 GB and five minutes. No cluster access occurred. No branch was created because no source changes were made; a dedicated local branch is required before future code changes. Audit files are outside the upstream checkout and were not committed to it.
+`AGENTS.md` requires focused checks for code changes and flags possible mutating check tasks. The actual current `check-projects.sh` uses Ruff check and format `--check`, not `--fix`. It prohibits credential changes and limits agent-submitted Sherlock tasks to two CPUs, 8 GB and five minutes. No cluster access occurred.
 
 ## Implemented DAG
 
@@ -272,7 +260,9 @@ The five strictly allowlisted public image references above are non-secret prove
 
 No workflow runtime pass/fail or biological acceptance is inferred. No official/reference pipeline comparison was executed; upstream statements about ENCODE or an IGVF scaffold remain claims to validate separately. The next baseline stage requires a pinned runner environment, plugin artifacts, exact compatible images or a reviewed baseline-preserving build route, and exact reference/FASTQ provenance. All future real-tool runs must retain commands, SHA, actual software/digests, input hashes, elapsed/RAM, outputs and unfiltered diagnostics. No assembly, replicate, MAPQ, duplicate, trimming or peak policy was changed.
 
-Files created: two audit reports, `scratch/bootstrap-*` evidence and the upstream clone; requested `audit/`, `benchmarks/`, `fixtures/`, `results/`, `design/`, `reports/`, `scratch/` directories exist. No upstream tracked file changed; no branch/commit/push or implementation work occurred. Bootstrap is complete; full baseline validation is not.
+This inventory produced two audit reports and `scratch/bootstrap-*` evidence in
+the original validation workspace. It did not modify tracked source or execute
+the full baseline test suite.
 
 ## Evidence ledger and checksums
 

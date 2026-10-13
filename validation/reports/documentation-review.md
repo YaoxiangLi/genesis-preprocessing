@@ -1,14 +1,9 @@
-# Documentation review, 13 October 2026
+# Documentation and installation validation, 13 October 2026
 
 The README now leads with installation, a first DAP or ATAC analysis, and where to
 find the results. It uses the installed `genesis` command throughout. Optional
 catalog, review, worker and AI features have their own task guides, linked from
 the README and [documentation index](../../docs/README.md).
-
-The [file inventory](../evidence/documentation-review-20261013/files.tsv) covers
-the 77 Markdown files present at revision `83ec12b`, including contributor instructions and
-historical records. It records each file's audience, review scope, change status
-and checksum. This report and later benchmark evidence are separate additions.
 
 ## Changes readers will notice
 
@@ -16,7 +11,7 @@ and checksum. This report and later benchmark evidence are separate additions.
   its outputs go. Examples use consistent input and output names.
 - The detailed DAP guide retains control assignments, reference handling,
   alignment/SPP policies, duplicate behavior, track units and peak-score definitions.
-  The original lab README remains unchanged in the historical archive.
+  The original DAP README remains unchanged in the historical archive.
 - The bulk and single-cell ATAC guides distinguish lanes, libraries, biological
   replicates, fragments and cut sites. Missing metrics remain distinct from zero.
 - The benchmark guide names the compared packages, fixed settings, measurement
@@ -44,7 +39,7 @@ corrected. Its package metadata and executable hashes establish BWA-MEM2 2.3;
 the misleading 2.2.1 banner is now explained in both benchmark guides. Earlier
 measurements retain their original package identities.
 
-The merged release at `a85211237470d7146457167e1723b04a7ebf3cff` passed the full
+The revision `a85211237470d7146457167e1723b04a7ebf3cff` passed the full
 suite again. Its documentation check covered 80 Markdown files, 143 CLI examples
 and 24 Pixi recipes. A new wheel installed outside the checkout also completed
 the offline curation tutorial. [Acceptance records](../evidence/method-comparison-20261013/release-acceptance/)
@@ -54,7 +49,7 @@ A fresh clone of GitHub `main` at `57e6a0d` installed the direct command using t
 documented custom-bin option. General help, DAP/ATAC help and runtime discovery
 worked from `/tmp`, and all eight transferred benchmark archives matched their
 recorded checksums. The cloned working tree remained clean. See the
-[handoff record](../evidence/method-comparison-20261013/github-handoff/).
+[installation record](../evidence/method-comparison-20261013/installation/).
 
 The benchmark HTML report was opened in Chromium. Its initial view now selects
 one library and a useful retention metric, and sorts methods and repetitions.

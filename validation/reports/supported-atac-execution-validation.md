@@ -18,7 +18,7 @@ and an SSH worker protocol provide deployment options; authentication remains
 under site control. A persistent controller isolates failed datasets, limits
 temporary retries and exposes unresolved work for human review.
 
-The comparison starts at fork commit
+The comparison starts at revision
 `4b682f700d539698b271ca652306f46b6230aea1`. The final production-code commit is
 `bad67391acda37a53f584b7ded9cbdf27096aa2b`; later commits retain evidence and
 documentation. The original upstream audit baseline remains
@@ -218,7 +218,7 @@ Complete image digests and actual version commands are in the evidence directory
 and `conf/atac-images.json`. The FastQC and MultiQC DAP defaults now use public,
 digest-pinned images at the same tool versions instead of local-only image IDs.
 
-Both dependency locks are unchanged from the fork base:
+Both dependency locks are unchanged from the comparison baseline:
 
 - `pixi.lock`: `874cbf7d41658470853868c86e5b6d4f2734b85a47b1973f9bb8e78833a7047c`
 - `genesis_tools/uv.lock`: `1132c51537ac229ce768fcf0edde8475a970be017cef82c0d46601b228f998f5`

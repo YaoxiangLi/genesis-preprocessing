@@ -3,8 +3,8 @@
 > Design record. Check the [current task guides](../../docs/README.md) for
 > implemented commands and the [validation index](../README.md) for tested behavior.
 
-Date: 2026-10-07. Status: implemented and validated; local commit `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`.
-Baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9`. Branch: `validation/fastqc`.
+Date: 2026-10-07. Status: implemented and validated; revision `430cfe31aab5fb9638d18c75a087a9bcb7a868c5`.
+Baseline: `4468c712e4c171b573e2ec2806fdc5327b5379e9`.
 
 ## Decision before implementation
 
@@ -59,15 +59,15 @@ reports; it does not establish assay suitability. [Official FastQC documentation
 
 ## Local container and reproducibility boundary
 
-No image will be pushed. The existing build wrapper fails before parsing options in
-this tagless clone (`git describe --tags`). Do not change those scripts or fabricate
-an upstream tag: invoke the same Dockerfile directly with the new locked environment.
-Record exact command, base digests, platform and local image ID. A local image ID is
-immutable but is not a registry digest or a remotely pullable artifact. Document this
-limitation and require an explicit publication step for remote Docker/Apptainer use.
+At the tested revision, the build wrapper failed before parsing options in a
+tagless clone (`git describe --tags`). The validation therefore used the same
+Dockerfile directly with the locked environment. The report records the command,
+base digests, platform and local image ID. A local image ID is immutable but is
+not a registry digest or a remotely pullable artifact; another host needs the
+image before it can reproduce these Docker/Apptainer runs.
 
-Reports and experiments remain outside upstream source under design/, reports/,
-results/fastqc/ and scratch/fastqc/. Source and tests are committed locally only.
+Large outputs and reproduction scripts were retained under `results/fastqc/`
+and `scratch/fastqc/` in the original validation workspace.
 
 ## Findings and implementation refinements
 
