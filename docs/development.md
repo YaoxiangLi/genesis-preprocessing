@@ -62,6 +62,8 @@ an invalid override fails explicitly. Scientific launchers execute the selected
 checkout's code with its own Python and locked Pixi environment. They preserve
 the caller's working directory until the existing pipeline wrapper selects its
 run directory. No workflow is downloaded or chosen from the current directory.
+The pipeline commands also need that checkout to show their workflow-specific
+`--help`. General `genesis --help` and core curation commands work without it.
 
 If `genesis doctor` reports an unavailable managed runtime, put Pixi on PATH and
 run `pixi run install-all` in that checkout. Core curation remains usable without

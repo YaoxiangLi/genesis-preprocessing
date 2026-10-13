@@ -19,6 +19,7 @@ server; use the recipe to prepare paths on another server.
 | [whole-workflows](whole-workflows/) | Current Genesis and pinned nf-core ATAC on two public Arabidopsis libraries, one million input pairs each; common metric definitions |
 | [workflow-summary](workflow-summary/) | Common workflow table and figure, with renderer and source hashes |
 | [acceptance](acceptance/) | Test receipts, complete-workflow logs, software/image records and baseline correction |
+| [release-acceptance](release-acceptance/) | Full regression suite and fresh installed-wheel acceptance at the merged release revision |
 | [older-bwa-mem2-2.2.1-synthetic-dap](older-bwa-mem2-2.2.1-synthetic-dap/) | Earlier comparison using the older 2.2.1 package as baseline; 15 completed cases |
 | [older-bwa-mem2-2.2.1-synthetic-atac](older-bwa-mem2-2.2.1-synthetic-atac/) | Earlier comparison using the older 2.2.1 package as baseline; 27 completed cases |
 | [interrupted-older-baseline-dap-se](interrupted-older-baseline-dap-se/) | Public run stopped after discovering the baseline version-label error; incomplete results and original work retained |

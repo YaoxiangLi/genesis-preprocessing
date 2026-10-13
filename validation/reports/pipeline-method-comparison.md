@@ -193,6 +193,15 @@ found a Git-provenance assumption; the isolated fix at `857ce3e` passed a fresh
 wheel test outside the repository. The fix records installed source hashes and
 an unknown Git revision rather than borrowing a nearby checkout's identity.
 
+The merged release at `a85211237470d7146457167e1723b04a7ebf3cff` also passed
+`pixi run checks` and fresh installed-wheel acceptance outside the repository.
+The wheel's offline tutorial completed metadata review, QC, reviewed export and
+backup/restore for two synthetic datasets. The release additionally refuses to
+resume intentionally pruned benchmark work and labels driver RSS with its actual
+scope. These changes do not alter scientific processing. The running campaigns
+keep their original recipe hashes. [Release acceptance records](../evidence/method-comparison-20261013/release-acceptance/)
+retain the commands and the two corrected test-harness assumptions.
+
 The evidence includes failures and corrections. An initial MACS2 Bioconda build
 failed to import, so the comparison uses its pinned source release in a separate
 environment. A 14-CPU/8-GiB synthetic setup failed during BWA-MEM2 execution; the
