@@ -21,10 +21,9 @@ The DAP scaffold follows igvf_pseudobulking_pipeline:
   for +gil, so install-projects.sh and the Dockerfile install plain 3.14.5 first. It is
   containerized with
   dockers/uv-project.Dockerfile. Its conda equivalent is GENESIS_TOOLS.yaml.
-- Docker build/discovery scripts and dockers/.dockerignore are copied unchanged
-  from the reference repository. Run them through Pixi, whose Nextflow dependency
+- Run Docker build/discovery scripts through Pixi, whose Nextflow dependency
   supplies GNU coreutils on macOS, including mktemp.
-- The Dockerfiles retain the reference's pinned base images. The uv recipe copies
+- The Dockerfiles use pinned base images. The uv recipe copies
   .python-version before dependency installation to select the Python version.
 - .env records image names for nf-dotenv.
 
@@ -43,7 +42,7 @@ genesis pipeline INPUT.tsv -profile local,docker
 genesis pipeline INPUT.tsv -profile sherlock,apptainer
 ```
 
-Every Docker build targets both linux/amd64 and linux/arm64. The original scripts
+Every Docker build targets both linux/amd64 and linux/arm64. The build scripts
 default to pushing, so explicitly pass --no-push for local builds. They derive
 image tags from the latest Git tag, with --tag available to
 override it. Image names match project/environment names without an extra prefix.
@@ -53,9 +52,8 @@ approval; local images alone are not available to Sherlock's Apptainer.
 Without a supplied profile, the pipeline wrapper uses scripts/get-default-profile.sh. `genesis pipeline` selects the checkout's Pixi runtime automatically. The default is `local,docker`; choose a cluster profile explicitly. Input TSV and references are staged
 inputs, so container tasks do not depend on undeclared host source paths.
 
-The four sample sheets use the six-column schema. The DAP reference guide describes the
-workflow and analysis policies; the superseded Bash pipeline and metadata helper
-have been removed. tests/verify_pipeline.py exercises actual Nextflow wiring,
+The four sample sheets use the six-column schema. The [DAP reference guide](usage/dapseq-reference.md)
+describes the workflow and analysis policies. tests/verify_pipeline.py exercises actual Nextflow wiring,
 reference cache transitions, resume, validation failures, and publication boundaries.
 DOWNLOAD fetches remote HTTP(S) FASTQs in batches with aria2c (maxForks 1); the
 regression tests serve their fixtures from a local HTTP server.

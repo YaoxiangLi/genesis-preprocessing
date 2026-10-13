@@ -8,6 +8,9 @@ metadata and QC, and export a selected dataset collection.
 Start with the standalone pipeline for your assay. Study management, the catalog
 and AI assistance are optional.
 
+<a id="install-and-run"></a>
+<a id="environments-and-docker-builds"></a>
+
 ## Install and check your environment
 
 Install [Pixi](https://pixi.sh/). For the default execution mode, Docker must
@@ -27,8 +30,8 @@ this checkout; keep the checkout in place. To use another command directory,
 add `--bin-dir /your/bin` to the install command.
 
 After installation, use `genesis` directly. Scientific commands use Pixi
-internally for Nextflow and the project runtime. Existing `pixi run` commands
-remain supported. See [installation and upgrades](docs/development.md#command-installation-and-maintenance)
+internally for Nextflow and the project runtime. You can also run commands through
+`pixi run`. See [installation and upgrades](docs/development.md#command-installation-and-maintenance)
 for moving a checkout, using a Python wheel or removing the command.
 
 ## Run your first analysis
@@ -36,6 +39,8 @@ for moving a checkout, using a Python wheel or removing the command.
 Run the examples below from the checkout, substituting your input paths. Both
 pipelines need an explicitly selected reference genome; Genesis does not choose
 or download an assembly for you.
+
+<a id="sample-sheet"></a>
 
 ### DAP-seq
 
@@ -82,6 +87,9 @@ fragments, Tn5 cut-count tracks and peaks. Technical lanes are combined within a
 library; biological replicates remain separate. Choose MAPQ, duplicate and adapter
 policies in the sample sheet before running.
 
+<a id="analysis-choices"></a>
+<a id="outputs-and-resources"></a>
+
 ## Find and interpret your results
 
 Start with the MultiQC report, then inspect the library-level QC and signal
@@ -101,6 +109,8 @@ flags need interpretation, and zero peaks can be a valid result.
 See the [DAP output definitions](docs/usage/dapseq-reference.md#outputs-and-resources)
 and [ATAC outputs](docs/usage/bulk-atac.md#outputs) before comparing measurements
 between tools or studies.
+
+<a id="reference-compatibility-and-development"></a>
 
 ## Choose your next task
 
@@ -122,20 +132,25 @@ The [documentation index](docs/README.md) also links to reference material and
 validation records. Core processing, catalog queries and manual review work
 without AI, a GPU or an API account.
 
-## Architecture and Current Capabilities
+<a id="verification"></a>
+
+## Architecture and current capabilities
 
 Nextflow runs the scientific analysis. The `genesis` CLI supplies input checks,
 study management, result validation and review. Independent workers use local or
 SSH execution; they do not need a shared filesystem. Optional AI services propose
 metadata and explanations for review.
 
-| Capability | Available now | Evidence and remaining work |
+| Capability | Supported use | Validation scope |
 | --- | --- | --- |
 | DAP and bulk ATAC processing | Standalone and managed-study commands | [Real tools on synthetic inputs](validation/reports/real-study-validation.md); [small public ATAC subsets](validation/reports/supported-atac-execution-validation.md) |
-| Single-cell ATAC | Existing fragment ingestion, pseudobulks and model exports | [Fixture and loader tests](validation/reports/scatac-delivery-validation.md); reviewed biological release still pending |
+| Single-cell ATAC | Existing fragment ingestion, pseudobulks and model exports | [Fixture and loader tests](validation/reports/scatac-delivery-validation.md); exports require independent scientific review before training |
 | Catalog, validation and review | Local registry, metadata/QC decisions, reviewed export | [Offline and installed-package tests](validation/reports/hybrid-llm-validation.md) |
-| Independent workers and clusters | Local/SSH transport and scheduler profiles | Local workers tested; live site acceptance remains necessary |
-| AI assistance and private model services | Optional providers and service lifecycle commands | Mock/HTTP/lifecycle tests; live GPU deployment and biological metadata accuracy remain unvalidated |
+| Independent workers and clusters | Local/SSH transport and scheduler profiles | Local workers tested; test scheduler and SSH access at your site before use |
+| AI assistance and private model services | Optional providers and service lifecycle commands | Mock/HTTP/lifecycle tests; live GPU deployment and biological metadata accuracy are unvalidated |
+
+The [validation records](validation/README.md) list tested revisions, environments
+and limitations.
 
 ## Benchmarks and tool choices
 
@@ -144,12 +159,11 @@ definitions, results and reproduction commands. It distinguishes package compari
 from parameter sensitivity and software tests. A higher mapping rate or more peaks
 alone is not evidence that one method is better.
 
-The [current comparison report](validation/reports/pipeline-method-comparison.md)
-includes repeated public SE DAP measurements, independent TF motif support, and
-Genesis/nf-core ATAC results scored with common definitions. The completed DAP
-comparison supports keeping BWA-MEM2/MACS3 for that cohort. PE DAP, further ATAC
-comparisons and deeper subsets are still running; no default has been changed
-on the strength of incomplete results.
+Repeated measurements and independent TF motif evidence support the BWA-MEM2/MACS3
+defaults for the tested Arabidopsis SE DAP cohort. That finding applies to the recorded
+libraries, read depth and settings. The [comparison report](validation/reports/pipeline-method-comparison.md)
+provides the measurements, figures and limitations, along with Genesis/nf-core
+ATAC results scored using common definitions.
 
 ## Troubleshooting
 
@@ -162,24 +176,3 @@ on the strength of incomplete results.
 | No peaks or unexpected QC values | Inspect depth, reference, assay settings and control assignment before changing parameters. |
 | A reviewed export is empty | Read its exclusions; validation or current review decisions may be missing. |
 | A worker is unreachable | Inspect worker status and reconnect before authorizing another attempt. |
-
-## Reference, compatibility and development
-
-<a id="install-and-run"></a>
-<a id="sample-sheet"></a>
-<a id="analysis-choices"></a>
-<a id="outputs-and-resources"></a>
-<a id="environments-and-docker-builds"></a>
-<a id="verification"></a>
-
-The detailed DAP material remains available: [installation](docs/usage/dapseq-reference.md#install-and-run),
-[sample sheets](docs/usage/dapseq-reference.md#sample-sheet),
-[analysis choices](docs/usage/dapseq-reference.md#analysis-choices),
-[outputs and resources](docs/usage/dapseq-reference.md#outputs-and-resources),
-[environments](docs/usage/dapseq-reference.md#environments-and-docker-builds), and
-[verification](docs/usage/dapseq-reference.md#verification).
-The [original DAP README](docs/history/dapseq-readme-fb60096.md) is preserved.
-
-For checks and contribution conventions, use the
-[contributor guide](docs/development.md). The [validation index](validation/README.md)
-explains which tests were run and where their evidence is available.

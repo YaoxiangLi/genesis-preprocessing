@@ -117,8 +117,8 @@ commands, Git SHA, source checksums, image digests, exit code and elapsed time.
 
 The entry point is `workflows/atac.nf`; reusable tasks are in `modules/atac/`,
 execution profiles in `conf/`, and typed helpers in `genesis_tools/atac/`.
-`experimental/atac/` preserves the earlier frozen benchmark implementation and
-is not used by `pipeline-atac`. Run its historical regression separately with
+The benchmark prototype in `experimental/atac/` is separate from `pipeline-atac`.
+To reproduce that prototype's regression, use
 `pixi run validate-atac-legacy --keep`.
 
 Use the [execution guide](execution.md) for clusters and isolated dataset

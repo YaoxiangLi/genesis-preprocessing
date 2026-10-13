@@ -86,11 +86,16 @@ def check_preserved_dap_readme() -> None:
         "3ce68770e50460992a2768f58b2c6ed9a69985f80b3ea4dcbcf4f02ae9f830ff"
     ), "Historical README text changed"
     readme = (ROOT / "README.md").read_text()
+    index = (ROOT / "docs/README.md").read_text()
     guide = (ROOT / "docs/usage/dapseq-reference.md").read_text()
+    assert "](docs/usage/dapseq-reference.md)" in readme, "README must link to the DAP guide"
+    assert "](usage/dapseq-reference.md)" in index, "Documentation index must link to the DAP guide"
+    assert "](history/dapseq-readme-fb60096.md)" in index, (
+        "Historical DAP documentation must be linked"
+    )
     for section in DAP_SECTIONS:
         assert section in anchors(readme), f"Original README bookmark lost: {section}"
         assert section in anchors(guide), f"DAP guide section lost: {section}"
-        assert f"docs/usage/dapseq-reference.md#{section}" in readme
     for path in (ROOT / "README.md", ROOT / "docs/development.md"):
         assert "https://github.com/kundajelab/genesis-preprocessing.git" in path.read_text()
 

@@ -40,7 +40,7 @@ the installer does not edit it. A custom location uses
 `pixi run install-all --install-cli --bin-dir /your/bin`. Check `command -v genesis`
 if another installation is selected earlier on PATH. For a temporary session, you
 can instead activate `genesis_tools/.venv/bin/activate`; plain `pixi run install-all`
-continues to install environments without creating a user-level command.
+installs environments without creating a user-level command.
 
 After updating this checkout with Git, rerun `pixi run install-all --install-cli`
 to synchronize locked dependencies. Reinstalling the same link is safe. Keep the
@@ -65,8 +65,8 @@ The pipeline commands also need that checkout to show their workflow-specific
 `--help`. General `genesis --help` and core curation commands work without it.
 
 If `genesis doctor` reports an unavailable managed runtime, put Pixi on PATH and
-run `pixi run install-all` in that checkout. Core curation remains usable without
-Pixi. Developer checks and image builds continue to use Pixi tasks.
+run `pixi run install-all` in that checkout. Core curation works without
+Pixi. Developer checks and image builds use Pixi tasks.
 
 Read [AGENTS.md](../AGENTS.md) before editing. Create a branch for the next change:
 
@@ -149,7 +149,7 @@ two plugin directories through your approved storage workflow. Nextflow document
 the cache and offline settings in its [plugin guide](https://docs.seqera.io/nextflow/plugins/using-plugins).
 Do not change the pinned plugin versions or bypass failed checks to recover access.
 
-Pixi currently reports a pre-existing `system-requirements` deprecation warning.
+Pixi reports a `system-requirements` deprecation warning.
 If uv's package cache and the checkout are on different filesystems, its hardlink
 attempt may fall back to copying; `UV_LINK_MODE=copy pixi run install-all` selects
 copying explicitly. Neither warning is a failed scientific check.

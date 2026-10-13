@@ -15,7 +15,7 @@ JSON by default; search also supports `--format tsv`. In the examples, replace
 accession is not necessarily the catalog ID.
 
 For registered studies, add `--scope inputs` to metadata/review commands before
-processing. The default `--scope results` preserves post-processing behavior.
+processing. Use the default `--scope results` to review processing outputs.
 Only metadata can be approved in the input scope; a matching collected result can
 carry that exact input approval forward with its original evidence. QC and export
 eligibility always require result-specific decisions. See the
@@ -45,12 +45,12 @@ The tutorial uses a mock provider and requires no account.
 | Export eligibility | Decision and export profile | Acceptance for a particular catalog purpose |
 
 `SUCCEEDED` does not mean accepted. Zero peaks can be structurally valid.
-A reviewer cannot waive structural errors. `resolve` still authorizes an
+A reviewer cannot waive structural errors. `resolve` authorizes an
 execution retry; it does not approve scientific quality or curation.
 
 ## Validate existing inputs and published runs
 
-Input checks delegate to the existing validators and keep their requirements:
+Validate the sample sheet and reference before starting a run:
 
 ```bash
 genesis validate inputs samples.tsv --assay bulk-ATAC \
@@ -89,16 +89,15 @@ workspace above it. ATAC uses its runner directory containing `manifest.json`,
 raw source snapshots and available QC definitions. DAP controls have no required
 treatment peak outputs. ATAC provenance must match the stored run manifest digest.
 
-New DAP runs publish a versioned `output/provenance/dap-run.json`; import checks its
+DAP runs publish a versioned `output/provenance/dap-run.json`; import checks its
 schema, sheet/control/reference bindings and complete task coverage. Full inspection
 checks the declared artifact digests and reference bytes. See
 [DAP run provenance](dapseq-reference.md#versioned-run-provenance) for the exact
 completeness requirements and resource-measurement limits.
 
 Historical DAP MultiQC provenance lacks complete input/resource/container evidence.
-Its import remains incomplete even when all surviving files are readable. No
-success or missing scientific measurement is invented. The default reviewed
-export excludes these incomplete records. An explicitly authored export profile
+These records are incomplete even when all surviving files are readable. The default
+reviewed export excludes them. An explicitly authored export profile
 can allow incomplete evidence for an appropriate catalog purpose; it still cannot
 allow a known structural error. Such an export is not full model-readiness evidence.
 
@@ -307,7 +306,7 @@ genesis registry backup /local/catalog --output catalog-backup.sqlite --json
 genesis registry restore /local/restored-catalog --backup catalog-backup.sqlite --json
 ```
 
-The existing page remains loopback-only with no write endpoints. It escapes
+The status page binds to loopback and has no write endpoints. It escapes
 untrusted names and shows campaign-linked curation summaries from a bounded
 catalog page (first 1,000 records). Use CLI pagination for complete catalogs.
 Approved report links download digest-verified HTML as attachments, not active
@@ -392,16 +391,16 @@ Approval is `PENDING_APPLY` until apply succeeds; reviewed exports exclude it.
 Apply creates an immutable `metadata_revision`, updates the selected scope's canonical
 metadata and emits a `compiled_inputs` description referencing the exact original
 assay, lanes and reference. For registered input revisions, `genesis study plan`
-compiles reviewed metadata and those preserved scientific choices into an executable
+compiles reviewed metadata and the recorded scientific choices into an executable
 campaign. Apply itself does not launch work. Scientific inputs are copied
 verbatim; reference/control proposals remain descriptive. Existing executed sheets,
 campaigns and raw accession records are never rewritten. Reassess QC and review
 eligibility after metadata changes. Source/manifest changes or concurrent reviews
 invalidate stale proposals/approvals. Repeating an unchanged apply is idempotent.
 
-Legacy version 1 manual proposals keep their documented behavior: `review approve`
-applies their limited descriptive changes directly. Version 1 hashes and history
-remain readable. New rich proposals use version 2 and require explicit apply.
+For version 1 manual proposals, `review approve` applies their limited descriptive
+changes directly. Version 1 hashes and history are readable. Rich proposals use
+version 2 and require explicit apply.
 The registry migrates through schema 4; stored source bundles/revisions/invocations
 are included with reviewed catalog provenance. Shared-account identity limitations
 and explicit individual review still apply.
@@ -445,12 +444,13 @@ Results propose a typed action (`inspect`, `renew-auth-manually`,
 `propose-metadata-correction`, `escalate`), evidence, uncertainty, preconditions and
 expected effect. **Diagnosis never executes that action.** It cannot change MAPQ,
 duplicates, adapters, references, peak thresholds, controls, QC approval or credentials.
-Recollect evidence and compare `target_version` before an action. Existing bounded
-exit-75 retries and conservative UNKNOWN reconciliation remain authoritative.
+Recollect evidence and compare `target_version` before an action. Automatic retries
+follow the controller's bounded exit-75 policy; the controller blocks retries while
+an attempt is UNKNOWN.
 Changed resources/inputs need an explicitly versioned replacement campaign linked
 to the original, not an edited campaign JSON or an assumption that `resolve` applies it.
 
 Run `pixi run uv run --frozen --project genesis_tools python tests/evaluate_metadata.py`
 for the separate synthetic metadata evaluation. The fixture split and reported field,
 evidence/conflict/abstention counts test software; they do not establish real curation
-accuracy. Human correction rates and live-provider comparisons remain unmeasured.
+accuracy. Human correction rates and live-provider comparisons have not been measured.

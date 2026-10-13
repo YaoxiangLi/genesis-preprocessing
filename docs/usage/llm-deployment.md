@@ -84,12 +84,13 @@ covers all these fields. Editing anything requires a new plan and hash. An offli
 rechecks real node preconditions and never treats the snapshot as current hardware.
 
 Prefer dedicated GPUs/nodes. Shared nodes require separate declared pipeline GPU
-UUIDs and a nonzero pipeline RAM reservation. Existing campaign `slots` remain job
-counts. Service admission serializes reservations under the node's `root/llm-services`;
-active/unknown deployments retain their GPU, port, RAM and CPU reservations. A new
-service cannot collide with them. All services for one node must use the same worker
-root. Match processing/scheduler limits to the declared pipeline reservation; these
-local checks cannot constrain unrelated users' workloads or replace site scheduling.
+UUIDs and a nonzero pipeline RAM reservation. Campaign `slots` count jobs; they do
+not reserve memory or GPUs. Service admission serializes reservations under the
+node's `root/llm-services`. Active/unknown deployments retain their GPU, port, RAM
+and CPU reservations. A new service cannot collide with them. All services on one
+node must use the same worker root. Match processing/scheduler limits to the declared
+pipeline reservation; these local checks cannot constrain unrelated users' workloads
+or replace site scheduling.
 
 ## Apply, inspect, reconnect and stop
 

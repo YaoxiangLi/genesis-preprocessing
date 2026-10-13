@@ -8,12 +8,12 @@ For a single analysis without a catalog, use `genesis pipeline` or
 
 Before starting, prepare the sample sheet and choose the reference, controls and
 analysis settings. See the [DAP](dapseq-reference.md) and
-[bulk ATAC](bulk-atac.md) guides for the existing input formats and output semantics.
+[bulk ATAC](bulk-atac.md) guides for input formats and output definitions.
 
 | Command | Purpose |
 | --- | --- |
 | `study init` | Validate and register a versioned sheet/reference snapshot, with one input record per library |
-| `study plan` | Compile exact, checksummed worker documents and an existing-format campaign without launching jobs |
+| `study plan` | Compile exact, checksummed worker documents and a campaign without launching jobs |
 | `study run` | Recheck the plan, launch its campaign and collect successful results |
 | `study resume` | Reconnect, poll existing attempts, launch eligible queued jobs and continue collection |
 | `study status` | Show execution, collection, structure, QC, input/result review and next commands independently |
@@ -60,7 +60,7 @@ provider can be configured separately; no provider is selected by study commands
 
 The original prepared sheet can run without a metadata approval. Descriptive edits
 must have a current input approval before they enter a plan. Input review uses
-`--scope inputs`; the default scope remains `results` for existing commands.
+`--scope inputs`; the default scope, `results`, applies to processing outputs.
 Only metadata review is applicable before processing. QC and export eligibility
 require actual result evidence.
 
@@ -231,7 +231,7 @@ Automatic assessment records evidence and missing values; it cannot approve a da
 Measurements, policy assessment and human exceptions remain separate. Reassess with
 `genesis qc evaluate --policy FILE` when an approved policy is available.
 
-New DAP runs with [versioned provenance](dapseq-reference.md#versioned-run-provenance)
+DAP runs with [versioned provenance](dapseq-reference.md#versioned-run-provenance)
 can pass full structural validation and the default reviewed export. Legacy or incomplete
 records remain excluded. DAP shared-control groups retain the exact six-column public
 sheet order when compiled for a worker. Each collection generation records its request
@@ -294,14 +294,14 @@ genesis registry backup /local/studies/atac-A/registry --output /local/catalog-b
 genesis registry restore /local/restored-catalog --backup /local/catalog-backup.sqlite
 ```
 
-The loopback status page adds read-only study summaries; writes remain in the CLI.
-Report downloads keep the existing local-only, digest-checked attachment boundary.
+The loopback status page shows read-only study summaries. Make changes through the
+CLI. Report downloads serve local, digest-checked files as attachments.
 Back up the catalog consistently and, with orchestration stopped, preserve study state
 and worker attempt/output directories separately. A Git clone transfers none of those
 live files. Relocating a study or running jobs across servers is not an automatic path
 rewrite; coordinate actual storage and authentication through the existing site tools.
 
-Registry schema 4 adds input heads, a separate input decision ledger and collection
+Registry schema 4 stores input heads, a separate input decision ledger and collection
 lineage through transactional migration with a pre-migration backup. `registry init`
 migrates existing catalogs; `study init` does this for its selected registry. Old software
 cannot write schema 4. To roll back, stop writers and restore the saved older-schema
@@ -314,11 +314,10 @@ incomplete validation, or an all-excluded export), **2** for malformed requests,
 observed by run/resume/collect. `status` itself is read-only and returns 0 when readable.
 Inspect the separate states; exit 0 is not biological acceptance.
 
-[Earlier validation evidence](../../validation/reports/study-workflow-validation.md) covers real
+[Worker validation](../../validation/reports/study-workflow-validation.md) covers real
 local worker supervision with explicitly synthetic output writers, real binary artifact
-readers and reviewed exports. The real scientific acceptance below extends that evidence.
-Live SSH/scheduler validation remains separate; synthetic fixtures do not establish
-biological accuracy.
+readers and reviewed exports. Use the acceptance recipe below to test scientific tools.
+These local tests do not establish SSH/scheduler access or biological accuracy.
 
 ## Real-tool acceptance on synthetic inputs
 
@@ -349,9 +348,9 @@ failed collection and recovery without sequencing resubmission.
 `--keep` retains inputs, registries, traces, logs, per-command timing and `result.json`.
 Successful runs otherwise remove their newly created test directory; failures retain
 it for diagnosis. Inspect retained worker state before cleanup. Test approvals concern
-synthetic integration only and establish no biological acceptance thresholds. SSH,
-schedulers, live API/GPU services and public biological validation remain separate.
+synthetic integration only and establish no biological acceptance thresholds. The runner
+does not test SSH, schedulers, live API/GPU services or public biological datasets.
 
 The [real-study validation report](../../validation/reports/real-study-validation.md)
 records the tested revision, results and limitations. The ordinary `pixi run checks`
-suite continues to use Docker-free fixtures.
+suite uses Docker-free fixtures.

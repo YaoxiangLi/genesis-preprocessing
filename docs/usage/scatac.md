@@ -91,10 +91,11 @@ Both adapters expose one unstranded channel without a control track. ChromBPNet
 requires a recorded bias-model plan; exporting files does not supply or validate
 a plant bias model. Do not apply another Tn5 shift to exported tracks.
 
-Every export remains `model_ready: false` until a model-loader test and scientific
-review are completed outside this command. Registry registration records an
-immutable **unreviewed** artifact; it does not approve a dataset. The prepared-study
-coordinator and reviewed-release promotion do not yet consume these scATAC records.
+The export command always writes `model_ready: false`. Test the model loader and
+complete scientific review separately before training. Registry registration records
+an immutable **unreviewed** artifact; it does not approve a dataset. Use the standalone
+scATAC commands: prepared-study execution and reviewed scATAC release export are
+not supported for these records.
 
 See the [model handoff](scatac-model-handoff.md) for loader setup and the [validation report](../../validation/reports/scatac-delivery-validation.md)
-for the actual tests, public-data findings and remaining release gates.
+for tested inputs, public-data findings and validation limits.

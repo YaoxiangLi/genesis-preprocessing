@@ -70,13 +70,12 @@ production container. Complete-workflow results provide a separate check.
 An optional [older 2.2.1 environment](../../environment/bwa-mem2-2.2.1/pixi.lock)
 is used only with `compile_matrix.py --include-legacy`.
 
-Early `v4` runs treated the banner as the package version and used the older
-2.2.1 build as their baseline. Their original records are retained under that
-description. Final `v5` runs use the verified production binaries; results from
-the two baselines must not be relabelled or pooled.
+Experiment IDs containing `v4` use the older BWA-MEM2 2.2.1 package as baseline;
+`v5` uses the verified production binaries. Keep those identities when reproducing
+results, and do not pool measurements from the two baselines.
 MACS2 is built from its pinned source distribution in a separate Python 3.11
-environment. A Bioconda binary failed to import on this host; that failure must
-remain in the validation record.
+environment. See the [comparison report](../../../validation/reports/pipeline-method-comparison.md)
+for the import failure with the tested Bioconda binary and the source-build details.
 
 The [main benchmark guide](../../README.md#what-is-compared) defines the fixed
 policies and caller differences. The panel does not lower MAPQ or change q-values

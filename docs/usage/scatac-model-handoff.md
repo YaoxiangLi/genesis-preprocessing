@@ -5,9 +5,9 @@ peak/background BEDs for each fold, `loader.json`, `config.json`, QC, source-cel
 membership and checksum provenance. Keep the entire directory together.
 
 Before training, verify the bundle, confirm biological identity and annotation
-review, and inspect the declared chromosome folds. `model_ready: false` means
-that Genesis has not approved a scientific handoff. File-format compatibility
-alone is insufficient.
+review, and inspect the declared chromosome folds. Genesis exports are marked
+`model_ready: false`: they require loader testing and scientific review outside
+the export command. File-format compatibility alone is insufficient.
 
 ## Cherimoya
 
@@ -43,10 +43,11 @@ configuration decisions.
 ## ChromBPNet
 
 Use commit `ece97c93ccaa2d9ee5bc5687e62f4dbf8d055367`. The adapter's narrowPeak-like
-regions include a valid summit offset in column 10. The actual
-`ChromBPNetBatchGenerator` was tested against the exported FASTA and raw cut-count
-bigWig. Its sequence tensor is `[batch,2114,4]`, whereas Cherimoya's loader returns
-`[batch,4,2114]`; do not interchange tensors or infer shared model defaults.
+regions include a valid summit offset in column 10. Load the exported FASTA and
+raw cut-count bigWig with `ChromBPNetBatchGenerator`. With the 2114-base input window
+used in the validation fixture, its sequence tensor is `[batch,2114,4]`, whereas
+Cherimoya's loader returns `[batch,4,2114]`. Use each model's own tensor layout
+and configuration.
 
 ChromBPNet needs a suitable bias model and its own training configuration. No
 human bias model is chosen automatically. Exported bigWigs already use the audited
@@ -74,4 +75,5 @@ are in `validation/reports/scatac-command-summary.json`.
 
 The deterministic fixture should yield 600 counts in each positive window and
 zero in its background. Those values validate the fixture only; they are not
-plant QC thresholds. No training result or biological pilot release is implied.
+plant QC thresholds. This check tests data loading, not model training or biological
+performance.

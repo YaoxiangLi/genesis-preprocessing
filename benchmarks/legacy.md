@@ -1,8 +1,9 @@
 # Parameter sensitivity and historical workflow comparisons
 
 For current package comparisons, start with the [benchmark guide](README.md).
-This page retains the version 1 adapters and original candidate catalogs.
-Their frozen prototype and historical limitations are separate from the supported pipelines.
+Version 1 benchmark adapters support post-alignment policy comparisons and two
+pinned historical workflows. Use them to reproduce those experiments; the
+`genesis-atac` prototype is separate from the supported bulk ATAC pipeline.
 
 These commands are opt-in experiments. They do not alter the production Nextflow
 workflow or scientific defaults. Run from the repository with its locked Pixi
@@ -34,10 +35,9 @@ originals: every changed input or policy defines a new campaign/output directory
 
 Generate a raw ATAC fixture using `fixture --assay bulk-ATAC --adapter genesis-atac`
 (or `nfcore-atac`) with `--checkout /absolute/path/to/pinned/checkout` and `--out`.
-The original Genesis prototype commit is `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`.
-It is also integrated under `experimental/atac/`: use `--checkout "$PWD"` from
-a clean committed checkout to benchmark the integrated entry point;
-the nf-core checkout is `1a1dbe52ffbd82256c941a032b0e22abbd925b8a`.
+The Genesis prototype commit is `0b8850207e94a3d4909bf4ab99d18c03cd010cc2`.
+To run the prototype in `experimental/atac/`, use `--checkout "$PWD"` from a clean
+committed checkout. The nf-core checkout is `1a1dbe52ffbd82256c941a032b0e22abbd925b8a`.
 Container locks are in `locks/`. Local image IDs are immutable but require that
 exact local image or an independently verified exported image on another host;
 they are not portable registry download locations. No images are published here.
@@ -89,10 +89,10 @@ separate. Synthetic edge TSSs can therefore yield undefined enrichment.
 Post-alignment quantification preserves RPM and RPKM comparisons on fixed regions,
 including absolute changes: correlation alone cannot detect scaling changes.
 No universal plant QC threshold or composite quality score is assigned.
-Baseline peaks are a measure of change, not independent ground truth. No motif,
-polyploid homoeolog assignment, mappability-stratified accuracy, library-complexity
-estimation or biological-replicate concordance claim is made by this first release.
-Those require explicit annotations/independent data and additional metric adapters.
+Baseline peaks are a measure of change, not independent ground truth. These adapters
+do not measure motif support, polyploid homoeolog assignment, mappability-stratified
+accuracy, library complexity or biological-replicate concordance. Those measurements
+require explicit annotations or independent data and additional metric adapters.
 
 ## Reproducibility, resources and artifacts
 
@@ -124,8 +124,8 @@ reasons. Full result JSON retains distribution and tool-native details.
 
 `catalog/arabidopsis-dap.toml` and `catalog/arabidopsis-atac.toml` are **blocked
 candidate plans**, not executable presets. `plan` returns exit 2 with the blocker;
-`fetch` refuses unresolved catalogs. Small official ENA metadata snapshots are
-committed at that milestone; it did not download real FASTQs or substitute references.
+`fetch` refuses unresolved catalogs. The catalogs include small official ENA
+metadata snapshots; supply verified FASTQs and exact references before execution.
 
 GSE60141 candidates are FUS3 (SRR2926076), ABI5 (SRR2926841), and shared control
 SRR2926068. The repository uses R1 only for this control, although ENA declares its
@@ -133,8 +133,8 @@ source library PAIRED. This needs an explicit projection decision, not silent ma
 removal. GSE85203 candidates are GSM2260231/SRR4000468 and
 GSM2260232/SRR4000469; reported replicate labels still require biological provenance.
 The exact TAIR10 FASTA, annotation release, input SHA256s and complete library
-metadata must be resolved before promotion to READY. An accession is not proof of
-biological replicate identity. Sorghum remains blocked on its exact requested
+metadata are required for `READY` status. An accession is not proof of
+biological replicate identity. The Sorghum catalog is blocked on its exact requested
 reference; no assembly substitution is allowed.
 
 `fetch` is a separate explicit command for READY manifests with public HTTPS URLs,

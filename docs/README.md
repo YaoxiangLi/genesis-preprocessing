@@ -22,6 +22,7 @@ Choose the guide for the task you want to complete.
 
 - [Benchmarks](../benchmarks/README.md): datasets, method comparisons, metric definitions and measured results.
 - [Validation records](../validation/README.md): dated tests and their limitations.
+- [Historical DAP documentation](history/dapseq-readme-fb60096.md): commands and behavior at revision `fb60096`.
 
 ## Develop Genesis
 
@@ -29,7 +30,6 @@ Choose the guide for the task you want to complete.
 - [Nextflow conventions](nextflow-style.md): module structure and pipeline changes.
 - [Diagram maintenance](diagrams/README.md): update the maintained workflow maps.
 - [Curation design](curation/IMPLEMENTATION_BRIEF.md): component ownership, contracts and compatibility.
-- [Original DAP README](history/dapseq-readme-fb60096.md): historical documentation, preserved for reference.
 
 Current guides describe the installed commands. Historical reports describe the
 revision and date written in each report; their commands and temporary paths may

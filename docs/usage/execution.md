@@ -49,14 +49,15 @@ directory. Set `GENESIS_RUNTIME_DIR` to shared project scratch at NERSC; do not
 use controller-local `/tmp`. Successful commands remove their private adapter.
 Failed commands retain it for recovery while queued jobs may still need it.
 
-Remote site execution still requires a live site acceptance run; local tests
+Test remote execution at your site before processing a study; local tests
 cannot establish scheduler access or site performance.
 
 ## Independent workers and isolated datasets
 
 For prepared DAP/ATAC sheets, use the [study workflow](studies.md) to compile these
 campaigns, stage checksummed documents, resume workers and collect results into the
-scientific registry automatically. The manual campaign format below remains available.
+scientific registry automatically. To configure individual jobs directly, use the
+campaign format below.
 Both paths use the same worker protocol, pinned checkout checks and retry rules.
 
 The campaign controller runs separate analysis jobs on existing Linux workers.
@@ -141,8 +142,9 @@ according to the dataset's access requirements.
 
 For optional scientific review, use a separate controller-local
 [curation registry](curation.md). `serve --registry /local/catalog` adds read-only
-curation summaries and approved report downloads. Execution `resolve` and
-`reconcile` retain their existing meanings; neither approves scientific quality.
+curation summaries and approved report downloads. `resolve` authorizes an execution
+retry; `reconcile` records that an uncertain attempt has stopped. Neither approves
+scientific quality.
 
 References: [Nextflow executors](https://www.nextflow.io/docs/latest/executor.html),
 [NERSC Nextflow](https://docs.nersc.gov/jobs/workflow/nextflow/),

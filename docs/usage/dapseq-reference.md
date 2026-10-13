@@ -18,35 +18,8 @@ calls MACS3 peaks against each treatment's assigned control, and quantifies peak
 | `16-Arabidopsis_thaliana-PRJNA1177481.tsv` | PE | 800 | 748 |
 | `24-Sorghum_bicolor-PRJNA1177471.tsv` | PE | 142 | 134 |
 
-The six-column sheets preserve the original sample IDs, URLs, and control
-assignments. The retired Bash pipeline and metadata script are available in Git
-history. Stock Bowtie 1 comparison modules remain available in `modules/`, but
-are not imported or run by the main workflow.
-
-This guide retains the six detailed sections from the original DAP README.
-The [project README](../../README.md) introduces the architecture and other assays;
-the [archived README at `fb60096`](../history/dapseq-readme-fb60096.md) preserves
-the original wording and dated validation claim.
-
-## Upgrade from the DAP-only release
-
-The full project update retains the sample sheets, assigned controls and DAP
-scientific defaults. Existing standalone commands remain available; curation and
-AI approval are optional additions. Changes since the DAP-only revision `fb60096`:
-
-| Area | Current behavior and migration |
-| --- | --- |
-| Default execution | Omitting a profile selects `local,docker`. Select `-p local,conda` or `-p sherlock,apptainer` explicitly; the presence of `sbatch` no longer selects a cluster automatically. |
-| Reference caches | Every invocation verifies FASTA identity, derived hashes and generator provenance before downloads, including on resume. Missing, stale or incomplete provenance stops execution. Preserve old caches and regenerate in a new reference directory containing the exact approved FASTAs; do not copy unverifiable derived products or invent provenance. |
-| Read QC | Raw-mate FastQC and one run-level MultiQC report are additional outputs. Their image digests are pinned in `.env`; the runtime may need to pull them. Quality WARN/FAIL labels are advisory, and scientific parameters are unchanged. |
-| Resume | Keep the existing run folder and work directory. Reference validation intentionally reruns; the first switch to published reference paths or changed process definitions can rerun affected tasks. Use a new run name and workspace when preserving the old run as a frozen result. |
-| Validation evidence | Task counts depend on the workflow revision. The old 45/41-task ARM64 claim remains in the archive; current fixtures include FastQC/MultiQC and have their own traces and evidence. |
-
-No command deletes old runs or rewrites executed campaign payloads as part of this
-upgrade. Back up live registries with the documented
-[registry backup/restore commands](curation.md#read-only-status-backup-and-rollback), and retain original
-references and run data separately from Git. See the
-[contributor guide](../development.md) for installation and dependency setup.
+These six-column sheets contain the source sample IDs, read URLs and assigned
+controls. Use one sheet per analysis.
 
 ## Install and run
 
@@ -92,7 +65,7 @@ genesis pipeline -p sherlock,apptainer 15-Arabidopsis_lyrata-PRJNA1177479.tsv
 ```
 
 `genesis pipeline` selects the checkout's Pixi environment so Nextflow can find micromamba.
-The existing `pixi run pipeline` command remains supported. Without
+You can also invoke it as `pixi run pipeline`. Without
 `-p`/`--profile` (or a Nextflow `-profile`), `scripts/get-default-profile.sh`
 always chooses `local,docker`. Cluster execution is selected explicitly.
 Choose an executor and a software environment together. `sherlock` uses SLURM and the
@@ -156,6 +129,9 @@ be HTTP or HTTPS. Reads are downloaded in batches of `--download_batch_size`
 samples (default 8), one batch at a time; mates with matching basenames are fine.
 
 ## Analysis choices
+
+The main workflow uses bwa-mem2 for alignment. The Bowtie 1 comparison modules in
+`modules/` are not imported or run by this workflow.
 
 Main and first-read QC alignments use **full reads**; only SPP's input is cut
 (see below). Read length is inferred
@@ -251,11 +227,11 @@ read1 statistics, and R1/R2 FastQC, never share an entry. The aggregation fails 
 any required parser or expected sample is absent, even if MultiQC exits zero.
 
 The Genesis table and header include sample/control associations, species,
-reference ID, run name, Git SHA, source-tree status and pipeline version. SPP
-aggregation is explicitly deferred: the native phantompeakqualtools parser cannot
-handle Genesis's valid `NA` fallback rows. Per-library SPP TSV/PDF files remain
-available. Missing optional SPP/insert-size companion files do not prevent
-aggregation; PE insert-size metrics are already in samtools stats.
+reference ID, run name, Git SHA, source-tree status and pipeline version. Read SPP
+results in each library's TSV/PDF files. They are not aggregated into MultiQC
+because its native phantompeakqualtools parser cannot handle Genesis's valid `NA`
+fallback rows. Missing optional SPP/insert-size companion files do not prevent
+aggregation; PE insert-size metrics are included in samtools stats.
 
 `multiqc_data/` retains native JSON/parquet, source records, logs and configuration,
 plus `genesis_{fastqc,stats,flagstat,idxstats}.json` and `genesis_provenance.json`.
@@ -268,7 +244,7 @@ retains generation metadata. A stable resume caches the complete report/data set
 
 ### Versioned run provenance
 
-Every newly completed DAP run publishes `output/provenance/dap-run.json`, including
+A completed DAP run publishes `output/provenance/dap-run.json`, including
 when launched directly with Nextflow. A final `DAP_PROVENANCE` task consumes completed
 output channels; it does not scan an asynchronously published directory. The installed
 [version 1 schema](../../genesis_tools/src/genesis_tools/contracts/schemas/dap-run-v1.json)
@@ -291,14 +267,14 @@ Curation derives completeness from validated evidence, never a supplied boolean.
 A clean pinned checkout, real tasks in digest-pinned containers, and complete input,
 reference and output bindings allow full validation and the default reviewed export.
 Stub runs, dirty/unknown source revisions, mutable images, conda/native tasks and historical
-reference caches lacking execution-engine evidence remain inspectable but incomplete.
-Legacy runs without this sidecar retain their previous incomplete status. An invalid
-present sidecar is rejected rather than silently treated as a legacy run. Reference
-recipe hashes changed with this release: preserve old caches and regenerate derived
-products in a fresh reference directory containing the same approved FASTAs.
+reference caches lacking execution-engine evidence can be inspected but are incomplete.
+Runs without this sidecar are also incomplete. Curation rejects an invalid sidecar
+rather than ignoring it. If a cached reference's recipe hash differs from the
+installed recipe, keep the old cache and regenerate derived products in a fresh
+reference directory containing the same approved FASTAs.
 
-Changes to scientific parameters and approval remain explicit. Full byte/format scans,
-scientific QC review and eligibility review are still separate from successful execution.
+Full byte/format scans, scientific QC review and eligibility review are separate
+from successful execution.
 See the [curation guide](curation.md#validate-existing-inputs-and-published-runs) and
 [study acceptance recipe](studies.md#real-tool-acceptance-on-synthetic-inputs).
 
@@ -324,8 +300,8 @@ memory or walltime. QC and tracks default to two CPUs, 8 GB, and four hours,
 configurable with `--cpus`, `--memory`, and `--time`. Other modules declare their
 own resources. The `local` profile caps requests at the machine's CPUs and memory.
 The `test` profile caps every task at two CPUs, 2 GB, and five minutes; it does
-not select a sample subset or replace tools. For agent-submitted Sherlock validation, every task must explicitly stay
-within five minutes, two CPUs, and 8 GB. Run computation on allocated nodes.
+not select a sample subset or replace tools. On clusters, run computation on
+allocated compute nodes within your site's resource limits.
 
 ## Environments and Docker builds
 
@@ -335,30 +311,28 @@ Python 3.14.5 uv project that reads BAMs with pysam. Its conda equivalent instal
 Python project; containers use the dedicated uv Dockerfile. Each Nextflow module
 declares its environment and reads its image from `.env` using nf-dotenv.
 
-Keep the original Docker discovery/build scripts and run them through Pixi:
+Build tool images through Pixi:
 
 ```bash
 pixi run build-dockers --no-push
 pixi run build-dockers --no-push -- dap_seq_alignment genesis_tools
 ```
 
-Every build targets `linux/amd64` and `linux/arm64`. The original scripts default
+Every build targets `linux/amd64` and `linux/arm64`. The build scripts default
 to pushing: always pass `--no-push` for local builds. Tags default to the latest
 Git tag (`0.1.0`); use `--tag` to override. The scripts update `.env` with image
 digests and preserve unrelated entries. Publishing images requires approval.
-The reference Dockerfiles and pinned base images are retained.
+The Dockerfiles specify pinned base images.
 
 FastQC and MultiQC use separate environments. Docker defaults pin publicly
 available Biocontainers images by registry digest: FastQC 0.12.1 and MultiQC 1.35.
 They can be pulled on a fresh Linux server without rebuilding or publishing an
-image. The committed environment locks remain available for explicit local builds
-or the conda profile. Only Linux amd64 Docker execution has been validated here.
+image. Use the committed environment locks for local builds or the conda profile.
+The FastQC/MultiQC integration has been validated with Linux amd64 Docker.
 
 ## Verification
 
-The [2026-10-12 integration validation](../../validation/reports/integration-validation-20261012.md)
-records current Linux Docker results and exact source/image identities. Earlier
-ARM64 results remain in the archived README with their original date and revision.
+Run the default checks, then use Docker validation to exercise the scientific tools:
 
 ```bash
 pixi run checks
@@ -389,18 +363,20 @@ focused cases independently with:
 pixi run uv run --frozen --project genesis_tools python tests/verify_fastqc.py --keep
 ```
 
-The five-library fixture now expects 43 initial tasks and 39 tasks after reference
-reuse, including exactly one MULTIQC aggregation and one DAP_PROVENANCE publication. Trace logs, not these counts alone, establish whether a particular run
-completed and cached successfully. Tool warnings are retained for inspection. MultiQC regressions require seven
+The five-library fixture expects 43 initial tasks and 39 tasks after reference
+reuse, including exactly one MULTIQC aggregation and one DAP_PROVENANCE publication.
+Task counts depend on the workflow revision; inspect the trace for completion and
+cache status. Tool warnings are retained for inspection. MultiQC regressions require seven
 FastQC, ten samtools stats, five flagstat and five idxstats identities, with
 numerical read-count checks and report sections. They cover shared controls,
 optional missing SPP, duplicate identities, collision-prone names, missing required
 modules despite a zero tool exit, fresh deterministic HTML/metrics, and cached
 full output directories.
 
-These small synthetic runs validate integration; comparisons of biological
-outputs on the full public datasets remain a separate validation task. Native
-macOS stub traces do not include task runtime metrics; Docker traces do.
+The [2026-10-12 integration validation](../../validation/reports/integration-validation-20261012.md)
+records Linux Docker results with exact source and image identities. These small
+synthetic runs test integration, not biological performance on full public datasets.
+Native macOS stub traces do not include task runtime metrics; Docker traces do.
 
 See [docs/nextflow-style.md](../../docs/nextflow-style.md) for module conventions.
 
@@ -409,5 +385,24 @@ See [docs/nextflow-style.md](../../docs/nextflow-style.md) for module convention
 Use `genesis benchmark` to compare processing packages on matched inputs or to
 test explicit policy changes. Start with the synthetic fixtures, then use the
 verified public plant recipes. See the [benchmark guide](../../benchmarks/README.md)
-for commands, metric definitions, measured results and remaining work.
+for commands, metric definitions, measured results and limitations.
 Running a comparison does not change production defaults.
+
+<a id="upgrade-from-the-dap-only-release"></a>
+
+## Compatibility with older DAP installations
+
+When upgrading from DAP-only revision `fb60096`, check your execution profile and
+reference cache before resuming an analysis. The six-column sample-sheet format,
+assigned controls and DAP scientific defaults are compatible with that revision.
+
+| Area | What to check |
+| --- | --- |
+| Default execution | Omitting a profile selects `local,docker`. Select `-p local,conda` or `-p sherlock,apptainer` explicitly; the presence of `sbatch` does not select a cluster. |
+| Reference caches | Every invocation verifies FASTA identity, derived hashes and generator provenance before downloads, including on resume. Missing, stale or incomplete provenance stops execution. Keep old caches and regenerate in a new reference directory containing the exact approved FASTAs; do not copy unverifiable derived products or invent provenance. |
+| Read QC | Raw-mate FastQC and one run-level MultiQC report require the images pinned in `.env`; the runtime may need to pull them. Quality WARN/FAIL labels are advisory. |
+| Resume | Keep the run folder and work directory. Reference validation reruns; switching to published reference paths or changing process definitions can rerun affected tasks. Use a new run name and workspace if you need to keep an earlier result unchanged. |
+
+Follow [installation and maintenance](../development.md#command-installation-and-maintenance)
+to update the environment. Keep references and run data separately from Git, and
+back up catalogs with the [registry backup/restore commands](curation.md#read-only-status-backup-and-rollback).
