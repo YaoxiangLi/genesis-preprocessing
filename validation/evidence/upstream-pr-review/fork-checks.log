@@ -2,11 +2,11 @@
   ⚠ the `[system-requirements]` table is deprecated in favor of virtual
   │ packages on `platforms`
    ╭─[/data/homes/yl814/package/genesis/genesis-preprocessing/pixi.toml:7:1]
- 6 │     
+ 6 │
  7 │ ╭─▶ [system-requirements]
  8 │ ├─▶ libc = { family = "glibc", version = "2.17" }
    · ╰──── declare these on the `platforms` entries instead
- 9 │     
+ 9 │
    ╰────
   help: e.g. platforms = [{ name = "my-linux-64", platform = "linux-64", glibc
         = "2.17" }, "osx-arm64", "osx-64"]

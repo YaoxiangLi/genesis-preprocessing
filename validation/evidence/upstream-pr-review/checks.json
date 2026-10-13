@@ -5,8 +5,9 @@
       "commit": "4468c712e4c171b573e2ec2806fdc5327b5379e9",
       "exit_code": 0,
       "log": "baseline-checks.log",
-      "log_sha256": "722e0c897a9be424d8e1bb8947c2fb185888f83c86e1842203c325f73f680791",
+      "log_sha256": "407a23de262fba1b5e440721e954343d6dc55a6a5aeed0e07bf16c7c1cc3fa79",
       "name": "upstream-baseline-checks",
+      "raw_log_sha256": "722e0c897a9be424d8e1bb8947c2fb185888f83c86e1842203c325f73f680791",
       "status": "PASS"
     },
     {
@@ -14,8 +15,9 @@
       "commit": "9fa85ca9b2d3548fe30d5accaeffa1d6acb26b53",
       "exit_code": 0,
       "log": "candidate-checks.log",
-      "log_sha256": "06be4c668c5fe93119a947537c7ffa8b7697e0a5835445832030711792eda5c4",
+      "log_sha256": "49a910aeeed031bd636500bb070671018418f2253248a7fb98236d7f1d3a27b1",
       "name": "combined-candidate-checks",
+      "raw_log_sha256": "06be4c668c5fe93119a947537c7ffa8b7697e0a5835445832030711792eda5c4",
       "status": "PASS",
       "tree": "ecf1857fcdbdb2566ca5343a67b37e0d81629ab8"
     },
@@ -23,8 +25,9 @@
       "command": "pixi run validate-docker --keep",
       "exit_code": 1,
       "log": "candidate-docker-unshared-path.log",
-      "log_sha256": "66c182c2385fa6aea5a5b8a544b42c83d21bee833760b8dd51be76f6cc5de3ae",
+      "log_sha256": "e094275d0a2fb12138f26646e01520ff6e75ec69f169f4442eefc48d5d4a941c",
       "name": "candidate-docker-in-unshared-tmp",
+      "raw_log_sha256": "66c182c2385fa6aea5a5b8a544b42c83d21bee833760b8dd51be76f6cc5de3ae",
       "reason": "Snap Docker cannot resolve checkout bind sources under this host /tmp; rerun in verified daemon-visible /var/tmp",
       "status": "ENVIRONMENT_FAILURE"
     },
@@ -33,8 +36,9 @@
       "commit": "9fa85ca9b2d3548fe30d5accaeffa1d6acb26b53",
       "exit_code": 0,
       "log": "candidate-docker.log",
-      "log_sha256": "c0bcb75d8afc0bf5bd5b60dbf70d1f9ade4e89a67e11051e0eafe88879c00cf3",
+      "log_sha256": "59e73a1e1e4a760a09b6dec8560f81c590364cd987ed1c5c72d7e213c00544c2",
       "name": "candidate-real-docker",
+      "raw_log_sha256": "c0bcb75d8afc0bf5bd5b60dbf70d1f9ade4e89a67e11051e0eafe88879c00cf3",
       "status": "PASS",
       "tree": "ecf1857fcdbdb2566ca5343a67b37e0d81629ab8"
     },
@@ -69,8 +73,9 @@
       "commit": "b44061d5a881cf8a3a546d982312af1894bba5d5",
       "exit_code": 0,
       "log": "fork-checks.log",
-      "log_sha256": "bdf12601dd5809ad74884373f1398456dca890febb9af29561e348cfff5c349c",
+      "log_sha256": "ebaddae2d4fc0616a52a4db389b9ed9166106115293fbec79d094bc691aeedc7",
       "name": "development-fork-checks",
+      "raw_log_sha256": "bdf12601dd5809ad74884373f1398456dca890febb9af29561e348cfff5c349c",
       "status": "PASS"
     },
     {
@@ -94,6 +99,7 @@
     "Upstream PR #12 is standalone provenance helpers; workflow enforcement is follow-up",
     "No live LLM/GPU/SSH/scheduler acceptance rerun"
   ],
+  "log_publication": "Trailing whitespace at line ends was removed for readable diffs; raw_log_sha256 records the original capture when it differs. Trace TSVs are unchanged.",
   "merged_upstream_commit": "fb600968b3abf5d79756aaf7e6d1e4ff43a1b41d",
   "merged_upstream_tree": "ecf1857fcdbdb2566ca5343a67b37e0d81629ab8",
   "observed_date_utc": "2026-10-13",

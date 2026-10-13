@@ -96,7 +96,9 @@ registry/review, provider and deployment mocks, prepared studies, scATAC and
 limitations remain unchanged; passing synthetic tests does not validate those.
 
 [Command receipts and log digests](../evidence/upstream-pr-review/checks.json)
-record exit codes and source revisions. [Environment evidence](../evidence/upstream-pr-review/review-environment.json)
+record exit codes and source revisions. Published logs omit trailing line-end
+whitespace; receipts retain the original capture digest wherever it differs.
+[Environment evidence](../evidence/upstream-pr-review/review-environment.json)
 records changed-source hashes, all five image references and plugin hashes.
 The checks used Python 3.14.5, Pixi 0.81.0, uv 0.11.33, ruff 0.16.10,
 ty 0.0.84, Nextflow 25.10.4 and Docker client/server 29.1.3/29.8.0.
