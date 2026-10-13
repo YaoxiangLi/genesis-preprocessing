@@ -43,6 +43,16 @@ def group_rss(group: int) -> int | None:
 class Runtime:
     def __init__(self, plan: dict[str, Any], out: Path, *, resume: bool) -> None:
         self.plan, self.out, self.resume = plan, out.resolve(), resume
+        retention = self.out / "retention.json"
+        if retention.exists():
+            record = json.loads(retention.read_text())
+            if not isinstance(record, dict) or record.get("schema_version") != 1:
+                raise ValueError("Unrecognized retention record; preserve it and use a new output")
+            if record.get("prune_status") != "NOT_REQUESTED":
+                raise ValueError(
+                    "Experiment work was pruned or removal was interrupted; "
+                    "preserve the archived evidence and use a new output directory"
+                )
         self.start = time.monotonic()
         self.limits = plan["spec"]["limits"]
         self.events: list[dict[str, Any]] = []

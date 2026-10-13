@@ -167,6 +167,20 @@ def main() -> None:
         runtime.seal(task, [root / "ref.fa"], [artifact], {"policy": "explicit"})
         resumed = Runtime(load(manifest), out, resume=True)
         assert resumed.cached(task, [root / "ref.fa"], {"policy": "explicit"})
+        budget_before = (out / "runtime-budget.json").read_bytes()
+        for status in ("PRUNING", "PRUNED"):
+            (out / "retention.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "prune_status": status,
+                    }
+                )
+            )
+            rejects(lambda: Runtime(load(manifest), out, resume=True))
+            assert (out / "runtime-budget.json").read_bytes() == budget_before
+            assert artifact.read_text() == "{}"
+        (out / "retention.json").unlink()
         artifact.write_text('{"changed":true}')
         assert not resumed.cached(task, [root / "ref.fa"], {"policy": "explicit"})
         rejects(lambda: Runtime(load(manifest), out, resume=False))
