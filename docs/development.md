@@ -183,6 +183,10 @@ credentials on the target host, and inspect `git status` before committing.
 
 ## Handoff verification
 
+The [2026-10-13 real-study report](../validation/reports/real-study-validation.md)
+records the current provenance and full scientific study milestone. Earlier handoffs
+below remain evidence for their named revisions.
+
 The [2026-10-12 full-update report](../validation/reports/lab-main-promotion.md)
 is the acceptance record for the lab promotion. A fresh lab-main clone of
 `aceb6f4` installed successfully and passed CLI help/doctor, 197 documented
@@ -220,12 +224,15 @@ controller restart, collection recovery, input review, stale evidence, binary sc
 reviewed export and failure isolation. They do not execute Nextflow scientific tasks.
 The fixture writer lives only in `tests/`; it is not a production CLI mode.
 
-The next acceptance priorities are one tiny real scientific run through `study`, then
-an explicitly authorized SSH worker run on the destination site. DAP output provenance
-needs a separate science-preserving improvement before default full-validation export
-can accept it. Accession-first acquisition and expert-reviewed biological metadata
-evaluation remain separate development work. The existing API/GPU acceptance runners
-remain opt-in; no service or hardware is selected by the study workflow.
+The real scientific study milestone now includes DAP run provenance and opt-in
+`pixi run validate-study` acceptance through standard full validation and reviewed export.
+See the [test prerequisites and command](usage/studies.md#real-tool-acceptance-on-synthetic-inputs)
+and [recorded evidence](../validation/reports/real-study-validation.md).
+
+The next acceptance priority is an explicitly authorized SSH worker run on the destination
+site, followed by a small reviewed public dataset. Accession-first acquisition and
+expert-reviewed biological metadata evaluation remain separate development work. Existing
+API/GPU acceptance runners remain opt-in; study commands select no service or hardware.
 
 Implementation map: `study/inputs.py` owns prepared registration; `planning.py` owns
 compilation; `staging.py` owns generated documents; `workflow.py` coordinates existing

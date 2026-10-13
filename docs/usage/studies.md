@@ -231,12 +231,12 @@ Automatic assessment records evidence and missing values; it cannot approve a da
 Measurements, policy assessment and human exceptions remain separate. Reassess with
 `genesis qc evaluate --policy FILE` when an approved policy is available.
 
-**DAP provenance limitation:** the current DAP output adapter does not reconstruct
-all scientific input/resource/container provenance from its existing published reports.
-Even a full scan of readable DAP files can retain `provenance.complete: NOT_EVALUATED`.
-Default reviewed exports exclude that incomplete evidence. An explicitly authored and
-reviewed export profile may allow incompleteness for a stated catalog purpose, but
-never a known structural error. This is not a claim of complete model readiness.
+New DAP runs with [versioned provenance](dapseq-reference.md#versioned-run-provenance)
+can pass full structural validation and the default reviewed export. Legacy or incomplete
+records remain excluded. DAP shared-control groups retain the exact six-column public
+sheet order when compiled for a worker. Each collection generation records its request
+and observations; restoring artifact bytes and revalidating creates new evidence without
+replacing history or launching another scientific attempt.
 
 ## 6. Review and export a selected catalog
 
@@ -314,7 +314,44 @@ incomplete validation, or an all-excluded export), **2** for malformed requests,
 observed by run/resume/collect. `status` itself is read-only and returns 0 when readable.
 Inspect the separate states; exit 0 is not biological acceptance.
 
-[Validation evidence](../../validation/reports/study-workflow-validation.md) covers real
+[Earlier validation evidence](../../validation/reports/study-workflow-validation.md) covers real
 local worker supervision with explicitly synthetic output writers, real binary artifact
-readers and reviewed exports. Live SSH/scheduler and new scientific pipeline execution
-are separate acceptance work; these fixtures do not establish biological accuracy.
+readers and reviewed exports. The real scientific acceptance below extends that evidence.
+Live SSH/scheduler validation remains separate; synthetic fixtures do not establish
+biological accuracy.
+
+## Real-tool acceptance on synthetic inputs
+
+Use this opt-in check on a development server with a **clean committed checkout**,
+installed Pixi/Nextflow, the existing digest-pinned DAP/ATAC Docker images, and an existing
+separate Python environment containing `pyBigWig`. It does not build or pull images,
+install a reader, download public sequencing datasets, or use AI. All input reads and
+references are generated from the repository's deterministic fixtures.
+
+```bash
+pixi run validate-study --keep --work-root /var/tmp \
+  --bigwig-python /path/to/bigwig-environment/bin/python
+```
+
+The work root must be outside the checkout and visible to Docker. On installations
+where Docker cannot bind host `/tmp` or home directories, place both the checkout and
+work root in an approved Docker-visible location such as `/var/tmp`. The test serves
+synthetic DAP reads over a temporary HTTP endpoint reachable from its containers.
+
+The runner creates fresh fixture-only registries and records explicit synthetic review
+decisions. It has no option to approve an existing study. It runs SE/PE DAP (five libraries,
+including a shared control) and bulk ATAC (two libraries, each with two lanes), assigned
+to two local worker identities with separate staged data, attempts and output roots.
+It exercises controller reconnect, metadata-only versus full scans, standard reviewed
+exports, idempotent collection, budget exhaustion, stale decisions, corrupt artifacts,
+failed collection and recovery without sequencing resubmission.
+
+`--keep` retains inputs, registries, traces, logs, per-command timing and `result.json`.
+Successful runs otherwise remove their newly created test directory; failures retain
+it for diagnosis. Inspect retained worker state before cleanup. Test approvals concern
+synthetic integration only and establish no biological acceptance thresholds. SSH,
+schedulers, live API/GPU services and public biological validation remain separate.
+
+The [real-study validation report](../../validation/reports/real-study-validation.md)
+records the tested revision, results and limitations. The ordinary `pixi run checks`
+suite continues to use Docker-free fixtures.

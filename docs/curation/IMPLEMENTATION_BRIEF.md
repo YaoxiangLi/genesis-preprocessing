@@ -141,3 +141,14 @@ collect|export`, documented in the [study guide](../usage/studies.md).
   incomplete where existing reports lack evidence; default reviewed export excludes it.
   Local synthetic lifecycle tests, actual binary readers, full regressions and wheel
   acceptance are distinct from unrun live SSH or new scientific-container acceptance.
+
+## Real scientific study milestone
+
+The 2026-10-13 follow-up adds versioned DAP execution evidence and real DAP/ATAC
+acceptance through the existing coordinator. It preserves the historical limitation
+above for runs lacking evidence. Complete new records can pass full validation and
+the standard reviewed export. Collection generations carry distinct immutable
+observations, including after restoring earlier artifact bytes. The
+[validation report](../../validation/reports/real-study-validation.md) records exact
+scope, revisions and failures repaired; live SSH and biological acceptance remain
+separate from the synthetic scientific fixtures.

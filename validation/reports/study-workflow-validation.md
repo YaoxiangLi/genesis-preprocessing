@@ -1,5 +1,7 @@
 # Prepared-study workflow validation
 
+This is the historical prepared-study implementation report. The [2026-10-13 real-tool follow-up](real-study-validation.md) adds complete DAP provenance and real DAP/ATAC study acceptance. Results below retain their original scope and revision.
+
 Date: 2026-10-11 UTC / 2026-10-10 America/New_York.
 Baseline: `e260f2238e2ad1b1c45333bc5038523bcc2b3761`.
 Tested implementation: `98d5525a0aea752dad536d64d8356f1c7d01b90a`.

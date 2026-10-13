@@ -55,3 +55,15 @@ Evidence: [study workflow report](../../validation/reports/study-workflow-valida
 Publication and fresh installation: [GitHub handoff evidence](../../validation/evidence/study-workflow/github-checkout.json).
 Live SSH/scheduler, real sequencing through the new coordinator, live APIs and GPU
 services remain separate acceptance work; local fixtures do not establish these passed.
+
+## Real scientific study acceptance (2026-10-13)
+
+- [x] Versioned DAP run sidecar, shipped strict schema, task/input/reference/output bindings.
+- [x] Legacy incomplete provenance preserved; completeness derived from evidence.
+- [x] Fixed campaign compilation to retain DAP's public six-column order.
+- [x] Collection generations retain distinct evidence after artifact repair.
+- [x] Opt-in real DAP/ATAC study runner and default Docker-free contract regressions.
+- [x] README, DAP/curation/study guides, diagrams and developer handoff updated.
+
+Exact acceptance outcomes, revisions and commands are recorded in
+[the validation report](../../validation/reports/real-study-validation.md).

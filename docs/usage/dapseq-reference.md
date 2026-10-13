@@ -253,6 +253,42 @@ positive-count contigs visible. Three renderer-only fields (gzip timestamp, UUID
 and embedded creation date) are canonicalized for reproducible HTML; native JSON
 retains generation metadata. A stable resume caches the complete report/data set.
 
+### Versioned run provenance
+
+Every newly completed DAP run publishes `output/provenance/dap-run.json`, including
+when launched directly with Nextflow. A final `DAP_PROVENANCE` task consumes completed
+output channels; it does not scan an asynchronously published directory. The installed
+[version 1 schema](../../genesis_tools/src/genesis_tools/contracts/schemas/dap-run-v1.json)
+is validated when curation imports the run.
+
+The record binds the original sheet and sample/control assignments, compressed FASTQ
+checksums, exact reference/cache identities and contig lengths, effective scientific
+parameters, source hashes/Git revision, Nextflow version, and published output hashes.
+Analysis-task receipts record the actual container selected after site overrides,
+script checksum, attempt number and requested CPU/memory/time. Cached tasks retain their
+original receipts. Container digests identify the software environment; native alignment,
+reference and QC reports retain their reported versions.
+
+Requested resources are not usage measurements. The receipt's `observed` value is null;
+use the run's Nextflow traces for measured task runtime/RSS. Neither establishes whole-host
+peak RAM or network traffic. FASTQ checksums survive intentional work-cache pruning; the
+record does not claim those intermediates still exist. Scientific outputs remain required.
+
+Curation derives completeness from validated evidence, never a supplied boolean.
+A clean pinned checkout, real tasks in digest-pinned containers, and complete input,
+reference and output bindings allow full validation and the default reviewed export.
+Stub runs, dirty/unknown source revisions, mutable images, conda/native tasks and historical
+reference caches lacking execution-engine evidence remain inspectable but incomplete.
+Legacy runs without this sidecar retain their previous incomplete status. An invalid
+present sidecar is rejected rather than silently treated as a legacy run. Reference
+recipe hashes changed with this release: preserve old caches and regenerate derived
+products in a fresh reference directory containing the same approved FASTAs.
+
+Changes to scientific parameters and approval remain explicit. Full byte/format scans,
+scientific QC review and eligibility review are still separate from successful execution.
+See the [curation guide](curation.md#validate-existing-inputs-and-published-runs) and
+[study acceptance recipe](studies.md#real-tool-acceptance-on-synthetic-inputs).
+
 **FASTQs, BAMs, BAM indexes, and bedGraphs are excluded from published results.** Derived reference files
 are published separately under the reference directory.
 
@@ -340,8 +376,8 @@ focused cases independently with:
 pixi run uv run --frozen --project genesis_tools python tests/verify_fastqc.py --keep
 ```
 
-The five-library fixture now expects 42 initial tasks and 38 tasks after reference
-reuse, including exactly one MULTIQC aggregation. Trace logs, not these counts alone, establish whether a particular run
+The five-library fixture now expects 43 initial tasks and 39 tasks after reference
+reuse, including exactly one MULTIQC aggregation and one DAP_PROVENANCE publication. Trace logs, not these counts alone, establish whether a particular run
 completed and cached successfully. Tool warnings are retained for inspection. MultiQC regressions require seven
 FastQC, ten samtools stats, five flagstat and five idxstats identities, with
 numerical read-count checks and report sections. They cover shared controls,

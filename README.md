@@ -21,15 +21,15 @@ work without AI. [Open the full-size, editable diagram](docs/images/genesis_arch
 
 **Implemented** means code is available. **Validated** names the evidence and its
 limits. **Planned** identifies remaining validation, not completed work. Evidence
-snapshot: **2026-10-12**. The [full lab-update acceptance record](validation/reports/lab-main-promotion.md)
-includes current checks, real scientific fixtures and installed-package evidence.
+snapshot: **2026-10-13**. The [real-study acceptance record](validation/reports/real-study-validation.md)
+includes current checks, scientific compatibility and installed-package evidence.
 
 | Capability | Implemented | Validated | Planned / next validation |
 | --- | --- | --- | --- |
-| [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Linux Docker SE/PE and bulk ATAC fixtures ([current acceptance](validation/reports/lab-main-promotion.md)); earlier [public ATAC subsets](validation/reports/supported-atac-execution-validation.md) | — |
+| [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Linux Docker SE/PE and bulk ATAC fixtures ([current acceptance](validation/reports/real-study-validation.md)); earlier [public ATAC subsets](validation/reports/supported-atac-execution-validation.md) | — |
 | [Single-cell ATAC fragments](docs/usage/scatac.md) | Inventory, ingestion, replicate-preserving pseudobulks and model exports | Deterministic fixtures, pinned peak/track tools and both model loaders ([evidence](validation/reports/scatac-delivery-validation.md)) | Reference/annotation resolution and reviewed Arabidopsis/Sorghum release |
 | [Controller / workers](docs/usage/execution.md) | Yes | Local isolation, retries, recovery and deployment-profile parsing ([evidence](validation/reports/supported-atac-execution-validation.md)) | Live SSH / scheduler site acceptance |
-| [Complete prepared-study workflow](docs/usage/studies.md) | Yes | Input review → immutable plans → local workers → automatic collection → reviewed export, with synthetic output writers and real bigWig validation ([evidence](validation/reports/study-workflow-validation.md)) | Live SSH and real sequencing acceptance through the new coordinator |
+| [Complete prepared-study workflow](docs/usage/studies.md) | Yes | Real DAP/ATAC Docker fixtures → separate local workers → full validation → default reviewed export; recovery without sequencing retries ([evidence](validation/reports/real-study-validation.md)) | Live SSH and reviewed public biological datasets |
 | [Validation / registry](docs/usage/curation.md) | Yes | Binary formats, provenance, migrations, backup/restore and installed-package checks ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
 | [QC / human review / export](docs/usage/curation.md) | Yes | Offline workflow, stale-decision rejection, export eligibility and immutable history ([evidence](validation/reports/hybrid-llm-validation.md)) | — |
 | [Metadata / AI assistant / diagnosis](docs/usage/ai-providers.md) | Yes | Synthetic cases, mock providers and fake HTTP; real biological accuracy **not evaluated** ([evidence](validation/reports/hybrid-llm-validation.md)) | Live provider acceptance and expert-reviewed metadata evaluation |
@@ -198,11 +198,23 @@ pixi run genesis study export /local/studies/atac-A --dataset DATASET_ID \
 
 Revalidation does not rerun sequencing. Execution, collection, structural validity,
 scientific QC and approval have separate states; `SUCCEEDED` does not approve a
-dataset. Default exports exclude incomplete validation and missing approvals. DAP's
-existing output provenance can remain incomplete after a full scan; an explicit
+dataset. Default exports exclude incomplete validation and missing approvals. Historical
+DAP provenance can remain incomplete after a full scan; an explicit
 reviewed catalog exception is required to export it for a suitable purpose.
 The [complete guide](docs/usage/studies.md) covers both assays, optional AI/manual
 metadata curation, monitoring, migration, backup and continuation on another server.
+
+To verify the complete workflow with real scientific tools on tiny synthetic inputs,
+use a clean committed checkout and an existing separate bigWig reader:
+
+```bash
+pixi run validate-study --keep --work-root /var/tmp \
+  --bigwig-python /path/to/bigwig-environment/bin/python
+```
+
+See [prerequisites, fixture-only review and retained evidence](docs/usage/studies.md#real-tool-acceptance-on-synthetic-inputs).
+New DAP runs publish [versioned run provenance](docs/usage/dapseq-reference.md#versioned-run-provenance)
+for full validation; historical incomplete records keep their existing status.
 
 ## Process DAP-seq
 

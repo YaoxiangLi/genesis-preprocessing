@@ -107,7 +107,7 @@ DAP_NODES = [
 ]
 DAP_EDGES = [
     edge("qc", [(1290,180),(1425,180),(1425,510),(1290,510)], "Reports bind the run provenance"),
-    edge("peaks", [(1290,330),(1290,510)], "Quantified artifacts bind the run provenance"),
+    edge("peaks", [(1290,330),(1175,330),(1175,510),(1290,510)], "Quantified artifacts bind the run provenance"),
     edge("tracks", [(1060,690),(1290,690),(1290,510)], "Tracks bind the run provenance"),
     edge("reads", [(140,330),(600,330),(830,330)], "Validated libraries download and align"),
     edge("peaks", [(830,330),(1060,330),(1290,330)], "Treatment/control peaks and quantification"),
