@@ -502,6 +502,21 @@ def workflow_checks(root: Path, bigwig_python: Path | None = None) -> None:
         )
     with contextlib.closing(store.connect(catalog)) as db:
         before = store.current(db, dataset)
+    # Restoring an artifact's original bytes must be a new, attributable observation.
+    contract = plan["data"]["jobs"][job["id"]]
+    output = Path(contract["root"]) / "manifest.json"
+    original = output.read_bytes()
+    output.write_bytes(original + b"\n")
+    workflow.configure_collection(study, scan, True)
+    changed = wait_study(study, collect_only=True)
+    assert all(r["collection"] in {"COLLECTED", "FAILED"} for r in changed["datasets"])
+    output.write_bytes(original)
+    workflow.configure_collection(study, scan, True)
+    restored = wait_study(study, collect_only=True)
+    assert all(r["collection"] == "COLLECTED" for r in restored["datasets"]), restored
+    assert all(r["execution"] == "SUCCEEDED" for r in restored["datasets"])
+    with contextlib.closing(store.connect(catalog)) as db:
+        before = store.current(db, dataset)
     conflict = root / "later-source.json"
     dump(conflict, {"tissue": "root"})
     harmonize.ingest(catalog, dataset, [conflict], [], "local-only", scope="inputs")

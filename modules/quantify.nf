@@ -1,4 +1,5 @@
 include { dotenv } from 'plugin/nf-dotenv'
+include { dapReceipt } from '../workflows/dap_receipt'
 
 process QUANTIFY {
     tag "${meta.id}"
@@ -18,14 +19,14 @@ process QUANTIFY {
         path("${meta.id}.peaks.mean_RPKM.tsv"), emit: quantified
     script:
     """
-    ${DapReceipt.command(task, 'QUANTIFY', [meta.id], workflow.containerEngine, false)}
+    ${dapReceipt(task, 'QUANTIFY', [meta.id], workflow.containerEngine, false)}
     genesis-tools quantify --bed '${peaks}' --bam '${bam}' --coverage '${coverage}' \\
         --chrom-sizes '${chrom_sizes}' --weighting primary --threads ${task.cpus} \\
         --rpm-output '${meta.id}.peaks.RPM.tsv' --rpkm-output '${meta.id}.peaks.mean_RPKM.tsv'
     """
     stub:
     """
-    ${DapReceipt.command(task, 'QUANTIFY', [meta.id], workflow.containerEngine, true)}
+    ${dapReceipt(task, 'QUANTIFY', [meta.id], workflow.containerEngine, true)}
     gzip -dc '${peaks}' | awk -v OFS='\\t' '{print \$0, 0}' > '${meta.id}.peaks.RPM.tsv'
     cp '${meta.id}.peaks.RPM.tsv' '${meta.id}.peaks.mean_RPKM.tsv'
     """

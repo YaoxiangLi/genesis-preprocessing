@@ -1,4 +1,5 @@
 include { dotenv } from 'plugin/nf-dotenv'
+include { dapReceipt } from '../workflows/dap_receipt'
 
 process DOWNLOAD {
     // Each task fetches a batch of samples with parallel aria2c connections, so only one task
@@ -35,7 +36,7 @@ process DOWNLOAD {
             count
     }.join('\n')
     """
-    ${DapReceipt.command(task, 'DOWNLOAD', samples.collect { it.id }, workflow.containerEngine, false)}
+    ${dapReceipt(task, 'DOWNLOAD', samples.collect { it.id }, workflow.containerEngine, false)}
     aria2c_input_file=aria2c-input.txt
     cat > "\${aria2c_input_file}" << 'END_OF_URLS'
 ${aria2cInput}
@@ -63,7 +64,7 @@ ${checks}
             "printf '4\\n' > '${meta.id}.fastq.lines'" + second
     }.join('\n')
     """
-    ${DapReceipt.command(task, 'DOWNLOAD', samples.collect { it.id }, workflow.containerEngine, true)}
+    ${dapReceipt(task, 'DOWNLOAD', samples.collect { it.id }, workflow.containerEngine, true)}
 ${fakes}
     sha256sum -- *.read*.fastq.gz > '${samples[0].id}.reads.sha256'
     """

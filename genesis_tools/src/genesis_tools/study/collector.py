@@ -180,7 +180,14 @@ def collect(target: Path, payload: dict[str, Any], request: dict[str, Any], fold
     observed = worker.inspect(folder)
     evidence = source_record(
         canonical(
-            {"status": observed, "payload_hash": request["payload_hash"], "plan": request["plan"]}
+            {
+                "status": observed,
+                "payload_hash": request["payload_hash"],
+                "plan": request["plan"],
+                # A new scan is a new observation, even if repaired files return to
+                # earlier bytes. Retain history without rolling a manifest back.
+                "collection_request": request,
+            }
         ),
         str(folder / "status.json"),
         "application/json",

@@ -1,4 +1,5 @@
 include { dotenv } from 'plugin/nf-dotenv'
+include { dapReceipt } from '../workflows/dap_receipt'
 
 process MULTIQC {
     cpus 1
@@ -21,7 +22,7 @@ process MULTIQC {
     script:
     def manifestJson = groovy.json.JsonOutput.toJson([run: provenance, samples: samples])
     """
-    ${DapReceipt.command(task, 'MULTIQC', ['run'], workflow.containerEngine, false)}
+    ${dapReceipt(task, 'MULTIQC', ['run'], workflow.containerEngine, false)}
     cat > genesis_manifest.json << 'GENESIS_MANIFEST'
 ${manifestJson}
 GENESIS_MANIFEST
@@ -32,7 +33,7 @@ GENESIS_MANIFEST
     stub:
     def manifestJson = groovy.json.JsonOutput.toJson([run: provenance, samples: samples])
     """
-    ${DapReceipt.command(task, 'MULTIQC', ['run'], workflow.containerEngine, true)}
+    ${dapReceipt(task, 'MULTIQC', ['run'], workflow.containerEngine, true)}
     mkdir multiqc_data
     printf '<html>MultiQC stub</html>\\n' > multiqc_report.html
     cat > multiqc_data/genesis_provenance.json << 'GENESIS_MANIFEST'

@@ -1,4 +1,5 @@
 include { dotenv } from 'plugin/nf-dotenv'
+include { dapReceipt } from '../workflows/dap_receipt'
 
 process FASTQC {
     cpus 1
@@ -17,7 +18,7 @@ process FASTQC {
     tuple val(meta), val(mate), path("${meta.id}.${mate}.fastqc.version.txt"), emit: version
     script:
     """
-    ${DapReceipt.command(task, 'FASTQC', ["${meta.id}.${mate}"], workflow.containerEngine, false)}
+    ${dapReceipt(task, 'FASTQC', ["${meta.id}.${mate}"], workflow.containerEngine, false)}
     # Fontconfig must not attempt a cache under the container's unwritable default HOME.
     export XDG_CACHE_HOME="\$PWD/.cache"
     mkdir -p "\$XDG_CACHE_HOME"
@@ -29,7 +30,7 @@ process FASTQC {
     """
     stub:
     """
-    ${DapReceipt.command(task, 'FASTQC', ["${meta.id}.${mate}"], workflow.containerEngine, true)}
+    ${dapReceipt(task, 'FASTQC', ["${meta.id}.${mate}"], workflow.containerEngine, true)}
     printf '<html>stub</html>\\n' > '${meta.id}.${mate}_fastqc.html'
     printf 'stub\\n' > '${meta.id}.${mate}_fastqc.zip'
     printf 'stub\\n' > '${meta.id}.${mate}.fastqc.version.txt'

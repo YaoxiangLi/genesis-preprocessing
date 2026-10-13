@@ -1,4 +1,5 @@
 include { dotenv } from 'plugin/nf-dotenv'
+include { dapReceipt } from '../workflows/dap_receipt'
 
 process METADATA {
     cpus 1
@@ -18,7 +19,7 @@ process METADATA {
     def files = reads instanceof List ? reads.sort { it.name } : [reads]
     def mate = meta.layout == 'PE' ? "--read2 '${files[1]}'" : ''
     """
-    ${DapReceipt.command(task, 'METADATA', [meta.id], workflow.containerEngine, false)}
+    ${dapReceipt(task, 'METADATA', [meta.id], workflow.containerEngine, false)}
     genesis-tools metadata --sample-id '${meta.id}' \
         --species '${meta.species}' --reference-fasta '${meta.reference_fasta}' \
         --chrom-sizes '${chrom_sizes}' \
@@ -28,7 +29,7 @@ process METADATA {
     def files = reads instanceof List ? reads.sort { it.name } : [reads]
     def mate = meta.layout == 'PE' ? "--read2 '${files[1]}'" : ''
     """
-    ${DapReceipt.command(task, 'METADATA', [meta.id], workflow.containerEngine, true)}
+    ${dapReceipt(task, 'METADATA', [meta.id], workflow.containerEngine, true)}
     genesis-tools metadata --sample-id '${meta.id}' \
         --species '${meta.species}' --reference-fasta '${meta.reference_fasta}' \
         --chrom-sizes '${chrom_sizes}' \

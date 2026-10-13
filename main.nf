@@ -238,7 +238,7 @@ workflow {
     // Clean Git identity is required for complete provenance; dirty runs remain inspectable.
     def sourceFiles = [file("${projectDir}/main.nf"), file("${projectDir}/nextflow.config"),
         file("${projectDir}/.env"), file("${projectDir}/multiqc_config.yaml"), file(params.spp_script)] +
-        file("${projectDir}/modules/*.nf") + file("${projectDir}/lib/*.groovy") +
+        file("${projectDir}/modules/*.nf") + [file("${projectDir}/workflows/dap_receipt.nf")] +
         file("${projectDir}/environments/*.yaml") + file("${projectDir}/environments/*.lock") +
         [provenanceScript, file("${projectDir}/genesis_tools/src/genesis_tools/dap_provenance.py"),
          file("${projectDir}/genesis_tools/uv.lock")]

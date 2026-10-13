@@ -1,4 +1,5 @@
 include { dotenv } from 'plugin/nf-dotenv'
+include { dapReceipt } from '../workflows/dap_receipt'
 
 process QC {
     cpus { resources.cpus }
@@ -24,7 +25,7 @@ process QC {
             '${meta.id}.qc.report.main.stats.txt' > '${meta.id}.qc.report.insert_lengths.tsv'
         """ : ''
     """
-    ${DapReceipt.command(task, 'QC', [meta.id], workflow.containerEngine, false)}
+    ${dapReceipt(task, 'QC', [meta.id], workflow.containerEngine, false)}
     samtools flagstat '${bam}' > '${meta.id}.qc.report.flagstat.txt'
     samtools idxstats '${bam}' > '${meta.id}.qc.report.idxstats.tsv'
     samtools stats '${bam}' > '${meta.id}.qc.report.main.stats.txt'
@@ -53,7 +54,7 @@ process QC {
     """
     stub:
     """
-    ${DapReceipt.command(task, 'QC', [meta.id], workflow.containerEngine, true)}
+    ${dapReceipt(task, 'QC', [meta.id], workflow.containerEngine, true)}
     printf 'stub\\n' > '${meta.id}.qc.report.spp.tsv'
     touch '${meta.id}.qc.report.spp.pdf' '${meta.id}.qc.report.flagstat.txt'
     """
