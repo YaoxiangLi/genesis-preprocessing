@@ -14,9 +14,10 @@ Install Git and [Pixi](https://pixi.sh/) for your server, then run:
 git clone --branch main https://github.com/kundajelab/genesis-preprocessing.git
 cd genesis-preprocessing
 git log -1 --oneline
-pixi run install-all
-pixi run genesis --help
-pixi run genesis doctor
+pixi run install-all --install-cli
+export PATH="$HOME/.local/bin:$PATH"
+genesis --help
+genesis doctor
 ```
 
 `install-all` uses the committed `pixi.lock`, `genesis_tools/uv.lock` and Python
@@ -27,9 +28,45 @@ server: environment paths and binaries are machine-specific. The supported Pixi
 platforms are Linux x86_64 and macOS x86_64/ARM64; private vLLM deployment requires
 an authorized Linux node and its separate serving environment.
 
-`doctor` reports available tools and Docker access. Docker, a GPU and API
+`doctor` reports the selected checkout, tools on the host and in Pixi, and Docker access.
+Docker, a GPU and API
 credentials are not prerequisites for the core development checks or mock tutorial;
 scientific-container and live-model acceptance have their own prerequisites.
+
+### Command installation and maintenance
+
+`--install-cli` links `~/.local/bin/genesis` to this checkout's
+`genesis_tools/.venv/bin/genesis`. Once its directory is on PATH, commands work from
+any directory. Add the PATH export above to your shell startup file if necessary;
+the installer does not edit it. A custom location uses
+`pixi run install-all --install-cli --bin-dir /your/bin`. Check `command -v genesis`
+if another installation is selected earlier on PATH. For a temporary session, you
+can instead activate `genesis_tools/.venv/bin/activate`; plain `pixi run install-all`
+continues to install environments without creating a user-level command.
+
+After updating this checkout with Git, rerun `pixi run install-all --install-cli`
+to synchronize locked dependencies. Reinstalling the same link is safe. Keep the
+checkout in place: the link refers to its environment. If moving the checkout,
+recreate its environments using the instructions above.
+
+To uninstall just the exposed command, inspect `ls -l "$HOME/.local/bin/genesis"`
+and remove that symlink with `rm "$HOME/.local/bin/genesis"` (adjust for a custom
+bin directory). This retains the checkout, environments and all analysis data.
+To switch checkouts, remove the previous link explicitly and run the installation
+command in the new checkout. The installer refuses to replace a different link,
+file or directory.
+
+An installed wheel supports core commands independently. To use a wheel's
+scientific launch commands, set `GENESIS_REPO=/absolute/path/to/genesis-preprocessing`
+to a checkout with installed environments. This overrides editable-source discovery;
+an invalid override fails explicitly. Scientific launchers execute the selected
+checkout's code with its own Python and locked Pixi environment. They preserve
+the caller's working directory until the existing pipeline wrapper selects its
+run directory. No workflow is downloaded or chosen from the current directory.
+
+If `genesis doctor` reports an unavailable managed runtime, put Pixi on PATH and
+run `pixi run install-all` in that checkout. Core curation remains usable without
+Pixi. Developer checks and image builds continue to use Pixi tasks.
 
 Read [AGENTS.md](../AGENTS.md) before editing. Create a branch for the next change:
 
@@ -148,7 +185,8 @@ describe the implemented state.
 
 For evidence, see [scientific processing](../validation/reports/supported-atac-execution-validation.md),
 [curation and hybrid LLMs](../validation/reports/hybrid-llm-validation.md), and
-[the architecture figure](../validation/reports/architecture-overview-validation.md).
+[the historical architecture figure](../validation/reports/architecture-overview-validation.md)
+(the overview image has since been removed from the README).
 Real API, GPU/SSH service and remote-scheduler acceptance remain separate next
 steps. Synthetic metadata tests do not establish real biological annotation
 accuracy. The README supplies opt-in live acceptance commands and prerequisites.

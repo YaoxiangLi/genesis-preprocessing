@@ -15,6 +15,7 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.parse import unquote
 
+from genesis_tools.atac import run as atac
 from genesis_tools.benchmark import __main__ as benchmark
 from genesis_tools.execution import controller
 
@@ -119,12 +120,21 @@ def main() -> None:
                     # uv is an installed dependency, rather than a named Pixi task.
                     assert command in tasks or command == "uv", (document, line)
                     task_count += 1
-                if not line.strip().startswith(("pixi run genesis ", "pixi run benchmark ")):
+                if not line.strip().startswith(
+                    ("genesis ", "pixi run genesis ", "pixi run benchmark ")
+                ):
                     continue
                 argv = shlex.split(line, comments=True)
-                entry = controller.main if argv[2] == "genesis" else benchmark.main
+                if argv[:2] == ["pixi", "run"]:
+                    argv = argv[2:]
+                entry = controller.main if argv[0] == "genesis" else benchmark.main
+                # Parse delegated Python options with the actual destination parser.
+                if argv[:2] == ["genesis", "pipeline-atac"]:
+                    entry, argv = atac.main, ["genesis pipeline-atac", *argv[2:]]
+                elif argv[:2] == ["genesis", "benchmark"]:
+                    entry, argv = benchmark.main, ["genesis benchmark", *argv[2:]]
                 with (
-                    patch.object(sys, "argv", [argv[2], *argv[3:]]),
+                    patch.object(sys, "argv", argv),
                     patch.object(argparse.ArgumentParser, "parse_args", parse_only),
                     contextlib.redirect_stdout(io.StringIO()),
                 ):

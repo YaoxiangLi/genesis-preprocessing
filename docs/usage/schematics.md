@@ -3,10 +3,10 @@
 Generate editable SVG figures for documentation, slides and papers:
 
 ```bash
-pixi run genesis schematic --workflow dap --output dap.svg
-pixi run genesis schematic --workflow atac --output atac.svg
-pixi run genesis schematic --workflow execution --output execution.svg
-pixi run genesis schematic --workflow atac --theme dark --animate --output atac-dark.svg
+genesis schematic --workflow dap --output dap.svg
+genesis schematic --workflow atac --output atac.svg
+genesis schematic --workflow execution --output execution.svg
+genesis schematic --workflow atac --theme dark --animate --output atac-dark.svg
 ```
 
 The Genesis botanical style combines a seedling/DNA illustration, forest-green
@@ -24,10 +24,10 @@ supplied. Rendering never starts a pipeline or changes an analysis.
 ## Customize a figure
 
 ```bash
-pixi run genesis schematic --workflow atac --template my-workflow.json
+genesis schematic --workflow atac --template my-workflow.json
 # Edit labels, icons, positions and connections in my-workflow.json.
-pixi run genesis schematic --spec my-workflow.json --output my-workflow.svg
-pixi run genesis schematic --list-icons
+genesis schematic --spec my-workflow.json --output my-workflow.svg
+genesis schematic --list-icons
 ```
 
 Templates are versioned JSON. Each stage has `id`, `title`, `detail`, `icon`,

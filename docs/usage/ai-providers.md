@@ -10,9 +10,9 @@ core Python 3.14 environment. Live HTTP uses the standard library.
 Start with [the complete mock configuration](../../examples/curation/providers.mock.json):
 
 ```bash
-pixi run genesis registry init /local/catalog
-pixi run genesis ai providers list --config examples/curation/providers.mock.json
-pixi run genesis ai providers check /local/catalog \
+genesis registry init /local/catalog
+genesis ai providers list --config examples/curation/providers.mock.json
+genesis ai providers check /local/catalog \
   --config examples/curation/providers.mock.json --provider mock
 ```
 
@@ -38,9 +38,9 @@ not automatic proof that its network or retention policy is private.
 
 ```bash
 # After editing /local/providers.json and provisioning the referenced credential:
-pixi run genesis ai providers check /local/catalog \
+genesis ai providers check /local/catalog \
   --config /local/providers.json --provider api
-pixi run genesis ai providers check /local/catalog \
+genesis ai providers check /local/catalog \
   --config /local/providers.json --provider private
 ```
 
@@ -81,11 +81,11 @@ Retries and temperature zero do not imply bitwise reproducibility.
 ## Read-only questions and provenance
 
 ```bash
-pixi run genesis registry search /local/catalog --text 'leaf' --limit 10
-pixi run genesis ai ask /local/catalog 'What metadata is recorded for these libraries?' \
+genesis registry search /local/catalog --text 'leaf' --limit 10
+genesis ai ask /local/catalog 'What metadata is recorded for these libraries?' \
   --dataset DATASET_ID --config /local/providers.json --provider private \
   --classification local-only
-pixi run genesis registry show /local/catalog INVOCATION_VERSION --kind invocation
+genesis registry show /local/catalog INVOCATION_VERSION --kind invocation
 ```
 
 Questions are bounded to 1–10 explicitly selected datasets. The assistant exposes

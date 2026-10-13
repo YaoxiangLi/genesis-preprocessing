@@ -13,11 +13,9 @@ campaign plan, run scientific processing, and collect validated results for revi
 and export. Run on one server or distribute independent datasets across authenticated
 workers. The standalone pipeline commands remain available.
 
-[![Genesis architecture: plant reads and explicit references enter DAP-seq or bulk ATAC-seq pipelines; results feed validation, registry, human review and reviewed export. Optional AI exchanges evidence and proposals; a controller supports local or SSH workers.](docs/images/genesis_architecture_overview.svg)](docs/images/genesis_architecture_overview.svg)
-
 **AI is optional.** Models suggest metadata and explanations; deterministic checks
 and accountable human review govern changes. Core processing and manual curation
-work without AI. [Open the full-size, editable diagram](docs/images/genesis_architecture_overview.svg).
+work without AI.
 
 **Implemented** means code is available. **Validated** names the evidence and its
 limits. **Planned** identifies remaining validation, not completed work. Evidence
@@ -93,21 +91,52 @@ Do not run installation or analysis as root.
 ```bash
 git clone https://github.com/kundajelab/genesis-preprocessing.git
 cd genesis-preprocessing
-pixi run install-all
-pixi run genesis doctor
-pixi run genesis --help
+pixi run install-all --install-cli
+export PATH="$HOME/.local/bin:$PATH"
+genesis doctor
+genesis --help
 ```
 
+After this one-time setup, use **`genesis` directly**, including outside the checkout.
+The installer links `~/.local/bin/genesis` to this checkout's Python environment;
+it never overwrites an unrelated command or edits your shell startup files. Keep
+that directory on your PATH in future shells. Use `--bin-dir /your/bin` with
+`--install-cli` for another location. `genesis doctor` reports the selected checkout,
+host tools and tools available inside the managed runtime.
+
+| Task | Command |
+| --- | --- |
+| DAP-seq | `genesis pipeline INPUT.tsv` |
+| Bulk ATAC-seq | `genesis pipeline-atac INPUT.tsv --references REFERENCES.json` |
+| Prepared studies | `genesis study --help` |
+| Curation and review | `genesis registry --help`, `genesis review --help` |
+| Optional AI | `genesis ai --help` |
+| Benchmarks | `genesis benchmark --help` |
+
 Pixi supplies Nextflow and uv; the Python project uses Python **3.14 or newer**.
-`pixi run genesis` invokes the existing controller CLI. An installed Python wheel
-also exposes `genesis` and the existing `genesis-tools` task helpers. Curation and
+Scientific commands use the checkout's installed Pixi environment internally,
+without updating locks or installing it during execution. `pixi run genesis`,
+`pixi run pipeline`, `pixi run pipeline-atac` and `pixi run benchmark` remain
+supported. `genesis run` remains the controller's campaign command. Curation and
 HTTP inference have no torch/vLLM dependency. Private model serving uses a separate
 pinned runtime and an already available Docker image.
 
-Commands below run from this checkout. Replace uppercase IDs/hashes and example
+A separately installed Python wheel exposes `genesis` and `genesis-tools`, but
+does not bundle Nextflow workflows. For scientific commands, set `GENESIS_REPO` to
+an installed checkout; its own environment runs its matching scientific code.
+Core registry, review and AI commands do not require that checkout or Pixi.
+
+Examples using repository-relative files assume this checkout as the current
+directory. Elsewhere, provide paths to your inputs; DAP's downstream Nextflow
+arguments still resolve relative to its run directory. Replace uppercase IDs/hashes and example
 paths with recorded values. Curation/AI commands print JSON by default and accept
 `--json`; use `--help` on each subcommand. First-time environment installation can
 need network access; the subsequent offline tutorial does not.
+
+For upgrades, switching checkouts and uninstalling the command, see
+[command installation and maintenance](docs/development.md#command-installation-and-maintenance).
+The [direct-command validation record](validation/reports/direct-cli-validation.md)
+covers installation, standalone wheel use and pipeline resume checks.
 
 **Continuing development on another server?** Follow the
 [development handoff](docs/development.md) for a fresh clone, environment setup,
@@ -125,7 +154,7 @@ recorded in every decision.
 ```bash
 pixi run uv run --frozen --project genesis_tools python \
   examples/curation/offline_workflow.py /tmp/genesis-curation-demo
-pixi run genesis registry search /tmp/genesis-curation-demo/catalog
+genesis registry search /tmp/genesis-curation-demo/catalog
 ```
 
 Choose a **new** directory each time. Expect `status: PASS`, two selected/included
@@ -136,8 +165,8 @@ is `NOT RUN`. To create fixtures for a step-by-step manual exercise instead:
 ```bash
 pixi run uv run --frozen --project genesis_tools python \
   examples/curation/create_demo.py /tmp/genesis-manual-demo
-pixi run genesis registry init /tmp/genesis-manual-demo/catalog
-pixi run genesis registry import /tmp/genesis-manual-demo/catalog \
+genesis registry init /tmp/genesis-manual-demo/catalog
+genesis registry import /tmp/genesis-manual-demo/catalog \
   --bundle /tmp/genesis-manual-demo/bundle.json
 ```
 
@@ -158,15 +187,15 @@ controller-local storage for the study directory and registry.
 
 ```bash
 cp examples/curation/study-execution.local.json /local/study-execution.json
-pixi run genesis study init /local/studies/atac-A --study-id atac-A --assay bulk-ATAC \
+genesis study init /local/studies/atac-A --study-id atac-A --assay bulk-ATAC \
   --sheet /data/atac-A.tsv --references /data/references.json
-pixi run genesis study plan /local/studies/atac-A \
+genesis study plan /local/studies/atac-A \
   --execution /local/study-execution.json --output /local/atac-plan-v1.json
 # Inspect the plan's status, blockers, jobs, paths and commands before running.
-pixi run genesis study run /local/studies/atac-A --plan /local/atac-plan-v1.json
-pixi run genesis study status /local/studies/atac-A
+genesis study run /local/studies/atac-A --plan /local/atac-plan-v1.json
+genesis study status /local/studies/atac-A
 # Reconnect after a controller restart; existing attempts are retained.
-pixi run genesis study resume /local/studies/atac-A
+genesis study resume /local/studies/atac-A
 ```
 
 For DAP use `--assay DAP-seq --sheet /data/dap.tsv --references /data/references`
@@ -188,11 +217,11 @@ Initial collection performs metadata-level inspection. Full validation needs an
 explicit scan budget and the appropriate artifact reader on each worker:
 
 ```bash
-pixi run genesis study collect /local/studies/atac-A --level full \
+genesis study collect /local/studies/atac-A --level full \
   --reader local=/path/to/track-environment/bin/python \
   --max-bytes 10737418240 --max-records 10000000 --max-seconds 1800
 # After reviewing metadata, QC and eligibility using the linked guide:
-pixi run genesis study export /local/studies/atac-A --dataset DATASET_ID \
+genesis study export /local/studies/atac-A --dataset DATASET_ID \
   --output /local/reviewed-atac-v1.json
 ```
 
@@ -233,9 +262,9 @@ does not choose/download a replacement assembly. Derived references carry checks
 provenance; stale/unproven cached products stop the run.
 
 ```bash
-pixi run genesis validate inputs dap.tsv --assay DAP-seq --references /data/references
-pixi run pipeline -w /scratch/genesis -n study-A dap.tsv --references /data/references
-pixi run pipeline -w /scratch/genesis -n study-A dap.tsv --references /data/references -resume
+genesis validate inputs dap.tsv --assay DAP-seq --references /data/references
+genesis pipeline -w /scratch/genesis -n study-A dap.tsv --references /data/references
+genesis pipeline -w /scratch/genesis -n study-A dap.tsv --references /data/references -resume
 ```
 
 Results are in `/scratch/genesis/study-A/output/`, intermediates in `work/`, and
@@ -270,9 +299,9 @@ position and strand. Derive them from the recorded annotation; do not invent TSS
 organellar assignments. Stage authenticated inputs locally before constructing sheets.
 
 ```bash
-pixi run genesis validate inputs atac.tsv --assay bulk-ATAC --references references.json
-pixi run pipeline-atac atac.tsv --references references.json --outdir /scratch/atac-run
-pixi run pipeline-atac atac.tsv --references references.json --outdir /scratch/atac-run --resume
+genesis validate inputs atac.tsv --assay bulk-ATAC --references references.json
+genesis pipeline-atac atac.tsv --references references.json --outdir /scratch/atac-run
+genesis pipeline-atac atac.tsv --references references.json --outdir /scratch/atac-run --resume
 ```
 
 Each library publishes raw-read/alignment QC, fragments, raw Tn5 cut-count bigWig,
@@ -291,9 +320,9 @@ For scheduler execution, copy a site template from `conf/sites/` outside the che
 set authorized account/partition/resources/paths, and select the profile explicitly:
 
 ```bash
-pixi run pipeline-atac atac.tsv --references references.json \
+genesis pipeline-atac atac.tsv --references references.json \
   --profile slurm,apptainer --config /local/site.config --outdir /scratch/atac-run
-pixi run pipeline -p slurm,apptainer dap.tsv -c /local/site.config
+genesis pipeline -p slurm,apptainer dap.tsv -c /local/site.config
 ```
 
 Profiles also cover Sherlock, NERSC, PBS Pro, LSF and SGE; see the
@@ -334,11 +363,11 @@ DAP treatments should share one job. Paths are worker-local; no shared filesyste
 or implicit data transfer is assumed. `slots` limits job count, not RAM/GPU use.
 
 ```bash
-pixi run genesis run /local/campaign --manifest campaign.json
-pixi run genesis status /local/campaign
-pixi run genesis issues /local/campaign
-pixi run genesis resume /local/campaign
-pixi run genesis serve /local/campaign --port 8765
+genesis run /local/campaign --manifest campaign.json
+genesis status /local/campaign
+genesis issues /local/campaign
+genesis resume /local/campaign
+genesis serve /local/campaign --port 8765
 ```
 
 The read-only page binds to `127.0.0.1`. Confirmed exit-75 failures have at most two
@@ -346,8 +375,8 @@ automatic retries. Other failures need review; `UNKNOWN` retains capacity and
 prevents duplicate submission. After correcting a confirmed failure:
 
 ```bash
-pixi run genesis resolve /local/campaign library-1 --note 'Cause corrected; retry approved'
-pixi run genesis resume /local/campaign
+genesis resolve /local/campaign library-1 --note 'Cause corrected; retry approved'
+genesis resume /local/campaign
 ```
 
 If a supervisor was lost, independently verify its processes/scheduler jobs have
@@ -361,18 +390,18 @@ Validation, execution success, scientific QC, metadata approval and export eligi
 are separate statuses. Run artifact validation on the machine holding the files:
 
 ```bash
-pixi run genesis validate run /scratch/atac-run --assay bulk-ATAC \
+genesis validate run /scratch/atac-run --assay bulk-ATAC \
   --source-id study-A --study study-A --worker worker-A --output inspection.json
-pixi run genesis validate run /scratch/atac-run --assay bulk-ATAC \
+genesis validate run /scratch/atac-run --assay bulk-ATAC \
   --source-id study-A --study study-A --worker worker-A --level full \
   --bigwig-python /absolute/track-environment/bin/python \
   --max-bytes 10737418240 --max-records 10000000 --max-seconds 1800 \
   --output validated.json
 # DAP adapters additionally need the executed sheet and reference directory:
-pixi run genesis validate run /scratch/genesis/study-A --assay DAP-seq \
+genesis validate run /scratch/genesis/study-A --assay DAP-seq \
   --source-id study-B --worker worker-A --sheet /data/dap.tsv \
   --references /data/references --output dap-inspection.json
-pixi run genesis validate manifest validated.json --json
+genesis validate manifest validated.json --json
 ```
 
 Metadata-level inspection is the default. Full scans explicitly check hashes,
@@ -393,16 +422,16 @@ Keep the registry on **controller-local disk**, separate from campaign `state.sq
 Transfer validated JSON bundles explicitly; workers never write a shared SQLite file.
 
 ```bash
-pixi run genesis registry init /local/catalog
-pixi run genesis registry import /local/catalog --bundle validated.json
-pixi run genesis registry import /local/catalog --campaign /local/campaign
-pixi run genesis registry search /local/catalog --filter assay=bulk-ATAC \
+genesis registry init /local/catalog
+genesis registry import /local/catalog --bundle validated.json
+genesis registry import /local/catalog --campaign /local/campaign
+genesis registry search /local/catalog --filter assay=bulk-ATAC \
   --filter availability=available --text leaf --limit 100
-pixi run genesis registry show /local/catalog DATASET_ID
-pixi run genesis registry history /local/catalog DATASET_ID --limit 100 --after 0
-pixi run genesis registry search /local/catalog --filter study=study-A --format tsv
-pixi run genesis registry backup /local/catalog --output catalog-backup.sqlite
-pixi run genesis registry restore /local/restored-catalog --backup catalog-backup.sqlite
+genesis registry show /local/catalog DATASET_ID
+genesis registry history /local/catalog DATASET_ID --limit 100 --after 0
+genesis registry search /local/catalog --filter study=study-A --format tsv
+genesis registry backup /local/catalog --output catalog-backup.sqlite
+genesis registry restore /local/restored-catalog --backup catalog-backup.sqlite
 ```
 
 Filters include species, assay, study, reference_id, worker, availability and
@@ -420,9 +449,9 @@ record by its version: `genesis registry show /local/catalog VERSION --kind invo
 ## Assess QC, review and export
 
 ```bash
-pixi run genesis qc evaluate /local/catalog DATASET_ID
-pixi run genesis review queue /local/catalog --category metadata
-pixi run genesis review show /local/catalog DATASET_ID
+genesis qc evaluate /local/catalog DATASET_ID
+genesis review queue /local/catalog --category metadata
+genesis review show /local/catalog DATASET_ID
 ```
 
 The shipped plant policy leaves biological thresholds **UNSPECIFIED**. It preserves
@@ -441,18 +470,18 @@ A locator is a JSON pointer, `line:N`, or `$` for a whole recorded source/artifa
 Use the fresh `status.token` from `review show` **after each change/decision**:
 
 ```bash
-pixi run genesis review approve /local/catalog DATASET_ID --category metadata \
+genesis review approve /local/catalog DATASET_ID --category metadata \
   --token CURRENT_TOKEN --reason 'State what the reviewed evidence establishes' --evidence evidence.json
-pixi run genesis review approve /local/catalog DATASET_ID --category qc \
+genesis review approve /local/catalog DATASET_ID --category qc \
   --token NEW_TOKEN --reason 'Record the QC judgment and any exception' --evidence evidence.json
-pixi run genesis review approve /local/catalog DATASET_ID --category eligibility \
+genesis review approve /local/catalog DATASET_ID --category eligibility \
   --token NEWEST_TOKEN --reason 'Accepted for this catalog purpose' --evidence evidence.json
-pixi run genesis review history /local/catalog DATASET_ID
-pixi run genesis registry search /local/catalog --filter study=study-A \
+genesis review history /local/catalog DATASET_ID
+genesis registry search /local/catalog --filter study=study-A \
   --selection-output selected.json
-pixi run genesis registry export /local/catalog --selection selected.json \
+genesis registry export /local/catalog --selection selected.json \
   --reviewed --output reviewed-catalog.json
-pixi run genesis serve /local/campaign --registry /local/catalog --port 8765
+genesis serve /local/campaign --registry /local/catalog --port 8765
 ```
 
 `reject`/`request-info` use the same category/token/reason interface. Reviewer identity
@@ -469,8 +498,8 @@ manifest catalogs, not copied sequencing files or training arrays. Omitting
 ## Configure mock, API or private providers
 
 ```bash
-pixi run genesis ai providers list --config examples/curation/providers.mock.json
-pixi run genesis ai providers check /local/catalog \
+genesis ai providers list --config examples/curation/providers.mock.json
+genesis ai providers check /local/catalog \
   --config examples/curation/providers.mock.json --provider mock
 ```
 
@@ -483,8 +512,8 @@ existing environment-variable names or owned `0600` file references, never liter
 keys in configuration or command arguments.
 
 ```bash
-pixi run genesis ai providers check /local/catalog --config /local/providers.json --provider api
-pixi run genesis ai providers check /local/catalog --config /local/providers.json --provider private
+genesis ai providers check /local/catalog --config /local/providers.json --provider api
+genesis ai providers check /local/catalog --config /local/providers.json --provider private
 ```
 
 `mode` is `disabled`, `mock` or `live`. Choose a provider explicitly per operation.
@@ -498,13 +527,13 @@ when declared. Unknown capabilities/usage/cost stay unknown; mock success is lab
 ## Harmonize metadata with evidence
 
 ```bash
-pixi run genesis metadata ingest /local/catalog DATASET_ID \
+genesis metadata ingest /local/catalog DATASET_ID \
   --source metadata.json --source paper-excerpt.txt --classification local-only
-pixi run genesis metadata propose /local/catalog DATASET_ID --output proposal.json
+genesis metadata propose /local/catalog DATASET_ID --output proposal.json
 # Optional: replace deterministic-only proposal generation with an explicit provider.
-pixi run genesis metadata propose /local/catalog DATASET_ID \
+genesis metadata propose /local/catalog DATASET_ID \
   --config /local/providers.json --provider private --output ai-proposal.json
-pixi run genesis metadata diff /local/catalog DATASET_ID --target PROPOSAL_VERSION
+genesis metadata diff /local/catalog DATASET_ID --target PROPOSAL_VERSION
 ```
 
 Local JSON/CSV/TSV/text and explicit public ENA/GEO accessions are supported; use
@@ -521,11 +550,11 @@ Review the diff and `proposal.data.evidence`, then save that evidence array as
 `{"evidence":[...]}`. Approval targets the exact proposal; version 2 application is separate:
 
 ```bash
-pixi run genesis review show /local/catalog DATASET_ID
-pixi run genesis review approve /local/catalog DATASET_ID --category metadata \
+genesis review show /local/catalog DATASET_ID
+genesis review approve /local/catalog DATASET_ID --category metadata \
   --target PROPOSAL_VERSION --token CURRENT_TOKEN --reason 'Explain the reviewed mapping' \
   --evidence evidence.json
-pixi run genesis metadata apply /local/catalog DATASET_ID --target PROPOSAL_VERSION \
+genesis metadata apply /local/catalog DATASET_ID --target PROPOSAL_VERSION \
   --output canonical-metadata.json
 ```
 
@@ -539,8 +568,8 @@ Reassess QC/eligibility afterward. For entirely manual corrections, supply
 ## Ask read-only catalog questions
 
 ```bash
-pixi run genesis registry search /local/catalog --text leaf --limit 10
-pixi run genesis ai ask /local/catalog 'What tissue and treatment evidence is recorded?' \
+genesis registry search /local/catalog --text leaf --limit 10
+genesis ai ask /local/catalog 'What tissue and treatment evidence is recorded?' \
   --dataset DATASET_ID --config /local/providers.json --provider private \
   --classification local-only
 ```
@@ -560,16 +589,16 @@ cross-host model sharding and public listeners are not supported.
 
 ```bash
 # Read metadata, resolve an immutable revision; no weight download.
-pixi run genesis ai model inspect NAMESPACE/MODEL --revision REVISION --output model.json
+genesis ai model inspect NAMESPACE/MODEL --revision REVISION --output model.json
 # Copy/edit the template with your actual node, image digest, budgets and reviewed model.
-pixi run genesis ai deployment plan --config /local/deployment.json \
+genesis ai deployment plan --config /local/deployment.json \
   --model model.json --output plan.json
 # Only after reviewing the complete plan: authorize this exact plan hash.
-pixi run genesis ai deployment apply /local/catalog --plan plan.json --authorize EXACT_PLAN_HASH
-pixi run genesis ai deployment status /local/catalog --plan plan.json
-pixi run genesis ai deployment logs /local/catalog --plan plan.json
-pixi run genesis ai deployment stop /local/catalog --plan plan.json
-pixi run genesis ai deployment status /local/catalog --plan plan.json
+genesis ai deployment apply /local/catalog --plan plan.json --authorize EXACT_PLAN_HASH
+genesis ai deployment status /local/catalog --plan plan.json
+genesis ai deployment logs /local/catalog --plan plan.json
+genesis ai deployment stop /local/catalog --plan plan.json
+genesis ai deployment status /local/catalog --plan plan.json
 ```
 
 Start from [deployment.example.json](examples/curation/deployment.example.json), which
@@ -596,11 +625,11 @@ explain every prerequisite and limit. Real GPU/SSH/API acceptance remains opt-in
 ## Diagnose a failed job
 
 ```bash
-pixi run genesis ai diagnose /local/catalog --root /scratch/atac-run \
+genesis ai diagnose /local/catalog --root /scratch/atac-run \
   --log .nextflow.log --log work/ab/task/.command.err \
   --dataset DATASET_ID --output diagnosis.json
 # Optional model explanation; deterministic classification still runs first.
-pixi run genesis ai diagnose /local/catalog --root /scratch/atac-run \
+genesis ai diagnose /local/catalog --root /scratch/atac-run \
   --log .nextflow.log --config /local/providers.json --provider private
 ```
 
@@ -619,27 +648,27 @@ review/retry mechanism. Resources or input changes require a new campaign.
 ## Create figures and benchmark methods
 
 ```bash
-pixi run genesis schematic --workflow atac --output atac.svg
-pixi run genesis schematic --workflow execution --theme dark --animate --output execution.svg
-pixi run genesis schematic --workflow dap --template dap-template.json
-pixi run genesis schematic --spec dap-template.json --output edited-dap.svg
-pixi run benchmark --help
-pixi run benchmark plan --help
-pixi run benchmark run --help
-pixi run benchmark compare --help
-pixi run benchmark report --help
+genesis schematic --workflow atac --output atac.svg
+genesis schematic --workflow execution --theme dark --animate --output execution.svg
+genesis schematic --workflow dap --template dap-template.json
+genesis schematic --spec dap-template.json --output edited-dap.svg
+genesis benchmark --help
+genesis benchmark plan --help
+genesis benchmark run --help
+genesis benchmark compare --help
+genesis benchmark report --help
 ```
 
 With the benchmark's required pinned images already present, a synthetic
 post-alignment comparison can be prepared and run explicitly:
 
 ```bash
-pixi run benchmark fixture --out /scratch/benchmark-fixture
-pixi run benchmark plan /scratch/benchmark-fixture/experiment.toml
-pixi run benchmark run /scratch/benchmark-fixture/experiment.toml --out /scratch/benchmark-run
-pixi run benchmark run /scratch/benchmark-fixture/experiment.toml --out /scratch/benchmark-run --resume
-pixi run benchmark report /scratch/benchmark-run
-pixi run benchmark compare /scratch/candidate-run --against /scratch/reference-run
+genesis benchmark fixture --out /scratch/benchmark-fixture
+genesis benchmark plan /scratch/benchmark-fixture/experiment.toml
+genesis benchmark run /scratch/benchmark-fixture/experiment.toml --out /scratch/benchmark-run
+genesis benchmark run /scratch/benchmark-fixture/experiment.toml --out /scratch/benchmark-run --resume
+genesis benchmark report /scratch/benchmark-run
+genesis benchmark compare /scratch/candidate-run --against /scratch/reference-run
 ```
 
 The last command needs two completed runs with matching source bytes/reference.

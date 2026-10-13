@@ -8,10 +8,10 @@ track and peak generation uses the existing pinned Docker images.
 ## Discover studies
 
 ```bash
-pixi run genesis scatac inventory import inventory --source 'Plant Data Sets.xlsx' --source-id plant-data-sets --registry catalog
-pixi run genesis scatac inventory audit inventory
-pixi run genesis scatac inventory evidence inventory --source evidence.json
-pixi run genesis scatac inventory export inventory --output inventory-tables
+genesis scatac inventory import inventory --source 'Plant Data Sets.xlsx' --source-id plant-data-sets --registry catalog
+genesis scatac inventory audit inventory
+genesis scatac inventory evidence inventory --source evidence.json
+genesis scatac inventory export inventory --output inventory-tables
 ```
 
 The importer retains the workbook and original cell values, including formulas
@@ -30,12 +30,12 @@ biological quality score. A named reviewer is required for approved evidence.
 ## Process known libraries
 
 ```bash
-pixi run genesis scatac ingest --manifest library.json --output fragments/library-1
-pixi run genesis scatac ingest --manifest library.json --output fragments/library-1 --resume
-pixi run genesis scatac pseudobulk --input fragments/library-1 --input fragments/library-2 --annotations cells.jsonl --policy policy.json --output pseudobulk
-pixi run genesis scatac products --input pseudobulk/TASK_ID --output products/TASK_ID
-pixi run genesis scatac qc --input products/TASK_ID
-pixi run genesis scatac register --input products/TASK_ID --registry catalog
+genesis scatac ingest --manifest library.json --output fragments/library-1
+genesis scatac ingest --manifest library.json --output fragments/library-1 --resume
+genesis scatac pseudobulk --input fragments/library-1 --input fragments/library-2 --annotations cells.jsonl --policy policy.json --output pseudobulk
+genesis scatac products --input pseudobulk/TASK_ID --output products/TASK_ID
+genesis scatac qc --input products/TASK_ID
+genesis scatac register --input products/TASK_ID --registry catalog
 ```
 
 Each library manifest declares its biological identity, producer/version, exact
@@ -74,8 +74,8 @@ retain diagnostics; complete outputs are published atomically.
 ## Export model inputs
 
 ```bash
-pixi run genesis scatac model export --input products/TASK_ID --config model.json --output models/TASK_ID
-pixi run genesis scatac model validate --input models/TASK_ID
+genesis scatac model export --input products/TASK_ID --config model.json --output models/TASK_ID
+genesis scatac model validate --input models/TASK_ID
 ```
 
 Adapters target Cherimoya `8ecf7f791ec07c05a701076cc58a0f845bf97609` and ChromBPNet

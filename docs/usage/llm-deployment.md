@@ -25,11 +25,11 @@ rechecked. Scheduler nodes require a site-approved existing allocation with expi
 
 ```bash
 # Read metadata only; does not download weights or accept license terms.
-pixi run genesis ai model inspect NAMESPACE/MODEL --revision REVISION \
+genesis ai model inspect NAMESPACE/MODEL --revision REVISION \
   --output inspected-model.json
 
 # For access already granted to a gated repository, use an existing token reference.
-pixi run genesis ai model inspect NAMESPACE/MODEL --revision FULL_COMMIT_SHA \
+genesis ai model inspect NAMESPACE/MODEL --revision FULL_COMMIT_SHA \
   --token-env HF_TOKEN --output inspected-gated-model.json
 ```
 
@@ -73,7 +73,7 @@ executable production recommendation. Configure:
   prior review/access. Genesis never accepts Hub terms on your behalf.
 
 ```bash
-pixi run genesis ai deployment plan --config /local/deployment.json \
+genesis ai deployment plan --config /local/deployment.json \
   --model inspected-model.json --output plan.json
 ```
 
@@ -97,13 +97,13 @@ The following apply command authorizes weight staging and service launch on the
 specific configured node. It is not part of installation or offline tests.
 
 ```bash
-pixi run genesis registry init /local/catalog
-pixi run genesis ai deployment apply /local/catalog --plan plan.json \
+genesis registry init /local/catalog
+genesis ai deployment apply /local/catalog --plan plan.json \
   --authorize EXACT_PLAN_HASH
-pixi run genesis ai deployment status /local/catalog --plan plan.json
-pixi run genesis ai deployment logs /local/catalog --plan plan.json
-pixi run genesis ai deployment stop /local/catalog --plan plan.json
-pixi run genesis ai deployment status /local/catalog --plan plan.json
+genesis ai deployment status /local/catalog --plan plan.json
+genesis ai deployment logs /local/catalog --plan plan.json
+genesis ai deployment stop /local/catalog --plan plan.json
+genesis ai deployment status /local/catalog --plan plan.json
 ```
 
 Launch is asynchronous. States are `PLANNED`, `STAGING`, `STARTING`, `READY`,

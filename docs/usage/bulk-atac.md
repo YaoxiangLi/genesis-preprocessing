@@ -1,8 +1,11 @@
 # Paired-end bulk ATAC
 
+Complete the [one-time installation](../../README.md#install-and-check-your-environment)
+first. Pixi supplies the scientific runtime internally.
+
 ```bash
-pixi run pipeline-atac samples.tsv --references references.json --outdir results/atac
-pixi run pipeline-atac samples.tsv --references references.json --outdir results/atac --resume
+genesis pipeline-atac samples.tsv --references references.json --outdir results/atac
+genesis pipeline-atac samples.tsv --references references.json --outdir results/atac --resume
 ```
 
 Each row describes one paired-end lane. Repeated `library_id` values concatenate

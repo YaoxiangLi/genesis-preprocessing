@@ -7,8 +7,10 @@ below also work independently. Curation adds artifact validation, a local scient
 registry, reproducible QC assessments and manual review. Existing scientific settings,
 outputs, retries and resume behavior remain unchanged. There is no LLM dependency.
 
-Install with `pixi run install-all`. Use `pixi run genesis` in this checkout, or
-the installed `genesis` command in the Python environment containing the wheel.
+Install with `pixi run install-all --install-cli` and put `~/.local/bin` on PATH
+(see [installation](../../README.md#install-and-check-your-environment)). Use
+`genesis` from any directory, or the command in the Python environment containing
+an installed wheel.
 All new command families support `--help` and `--json`. Successful commands emit
 JSON by default; search also supports `--format tsv`.
 
@@ -38,9 +40,9 @@ execution retry; it does not approve scientific quality or curation.
 Input checks delegate to the existing validators and keep their requirements:
 
 ```bash
-pixi run genesis validate inputs samples.tsv --assay bulk-ATAC \
+genesis validate inputs samples.tsv --assay bulk-ATAC \
   --references references.json --json
-pixi run genesis validate inputs dap.tsv --assay DAP-seq \
+genesis validate inputs dap.tsv --assay DAP-seq \
   --references /data/references --json
 ```
 
@@ -51,18 +53,18 @@ Internal dataset IDs are separate from accessions, library names, lanes and jobs
 
 ```bash
 # Execute on the machine that holds these artifacts.
-pixi run genesis validate run /data/atac-run --assay bulk-ATAC \
+genesis validate run /data/atac-run --assay bulk-ATAC \
   --source-id study-A --study study-A --worker local \
   --output atac-inspection-v1.json --json
 
 # Explicit full inspection with a separately installed bigWig reader.
-pixi run genesis validate run /data/atac-run --assay bulk-ATAC \
+genesis validate run /data/atac-run --assay bulk-ATAC \
   --source-id study-A --study study-A --worker local --level full \
   --bigwig-python /path/to/track-environment/bin/python \
   --max-bytes 10737418240 --max-records 10000000 --max-seconds 1800 \
   --output atac-validation-v1.json --json
 
-pixi run genesis validate run /data/dap-run --assay DAP-seq \
+genesis validate run /data/dap-run --assay DAP-seq \
   --source-id study-B --study study-B --worker local \
   --sheet /data/dap.tsv --references /data/references \
   --output dap-inspection-v1.json --json
@@ -113,8 +115,8 @@ the validator there and transfer only the resulting JSON through approved means.
 For authored records or repeat scans:
 
 ```bash
-pixi run genesis validate manifest bundle.json --json
-pixi run genesis validate manifest bundle.json --scan --level full --worker worker-A \
+genesis validate manifest bundle.json --json
+genesis validate manifest bundle.json --scan --level full --worker worker-A \
   --bigwig-python /path/to/track-environment/bin/python --output recheck-v2.json --json
 ```
 
@@ -148,14 +150,14 @@ Sources, findings, decisions and prior manifests are immutable. Current dataset
 projections change only through explicit import, assessment or review operations.
 
 ```bash
-pixi run genesis registry init /local/catalog --json
-pixi run genesis registry import /local/catalog --bundle atac-validation-v1.json --json
-pixi run genesis registry import /local/catalog --campaign /local/campaign --json
-pixi run genesis registry search /local/catalog --filter assay=bulk-ATAC \
+genesis registry init /local/catalog --json
+genesis registry import /local/catalog --bundle atac-validation-v1.json --json
+genesis registry import /local/catalog --campaign /local/campaign --json
+genesis registry search /local/catalog --filter assay=bulk-ATAC \
   --filter availability=available --limit 100 --json
-pixi run genesis registry search /local/catalog --text 'leaf' --format tsv
-pixi run genesis registry show /local/catalog DATASET_ID --json
-pixi run genesis registry history /local/catalog DATASET_ID --limit 100 --after 0 --json
+genesis registry search /local/catalog --text 'leaf' --format tsv
+genesis registry show /local/catalog DATASET_ID --json
+genesis registry history /local/catalog DATASET_ID --limit 100 --after 0 --json
 ```
 
 Structured filters are `species`, `assay`, `study`, `reference_id`, `worker`,
@@ -186,9 +188,9 @@ monitoring: revalidate before consuming artifacts that might have changed.
 ## Assess QC and review one dataset at a time
 
 ```bash
-pixi run genesis qc evaluate /local/catalog DATASET_ID --json
-pixi run genesis review queue /local/catalog --category metadata --json
-pixi run genesis review show /local/catalog DATASET_ID --json
+genesis qc evaluate /local/catalog DATASET_ID --json
+genesis review queue /local/catalog --category metadata --json
+genesis review show /local/catalog DATASET_ID --json
 ```
 
 The packaged `plant-diagnostic-v1` policy leaves thresholds **UNSPECIFIED**. It
@@ -213,13 +215,13 @@ unresolvable source locators are rejected. Copy the current `status.token` from
 `review show`; obtain a fresh token after each decision or reassessment.
 
 ```bash
-pixi run genesis review approve /local/catalog DATASET_ID --category metadata \
+genesis review approve /local/catalog DATASET_ID --category metadata \
   --token CURRENT_TOKEN --reason 'Reviewed the named source evidence' --evidence evidence.json
-pixi run genesis review approve /local/catalog DATASET_ID --category qc \
+genesis review approve /local/catalog DATASET_ID --category qc \
   --token NEW_TOKEN --reason 'Document the actual QC judgment or exception' --evidence evidence.json
-pixi run genesis review approve /local/catalog DATASET_ID --category eligibility \
+genesis review approve /local/catalog DATASET_ID --category eligibility \
   --token NEWEST_TOKEN --reason 'Reviewed for this catalog purpose' --evidence evidence.json
-pixi run genesis review history /local/catalog DATASET_ID --json
+genesis review history /local/catalog DATASET_ID --json
 ```
 
 `reject` and `request-info` use the same category/token/reason interface. QC approval
@@ -245,9 +247,9 @@ dump(Path("proposal.json"), proposal, immutable=True)
 ```
 
 ```bash
-pixi run genesis review propose /local/catalog --file proposal.json
-pixi run genesis review diff /local/catalog DATASET_ID --target PROPOSAL_VERSION
-pixi run genesis review approve /local/catalog DATASET_ID --category metadata \
+genesis review propose /local/catalog --file proposal.json
+genesis review diff /local/catalog DATASET_ID --target PROPOSAL_VERSION
+genesis review approve /local/catalog DATASET_ID --category metadata \
   --target PROPOSAL_VERSION --token CURRENT_TOKEN --reason 'Reviewed this diff' \
   --evidence evidence.json
 ```
@@ -259,9 +261,9 @@ as descriptive proposals. Use an explicit new scientific run for such changes.
 ## Export an explicit selection
 
 ```bash
-pixi run genesis registry search /local/catalog --filter study=study-A \
+genesis registry search /local/catalog --filter study=study-A \
   --limit 100 --selection-output selection.json --json
-pixi run genesis registry export /local/catalog --selection selection.json \
+genesis registry export /local/catalog --selection selection.json \
   --reviewed --output reviewed-catalog-v1.json --json
 ```
 
@@ -287,9 +289,9 @@ not replay another registry's approvals. Use backup/restore for complete history
 ## Read-only status, backup and rollback
 
 ```bash
-pixi run genesis serve /local/campaign --registry /local/catalog --port 8765
-pixi run genesis registry backup /local/catalog --output catalog-backup.sqlite --json
-pixi run genesis registry restore /local/restored-catalog --backup catalog-backup.sqlite --json
+genesis serve /local/campaign --registry /local/catalog --port 8765
+genesis registry backup /local/catalog --output catalog-backup.sqlite --json
+genesis registry restore /local/restored-catalog --backup catalog-backup.sqlite --json
 ```
 
 The existing page remains loopback-only with no write endpoints. It escapes
@@ -323,18 +325,18 @@ supply no evidence. Re-ingestion preserves earlier snapshots and the most restri
 source classification; conflicting sources stay visible.
 
 ```bash
-pixi run genesis metadata ingest /local/catalog DATASET_ID \
+genesis metadata ingest /local/catalog DATASET_ID \
   --source source-metadata.json --source paper-excerpt.txt --classification local-only
 # Optional public metadata retrieval, explicitly involving network access:
-pixi run genesis metadata ingest /local/catalog DATASET_ID \
+genesis metadata ingest /local/catalog DATASET_ID \
   --accession SRR123456 --classification public
 
 # Deterministic extraction, no AI required:
-pixi run genesis metadata propose /local/catalog DATASET_ID --output proposal-v2.json
+genesis metadata propose /local/catalog DATASET_ID --output proposal-v2.json
 # Or explicitly select a configured provider:
-pixi run genesis metadata propose /local/catalog DATASET_ID \
+genesis metadata propose /local/catalog DATASET_ID \
   --config /local/providers.json --provider private --output model-proposal.json
-pixi run genesis metadata diff /local/catalog DATASET_ID --target PROPOSAL_VERSION
+genesis metadata diff /local/catalog DATASET_ID --target PROPOSAL_VERSION
 ```
 
 Fields include organism/taxon, cultivar/genotype, tissue, developmental stage,
@@ -365,11 +367,11 @@ For version 2 proposals, approval and apply are deliberately separate:
 
 ```bash
 # Save {"evidence": proposal.data.evidence} as evidence.json after inspecting it.
-pixi run genesis review show /local/catalog DATASET_ID
-pixi run genesis review approve /local/catalog DATASET_ID --category metadata \
+genesis review show /local/catalog DATASET_ID
+genesis review approve /local/catalog DATASET_ID --category metadata \
   --target PROPOSAL_VERSION --token CURRENT_TOKEN --reason 'Explain the evidence review' \
   --evidence evidence.json
-pixi run genesis metadata apply /local/catalog DATASET_ID --target PROPOSAL_VERSION \
+genesis metadata apply /local/catalog DATASET_ID --target PROPOSAL_VERSION \
   --output canonical-metadata-v1.json
 ```
 
@@ -396,11 +398,11 @@ and explicit individual review still apply.
 Collect a small explicit selection of logs from an approved run/work root:
 
 ```bash
-pixi run genesis ai diagnose /local/catalog --root /scratch/atac-run \
+genesis ai diagnose /local/catalog --root /scratch/atac-run \
   --log .nextflow.log --log work/ab/task/.command.err \
   --facts diagnostic-facts.json --dataset DATASET_ID --output diagnosis.json
 # Optional explanation, with the same deterministic classifier:
-pixi run genesis ai diagnose /local/catalog --root /scratch/atac-run \
+genesis ai diagnose /local/catalog --root /scratch/atac-run \
   --log .nextflow.log --config /local/providers.json --provider private
 ```
 

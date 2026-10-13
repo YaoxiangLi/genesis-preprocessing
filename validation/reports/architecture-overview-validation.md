@@ -1,5 +1,8 @@
 # README architecture overview validation
 
+Historical report: the README overview was subsequently removed at the project owner’s request.
+The linked image is retained at its original Git revision.
+
 Date: 2026-10-10 UTC (2026-10-09 America/New_York).
 Base revision: `2c25645adec6157db2e91b2beaca2446d367f07c`.
 Scope: README introduction, one maintained SVG overview and this evidence.
@@ -10,7 +13,7 @@ table separates available implementations, the scope of existing validation and
 remaining live acceptance. The table links to existing scientific and hybrid-LLM
 reports; it makes no new scientific, biological-accuracy or deployment claim.
 
-The [overview](../../docs/images/genesis_architecture_overview.svg) reuses eleven
+The [overview](https://github.com/kundajelab/genesis-preprocessing/blob/b04bee282870ada4dff69b96bdd0cb9796ebda60/docs/images/genesis_architecture_overview.svg) reuses eleven
 existing licensed Genesis/Tabler vector assets. It is an editable, self-contained
 1600 × 1120 SVG with selectable labels, an accessible title/description and embedded
 source, checksum and full license metadata. This is a maintained architecture

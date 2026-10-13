@@ -1,7 +1,7 @@
 # Run locally or across servers
 
 Genesis runs on one Linux server by default. Install the project with Pixi and
-use Docker with your existing account. `pixi run genesis doctor` lists available
+use Docker with your existing account. `genesis doctor` lists available
 runtimes and checks Docker access. It never installs services or changes access.
 
 ## Managed clusters
@@ -28,16 +28,16 @@ scratch, not a short-lived login session or home filesystem for work files.
 
 ```bash
 # Bulk ATAC on Sherlock
-pixi run pipeline-atac samples.tsv --references references.json \
+genesis pipeline-atac samples.tsv --references references.json \
   --profile sherlock,apptainer --config /path/site.config --outdir /scratch/run
 
 # NERSC: the adapter path must be visible from compute nodes
-GENESIS_RUNTIME_DIR=/scratch/run/runtime scripts/nersc-podman.sh pixi run pipeline-atac samples.tsv \
+GENESIS_RUNTIME_DIR=/scratch/run/runtime scripts/nersc-podman.sh genesis pipeline-atac samples.tsv \
   --references references.json --profile nersc \
   --config /path/site.config --outdir /scratch/run
 
 # DAP-seq uses the same scheduler profiles
-pixi run pipeline -p slurm,apptainer samples.tsv -c /path/site.config
+genesis pipeline -p slurm,apptainer samples.tsv -c /path/site.config
 ```
 
 NERSC submissions are capped at 15 outstanding tasks with five-minute scheduler
@@ -106,12 +106,12 @@ without SSH and is suitable for a single server. `slots` caps concurrent jobs,
 not the memory of each job; set matching Nextflow resource limits.
 
 ```bash
-pixi run genesis run /local/campaign --manifest campaign.json
-pixi run genesis status /local/campaign
-pixi run genesis issues /local/campaign
-pixi run genesis resolve /local/campaign library-1 --note 'Cause corrected; retry approved'
-pixi run genesis resume /local/campaign
-pixi run genesis serve /local/campaign --port 8765
+genesis run /local/campaign --manifest campaign.json
+genesis status /local/campaign
+genesis issues /local/campaign
+genesis resolve /local/campaign library-1 --note 'Cause corrected; retry approved'
+genesis resume /local/campaign
+genesis serve /local/campaign --port 8765
 ```
 
 The browser page binds only to `127.0.0.1` and has no write endpoints. View it

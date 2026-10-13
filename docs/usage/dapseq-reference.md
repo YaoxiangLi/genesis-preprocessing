@@ -53,7 +53,8 @@ references and run data separately from Git. See the
 Install [Pixi](https://pixi.sh/), then install the project and its Python tools:
 
 ```bash
-pixi run install-all
+pixi run install-all --install-cli
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
 Place each sheet's gzipped reference FASTA under `references/`, using the exact
@@ -74,23 +75,24 @@ Run exactly one sheet per invocation:
 
 ```bash
 # Show wrapper options.
-pixi run pipeline --help
+genesis pipeline --help
 
 
 # Run test data with default profile: local Docker.
-pixi run pipeline test-Sorghum_bicolor-PRJNA1177471.tsv
+genesis pipeline test-Sorghum_bicolor-PRJNA1177471.tsv
 
 # Local execution with micromamba/conda environments.
-pixi run pipeline -p local,conda 15-Arabidopsis_lyrata-PRJNA1177479.tsv
+genesis pipeline -p local,conda 15-Arabidopsis_lyrata-PRJNA1177479.tsv
 
 # Continue a previous run using Nextflow's task cache.
-pixi run pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -resume
+genesis pipeline 15-Arabidopsis_lyrata-PRJNA1177479.tsv -resume
 
 # Submit tasks from Sherlock using accessible container images.
-pixi run pipeline -p sherlock,apptainer 15-Arabidopsis_lyrata-PRJNA1177479.tsv
+genesis pipeline -p sherlock,apptainer 15-Arabidopsis_lyrata-PRJNA1177479.tsv
 ```
 
-Run through the root Pixi environment so Nextflow can find micromamba. Without
+`genesis pipeline` selects the checkout's Pixi environment so Nextflow can find micromamba.
+The existing `pixi run pipeline` command remains supported. Without
 `-p`/`--profile` (or a Nextflow `-profile`), `scripts/get-default-profile.sh`
 always chooses `local,docker`. Cluster execution is selected explicitly.
 Choose an executor and a software environment together. `sherlock` uses SLURM and the
@@ -393,7 +395,7 @@ See [docs/nextflow-style.md](../../docs/nextflow-style.md) for module convention
 
 ## Opt-in method benchmarks
 
-Use `pixi run benchmark` for explicit sensitivity experiments and pinned raw-ATAC
+Use `genesis benchmark` for explicit sensitivity experiments and pinned raw-ATAC
 workflow comparisons. The default synthetic fixtures run without dataset downloads;
 real plant candidate plans remain blocked until reference and input identity are
 resolved. See [benchmark commands, contracts and limitations](../../benchmarks/README.md).

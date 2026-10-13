@@ -12,6 +12,7 @@ import re
 import shutil
 import sqlite3
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -295,9 +296,15 @@ def serve(folder: Path, port: int, registry: Path | None = None) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
+    from . import launch
+
+    parser = argparse.ArgumentParser(
+        prog="genesis",
+        description="Plant sequencing, study execution and evidence-backed curation.",
+    )
     commands = parser.add_subparsers(dest="action", required=True)
     commands.add_parser("doctor")
+    launch.configure(commands)
     from ..curation import commands as curation_commands
 
     curation_commands.configure(commands)
@@ -320,7 +327,18 @@ def main() -> None:
         if name == "serve":
             child.add_argument("--port", type=int, default=8765)
             child.add_argument("--registry", type=Path)
-    args = parser.parse_args()
+    argv = sys.argv[1:]
+    # A separator keeps delegated options opaque to this parser, including leading
+    # -p/--profile and --help. The existing launchers retain ownership of their CLI.
+    if argv and argv[0] in launch.COMMANDS:
+        argv = [argv[0], "--", *argv[1:]]
+    args = parser.parse_args(argv)
+    if args.action in launch.COMMANDS:
+        try:
+            launch.execute(args.action, args.arguments[1:])
+        except (ValueError, OSError, subprocess.SubprocessError) as error:
+            parser.exit(2, f"Cannot start {args.action}: {error}\n")
+        return
     if hasattr(args, "curation_handler"):
         curation_commands.execute(args)
         return
@@ -334,31 +352,39 @@ def main() -> None:
         print(
             json.dumps(
                 {
-                    name: shutil.which(name)
-                    for name in (
-                        "nextflow",
-                        "docker",
-                        "apptainer",
-                        "podman-hpc",
-                        "sbatch",
-                        "qsub",
-                        "bsub",
-                        "ssh",
-                    )
+                    "runtime": launch.inspect_runtime(),
+                    **{
+                        name: shutil.which(name)
+                        for name in (
+                            "nextflow",
+                            "docker",
+                            "apptainer",
+                            "podman-hpc",
+                            "sbatch",
+                            "qsub",
+                            "bsub",
+                            "ssh",
+                        )
+                    },
                 },
                 indent=2,
             )
         )
-        result = (
-            subprocess.run(
-                ["docker", "info", "--format", "{{.ServerVersion}}"],
-                capture_output=True,
-                text=True,
-                check=False,
+        try:
+            result = (
+                subprocess.run(
+                    ["docker", "info", "--format", "{{.ServerVersion}}"],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=10,
+                )
+                if shutil.which("docker")
+                else None
             )
-            if shutil.which("docker")
-            else None
-        )
+        except (OSError, subprocess.SubprocessError) as error:
+            result = None
+            print(f"Docker check unavailable: {error}")
         print("Docker accessible:", bool(result and result.returncode == 0))
         return
     folder = args.directory.resolve()
