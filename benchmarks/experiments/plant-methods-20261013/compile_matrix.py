@@ -1,4 +1,4 @@
-"""Compile a public-panel comparison with the production BWA-MEM2 version.
+"""Compile a panel comparison with the verified production BWA-MEM2 binaries.
 
 Preparation remains separate from execution. The mapping/processing groups use
 identical input subsets and the same baseline, limiting temporary storage for maize.
@@ -16,7 +16,14 @@ HERE = Path(__file__).resolve().parent
 
 
 def compile_matrix(
-    prepared: Path, out: Path, *, group: str, repetitions: int, cpus: int, seed: int
+    prepared: Path,
+    out: Path,
+    *,
+    group: str,
+    repetitions: int,
+    cpus: int,
+    seed: int,
+    include_legacy: bool = False,
 ) -> None:
     if out.exists():
         raise FileExistsError("Choose a new experiment manifest")
@@ -26,24 +33,31 @@ def compile_matrix(
     if spec["schema_version"] != 2 or spec["adapter"] != "methods":
         raise ValueError("A prepared version-2 method comparison is required")
     spec["dataset"] = str((prepared.parent / spec["dataset"]).resolve())
-    for method in spec["methods"]:
-        if method["aligner"] == "bwa-mem2":
-            method["aligner"] = "bwa-mem2-2.2.1"
     baseline = next(m for m in spec["methods"] if m["id"] == "baseline")
-    spec["methods"].insert(1, {**baseline, "id": "bwa-mem2-2.3", "aligner": "bwa-mem2"})
-    mapping = {"baseline", "bwa-mem2-2.3", "bwa", "bowtie2"}
+    if baseline["aligner"] != "bwa-mem2":
+        raise ValueError("Use a fresh prepared experiment with the BWA-MEM2 2.3 baseline")
+    evidence = json.loads((HERE / "sources/production-aligner-identity.json").read_text())
+    prefix = (prepared.parent / spec["environment"]["prefix"]).resolve()
+    for name, expected in evidence["production"]["binaries"].items():
+        if sha256(prefix / "bin" / name) != expected:
+            raise ValueError(
+                "Baseline executable differs from the tested production image: " + name
+            )
+    if include_legacy:
+        spec["methods"].insert(1, {**baseline, "id": "bwa-mem2-2.2.1", "aligner": "bwa-mem2-2.2.1"})
+        environment = HERE.parents[1] / "environment/bwa-mem2-2.2.1"
+        spec["environment"]["bwa_mem2_221"] = {
+            "prefix": str(environment / ".pixi/envs/default"),
+            "lock": str(environment / "pixi.lock"),
+            "lock_sha256": sha256(environment / "pixi.lock"),
+        }
+    mapping = {"baseline", "bwa-mem2-2.2.1", "bwa", "bowtie2"}
     if group != "all":
         spec["methods"] = [
             m
             for m in spec["methods"]
             if m["id"] == "baseline" or (m["id"] in mapping) == (group == "mapping")
         ]
-    environment = HERE.parents[1] / "environment/bwa-mem2-2.2.1"
-    spec["environment"]["bwa_mem2_221"] = {
-        "prefix": str(environment / ".pixi/envs/default"),
-        "lock": str(environment / "pixi.lock"),
-        "lock_sha256": sha256(environment / "pixi.lock"),
-    }
     spec["id"] += "-production-baseline-" + group
     spec["seed"] = seed
     spec["performance"] = {"repetitions": repetitions, "random_order": True}
@@ -66,6 +80,7 @@ if __name__ == "__main__":
     parser.add_argument("--repetitions", type=int, default=1)
     parser.add_argument("--cpus", type=int, default=14)
     parser.add_argument("--order-seed", type=int, default=60141)
+    parser.add_argument("--include-legacy", action="store_true", help="Also compare BWA-MEM2 2.2.1")
     args = parser.parse_args()
     compile_matrix(
         args.prepared.resolve(),
@@ -74,4 +89,5 @@ if __name__ == "__main__":
         repetitions=args.repetitions,
         cpus=args.cpus,
         seed=args.order_seed,
+        include_legacy=args.include_legacy,
     )

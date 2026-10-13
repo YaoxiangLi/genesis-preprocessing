@@ -48,17 +48,25 @@ matching an assembly name does not prove identity with the original paper's file
 
 | Component | Baseline | Alternative |
 | --- | --- | --- |
-| Alignment | BWA-MEM2 2.2.1 | BWA-MEM2 2.3, BWA 0.7.19, Bowtie2 2.5.5 |
+| Alignment | BWA-MEM2 2.3 | BWA 0.7.19, Bowtie2 2.5.5; optional older BWA-MEM2 2.2.1 |
 | ATAC adapter handling | Declared full-read policy | Cutadapt 5.2, fastp 1.4.0 |
 | ATAC duplicate marking | samtools 1.24 | Picard 3.5.0 |
 | Peak calling | MACS3 3.0.5 | MACS2 2.2.9.1; Genrich 0.6.2 for ATAC |
 | Independent read-end counts | Python interval counts | bedtools 2.31.1 |
 
-The baseline matches the production aligner version and scientific settings.
-The native package build and the production container are different artifacts;
-their identities and complete-workflow tests remain separate evidence. The
-[comparison lock](../../environment/pixi.lock) and
-[2.2.1 lock](../../environment/bwa-mem2-2.2.1/pixi.lock) pin the native environments.
+The baseline matches the production aligner binaries and scientific settings.
+Its banner prints 2.2.1, but the package is 2.3 and all six executable hashes
+match production. [The recorded identity check](sources/production-aligner-identity.json)
+and [upstream report](https://github.com/bwa-mem2/bwa-mem2/issues/283) explain this
+version-string error. The compiler checks these hashes before writing a comparison.
+The [comparison lock](../../environment/pixi.lock) pins the native environment.
+An optional [older 2.2.1 environment](../../environment/bwa-mem2-2.2.1/pixi.lock)
+is used only with `compile_matrix.py --include-legacy`.
+
+Early `v4` runs treated the banner as the package version and used the older
+2.2.1 build as their baseline. Their original records are retained under that
+description. Final `v5` runs use the verified production binaries; results from
+the two baselines must not be relabelled or pooled.
 MACS2 is built from its pinned source distribution in a separate Python 3.11
 environment. A Bioconda binary failed to import on this host; that failure must
 remain in the validation record.
@@ -75,7 +83,6 @@ Install Genesis, then run from its checkout:
 
 ```bash
 pixi install --all --manifest-path benchmarks/environment/pixi.toml
-pixi install --manifest-path benchmarks/environment/bwa-mem2-2.2.1/pixi.toml
 ```
 
 The full input manifest downloads **86.01 GB** before retries and software
@@ -165,6 +172,20 @@ fails validation. The explicit `macs_gsize` bypasses that lookup and its k-mer t
 so this unused option does not change or pad the 31-base reads. The upstream
 source revision and exact executed commands are retained with the results.
 
+Score both completed runs with identical definitions:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python \
+  benchmarks/experiments/plant-methods-20261013/score_workflows.py \
+  --genesis-run /scratch/workflow-comparison/genesis-results \
+  --nfcore-run /scratch/workflow-comparison/nfcore-results \
+  --out /data/evidence/workflow-comparison
+```
+
+The scorer verifies matching input and reference hashes, retains the different
+workflow policies, and writes `metrics.tsv` and `results.json`. Fixed-region
+comparisons use Genesis peaks as a common reference, not as biological truth.
+
 ## Independent DAP motif support
 
 [motifs.py](motifs.py) evaluates FUS3 and ABI5 against the PBM-derived JASPAR
@@ -196,6 +217,27 @@ counts make fold ratios unstable; use the counts and fractions when comparing
 methods. Motif support is biological plausibility evidence, not in-vivo binding
 truth or proof that every extra peak is correct. No independent motif assignment
 has been established for the PE DAP groups in this panel.
+
+## Share evidence and manage temporary work
+
+Finish all BAM-dependent measurements and motif evaluation before removing work.
+The archive recipe retains tables, peak files, command logs, task hashes and
+figures, then verifies every archived file. Reads, BAMs and reference indexes
+stay outside Git.
+
+```bash
+pixi run uv run --frozen --project genesis_tools python \
+  benchmarks/experiments/plant-methods-20261013/archive.py \
+  /scratch/dap-se-comparison-1m --out /data/evidence/dap-se-1m
+```
+
+To release storage after a **completed** experiment, use a new archive destination
+and add `--prune-work`. This explicitly removes that experiment's method work and
+indexes after verifying the archive. Original inputs and result tables remain.
+It writes a retention record before removal and records any interrupted removal.
+The pruned run cannot resume; rerun its manifest in a new result directory.
+Active experiments are refused, and failed experiments retain their work for
+diagnosis. Without the flag, archiving removes nothing.
 
 ## Interpret the comparison
 

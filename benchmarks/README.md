@@ -55,10 +55,13 @@ The generated version 2 experiment changes one component at a time:
 | Peak calling | MACS3 | MACS2; Genrich for ATAC | Selected alignments and nominal q-value; caller models remain different |
 | Interval counting | Genesis/Python span counts | bedtools coverage | Identical BAM and fixed intervals; read ends counted separately |
 
-The quick fixture uses BWA-MEM2 2.3 from the comparison environment. Production
-currently pins 2.2.1. The [public plant panel](experiments/plant-methods-20261013/README.md)
-adds a separately locked 2.2.1 baseline and compares 2.3 as an explicit alternative.
-It records the native package builds separately from the production image digests.
+The fixture and [public plant panel](experiments/plant-methods-20261013/README.md)
+use BWA-MEM2 2.3. Every aligner executable matches the pinned production image
+byte for byte. Its version banner incorrectly reports 2.2.1; the comparison
+records package metadata and executable hashes as well as that banner. See the
+[identity check](experiments/plant-methods-20261013/sources/production-aligner-identity.json)
+and [upstream version-string report](https://github.com/bwa-mem2/bwa-mem2/issues/283).
+The panel can also compare the older 2.2.1 package with `--include-legacy`.
 
 DAP retains primary mapped alignments including MAPQ 0, uses each treatment's
 assigned control and MACS `keep_dup=1`. ATAC applies the production fragment

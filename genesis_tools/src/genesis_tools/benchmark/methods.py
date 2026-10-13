@@ -55,10 +55,10 @@ def validate_methods(spec: dict[str, Any], base: Path) -> list[dict[str, Any]]:
             not SHA.fullmatch(pinned["lock_sha256"])
             or sha256(Path(pinned["lock"])) != pinned["lock_sha256"]
         ):
-            raise ValueError("Production aligner comparison lock differs")
+            raise ValueError("BWA-MEM2 2.2.1 comparison lock differs")
         records = list((Path(pinned["prefix"]) / "conda-meta").glob("bwa-mem2-*.json"))
         if len(records) != 1 or json.loads(records[0].read_text())["version"] != "2.2.1":
-            raise ValueError("The production-version comparison requires BWA-MEM2 2.2.1")
+            raise ValueError("The older-package comparison requires BWA-MEM2 2.2.1")
     if len(spec["parameters"]["mapq"]) != 1 or len(spec["parameters"]["duplicates"]) != 1:
         raise ValueError("Compare packages separately from MAPQ/duplicate policy matrices")
     if spec["parameters"]["spp"] or spec["parameters"]["quantify"]:
