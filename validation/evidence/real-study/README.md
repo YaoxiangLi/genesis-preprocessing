@@ -6,7 +6,7 @@ explains the commands, failures found and repaired, limits and rollback.
 
 - `real-study`, `real-dap`, `real-atac`, `full-checks` and `installed-wheel` JSON/log pairs
   record exact commands, start times, exit codes, durations, environment overrides and log hashes.
-- `study-commands.json` records all 145 public CLI calls and hashes of their retained full logs.
+- `study-commands.json` records all 145 public CLI calls and hashes of their full logs, archived verbatim in `study-cli-logs.tar.gz`.
   `study-summary.json` records all export denominators, job/task counts and provenance identities.
 - `scientific-invariance.json` records 59 exact scientific artifact hashes compared with the
   preceding lab revision; narrowPeak gzip payloads are compared after decompression.
@@ -23,3 +23,7 @@ The ordinary test suite remains Docker-free; real tools require the opt-in comma
 `publication.json` verifies the lab and fork remote heads. `fresh-clone*` and
 `final-docs*` record the published checkout handoff and documentation checks.
 The final evidence-only commit leaves the tested implementation unchanged.
+
+`study-cli-logs.tar.gz` contains all 290 CLI stdout/stderr files; each digest matches
+`study-commands.json`. The owned temporary checkouts, environments, registries and large
+scientific work products were removed after the compact evidence and logs were archived.

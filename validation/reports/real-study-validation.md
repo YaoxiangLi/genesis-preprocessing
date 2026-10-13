@@ -162,3 +162,9 @@ parent `VIRTUAL_ENV` so the fresh checkout uses its own environment.
 [final documentation checks](../evidence/real-study/final-docs.json) preserve exact scope.
 Follow the [developer handoff](../../docs/development.md) to continue from another server;
 Git transfers the source and compact evidence, not sequencing files or live registries.
+
+All 290 study command stdout/stderr files are retained in a
+[compact archive](../evidence/real-study/study-cli-logs.tar.gz), verified against the
+per-command hashes. Owned temporary checkouts and large scientific work products were
+cleaned up after this evidence was saved. Reproduce those products with the documented
+fixture commands; the historical temporary paths are not permanent data locations.
