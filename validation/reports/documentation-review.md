@@ -44,6 +44,12 @@ corrected. Its package metadata and executable hashes establish BWA-MEM2 2.3;
 the misleading 2.2.1 banner is now explained in both benchmark guides. Earlier
 measurements retain their original package identities.
 
+The merged release at `a85211237470d7146457167e1723b04a7ebf3cff` passed the full
+suite again. Its documentation check covered 80 Markdown files, 143 CLI examples
+and 24 Pixi recipes. A new wheel installed outside the checkout also completed
+the offline curation tutorial. [Acceptance records](../evidence/method-comparison-20261013/release-acceptance/)
+identify the exact commands, package contents and remaining live-service exclusions.
+
 The benchmark HTML report was opened in Chromium. Its initial view now selects
 one library and a useful retention metric, and sorts methods and repetitions.
 Static figures use explicit proportion/correlation scales and record their source

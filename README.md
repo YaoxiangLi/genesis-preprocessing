@@ -145,6 +145,13 @@ definitions, results and reproduction commands. It distinguishes package compari
 from parameter sensitivity and software tests. A higher mapping rate or more peaks
 alone is not evidence that one method is better.
 
+The [current comparison report](validation/reports/pipeline-method-comparison.md)
+includes repeated public SE DAP measurements, independent TF motif support, and
+Genesis/nf-core ATAC results scored with common definitions. The completed DAP
+comparison supports keeping BWA-MEM2/MACS3 for that cohort. PE DAP, further ATAC
+comparisons and deeper subsets are still running; no default has been changed
+on the strength of incomplete results.
+
 ## Troubleshooting
 
 | Problem | First step |
