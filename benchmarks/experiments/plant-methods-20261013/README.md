@@ -197,6 +197,26 @@ The scorer verifies matching input and reference hashes, retains the different
 workflow policies, and writes `metrics.tsv` and `results.json`. Fixed-region
 comparisons use Genesis peaks as a common reference, not as biological truth.
 
+After the native one-million-template ATAC comparison finishes, check its baseline
+against those production observations:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python \
+  benchmarks/experiments/plant-methods-20261013/compare_production.py \
+  --native /scratch/atac-comparison-1m \
+  --workflow-scores /data/evidence/workflow-comparison \
+  --genesis-run /scratch/workflow-comparison/genesis-results \
+  --output /data/evidence/native-production-comparison.json
+```
+
+This verifies recorded read/reference hashes and common metric definitions, then
+compares counts, peak coordinates/scores, MAPQ and fragment distributions, and
+the full TSS profile. The output records `EQUAL` or `DIFFERENT` for each
+observation and repetition. Changed fixed regions make their counts
+`NOT_COMPARABLE`. Equal observations do not imply identical BAM bytes, agreement
+at every genomic locus or equal runtime. A difference needs investigation before
+treating the native baseline as equivalent to the production workflow.
+
 ## Independent DAP motif support
 
 [motifs.py](motifs.py) evaluates FUS3 and ABI5 against the PBM-derived JASPAR
