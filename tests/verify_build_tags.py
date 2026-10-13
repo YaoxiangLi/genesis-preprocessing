@@ -20,6 +20,7 @@ def main() -> None:
         (root / "dockers").mkdir()
         (root / "dockers/.dockerignore").touch()
         (root / "environments").mkdir()
+        (root / "conf").mkdir()
         (root / "environments/EXAMPLE.yaml").write_text("name: example\n")
         (root / "project").mkdir()
         (root / "project/pixi.lock").touch()
@@ -54,8 +55,11 @@ def main() -> None:
 
         def check(script: str, args: list[str], expected: int, tag: str | None = None) -> None:
             log.write_text("")
-            dotenv = root / ".env"
-            dotenv.write_text("UNCHANGED=1\n")
+            images = root / "conf/dap-images.lock"
+            images.write_text("UNCHANGED_IMAGE=example/unchanged@sha256:" + "a" * 64 + "\n")
+            original_images = images.read_bytes()
+            private_env = root / ".env"
+            private_env.write_text("LOCAL_SETTING=private-test-fixture\n")
             result = subprocess.run(
                 [str(root / "scripts" / script), *args],
                 cwd=root,
@@ -66,13 +70,15 @@ def main() -> None:
                 timeout=15,
             )
             assert result.returncode == expected, (script, args, result.stderr)
+            assert private_env.read_text() == "LOCAL_SETTING=private-test-fixture\n"
+            assert "LOCAL_SETTING" not in images.read_text()
             calls = [json.loads(line) for line in log.read_text().splitlines()]
             assert not any(call[:2] == ["docker", "push"] for call in calls), calls
             if expected:
                 assert "--tag" in result.stderr or "explicit tag" in result.stderr
             if expected or args == ["--help"]:
                 assert not any(call[0] in ("docker", "pixi") for call in calls), calls
-                assert dotenv.read_text() == "UNCHANGED=1\n"
+                assert images.read_bytes() == original_images
             else:
                 builds = [call for call in calls if call[:2] == ["docker", "build"]]
                 assert builds and any(

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -62,6 +63,64 @@ def write_bam(path: Path, records: str) -> None:
 
 def scores(path: Path) -> list[float]:
     return [float(line.rsplit("\t", 1)[1]) for line in path.read_text().splitlines()]
+
+
+def check_public_configuration(work: Path) -> None:
+    """Keep private configuration untracked and the public image lock limited to pins."""
+    tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT, text=True).split("\0")
+    for name in filter(None, tracked):
+        path = Path(name)
+        private = (
+            bool({".claude", ".codex"} & set(path.parts))
+            or path.name in {".env", ".envrc"}
+            or path.name.startswith(".env.")
+        )
+        assert not private, f"Local configuration must not be tracked: {name}"
+
+    pins: dict[str, str] = {}
+    for line in (ROOT / "conf/dap-images.lock").read_text().splitlines():
+        if not line or line.startswith("#"):
+            continue
+        key, separator, value = line.partition("=")
+        assert separator and re.fullmatch(r"[A-Z][A-Z0-9_]*_IMAGE", key), (
+            "Image lock accepts only IMAGE keys"
+        )
+        assert key not in pins, "Duplicate image pin"
+        assert re.fullmatch(r"[A-Za-z0-9._:/-]+@sha256:[a-f0-9]{64}", value), (
+            "Image lock requires a registry image with an immutable SHA256 digest"
+        )
+        pins[key] = value
+    sources = [ROOT / "main.nf", *sorted((ROOT / "modules").glob("*.nf"))]
+    required = {
+        key for path in sources for key in re.findall(r"dotenv\('([^']+)'\)", path.read_text())
+    }
+    assert pins.keys() == required, "Image pins must cover exactly the DAP workflow's images"
+
+    work.mkdir()
+    subprocess.run(["git", "init", "--quiet", str(work)], check=True)
+    shutil.copyfile(ROOT / ".gitignore", work / ".gitignore")
+    private_paths = [
+        prefix + name
+        for prefix in ("", "nested/")
+        for name in (
+            ".env",
+            ".env.local",
+            ".env.production",
+            ".envrc",
+            ".claude/settings.json",
+            ".claude/settings.local.json",
+            ".codex/config.toml",
+            ".codex/rules/default.rules",
+        )
+    ]
+    public_paths = ["conf/dap-images.lock", "conf/atac-images.json", "AGENTS.md"]
+    ignored = subprocess.check_output(
+        ["git", "check-ignore", "--no-index", "--stdin"],
+        cwd=work,
+        input="\n".join([*private_paths, *public_paths]) + "\n",
+        text=True,
+    ).splitlines()
+    assert ignored == private_paths, "Ignore rules must cover local config, not public image locks"
 
 
 def check_quantification(work: Path) -> None:
@@ -154,8 +213,12 @@ def check_builds(work: Path, bash: str) -> None:
     project.mkdir()
     for name in ("pyproject.toml", "uv.lock"):
         (project / name).write_text("mock\n")
-    envfile = repo / ".env"
-    envfile.write_text("UNRELATED=keep\nDAP_SEQ_ALIGNMENT_IMAGE=old\n")
+    (repo / "conf").mkdir()
+    image_lock = repo / "conf/dap-images.lock"
+    unrelated = "OTHER_IMAGE=example/other@sha256:" + "b" * 64
+    image_lock.write_text(unrelated + "\nDAP_SEQ_ALIGNMENT_IMAGE=old\n")
+    private_env = repo / ".env"
+    private_env.write_text("LOCAL_SETTING=private-test-fixture\n")
     binaries = work / "bin"
     binaries.mkdir()
     for name in ("docker", "pixi", "uv", "git"):
@@ -182,8 +245,10 @@ def check_builds(work: Path, bash: str) -> None:
 
     result = run(["--tag", "test", "--no-push"])
     assert result.returncode == 0, result.stderr
-    contents = envfile.read_text()
-    assert "UNRELATED=keep" in contents
+    contents = image_lock.read_text()
+    assert unrelated in contents
+    assert "LOCAL_SETTING" not in contents
+    assert private_env.read_text() == "LOCAL_SETTING=private-test-fixture\n"
     assert "DAP_SEQ_ALIGNMENT_IMAGE=kundajelab/dap_seq_alignment@sha256:" in contents
     assert "GENESIS_TOOLS_IMAGE=kundajelab/genesis_tools@sha256:" in contents
     commands = [json.loads(line) for line in log.read_text().splitlines()]
@@ -200,7 +265,7 @@ def check_builds(work: Path, bash: str) -> None:
     commands = [json.loads(line) for line in log.read_text().splitlines()]
     assert sum(name == "docker" and args[0] == "push" for name, args in commands) == 1
     assert sum(name == "docker" and args[0] == "build" for name, args in commands) == 1
-    assert "DAP_SEQ_ALIGNMENT_IMAGE=kundajelab/dap_seq_alignment@sha256:" in envfile.read_text()
+    assert "DAP_SEQ_ALIGNMENT_IMAGE=kundajelab/dap_seq_alignment@sha256:" in image_lock.read_text()
     log.write_text("")
     result = run(["--no-push", "--", "genesis_tools"])
     assert result.returncode == 0, result.stderr
@@ -208,10 +273,11 @@ def check_builds(work: Path, bash: str) -> None:
     build = next(args for name, args in commands if name == "docker" and args[0] == "build")
     assert "genesis_tools:0.1.0" in build
     assert not any(name == "docker" and args[0] == "push" for name, args in commands)
-    unchanged = envfile.read_text()
+    unchanged = image_lock.read_text()
     result = run(["--tag", "broken", "--no-push"], fail=True)
     assert result.returncode != 0
-    assert envfile.read_text() == unchanged
+    assert image_lock.read_text() == unchanged
+    assert private_env.read_text() == "LOCAL_SETTING=private-test-fixture\n"
 
 
 def main() -> None:
@@ -230,6 +296,7 @@ def main() -> None:
     interpreters = list(dict.fromkeys(["/bin/bash", shutil.which("bash") or "/bin/bash"]))
     with tempfile.TemporaryDirectory(prefix="genesis-style-") as temporary:
         work = Path(temporary)
+        check_public_configuration(work / "configuration")
         quant = work / "quantification"
         quant.mkdir()
         check_quantification(quant)
@@ -237,7 +304,7 @@ def main() -> None:
             folder = work / f"builds-{index}"
             folder.mkdir()
             check_builds(folder, bash)
-    print("Nextflow style, BAM quantification, and mocked Docker build checks passed.")
+    print("Public configuration, Nextflow style, BAM quantification and mocked builds passed.")
 
 
 if __name__ == "__main__":

@@ -195,7 +195,14 @@ live API/GPU checks. Mock tests do not establish acceptance on a remote site.
 
 Git transfers code, locks, small fixtures, schemas, templates and validation reports.
 It does not transfer references, reads, analysis outputs, caches, live databases,
-model weights or credentials. The tracked `.env` contains image references only.
+model weights or credentials. Public container pins are in `conf/dap-images.lock`
+for DAP and `conf/atac-images.json` for ATAC. These files contain image references only.
+
+Keep `.env`, `.env.*`, `.envrc`, `.claude/` and `.codex/` local. Git and Docker build
+contexts ignore them. Genesis reads DAP image pins from `conf/dap-images.lock`;
+it does not load a local `.env`. Configure credentials through the environment-variable
+or protected-file references described in the [provider guide](usage/ai-providers.md).
+Check staged files with `git diff --cached --name-only` before committing.
 
 For a catalog, use [registry backup/restore](usage/curation.md#read-only-status-backup-and-rollback).
 With orchestration stopped, preserve study state and worker attempt/output directories

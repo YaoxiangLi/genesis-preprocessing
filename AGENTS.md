@@ -40,9 +40,9 @@ The project runs locally on macOS or Linux and on supported scheduler profiles.
   when the requested behavior changes, while preserving meaningful coverage.
 
 ## Boundaries
-This section is guidance, not enforcement. Enforced allow/ask/deny rules live in
-`.claude/settings.json`; personal overrides go in the untracked `.claude/settings.local.json`.
-Keep the two in sync: a boundary added here that is pattern-matchable belongs there too.
+Keep assistant settings, environment files and credentials local and untracked.
+The public `conf/dap-images.lock` contains container image pins only; never put
+credentials or machine-specific settings in it.
 - Allowed without prompting:
   - Creation of temporary files as long as they are cleaned up.
   - Read-only bash commands that will not alter or create files, and will not read non-temporary files outside the project folder.

@@ -13,15 +13,15 @@ workspace/
 tests/.runs/
 
 .venv/
+.env
+.env.*
 .envrc
 
 .vscode/
 .zed/
-# Claude Code: share project permission policy, keep personal overrides local.
-# Must be `.claude/*` not `.claude/`; git will not descend into an excluded directory,
-# so a negation under a trailing-slash exclusion never matches.
-.claude/*
-!.claude/settings.json
+# Assistant settings are local to each contributor.
+.claude/
+.codex/
 workspace/
 .ruff_cache/
 .DS_Store
@@ -30,8 +30,3 @@ build/
 *.egg-info/
 *.so
 *.c
-.codex/**/*
-!.codex/rules/
-.codes/rules/*
-!.codex/config.toml
-!.codex/rules/default.rules

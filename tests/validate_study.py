@@ -340,7 +340,7 @@ def preflight(reader: Path) -> str:
     )
     images = {
         line.split("=", 1)[1].strip().strip('"')
-        for line in (ROOT / ".env").read_text().splitlines()
+        for line in (ROOT / "conf/dap-images.lock").read_text().splitlines()
         if "_IMAGE=" in line and not line.startswith("#")
     }
     images.update(load(ROOT / "conf/atac-images.json").values())

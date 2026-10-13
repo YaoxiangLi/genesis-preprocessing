@@ -764,7 +764,9 @@ def check_download_failures(work: Path, base_url: str) -> None:
 def check_bams(work: Path) -> None:
     """Read real BAMs to verify MAPQ-zero retention, flags, and untrimmed sequences."""
     images = dict(
-        line.split("=", 1) for line in (ROOT / ".env").read_text().splitlines() if "=" in line
+        line.split("=", 1)
+        for line in (ROOT / "conf/dap-images.lock").read_text().splitlines()
+        if "=" in line
     )
     for row in trace_rows(work):
         if not row["name"].startswith("BWA_MEM2_ALIGN "):

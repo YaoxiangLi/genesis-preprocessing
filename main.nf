@@ -237,7 +237,7 @@ workflow {
     // Hash the implementation and locked tool definitions, including dirty working copies.
     // Clean Git identity is required for complete provenance; dirty runs remain inspectable.
     def sourceFiles = [file("${projectDir}/main.nf"), file("${projectDir}/nextflow.config"),
-        file("${projectDir}/.env"), file("${projectDir}/multiqc_config.yaml"), file(params.spp_script)] +
+        file("${projectDir}/conf/dap-images.lock"), file("${projectDir}/multiqc_config.yaml"), file(params.spp_script)] +
         file("${projectDir}/modules/*.nf") + [file("${projectDir}/workflows/dap_receipt.nf")] +
         file("${projectDir}/environments/*.yaml") + file("${projectDir}/environments/*.lock") +
         [provenanceScript, file("${projectDir}/genesis_tools/src/genesis_tools/dap_provenance.py"),

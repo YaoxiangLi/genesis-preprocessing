@@ -309,7 +309,7 @@ Pure tool environments are defined in `environments/*.yaml`; their matching
 Pixi manifests and locks support container builds. `genesis_tools/` is a typed
 Python 3.14.5 uv project that reads BAMs with pysam. Its conda equivalent installs the local
 Python project; containers use the dedicated uv Dockerfile. Each Nextflow module
-declares its environment and reads its image from `.env` using nf-dotenv.
+declares its environment and reads its image from `conf/dap-images.lock` using nf-dotenv.
 
 Build tool images through Pixi:
 
@@ -320,7 +320,7 @@ pixi run build-dockers --no-push -- dap_seq_alignment genesis_tools
 
 Every build targets `linux/amd64` and `linux/arm64`. The build scripts default
 to pushing: always pass `--no-push` for local builds. Tags default to the latest
-Git tag (`0.1.0`); use `--tag` to override. The scripts update `.env` with image
+Git tag (`0.1.0`); use `--tag` to override. The scripts update `conf/dap-images.lock` with image
 digests and preserve unrelated entries. Publishing images requires approval.
 The Dockerfiles specify pinned base images.
 
@@ -400,7 +400,7 @@ assigned controls and DAP scientific defaults are compatible with that revision.
 | --- | --- |
 | Default execution | Omitting a profile selects `local,docker`. Select `-p local,conda` or `-p sherlock,apptainer` explicitly; the presence of `sbatch` does not select a cluster. |
 | Reference caches | Every invocation verifies FASTA identity, derived hashes and generator provenance before downloads, including on resume. Missing, stale or incomplete provenance stops execution. Keep old caches and regenerate in a new reference directory containing the exact approved FASTAs; do not copy unverifiable derived products or invent provenance. |
-| Read QC | Raw-mate FastQC and one run-level MultiQC report require the images pinned in `.env`; the runtime may need to pull them. Quality WARN/FAIL labels are advisory. |
+| Read QC | Raw-mate FastQC and one run-level MultiQC report require the images pinned in `conf/dap-images.lock`; the runtime may need to pull them. Quality WARN/FAIL labels are advisory. |
 | Resume | Keep the run folder and work directory. Reference validation reruns; switching to published reference paths or changing process definitions can rerun affected tasks. Use a new run name and workspace if you need to keep an earlier result unchanged. |
 
 Follow [installation and maintenance](../development.md#command-installation-and-maintenance)

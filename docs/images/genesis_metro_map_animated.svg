@@ -131,4 +131,4 @@
 <text class="note" x="48" y="798">QC is diagnostic. FastQC warnings do not reject a dataset; SPP is reported separately.</text>
 <text class="note" x="48" y="823">Controls receive QC and tracks; treatments receive peaks and quantification. FASTQs and BAMs stay intermediate.</text>
 <text class="note" x="48" y="848">Routes summarize data dependencies, not runtime. Crossings without a station do not join channels.</text>
-<metadata>Genesis diagram schema 2; main.nf SHA256 e6dcbacabc09a579dd07f9f0a5e062fa6e0c94f5c1b085b5220959253bbbcbbb; schematic animation.</metadata></svg>
+<metadata>Genesis diagram schema 2; main.nf SHA256 82b5b36f4aaaea255e69b3c4e747f7745de819d81584dfae93e2900963f8ac7e; schematic animation.</metadata></svg>
