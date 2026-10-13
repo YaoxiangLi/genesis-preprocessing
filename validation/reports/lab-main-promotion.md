@@ -117,5 +117,18 @@ matching code, as described in the [curation guide](../../docs/usage/curation.md
 
 ## Publication and fresh-clone verification
 
-PENDING. Record remote heads and fresh-clone acceptance after publishing the tested
-update; do not infer publication from local commits.
+Both GitHub `main` branches were updated through normal fast-forward pushes to
+[`aceb6f4dc5f2d693a8d78616a4cf5f4cc7c7c15c`](https://github.com/kundajelab/genesis-preprocessing/commit/aceb6f4dc5f2d693a8d78616a4cf5f4cc7c7c15c).
+The [publication receipt](../evidence/lab-main-promotion/publication.json) records
+both observed remote heads and their previous revisions. No original branch history
+was discarded. This receipt and final report are a documentation/evidence-only
+follow-up to that tested release.
+
+A fresh clone from the **lab repository** installed into new environments and passed
+CLI help/doctor, all 197 current CLI/documentation checks and the complete offline
+tutorial. All **521 tracked files** were byte-identical to the published checkout;
+the clone remained clean. The observed clone/install/check time was **20.400 s**,
+using existing package caches on this host. This does not claim acceptance on an
+unspecified destination server. [Receipt](../evidence/lab-main-promotion/fresh-clone.json),
+[per-command results](../evidence/lab-main-promotion/fresh-clone-details.json) and
+[log](../evidence/lab-main-promotion/fresh-clone.log) record the exact scope.

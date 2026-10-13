@@ -184,8 +184,13 @@ credentials on the target host, and inspect `git status` before committing.
 ## Handoff verification
 
 The [2026-10-12 full-update report](../validation/reports/lab-main-promotion.md)
-is the acceptance record for the lab promotion. Earlier handoffs below retain
-their original dates and revisions; their measurements are not new-server promises.
+is the acceptance record for the lab promotion. A fresh lab-main clone of
+`aceb6f4` installed successfully and passed CLI help/doctor, 197 documented
+CLI recipes and the complete offline tutorial. All 521 tracked files matched and
+the checkout stayed clean; see [the handoff receipt](../validation/evidence/lab-main-promotion/fresh-clone-details.json).
+The final evidence follow-up leaves the tested implementation unchanged. Earlier
+handoffs below retain their original dates and revisions; their measurements are
+not new-server promises.
 
 The prepared-study milestone adds the [complete study workflow](usage/studies.md),
 registry migration 4, version 3 records and separate input/result metadata review.

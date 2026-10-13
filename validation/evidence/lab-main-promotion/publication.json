@@ -1,0 +1,15 @@
+{
+  "checked_utc": "2026-10-13T03:03:05.975943+00:00",
+  "status": "PASS",
+  "remote_main_heads": {
+    "kundajelab/genesis-preprocessing": "aceb6f4dc5f2d693a8d78616a4cf5f4cc7c7c15c",
+    "YaoxiangLi/genesis-preprocessing": "aceb6f4dc5f2d693a8d78616a4cf5f4cc7c7c15c"
+  },
+  "previous_heads": {
+    "kundajelab/genesis-preprocessing": "fb600968b3abf5d79756aaf7e6d1e4ff43a1b41d",
+    "YaoxiangLi/genesis-preprocessing": "16f0722b67ebd698f846918be592814628f0ca6d"
+  },
+  "method": "normal fast-forward pushes of the merge and acceptance documentation; no force push",
+  "fresh_clone": "fresh-clone-details.json",
+  "note": "This receipt and final report are added in a documentation/evidence-only follow-up commit. The recorded SHA is the published and freshly cloned release parent."
+}
