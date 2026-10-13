@@ -251,7 +251,9 @@ def summarize(
             axis.set_ylabel("Fraction of paired windows with a motif hit")
             axis.grid(axis="y", alpha=0.2)
             axis.legend(fontsize=8)
-        fig.suptitle("Independent PBM motif support · top 1,000 DAP peaks", x=0.05, ha="left")
+        fig.suptitle(
+            "Independent PBM motifs · top 1,000 eligible DAP summit windows", x=0.05, ha="left"
+        )
         fig.text(
             0.05,
             0.01,

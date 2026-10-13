@@ -215,12 +215,18 @@ single-strand uniform-background tail of at most 0.0001, using a 0.5 pseudocount
 and weights rounded to millionths of a bit. This is not a peak-level p-value.
 
 Report peak/control motif-hit counts and fractions for all eligible pairs and
-the top 1,000/5,000 peaks by caller signal. An undersized selection is marked
+the top 1,000/5,000 eligible summit windows by caller signal. Invalid windows are
+excluded before ranking, and their count is retained. An undersized selection is marked
 incomplete. A zero control count leaves fold enrichment undefined. Small control
 counts make fold ratios unstable; use the counts and fractions when comparing
 methods. Motif support is biological plausibility evidence, not in-vivo binding
 truth or proof that every extra peak is correct. No independent motif assignment
 has been established for the PE DAP groups in this panel.
+
+Keep the motif output directory with the result archive. `motif-metrics.tsv`
+contains every selection, `motif-windows.tsv` records individual peak/control
+pairs, and `provenance.json` identifies the matrices and source peak files.
+The method archive command below does not collect this separate directory.
 
 ## Share evidence and manage temporary work
 

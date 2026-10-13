@@ -13,6 +13,9 @@ server; use the recipe to prepare paths on another server.
 | --- | --- |
 | [synthetic-dap](synthetic-dap/) | Verified production BWA-MEM2 2.3 baseline, four methods × three technical repetitions; 12 completed cases |
 | [synthetic-atac](synthetic-atac/) | Verified production baseline, eight methods × three technical repetitions; 24 completed cases |
+| [dap-se-1m](dap-se-1m/) | Public FUS3/ABI5/control comparison at one million templates per library; 12 completed cases, archived before temporary work was pruned |
+| [dap-se-1m-summary](dap-se-1m-summary/) | Per-library measurements, timing observations and independent PBM motif support |
+| [dap-se-1m-motifs](dap-se-1m-motifs/) | All motif selections, individual peak/control windows, matrix provenance and repetition checks |
 | [whole-workflows](whole-workflows/) | Current Genesis and pinned nf-core ATAC on two public Arabidopsis libraries, one million input pairs each; common metric definitions |
 | [workflow-summary](workflow-summary/) | Common workflow table and figure, with renderer and source hashes |
 | [acceptance](acceptance/) | Test receipts, complete-workflow logs, software/image records and baseline correction |

@@ -79,6 +79,69 @@ completed in 76.74 s. The ATAC test checked lane combination, adapter handling,
 scientific-output reuse and helper-source invalidation. These are integration
 checks, not throughput comparisons.
 
+## Public SE DAP at one million templates
+
+Four methods completed three fresh repetitions each on FUS3, ABI5 and their shared
+control. Scientific metrics were identical across the technical repetitions for
+each method. Every independent bedtools count check passed.
+
+| Method | FUS3 retained reads | FUS3 peaks | FUS3 own FRiP | ABI5 retained reads | ABI5 peaks | ABI5 own FRiP |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| BWA-MEM2 + MACS3 | 983,976 | 2,057 | 0.282136 | 783,796 | 2,017 | 0.148313 |
+| BWA + MACS3 | 983,976 | 2,057 | 0.282136 | 783,796 | 2,017 | 0.148313 |
+| Bowtie2 + MACS3 | 984,095 | 2,068 | 0.282000 | 804,550 | 1,998 | 0.146308 |
+| BWA-MEM2 + MACS2 | 983,976 | 2,082 | 0.282601 | 783,796 | 2,041 | 0.148804 |
+
+These are SE libraries, so FRiP uses retained read spans. The BWA and BWA-MEM2
+methods had identical peak intervals and fixed-region count measurements.
+Bowtie2's peak base-pair Jaccard with the baseline was 0.9602 for FUS3 and 0.9533
+for ABI5. Higher ABI5 retention did not increase its independent motif-hit fraction
+in the selected windows.
+
+Independent PBM matrices were evaluated on the top 1,000 **eligible** 200-base
+summit windows. Nine FUS3 and two ABI5 windows per method were excluded before
+ranking because they failed the window requirements. The remaining windows were
+paired with same-chromosome, GC-matched genomic controls outside the pooled method
+windows. The table gives exact hit counts and paired denominators; repetitions
+gave the same values.
+
+| Method | FUS3 peak hits / pairs | FUS3 control hits / pairs | ABI5 peak hits / pairs | ABI5 control hits / pairs |
+| --- | ---: | ---: | ---: | ---: |
+| BWA-MEM2 + MACS3 | 478 / 998 | 10 / 998 | 586 / 1,000 | 18 / 1,000 |
+| BWA + MACS3 | 478 / 998 | 10 / 998 | 586 / 1,000 | 18 / 1,000 |
+| Bowtie2 + MACS3 | 478 / 998 | 4 / 998 | 586 / 1,000 | 18 / 1,000 |
+| BWA-MEM2 + MACS2 | 471 / 999 | 12 / 999 | 587 / 1,000 | 17 / 1,000 |
+
+![Independent PBM motif support for the public FUS3 and ABI5 comparison](../evidence/method-comparison-20261013/dap-se-1m-summary/dap-motif-support.svg)
+
+The FUS3 selections remain marked incomplete: one or two controls could not be
+matched. Small background-hit counts make fold ratios unstable; the 4-versus-10
+background difference does not establish superior Bowtie2 peak accuracy. These
+motif measurements provide biological plausibility evidence, not binding-site truth.
+
+| Method | Processing median (range), s | Tool-time median, s | Maximum sampled tool-group RSS, median, GiB |
+| --- | ---: | ---: | ---: |
+| BWA-MEM2 + MACS3 | 187.02 (185.53–187.69) | 55.36 | 1.332 |
+| BWA + MACS3 | 195.12 (194.63–197.59) | 64.63 | 0.702 |
+| Bowtie2 + MACS3 | 194.84 (194.42–197.26) | 66.92 | 0.455 |
+| BWA-MEM2 + MACS2 | 183.17 (180.58–183.97) | 52.57 | 1.322 |
+
+Each timing covers all three libraries, including the control once, at a 14-CPU
+limit. Processing includes Python selection and task hashing; tool time excludes
+them. Both exclude reference indexing, common assessment, FastQC, SPP and tracks.
+These are component costs, not complete pipeline runtimes. The complete comparison,
+including indexing and assessment, took 3,262.80 s.
+
+The observations support retaining BWA-MEM2/MACS3 for this cohort. The modest
+MACS2 timing difference and changed boundaries do not establish a biological
+advantage. Deeper subsets and the PE/ATAC cohorts remain separate checks.
+See [quality summaries](../evidence/method-comparison-20261013/dap-se-1m-summary/quality-summary.tsv),
+[all cost observations](../evidence/method-comparison-20261013/dap-se-1m-summary/cost-observations.tsv),
+[index costs](../evidence/method-comparison-20261013/dap-se-1m-summary/index-observations.tsv)
+and the [archived commands and peaks](../evidence/method-comparison-20261013/dap-se-1m/).
+The [complete motif evidence](../evidence/method-comparison-20261013/dap-se-1m-motifs/)
+includes every selected peak/control window, exclusions and unmatched controls.
+
 ## Complete ATAC workflows on public inputs
 
 Genesis and nf-core ATAC 2.1.2 processed the same two verified Arabidopsis input

@@ -120,6 +120,9 @@ measurements. Native memory is the largest sampled sum of process-group RSS;
 shared pages can be counted twice and short peaks can be missed. GNU-time maximum
 RSS is a separate process statistic. Container memory, when available, has a
 different scope and can include page cache. None is whole-host peak RAM.
+The driver's RSS is also separate: it is the Python process's lifetime high-water
+value, excluding child tools. Earlier Linux result files named this
+`peak_host_rss_kib`; that legacy field still describes the driver, not the host.
 Index construction is reported separately from per-library work. CPU and wall
 time from a Docker launcher must not be interpreted as container CPU usage.
 `processing.tsv` also measures each complete method case, including Python
