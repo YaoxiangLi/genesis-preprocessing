@@ -5,8 +5,10 @@ from __future__ import annotations
 import gzip
 import json
 import os
+import subprocess
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from genesis_tools.reference_cache import products, record, sha256, sidecar, verify
 
@@ -82,6 +84,39 @@ def check(work: Path) -> None:
         manifest.write_text(json.dumps(obj))
         rejected()
         manifest.write_bytes(initial[manifest])
+    for field in ("source_basename", "compressed_fasta_sha256"):
+        for replacement in (None, "", 123):
+            obj = json.loads(initial[manifest])
+            if replacement is None:
+                del obj[field]
+            else:
+                obj[field] = replacement
+            manifest.write_text(json.dumps(obj))
+            rejected()
+    for field in ("version", "version_stderr"):
+        for replacement in (None, 123, []):
+            obj = json.loads(initial[manifest])
+            if replacement is None:
+                del obj["generator"][field]
+            else:
+                obj["generator"][field] = replacement
+            manifest.write_text(json.dumps(obj))
+            rejected()
+    for field, replacement in (
+        ("schema_version", True),
+        ("schema_version", 1.0),
+        ("compressed_fasta_sha256", "not-a-digest"),
+        ("source_basename", "  "),
+    ):
+        obj = json.loads(initial[manifest])
+        obj[field] = replacement
+        manifest.write_text(json.dumps(obj))
+        rejected()
+    obj = json.loads(initial[manifest])
+    obj["generator"]["version"] = " "
+    manifest.write_text(json.dumps(obj))
+    rejected()
+    manifest.write_bytes(initial[manifest])
     for altered_container, altered_recipe in (
         ("different", recipe),
         (container, "different"),
@@ -105,6 +140,26 @@ def check(work: Path) -> None:
         pass
     else:
         raise AssertionError("Stub reference accepted for a real analysis")
+    verify_all()
+    for stdout, stderr in (("samtools 1.23\n", ""), ("", "bwa-mem2 2.3\n")):
+        result = subprocess.CompletedProcess(["mock-version"], 0, stdout, stderr)
+        with patch("genesis_tools.reference_cache.subprocess.run", return_value=result):
+            record(fasta, sizes, "chrom-sizes", "real", container, recipe)
+        verify(sizes, "chrom-sizes", sha256(fasta, decompress=True), "real", container, recipe)
+        obj = json.loads(manifest.read_text())
+        assert obj["generator"]["version"] == stdout.strip()
+        assert obj["generator"]["version_stderr"] == stderr.strip()
+    previous = manifest.read_bytes()
+    result = subprocess.CompletedProcess(["mock-version"], 0, " \n", "\n")
+    with patch("genesis_tools.reference_cache.subprocess.run", return_value=result):
+        try:
+            record(fasta, sizes, "chrom-sizes", "real", container, recipe)
+        except ValueError as error:
+            assert "empty generator version" in str(error)
+        else:
+            raise AssertionError("Empty generator version was recorded")
+    assert manifest.read_bytes() == previous
+    manifest.write_bytes(initial[manifest])
     verify_all()
     assert all(path.read_bytes() == content for path, content in initial.items())
     print("PASS: reference identity, metadata-only changes, corruption, generator and mode checks")

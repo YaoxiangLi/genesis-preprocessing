@@ -6,7 +6,9 @@ import argparse
 import gzip
 import hashlib
 import json
+import re
 import subprocess
+from collections.abc import Mapping
 from pathlib import Path
 
 INDEX_SUFFIXES = (".0123", ".amb", ".ann", ".bwt.2bit.64", ".pac")
@@ -36,6 +38,31 @@ def sidecar(artifact: Path, kind: str) -> Path:
     )
 
 
+def validate_provenance(manifest: Mapping[str, object]) -> None:
+    """Require complete recorded provenance without treating a filename as identity."""
+    if type(manifest.get("schema_version")) is not int or manifest["schema_version"] != 1:
+        raise ValueError("unsupported or malformed manifest schema version")
+    if manifest.get("mode") not in ("real", "stub"):
+        raise ValueError("reference mode must be real or stub")
+    basename = manifest.get("source_basename")
+    if not isinstance(basename, str) or not basename.strip():
+        raise ValueError("missing or malformed source basename")
+    for field in ("fasta_sha256", "compressed_fasta_sha256"):
+        digest = manifest.get(field)
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise ValueError(f"missing or malformed {field}")
+    generator = manifest.get("generator")
+    if not isinstance(generator, dict):
+        raise ValueError("missing generator provenance")
+    for field in ("container", "recipe_sha256", "version", "version_stderr"):
+        value = generator.get(field)
+        if not isinstance(value, str) or (field in ("container", "recipe_sha256") and not value):
+            raise ValueError(f"missing or malformed generator {field}")
+    # Some generators report their version on stderr rather than stdout.
+    if not generator["version"].strip() and not generator["version_stderr"].strip():
+        raise ValueError("empty generator version output")
+
+
 def record(fasta: Path, artifact: Path, kind: str, mode: str, container: str, recipe: str) -> None:
     """Write a manifest only after all expected products exist and are nonempty."""
     paths = products(artifact, kind)
@@ -62,6 +89,7 @@ def record(fasta: Path, artifact: Path, kind: str, mode: str, container: str, re
         },
         "artifacts": {path.name: sha256(path) for path in paths},
     }
+    validate_provenance(manifest)
     destination = sidecar(artifact, kind)
     temporary = destination.with_name(destination.name + ".tmp")
     temporary.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
@@ -84,6 +112,7 @@ def verify(
         manifest = json.loads(manifest_path.read_text())
         if not isinstance(manifest, dict):
             raise ValueError("manifest must be an object")
+        validate_provenance(manifest)
         generator = manifest.get("generator")
         expected_artifacts = {path.name: sha256(path) for path in paths}
         if kind == "bwa-mem2":
