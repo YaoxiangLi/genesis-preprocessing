@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 from genesis_tools.benchmark.runner import spp
 from genesis_tools.benchmark.runtime import Runtime, fetch
-from genesis_tools.benchmark.spec import load, sha256
+from genesis_tools.benchmark.spec import load, sha256, source_identity
 from genesis_tools.benchmark.workflows import verify_effective_commands, verify_workflow_outputs
 
 TOML = """schema_version = 1
@@ -48,6 +48,34 @@ def rejects(function: Callable[[], object]) -> None:
 
 
 def main() -> None:
+    identity = source_identity()
+    assert identity["source_kind"] == "checkout" and identity["git_sha"]
+    assert "benchmark/report.html" in identity["recipe_sha256"]
+    with tempfile.TemporaryDirectory() as temp:
+        package = Path(temp) / "venv/lib/python3.14/site-packages/genesis_tools"
+        benchmark = package / "benchmark"
+        benchmark.mkdir(parents=True)
+        (package / "atac").mkdir()
+        (benchmark / "spec.py").write_text("# installed fixture\n")
+        (benchmark / "report.html").write_text("<html>installed template</html>\n")
+        (package / "atac/fragments.py").write_text("# installed selection\n")
+        with (
+            patch("genesis_tools.benchmark.spec.__file__", str(benchmark / "spec.py")),
+            patch(
+                "genesis_tools.benchmark.spec.subprocess.run",
+                side_effect=AssertionError("A wheel must not borrow an enclosing Git revision"),
+            ),
+        ):
+            installed = source_identity()
+        assert installed["git_sha"] is None and installed["git_status"] is None
+        assert installed["source_kind"] == "installed-package"
+        assert installed["recipe_sha256"]["benchmark/report.html"] == sha256(
+            benchmark / "report.html"
+        )
+    with patch("genesis_tools.benchmark.spec.subprocess.run", side_effect=FileNotFoundError):
+        unversioned = source_identity()
+    assert unversioned["git_metadata_status"] == "UNAVAILABLE"
+    assert unversioned["git_sha"] is None and unversioned["recipe_sha256"]
     policy = {
         "adapter": "nfcore-atac",
         "parameters": {"qvalue": 0.01, "keep_dup": "all", "mapq": [1]},

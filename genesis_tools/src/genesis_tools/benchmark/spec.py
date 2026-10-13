@@ -88,20 +88,46 @@ def public_url(url: str) -> None:
 
 
 def source_identity() -> dict[str, Any]:
+    """Hash the executing package; attach Git metadata only for its own checkout."""
+    from importlib.metadata import PackageNotFoundError, version
+
     root = Path(__file__).resolve().parents[4]
-
-    def git(*args: str) -> str:
-        return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
-
     package = Path(__file__).resolve().parent.parent
     paths = sorted(p for p in Path(__file__).parent.iterdir() if p.suffix in {".py", ".html"}) + [
         package / "atac/fragments.py"
     ]
-    return {
-        "git_sha": git("rev-parse", "HEAD"),
-        "git_status": git("status", "--porcelain"),
+    identity: dict[str, Any] = {
+        "git_sha": None,
+        "git_status": None,
+        "source_kind": "installed-package",
         "recipe_sha256": {str(p.relative_to(package)): sha256(p) for p in paths},
     }
+    try:
+        identity["distribution_version"] = version("genesis-tools")
+    except PackageNotFoundError:
+        identity["distribution_version"] = None
+    # Git searches parent directories. An installed wheel inside an unrelated
+    # checkout must not acquire that checkout's revision as its code identity.
+    expected = root / "genesis_tools/src/genesis_tools/benchmark/spec.py"
+    if expected.resolve() == Path(__file__).resolve():
+        identity["source_kind"] = "checkout"
+        try:
+            values = []
+            for arguments in (("rev-parse", "HEAD"), ("status", "--porcelain")):
+                values.append(
+                    subprocess.run(
+                        ["git", "-C", str(root), *arguments],
+                        check=True,
+                        capture_output=True,
+                        text=True,
+                        timeout=10,
+                    ).stdout.strip()
+                )
+            identity.update(git_sha=values[0], git_status=values[1])
+        except (OSError, subprocess.SubprocessError) as error:
+            identity["git_metadata_status"] = "UNAVAILABLE"
+            identity["git_metadata_reason"] = type(error).__name__
+    return identity
 
 
 def load(path: Path, *, verify: bool = True) -> dict[str, Any]:
