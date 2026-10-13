@@ -16,7 +16,8 @@ it does not establish biological truth. Read ends and fragments have different d
 <a href="distributions.tsv">Distributions</a> · <a href="counts.tsv">Counts</a> ·
 <a href="resources.tsv">Resources</a> · <a href="processing.tsv">Processing times</a></p>
 <p>Tool wall times include startup. Native memory is a sampled process-group RSS sum; shared pages may be counted twice. Repetitions describe computational variability,
-not biological replication. Container memory includes page cache; host RSS is recorded separately.</p>
+not biological replication. Container memory includes page cache. The Python driver's peak RSS
+is recorded separately; it excludes child tools and is not whole-host memory.</p>
 <label>Metric <select id="metric"></select></label><label>Library <select id="sample"></select></label>
 <label>Filter <input id="filter" placeholder="arm, definition or status"></label>
 <p id="description"></p><svg id="chart" role="img" aria-label="Selected metric by experiment arm" width="1000" height="300"></svg>

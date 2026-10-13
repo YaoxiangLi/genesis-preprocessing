@@ -516,7 +516,13 @@ def run_locked(plan: dict[str, Any], out: Path, *, resume: bool) -> None:
             htslib=pysam.__samtools_version__,
             architecture=platform.machine(),
             resume=resume,
-            peak_host_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            driver_peak_rss={
+                "value": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                "unit": "KiB" if sys.platform.startswith("linux") else "platform-native",
+                "scope": "Python driver lifetime high-water RSS; excludes child tools; "
+                "not whole-host memory",
+                "measurement": "getrusage(RUSAGE_SELF).ru_maxrss",
+            },
         )
         attempts = out / "invocations"
         attempts.mkdir(exist_ok=True)
