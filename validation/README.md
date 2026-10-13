@@ -7,6 +7,8 @@ measurements and limits; an earlier successful test is not a test of later code.
 
 | Evidence | What it covers |
 | --- | --- |
+| [Pipeline package comparison](reports/pipeline-method-comparison.md) | Measured package/workflow comparisons, metric definitions, tables and figures; completed and pending work distinguished |
+| [Documentation review](reports/documentation-review.md) | User-guide changes, scientific information retained, command/link checks and file inventory |
 | [Real study acceptance](reports/real-study-validation.md) | DAP/ATAC processing through registration, collection, validation and reviewed export on synthetic inputs |
 | [Supported bulk ATAC](reports/supported-atac-execution-validation.md) | Synthetic fixtures and small public Arabidopsis/maize subsets; [compact evidence](evidence/supported-atac/README.md) and [reproduction](reproduce/supported-atac/README.md) |
 | [Curation and AI](reports/hybrid-llm-validation.md) | Registry/review, mock and HTTP providers, simulated model services; live GPU/API acceptance is separate |

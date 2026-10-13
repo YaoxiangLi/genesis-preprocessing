@@ -85,6 +85,10 @@ Install Genesis, then run from its checkout:
 pixi install --all --manifest-path benchmarks/environment/pixi.toml
 ```
 
+For the optional older aligner comparison, also run
+`pixi install --manifest-path benchmarks/environment/bwa-mem2-2.2.1/pixi.toml`
+and add `--include-legacy` when compiling the matrix.
+
 The full input manifest downloads **86.01 GB** before retries and software
 downloads. Its transfer limit is 100 GB. Review the manifest and choose storage
 with room for original inputs plus temporary work. The recorded panel budget is
@@ -211,12 +215,18 @@ single-strand uniform-background tail of at most 0.0001, using a 0.5 pseudocount
 and weights rounded to millionths of a bit. This is not a peak-level p-value.
 
 Report peak/control motif-hit counts and fractions for all eligible pairs and
-the top 1,000/5,000 peaks by caller signal. An undersized selection is marked
+the top 1,000/5,000 eligible summit windows by caller signal. Invalid windows are
+excluded before ranking, and their count is retained. An undersized selection is marked
 incomplete. A zero control count leaves fold enrichment undefined. Small control
 counts make fold ratios unstable; use the counts and fractions when comparing
 methods. Motif support is biological plausibility evidence, not in-vivo binding
 truth or proof that every extra peak is correct. No independent motif assignment
 has been established for the PE DAP groups in this panel.
+
+Keep the motif output directory with the result archive. `motif-metrics.tsv`
+contains every selection, `motif-windows.tsv` records individual peak/control
+pairs, and `provenance.json` identifies the matrices and source peak files.
+The method archive command below does not collect this separate directory.
 
 ## Share evidence and manage temporary work
 
@@ -238,6 +248,57 @@ It writes a retention record before removal and records any interrupted removal.
 The pruned run cannot resume; rerun its manifest in a new result directory.
 Active experiments are refused, and failed experiments retain their work for
 diagnosis. Without the flag, archiving removes nothing.
+
+For the complete workflow comparison, archive the runs after common scoring:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python \
+  benchmarks/experiments/plant-methods-20261013/archive_workflows.py \
+  --genesis-run /scratch/workflow-comparison/genesis-results \
+  --nfcore-run /scratch/workflow-comparison/nfcore-results \
+  --scored /data/evidence/workflow-comparison \
+  --out /data/evidence/workflow-archive
+```
+
+This retains workflow command logs, task traces, peaks and common measurements.
+It verifies every archive member and leaves the original work in place.
+
+## Make summary tables and figures
+
+`summarize.py` keeps libraries separate and reports medians, ranges and missing
+counts across technical repetitions. It accepts only complete, fresh method runs.
+Use a new output directory:
+
+```bash
+benchmarks/environment/.pixi/envs/default/bin/python \
+  benchmarks/experiments/plant-methods-20261013/summarize.py \
+  --run dap-se-1m=/scratch/dap-se-comparison-1m \
+  --motifs /scratch/dap-se-motif-support \
+  --workflows /data/evidence/workflow-comparison \
+  --out /data/evidence/panel-summary
+```
+
+Add a `--run NAME=DIRECTORY` for each cohort/depth. Omit `--motifs` or `--workflows`
+when that evaluation was not run. The output contains quality and cost TSVs,
+workflow/motif figures in SVG, PNG and PDF, and the hashes of every source table.
+Index costs remain separate. Missing evaluations must still be listed in the
+accompanying report; their omission from a plot is not a successful result.
+
+For a completed ATAC run, inspect TSS shape and fragment lengths alongside the
+scalar metrics:
+
+```bash
+benchmarks/environment/.pixi/envs/default/bin/python \
+  benchmarks/experiments/plant-methods-20261013/plot_profiles.py \
+  /scratch/atac-comparison-1m --method baseline --method bwa --method bowtie2 \
+  --out /data/evidence/atac-mapping-profiles
+```
+
+Select other methods with repeated `--method` arguments. The figure shows one
+technical repetition, with separate panels for each library. TSS curves use a
+25-base moving mean for display; the reported enrichment value still uses the
+unsmoothed center bin. Fragment plots show lengths below 1,000 bp while retaining
+all fragments in the denominator. Raw counts and omitted profiles are exported.
 
 ## Interpret the comparison
 

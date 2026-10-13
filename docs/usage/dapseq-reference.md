@@ -144,6 +144,11 @@ reference, and layout. Controls receive alignment, QC, and tracks; treatments
 also receive peaks and quantification. Multiple treatments can share a control.
 Validation completes before downloads start.
 
+For interspecies DAP, distinguish the TF-source organism from the organism whose
+DNA was assayed. The alignment reference must describe that DNA. Preserve the
+original sheet labels, and record the separate biological identities in the
+[curation metadata](curation.md); do not infer both from a single species label.
+
 Reference names are gzipped FASTA basenames ending in `.fa.gz`, `.fasta.gz`, or
 `.fna.gz`. Identifiers and filenames may contain letters, digits, underscores,
 periods, and hyphens, with a letter, digit, or underscore first. Read URLs must
@@ -169,6 +174,12 @@ first-read statistics and tracks. A third alignment, for SPP only, uses first
 reads cut to their first 50 bases (`--spp_read_length`). Each sample's alignment
 provenance records the bwa-mem2 version, layout, read length, flag exclusion,
 options, and the QC and SPP read policies.
+
+The currently pinned alignment image contains BWA-MEM2 **2.3**, although its
+executable banner reports `2.2.1`. Use the image digest, package metadata and
+executable hashes to identify that build. The
+[benchmark identity check](../../validation/reports/pipeline-method-comparison.md#production-identity-correction)
+records the discrepancy.
 
 BWA defaults are `-K 10000000 -k 19 -c 10000 -T 30`. Override them with
 `--bwa_batch_size`, `--bwa_seed_length`, `--bwa_max_seed_occurrences`, and
@@ -395,8 +406,8 @@ See [docs/nextflow-style.md](../../docs/nextflow-style.md) for module convention
 
 ## Opt-in method benchmarks
 
-Use `genesis benchmark` for explicit sensitivity experiments and pinned raw-ATAC
-workflow comparisons. The default synthetic fixtures run without dataset downloads;
-real plant candidate plans remain blocked until reference and input identity are
-resolved. See [benchmark commands, contracts and limitations](../../benchmarks/README.md).
-Production scientific defaults are unchanged.
+Use `genesis benchmark` to compare processing packages on matched inputs or to
+test explicit policy changes. Start with the synthetic fixtures, then use the
+verified public plant recipes. See the [benchmark guide](../../benchmarks/README.md)
+for commands, metric definitions, measured results and remaining work.
+Running a comparison does not change production defaults.

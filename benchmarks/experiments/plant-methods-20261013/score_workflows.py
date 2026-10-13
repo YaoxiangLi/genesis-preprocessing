@@ -53,10 +53,9 @@ def score(genesis: Path, nfcore: Path, out: Path) -> None:
         for mate in ("read1", "read2"):
             if meta["lanes"][0][mate + "_sha256"] != plan["assets"][library[mate]]["sha256"]:
                 raise ValueError("Workflow read bytes differ")
-        if (
-            meta["reference"]["fasta_sha256"] != plan["assets"][ref["fasta"]]["sha256"]
-            or meta["reference"]["tss_sha256"] != sha256(tss)
-        ):
+        if meta["reference"]["fasta_sha256"] != plan["assets"][ref["fasta"]]["sha256"] or meta[
+            "reference"
+        ]["tss_sha256"] != sha256(tss):
             raise ValueError("Workflow reference or annotation differs")
         tasks = [row for row in trace if row["name"] == f"ATAC_FRAGMENTS ({name})"]
         if len(tasks) != 1:
