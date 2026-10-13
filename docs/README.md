@@ -21,7 +21,6 @@ Choose the guide for the task you want to complete.
 ## Understand the methods
 
 - [Benchmarks](../benchmarks/README.md): datasets, method comparisons, metric definitions and measured results.
-- [Schematics](usage/schematics.md): generate editable workflow figures.
 - [Validation records](../validation/README.md): dated tests and their limitations.
 
 ## Develop Genesis

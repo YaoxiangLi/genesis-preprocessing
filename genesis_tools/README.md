@@ -1,19 +1,15 @@
 # Genesis tools
 
-Python helpers for Genesis plant sequencing workflows, validation, benchmarks,
-execution monitoring and workflow illustrations.
+Python tools for Genesis plant sequencing workflows: sample validation, metadata,
+peak quantification, benchmarks, execution monitoring and dataset curation.
 
 From the repository root, run `pixi run install-all --install-cli` and add
-`~/.local/bin` to your PATH. Then use `genesis --help`. For example, create an
-editable workflow figure with:
+`~/.local/bin` to your PATH. List the available commands and check your environment:
 
 ```bash
-genesis schematic --workflow atac --output atac.svg
+genesis --help
+genesis doctor
 ```
 
 See [the project documentation](../docs/README.md) for processing, catalog and
 benchmark commands.
-
-The schematic assets include their license notices and a checksummed source
-catalog. SVG exports retain these notices in metadata. See the repository's
-`docs/usage/schematics.md` for templates, themes and custom layouts.

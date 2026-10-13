@@ -308,10 +308,6 @@ def main() -> None:
     from ..curation import commands as curation_commands
 
     curation_commands.configure(commands)
-    from ..schematics.render import configure
-    from ..schematics.render import execute as schematic
-
-    configure(commands.add_parser("schematic", help="Generate Genesis workflow illustrations"))
     for name in ("run", "resume", "status", "issues", "resolve", "reconcile", "serve"):
         child = commands.add_parser(name)
         child.add_argument("directory", type=Path)
@@ -341,12 +337,6 @@ def main() -> None:
         return
     if hasattr(args, "curation_handler"):
         curation_commands.execute(args)
-        return
-    if args.action == "schematic":
-        try:
-            schematic(args)
-        except (ValueError, OSError) as error:
-            parser.error(str(error))
         return
     if args.action == "doctor":
         print(

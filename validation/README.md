@@ -14,7 +14,6 @@ measurements and limits; an earlier successful test is not a test of later code.
 | [Curation and AI](reports/hybrid-llm-validation.md) | Registry/review, mock and HTTP providers, simulated model services; live GPU/API acceptance is separate |
 | [Single-cell delivery](reports/scatac-delivery-validation.md) | Fragment/pseudobulk contracts and pinned model-loader checks |
 | [Direct command installation](reports/direct-cli-validation.md) | Installation and use of `genesis` outside the checkout |
-| [Figure commands](reports/schematic-cli-validation.md) | Offline SVG rendering, licensed assets and browser checks |
 | [Integration validation](reports/integration-validation-20261012.md) | Regression tests, scientific output checks and installation at the recorded revision |
 | [DAP regressions](reports/dap-regressions-20261012.md) | Reference-cache validation, container permissions, build behavior and duplicate-count semantics |
 | [Earlier sensitivity study](reports/dapseq-sensitivity-study.md) | Explicit MAPQ/duplicate experiments; not an aligner-selection benchmark |

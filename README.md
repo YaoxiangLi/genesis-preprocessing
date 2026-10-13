@@ -116,7 +116,6 @@ between tools or studies.
 | Propose metadata or explain a failure with an LLM | [AI providers](docs/usage/ai-providers.md) |
 | Host a private model on an existing node | [Model services](docs/usage/llm-deployment.md) |
 | Compare processing methods and inspect benchmark evidence | [Benchmarks](benchmarks/README.md) |
-| Draw a workflow schematic | [Figure commands](docs/usage/schematics.md) |
 | Set up a development environment or contribute | [Contributor guide](docs/development.md) |
 
 The [documentation index](docs/README.md) also links to reference material and
