@@ -124,6 +124,13 @@ branches or stashes needed to resume it. Milestones:
 - `accaf04`: hybrid providers, metadata curation, diagnosis and private model-service management.
 - `b04bee2`: README architecture overview and capability status table.
 
+The lab repository's six focused PRs (#2, #4, #6, #8, #10 and #12) are now merged
+at `fb600968b3abf5d79756aaf7e6d1e4ff43a1b41d`, and their linked issues are closed.
+The [review and validation record](../validation/reports/upstream-pr-review.md)
+contains the provenance correction, full checks, real Docker results and exact
+merge receipts. Continue the broader curation/LLM/ATAC/scATAC work from this fork;
+those extensions were not part of these six upstream PRs.
+
 Start with the [README](../README.md#architecture-and-current-capabilities), the
 [shared specification](curation/IMPLEMENTATION_BRIEF.md), and the
 [completed checklist](curation/CHECKLIST.md). Baseline-audit passages in the

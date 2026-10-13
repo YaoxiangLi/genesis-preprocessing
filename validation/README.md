@@ -13,6 +13,10 @@ Start with the [bulk ATAC and execution validation](reports/supported-atac-execu
 The [schematic CLI validation](reports/schematic-cli-validation.md) covers the
 offline figure generator, bundled artwork and browser checks.
 
+The [upstream PR review](reports/upstream-pr-review.md) records the six reviewed
+lab-repository merges, linked issue closure, real Docker acceptance and the
+reference-provenance correction shared with the development fork.
+
 Earlier studies include the [benchmark validation](reports/benchmark-validation.md),
 [overall validation](reports/GENESIS_PREPROCESSING_VALIDATION.md),
 [benchmark design](design/benchmark-spec.md), and
