@@ -85,9 +85,11 @@ not normalized fragment coverage.
 
 FRiP counts a fragment once when its span overlaps any called peak; the
 denominator is all usable fragments. TSS profiles use strand-aware ±2 kb windows
-that fit inside the contig, edge background and a centered signal region. The
-metric definition is retained with the result. Undefined metrics are null, not
-zero. NRF and PBC use nuclear, MAPQ-passing fragment coordinates before duplicate
+that fit inside the contig. Enrichment is the cut count at the single center
+position divided by the mean count in the outer 100 positions on each side.
+The stored profile is unsmoothed; a display that smooths the curve must say so.
+The metric definition and eligible TSS count are retained with the result.
+Undefined metrics are null, not zero. NRF and PBC use nuclear, MAPQ-passing fragment coordinates before duplicate
 exclusion; coordinate duplication is not proof of PCR origin.
 
 Libraries with matching sample and reference IDs receive pairwise peak
