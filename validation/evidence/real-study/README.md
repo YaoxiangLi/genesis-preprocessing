@@ -19,3 +19,7 @@ explains the commands, failures found and repaired, limits and rollback.
 Large synthetic inputs, FASTQs/BAMs, Nextflow work directories, environments and registries
 are not a GitHub backup. All review decisions in acceptance were explicitly synthetic.
 The ordinary test suite remains Docker-free; real tools require the opt-in command.
+
+`publication.json` verifies the lab and fork remote heads. `fresh-clone*` and
+`final-docs*` record the published checkout handoff and documentation checks.
+The final evidence-only commit leaves the tested implementation unchanged.

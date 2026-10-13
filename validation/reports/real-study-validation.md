@@ -140,3 +140,25 @@ before changing code, retain immutable run/attempt/evidence directories, and res
 registry backup into a new location when needed. This milestone adds no registry migration;
 older code will not recognize the new DAP evidence. Never erase approval history or mutate a
 campaign to simulate a rollback.
+
+## GitHub publication and fresh-clone handoff
+
+Both lab and fork `main` branches were advanced normally to
+[`f2a1a731f17ba25b0e82dd5b56137beaf29e957a`](https://github.com/kundajelab/genesis-preprocessing/commit/f2a1a731f17ba25b0e82dd5b56137beaf29e957a).
+[Publication receipt](../evidence/real-study/publication.json). No public history was
+rewritten. The final handoff receipt is a documentation/evidence-only follow-up.
+
+A fresh clone from the lab repository installed into new environments and passed CLI
+help/doctor, all 197 documented CLI examples, the offline tutorial, strict DAP provenance
+checks, and local study acceptance with the separate binary reader. All **574 tracked
+files** matched the published checkout and the clone remained clean. The measured time
+was **47.989 seconds**, using existing package/plugin caches on this host. This is not
+acceptance on an unspecified destination server. The harness clears `PYTHONPATH` and the
+parent `VIRTUAL_ENV` so the fresh checkout uses its own environment.
+
+[Fresh-clone receipt](../evidence/real-study/fresh-clone.json),
+[per-command results](../evidence/real-study/fresh-clone-details.json),
+[complete log](../evidence/real-study/fresh-clone.log), and
+[final documentation checks](../evidence/real-study/final-docs.json) preserve exact scope.
+Follow the [developer handoff](../../docs/development.md) to continue from another server;
+Git transfers the source and compact evidence, not sequencing files or live registries.

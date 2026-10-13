@@ -184,8 +184,11 @@ credentials on the target host, and inspect `git status` before committing.
 ## Handoff verification
 
 The [2026-10-13 real-study report](../validation/reports/real-study-validation.md)
-records the current provenance and full scientific study milestone. Earlier handoffs
-below remain evidence for their named revisions.
+records the current provenance and full scientific study milestone. A fresh lab-main
+clone of `f2a1a73` installed successfully and passed documentation, DAP provenance,
+study/binary checks and the offline tutorial. All 574 tracked files matched and the
+checkout stayed clean; [commands and results](../validation/evidence/real-study/fresh-clone-details.json)
+record the scope. Earlier handoffs below retain their named revisions.
 
 The [2026-10-12 full-update report](../validation/reports/lab-main-promotion.md)
 is the acceptance record for the lab promotion. A fresh lab-main clone of
