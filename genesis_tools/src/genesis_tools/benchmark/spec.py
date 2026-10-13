@@ -94,7 +94,9 @@ def source_identity() -> dict[str, Any]:
         return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
 
     package = Path(__file__).resolve().parent.parent
-    paths = sorted(Path(__file__).parent.glob("*.py")) + [package / "atac/fragments.py"]
+    paths = sorted(p for p in Path(__file__).parent.iterdir() if p.suffix in {".py", ".html"}) + [
+        package / "atac/fragments.py"
+    ]
     return {
         "git_sha": git("rev-parse", "HEAD"),
         "git_status": git("status", "--porcelain"),

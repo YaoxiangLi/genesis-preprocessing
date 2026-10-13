@@ -27,6 +27,10 @@ used gDNA controls; this panel's control-free ATAC comparison does not reproduce
 that complete analysis. See [Lu et al.](https://pmc.ncbi.nlm.nih.gov/articles/PMC5389718/)
 and the [maize study](https://doi.org/10.3389/fpls.2024.1370618).
 
+The first 100 records from each archived Arabidopsis ATAC mate are 31 bases long.
+The benchmark processes the archived sequences as supplied. The original sequencing
+read length must not be substituted for the length of these files.
+
 [ENA, SRA and BioSample snapshots](sources/) preserve the accession, layout and
 sample evidence. The [acquisition manifest](acquisition.json) pins public URLs,
 publisher sizes and checksums. It includes complete FASTQs, not HTTP prefixes.
@@ -111,6 +115,55 @@ Preparation can resume completed samples only when their sources, selection seed
 depths and output hashes agree. A failed acquisition can resume its original
 destination; partial files do not count as verified sources. Benchmark execution
 uses `--resume` only with unchanged source, environments and experiment identity.
+
+## Compare complete ATAC workflows
+
+Component timings omit QC reports and tracks. Run a separate workflow comparison
+to include those steps. [prepare_workflows.py](prepare_workflows.py) copies verified
+inputs into a Docker-visible directory and writes both Genesis inputs and a pinned
+nf-core experiment. It leaves the original inputs unchanged.
+
+The [nf-core container lock](nfcore-containers.json) pins the linux/amd64 images.
+Make those images and the Genesis images available locally before execution;
+the comparison refuses to pull an unpinned image during a task. The nf-core images
+have 2.88 GB of unique compressed layers before local cache reuse.
+
+```bash
+git clone --branch 2.1.2 https://github.com/nf-core/atacseq.git /scratch/nfcore-atacseq
+pixi run nextflow plugin install nf-validation@1.1.4
+pixi run uv run --frozen --project genesis_tools python \
+  benchmarks/experiments/plant-methods-20261013/prepare_workflows.py \
+  /scratch/atac-inputs/atac-arabidopsis-depth-1000000.json \
+  --out /scratch/workflow-comparison \
+  --nfcore-checkout /scratch/nfcore-atacseq \
+  --container-lock benchmarks/experiments/plant-methods-20261013/nfcore-containers.json
+
+genesis pipeline-atac /scratch/workflow-comparison/samples.tsv \
+  --references /scratch/workflow-comparison/references.json \
+  --config /scratch/workflow-comparison/genesis.config \
+  --outdir /scratch/workflow-comparison/genesis-results
+genesis benchmark run /scratch/workflow-comparison/nfcore.json \
+  --out /scratch/workflow-comparison/nfcore-results
+```
+
+Run the two workflows sequentially. This recipe gives each workflow 14 CPUs,
+80 GiB RAM and a two-hour task limit. Genesis processes both libraries in one run;
+the existing nf-core adapter launches each library separately and builds its own
+index each time. Report those costs explicitly. One execution checks integration
+and outputs; it does not establish a stable runtime ranking.
+
+The workflows have different policies: Genesis uses BWA-MEM2, both-mate MAPQ30,
+Mt/Pt exclusion and nuclear ACGT genome size. This nf-core configuration uses BWA,
+MAPQ1 plus its native filters, Mt removal, and total reference length for MACS2.
+Its replicate merging, DESeq2, annotation and profile/fingerprint plots are disabled.
+This is a **configured workflow comparison**, not a claim of matched policies or
+untouched nf-core defaults.
+
+nf-core's `read_length=50` is a genome-size lookup option, not observed read
+metadata. Its schema permits only 50/75/100/150/200; specifying the observed 31
+fails validation. The explicit `macs_gsize` bypasses that lookup and its k-mer task,
+so this unused option does not change or pad the 31-base reads. The upstream
+source revision and exact executed commands are retained with the results.
 
 ## Independent DAP motif support
 

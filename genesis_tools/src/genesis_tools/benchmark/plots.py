@@ -89,6 +89,17 @@ def render(root: Path) -> None:
             axis.set_xticks(range(len(names)), names, rotation=25, ha="right")
             axis.set_ylabel(rows[0]["unit"])
             axis.set_title(label, loc="left")
+            # Keep proportions on a visible, comparable scale. Automatic offsets
+            # near one made tiny differences look large and obscured their units.
+            axis.ticklabel_format(axis="y", style="plain", useOffset=False)
+            if rows[0]["unit"] == "fraction":
+                axis.set_ylim(-0.02, 1.02)
+                axis.set_yticks([0, 0.25, 0.5, 0.75, 1])
+            elif rows[0]["unit"] == "correlation":
+                axis.set_ylim(-1.02, 1.02)
+                axis.set_yticks([-1, -0.5, 0, 0.5, 1])
+            else:
+                axis.set_ylim(bottom=0)
             axis.grid(axis="y", alpha=0.2)
             if any(r["status"] == "OK" for r in rows):
                 axis.legend(fontsize=8, loc="best")
