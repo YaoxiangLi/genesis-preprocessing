@@ -76,10 +76,25 @@ no unknown MAPQ 255, and the declared duplicate policy. MACS uses BAMPE and
 real comparisons must document their own choices.
 
 Bowtie2 uses `--very-sensitive-local`, with `-X 2000` for paired reads; ATAC also
-uses `--dovetail --no-mixed --no-discordant`. Genrich uses its ATAC cut-site mode
-and remaining defaults, including its minimum area criterion. Equal q-values
-do not make the callers statistically equivalent. Every executed argument is
-saved in the command records.
+uses `--dovetail --no-mixed --no-discordant`. Local alignment permits soft clipping;
+dovetail allows the mates to extend past each other's starts. See the
+[Bowtie2 manual](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#mates-can-overlap-contain-or-dovetail-each-other).
+
+For ATAC, MACS uses the paired fragment pileup in `BAMPE` mode, with nuclear ACGT
+count as its declared genome size. This differs from Genrich's `-j` cut-site
+model. See [MACS format definitions](https://macs3-project.github.io/MACS/docs/callpeak.html).
+The Genrich comparison keeps 100-bp cut-site windows, minimum AUC 200 and maximum
+gap 100 bp. It retains the BAM header and passes no `-e`, `-E` or `-L`, so its
+background genome length includes all header contigs and ambiguous bases even
+though organellar alignments were removed before calling. It does not test
+Genrich's multimapping or joint-replicate analysis. These are caller-model
+differences, not a matched effective-genome-size comparison. See the
+[Genrich definitions](https://github.com/jsh58/Genrich#genome-length-calculation).
+
+Equal q-values do not make these callers statistically equivalent. Common TSS
+and FRiP measurements use the same evaluation code for every caller; they do not
+reuse caller-specific signal profiles. Every executed argument is saved in the
+command records.
 
 The `methods` adapter compares scientific components. It does not execute the
 complete Nextflow workflows or include FastQC, SPP, MultiQC and track generation

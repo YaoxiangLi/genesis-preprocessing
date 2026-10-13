@@ -50,6 +50,12 @@ and 24 Pixi recipes. A new wheel installed outside the checkout also completed
 the offline curation tutorial. [Acceptance records](../evidence/method-comparison-20261013/release-acceptance/)
 identify the exact commands, package contents and remaining live-service exclusions.
 
+A fresh clone of GitHub `main` at `57e6a0d` installed the direct command using the
+documented custom-bin option. General help, DAP/ATAC help and runtime discovery
+worked from `/tmp`, and all eight transferred benchmark archives matched their
+recorded checksums. The cloned working tree remained clean. See the
+[handoff record](../evidence/method-comparison-20261013/github-handoff/).
+
 The benchmark HTML report was opened in Chromium. Its initial view now selects
 one library and a useful retention metric, and sorts methods and repetitions.
 Static figures use explicit proportion/correlation scales and record their source

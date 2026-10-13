@@ -60,6 +60,13 @@ match production. [The recorded identity check](sources/production-aligner-ident
 and [upstream report](https://github.com/bwa-mem2/bwa-mem2/issues/283) explain this
 version-string error. The compiler checks these hashes before writing a comparison.
 The [comparison lock](../../environment/pixi.lock) pins the native environment.
+The production and native samtools/htslib packages also match. MACS3 is 3.0.5
+in both environments, but production uses its Python 3.13 build and the comparison
+uses Python 3.12. These are different package artifacts, recorded in the
+[package identity check](sources/production-method-package-identity.json).
+The native matrix is a component comparison, not a byte-identical copy of every
+production container. Complete-workflow results provide a separate check.
+
 An optional [older 2.2.1 environment](../../environment/bwa-mem2-2.2.1/pixi.lock)
 is used only with `compile_matrix.py --include-legacy`.
 

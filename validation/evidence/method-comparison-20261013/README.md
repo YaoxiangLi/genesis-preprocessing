@@ -20,6 +20,7 @@ server; use the recipe to prepare paths on another server.
 | [workflow-summary](workflow-summary/) | Common workflow table and figure, with renderer and source hashes |
 | [acceptance](acceptance/) | Test receipts, complete-workflow logs, software/image records and baseline correction |
 | [release-acceptance](release-acceptance/) | Full regression suite and fresh installed-wheel acceptance at the merged release revision |
+| [github-handoff](github-handoff/) | Fresh clone from lab main, archive checksum verification and direct CLI installation from another working directory |
 | [older-bwa-mem2-2.2.1-synthetic-dap](older-bwa-mem2-2.2.1-synthetic-dap/) | Earlier comparison using the older 2.2.1 package as baseline; 15 completed cases |
 | [older-bwa-mem2-2.2.1-synthetic-atac](older-bwa-mem2-2.2.1-synthetic-atac/) | Earlier comparison using the older 2.2.1 package as baseline; 27 completed cases |
 | [interrupted-older-baseline-dap-se](interrupted-older-baseline-dap-se/) | Public run stopped after discovering the baseline version-label error; incomplete results and original work retained |
