@@ -307,6 +307,10 @@ or the conda profile. Only Linux amd64 Docker execution has been validated here.
 
 ## Verification
 
+The [2026-10-12 lab-update acceptance](../../validation/reports/lab-main-promotion.md)
+records current Linux Docker results and exact source/image identities. Earlier
+ARM64 results remain in the archived README with their original date and revision.
+
 ```bash
 pixi run checks
 # Real-tool Docker validation:

@@ -21,11 +21,12 @@ work without AI. [Open the full-size, editable diagram](docs/images/genesis_arch
 
 **Implemented** means code is available. **Validated** names the evidence and its
 limits. **Planned** identifies remaining validation, not completed work. Evidence
-snapshot: **2026-10-10**.
+snapshot: **2026-10-12**. The [full lab-update acceptance record](validation/reports/lab-main-promotion.md)
+includes current checks, real scientific fixtures and installed-package evidence.
 
 | Capability | Implemented | Validated | Planned / next validation |
 | --- | --- | --- | --- |
-| [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Historical Docker runs and public ATAC subsets; current regressions ([scientific evidence](validation/reports/supported-atac-execution-validation.md), [current checks](validation/reports/hybrid-llm-validation.md)) | — |
+| [DAP-seq](docs/usage/dapseq-reference.md) / [bulk ATAC-seq](docs/usage/bulk-atac.md) | Yes | Linux Docker SE/PE and bulk ATAC fixtures ([current acceptance](validation/reports/lab-main-promotion.md)); earlier [public ATAC subsets](validation/reports/supported-atac-execution-validation.md) | — |
 | [Single-cell ATAC fragments](docs/usage/scatac.md) | Inventory, ingestion, replicate-preserving pseudobulks and model exports | Deterministic fixtures, pinned peak/track tools and both model loaders ([evidence](validation/reports/scatac-delivery-validation.md)) | Reference/annotation resolution and reviewed Arabidopsis/Sorghum release |
 | [Controller / workers](docs/usage/execution.md) | Yes | Local isolation, retries, recovery and deployment-profile parsing ([evidence](validation/reports/supported-atac-execution-validation.md)) | Live SSH / scheduler site acceptance |
 | [Complete prepared-study workflow](docs/usage/studies.md) | Yes | Input review → immutable plans → local workers → automatic collection → reviewed export, with synthetic output writers and real bigWig validation ([evidence](validation/reports/study-workflow-validation.md)) | Live SSH and real sequencing acceptance through the new coordinator |
@@ -657,7 +658,8 @@ review, fake HTTP, metadata evidence and model lifecycle simulations. Installed-
 acceptance checks packaged schemas/prompts/vocabularies outside the repository.
 Synthetic gold fixtures report field/evidence/conflict/abstention results; real
 biological accuracy, human corrections, API charges and GPU performance stay unmeasured.
-[Foundations evidence](validation/reports/curation-foundations-validation.md) and
+[Current lab-update acceptance](validation/reports/lab-main-promotion.md),
+[foundations evidence](validation/reports/curation-foundations-validation.md) and
 [hybrid extension evidence](validation/reports/hybrid-llm-validation.md) distinguish
 PASS, FAIL, BLOCKED and NOT RUN and record commands/revisions/limitations.
 
