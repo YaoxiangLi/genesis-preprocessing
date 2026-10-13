@@ -72,6 +72,21 @@ def main() -> None:
         assert installed["recipe_sha256"]["benchmark/report.html"] == sha256(
             benchmark / "report.html"
         )
+        source_package = Path(temp) / "source/genesis_tools/src/genesis_tools"
+        source_benchmark = source_package / "benchmark"
+        source_benchmark.mkdir(parents=True)
+        (source_package / "atac").mkdir()
+        (source_benchmark / "spec.py").write_text("# source archive\n")
+        (source_package / "atac/fragments.py").write_text("# selection\n")
+        with (
+            patch("genesis_tools.benchmark.spec.__file__", str(source_benchmark / "spec.py")),
+            patch(
+                "genesis_tools.benchmark.spec.subprocess.run",
+                side_effect=AssertionError("A source archive has no own Git revision"),
+            ),
+        ):
+            archived = source_identity()
+        assert archived["source_kind"] == "source-tree" and archived["git_sha"] is None
     with patch("genesis_tools.benchmark.spec.subprocess.run", side_effect=FileNotFoundError):
         unversioned = source_identity()
     assert unversioned["git_metadata_status"] == "UNAVAILABLE"

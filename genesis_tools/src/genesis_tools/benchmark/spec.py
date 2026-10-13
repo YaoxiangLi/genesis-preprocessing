@@ -110,6 +110,13 @@ def source_identity() -> dict[str, Any]:
     # checkout must not acquire that checkout's revision as its code identity.
     expected = root / "genesis_tools/src/genesis_tools/benchmark/spec.py"
     if expected.resolve() == Path(__file__).resolve():
+        if not (root / ".git").exists():
+            identity.update(
+                source_kind="source-tree",
+                git_metadata_status="UNAVAILABLE",
+                git_metadata_reason="No Git repository at the source root",
+            )
+            return identity
         identity["source_kind"] = "checkout"
         try:
             values = []
