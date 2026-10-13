@@ -24,6 +24,7 @@ from ..contracts.records import (
 from ..curation import review
 from ..execution.transport import validate_worker
 from ..registry import store
+from ..samples import SAMPLE_HEADER
 from .inputs import input_head, read_study
 
 DEFAULT_SCAN = {
@@ -127,9 +128,15 @@ def text_document(name: str, text: str) -> dict[str, str]:
     return {"name": name, "text": text, "sha256": hashlib.sha256(text.encode()).hexdigest()}
 
 
-def sheet_text(rows: list[dict[str, str]]) -> str:
+def sheet_text(rows: list[dict[str, str]], *, dap: bool = False) -> str:
     stream = io.StringIO()
-    writer = csv.DictWriter(stream, fieldnames=list(rows[0]), delimiter="\t", lineterminator="\n")
+    # Stored JSON sorts object keys. DAP's public six-column interface has a fixed order.
+    writer = csv.DictWriter(
+        stream,
+        fieldnames=SAMPLE_HEADER if dap else sorted(rows[0]),
+        delimiter="\t",
+        lineterminator="\n",
+    )
     writer.writeheader()
     writer.writerows(rows)
     return stream.getvalue()
@@ -177,7 +184,7 @@ def build_job(
                 raise ValueError("Worker path mapping aliases different input bytes")
             assets[target] = asset["sha256"]
     docs = [
-        text_document("samples.tsv", sheet_text(rows)),
+        text_document("samples.tsv", sheet_text(rows, dap=study["assay"] == "DAP-seq")),
         text_document(
             "metadata.json", canonical({i["id"]: metadata[i["id"]] for i in members}) + "\n"
         ),

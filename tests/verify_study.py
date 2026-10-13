@@ -553,6 +553,13 @@ def dap_checks(root: Path, bigwig_python: Path | None = None) -> None:
     assert plan["data"]["status"] == "READY"
     assert len(plan["data"]["campaign"]["jobs"]) == 1
     assert len(next(iter(plan["data"]["jobs"].values()))["inputs"]) == 3
+    from genesis_tools.samples import SAMPLE_HEADER, load_samples
+
+    documents = plan["data"]["campaign"]["jobs"][0]["payload"]["study"]["documents"]
+    compiled = root / "compiled.tsv"
+    compiled.write_text(next(d["text"] for d in documents if d["name"] == "samples.tsv"))
+    assert compiled.read_text().splitlines()[0].split("\t") == list(SAMPLE_HEADER)
+    assert len(load_samples(compiled, refs)) == 3
     workflow.start(study, plan)
     result = wait_study(study)
     assert len(result["datasets"]) == 3
