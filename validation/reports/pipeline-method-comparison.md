@@ -1,13 +1,14 @@
 # Pipeline method comparison, October 2026
 
-This report separates three questions: whether the tools produce correct outputs
-on known fixtures, how their biological measurements differ on public plant data,
-and what their execution costs are. The [recipe](../../benchmarks/experiments/plant-methods-20261013/README.md)
-and [compact evidence](../evidence/method-comparison-20261013/README.md) contain the
-commands, input identities, software locks, raw measurements and figures.
+The completed public SE DAP comparison supports keeping BWA-MEM2/MACS3 for that
+cohort. BWA produced identical peaks, while Bowtie2's higher ABI5 read retention
+did not improve the selected peak windows' independent motif-hit fraction.
+The broader PE DAP, ATAC and depth comparisons are still running; the results do
+not yet justify changing a pipeline default across assays.
 
-The public component campaigns are still running. The completed results below
-do not yet establish a replacement for a pipeline default.
+The [recipe](../../benchmarks/experiments/plant-methods-20261013/README.md) and
+[compact evidence](../evidence/method-comparison-20261013/README.md) contain the
+commands, input identities, software locks, raw measurements and figures.
 
 ## Data and comparison design
 
@@ -215,6 +216,12 @@ resume intentionally pruned benchmark work and labels driver RSS with its actual
 scope. These changes do not alter scientific processing. The running campaigns
 keep their original recipe hashes. [Release acceptance records](../evidence/method-comparison-20261013/release-acceptance/)
 retain the commands and the two corrected test-harness assumptions.
+
+At `74163ef`, the full suite passed after adding the native/production comparison
+helper and strengthening track-specific assertions. Separate binary bigWig tests
+passed for corruption, NaN, integer raw counts and fractional normalized coverage
+using the pinned track reader. [Follow-up records](../evidence/method-comparison-20261013/followup-validation/)
+distinguish those executed checks from the pending public ATAC equivalence check.
 
 The evidence includes failures and corrections. An initial MACS2 Bioconda build
 failed to import, so the comparison uses its pinned source release in a separate
