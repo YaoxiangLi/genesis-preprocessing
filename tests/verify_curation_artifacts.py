@@ -95,22 +95,51 @@ def main() -> None:
             )
         )
         track = record("manifest", data, manifest["id"])
-        assert "NOT_EVALUATED" in states(bundle([track], level="full"))
+
+        def track_finding(value: dict[str, Any], rule: str = "artifact.scan") -> dict[str, Any]:
+            matches = [
+                finding["data"]
+                for finding in value["data"]["validations"][0]["data"]["findings"]
+                if finding["data"]["rule_id"] == rule
+                and finding["data"]["subject"]["id"] == data["artifacts"][-1]["id"]
+            ]
+            assert len(matches) == 1, matches
+            return matches[0]
+
+        assert track_finding(bundle([track], level="full"))["result"] == "NOT_EVALUATED"
         wrong = altered(track, lambda d: d["artifacts"][-1]["signal"].update(unit="fragment"))
-        assert "ERROR" in states(bundle([wrong], level="full"))
+        assert track_finding(bundle([wrong], level="full"), "signal.semantics")["result"] == "ERROR"
         if args.bigwig_python:
-            assert "ERROR" in states(
-                bundle([track], level="full", bigwig_python=args.bigwig_python)
-            )
+            corrupt = track_finding(bundle([track], level="full", bigwig_python=args.bigwig_python))
+            assert corrupt["result"] == "ERROR", corrupt
             make = """import pyBigWig,sys
 with pyBigWig.open(sys.argv[1], 'w') as out:
     out.addHeader([('chr1',100)])
     out.addEntries(['chr1'], [10], ends=[11], values=[float(sys.argv[2])])
 """
-            for value, expected in (("1", "PASS"), ("nan", "ERROR"), ("0.5", "ERROR")):
+            for value, expected, reason in (
+                ("1", "PASS", None),
+                ("nan", "ERROR", "nonfinite"),
+                ("0.5", "ERROR", "Raw counts must be nonnegative integers"),
+            ):
                 subprocess.run([str(args.bigwig_python), "-c", make, str(bw), value], check=True)
                 tested = bundle([track], level="full", bigwig_python=args.bigwig_python)
-                assert expected in states(tested), tested
+                finding = track_finding(tested)
+                assert finding["result"] == expected, finding
+                if reason:
+                    assert reason in finding["observed"], finding
+                else:
+                    assert states(tested) == {"PASS"}, tested
+            normalized = altered(
+                track,
+                lambda d: d["artifacts"][-1].update(role="track_cpm", signal=signal("track_cpm")),
+            )
+            assert (
+                track_finding(bundle([normalized], level="full", bigwig_python=args.bigwig_python))[
+                    "result"
+                ]
+                == "PASS"
+            )
             print("PASS: real bigWig readability, finite values and raw-count semantics")
         else:
             print("NOT RUN: binary bigWig checks require explicit --bigwig-python")
