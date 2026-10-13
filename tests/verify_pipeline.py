@@ -191,6 +191,8 @@ def check_sheets(work: Path) -> None:
     }
     control = {**good, "sample_id": "control", "control_sample": "-"}
     (references / "ref.fa.gz").touch()
+    (references / "ref.fna.gz").touch()
+    (references / "ref.fasta.gz").touch()
     sheet = work / "invalid.tsv"
     cases = [
         ([good], "invalid control"),
@@ -205,6 +207,14 @@ def check_sheets(work: Path) -> None:
         ([{**control, "read1_url": "https://example.org/a'bad"}], "invalid read1_url"),
         ([{**control, "read1_url": "file:///tmp/a.gz"}], "invalid read1_url"),
         ([{**control, "sample_id": "bad;id"}], "unsafe sample_id"),
+        (
+            [control, {**control, "sample_id": "other", "reference_fasta": "ref.fna.gz"}],
+            "reference ID collision",
+        ),
+        (
+            [control, {**control, "sample_id": "other", "reference_fasta": "ref.fasta.gz"}],
+            "reference ID collision",
+        ),
         ([], "no samples"),
     ]
     for rows, diagnostic in cases:
@@ -516,6 +526,11 @@ def check_outputs(work: Path, *, docker: bool) -> None:
             assert source.count("samtools view -u -F 2308 -") == 3 and " -q " not in source
             assert "trimfastq" not in source and "head " not in source
             assert source.count("substr($0, 1, bases)") == 1 and "-v bases=50 " in source
+        if docker and "bamCoverage " in source:
+            assert (
+                "Matplotlib created a temporary cache directory"
+                not in (command.parent / ".command.err").read_text()
+            )
         if "macs3 callpeak" in source:
             assert "_control.primary.bam" in source
         if "Rscript" in source:
@@ -578,6 +593,25 @@ def check_failures(work: Path, sheet: Path) -> None:
     assert "Supply exactly one" in (work / "output-multiple-sheets.log").read_text()
 
 
+def check_reference_collision(work: Path, sheet: Path, *, docker: bool) -> None:
+    """Colliding basenames must fail in the actual staged validator before DOWNLOAD."""
+    with sheet.open() as stream:
+        rows = list(csv.DictReader(stream, delimiter="\t"))
+    references = work / "references"
+    source = references / rows[0]["reference_fasta"]
+    alias = source.with_name(source.name.replace(".fa.gz", ".fna.gz"))
+    shutil.copyfile(source, alias)
+    bad = work / "reference-collision.tsv"
+    first = {**rows[0], "control_sample": "-"}
+    second = {**first, "sample_id": "other", "reference_fasta": alias.name}
+    write_sheet(bad, [first, second])
+    run_pipeline(work, bad, docker=docker, suffix="reference-collision", expect_failure=True)
+    assert "reference ID collision" in (work / "output-reference-collision.log").read_text()
+    tasks = trace_rows(work, "reference-collision")
+    assert len(tasks) == 1 and tasks[0]["name"] == "VALIDATE_SHEET"
+    assert tasks[0]["status"] == "FAILED"
+
+
 def check_bams(work: Path) -> None:
     """Read real BAMs to verify MAPQ-zero retention, flags, and untrimmed sequences."""
     images = dict(
@@ -596,6 +630,8 @@ def check_bams(work: Path) -> None:
                     "docker",
                     "run",
                     "--rm",
+                    "--user",
+                    f"{os.getuid()}:{os.getgid()}",
                     "--network",
                     "none",
                     "-v",
@@ -653,6 +689,7 @@ def main() -> None:
             if args.docker:
                 check_bams(work)
             check_resume(work, sheet, docker=args.docker)
+            check_reference_collision(work, sheet, docker=args.docker)
             if not args.docker:
                 check_failures(work, sheet)
         label = "Real-tool Docker end-to-end" if args.docker else "Nextflow regression"
