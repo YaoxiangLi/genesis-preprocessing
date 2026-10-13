@@ -1,0 +1,184 @@
+[
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "-m",
+      "genesis_tools.benchmark",
+      "fixture",
+      "--adapter",
+      "methods",
+      "--assay",
+      "DAP-seq",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-dap-v5-inputs"
+    ],
+    "utc": "2026-10-13T09:31:46.011664+00:00",
+    "exit": 0,
+    "seconds": 6.542670442024246
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "benchmarks/experiments/plant-methods-20261013/compile_matrix.py",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-dap-v5-inputs/experiment.json",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-dap-v5-inputs/production-baseline.json",
+      "--repetitions",
+      "3",
+      "--cpus",
+      "2"
+    ],
+    "utc": "2026-10-13T09:31:52.554681+00:00",
+    "exit": 0,
+    "seconds": 0.31810399587266147
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "-m",
+      "genesis_tools.benchmark",
+      "run",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-dap-v5-inputs/production-baseline.json",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-dap-v5-results"
+    ],
+    "utc": "2026-10-13T09:31:53.102176+00:00",
+    "exit": 0,
+    "seconds": 189.17760906391777
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "-m",
+      "genesis_tools.benchmark",
+      "report",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-dap-v5-results",
+      "--plot-python",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/benchmarks/environment/.pixi/envs/default/bin/python"
+    ],
+    "utc": "2026-10-13T09:35:02.280389+00:00",
+    "exit": 0,
+    "seconds": 4.413282309193164
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "-m",
+      "genesis_tools.benchmark",
+      "fixture",
+      "--adapter",
+      "methods",
+      "--assay",
+      "bulk-ATAC",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-atac-v5-inputs"
+    ],
+    "utc": "2026-10-13T09:35:06.694264+00:00",
+    "exit": 0,
+    "seconds": 3.8041046960279346
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "benchmarks/experiments/plant-methods-20261013/compile_matrix.py",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-atac-v5-inputs/experiment.json",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-atac-v5-inputs/production-baseline.json",
+      "--repetitions",
+      "3",
+      "--cpus",
+      "2"
+    ],
+    "utc": "2026-10-13T09:35:10.499067+00:00",
+    "exit": 0,
+    "seconds": 0.34572625113651156
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "-m",
+      "genesis_tools.benchmark",
+      "run",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-atac-v5-inputs/production-baseline.json",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-atac-v5-results"
+    ],
+    "utc": "2026-10-13T09:35:10.845388+00:00",
+    "exit": 0,
+    "seconds": 215.63868768094108
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "-m",
+      "genesis_tools.benchmark",
+      "report",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/synthetic-atac-v5-results",
+      "--plot-python",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/benchmarks/environment/.pixi/envs/default/bin/python"
+    ],
+    "utc": "2026-10-13T09:38:46.484833+00:00",
+    "exit": 0,
+    "seconds": 4.651930778985843
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "benchmarks/experiments/plant-methods-20261013/compile_matrix.py",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-se/dap-se-depth-1000000.json",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-se/comparison-1m-v5.json",
+      "--repetitions",
+      "3",
+      "--cpus",
+      "14"
+    ],
+    "utc": "2026-10-13T09:38:51.137198+00:00",
+    "exit": 0,
+    "seconds": 0.8597088102251291
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "-m",
+      "genesis_tools.benchmark",
+      "run",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-se/comparison-1m-v5.json",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-se-1m-v5-results"
+    ],
+    "utc": "2026-10-13T09:38:51.997557+00:00",
+    "exit": 0,
+    "seconds": 3263.751738062827
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "-m",
+      "genesis_tools.benchmark",
+      "report",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-se-1m-v5-results",
+      "--plot-python",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/benchmarks/environment/.pixi/envs/default/bin/python"
+    ],
+    "utc": "2026-10-13T10:33:15.750246+00:00",
+    "exit": 0,
+    "seconds": 3.5378242461010814
+  },
+  {
+    "argv": [
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "benchmarks/experiments/plant-methods-20261013/compile_matrix.py",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-pe/dap-pe-depth-1000000.json",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-pe/comparison-1m-v5.json",
+      "--repetitions",
+      "3",
+      "--cpus",
+      "14"
+    ],
+    "utc": "2026-10-13T10:33:19.288477+00:00",
+    "exit": 0,
+    "seconds": 6.055092117050663
+  }
+]
