@@ -1,0 +1,33 @@
+[
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "14",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/benchmarks/environment/.pixi/envs/default/bin/python",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/benchmarks/experiments/plant-methods-20261013/motifs.py",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-se-1m-v5-results",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-se-1m-v5-motifs"
+    ],
+    "utc": "2026-10-13T10:33:29.013826+00:00",
+    "seconds": 6.449201260926202,
+    "exit": 0
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "14",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/genesis_tools/.venv/bin/python",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/benchmarks/experiments/plant-methods-20261013/archive.py",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/results/method-benchmark-20261013/dap-se-1m-v5-results",
+      "--out",
+      "/data/homes/yl814/package/genesis/genesis-preprocessing/validation/evidence/method-comparison-20261013/dap-se-1m",
+      "--prune-work"
+    ],
+    "utc": "2026-10-13T10:33:35.465259+00:00",
+    "seconds": 5.3612854848615825,
+    "exit": 0
+  }
+]

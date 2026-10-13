@@ -1,0 +1,47 @@
+"""Execute recorded comparison commands sequentially; stop on first failure."""
+from pathlib import Path
+import datetime
+import json
+import os
+import subprocess
+import sys
+import time
+
+root=Path.cwd()
+out=root/'results/method-benchmark-20261013'
+python=str(root/'genesis_tools/.venv/bin/python')
+bench=[python,'-m','genesis_tools.benchmark']
+compiler=[python,'benchmarks/experiments/plant-methods-20261013/compile_matrix.py']
+env=dict(os.environ,PYTHONPATH=str(root/'genesis_tools/src'),PYTHONUNBUFFERED='1')
+commands=[]
+for label,assay in [('dap','DAP-seq'),('atac','bulk-ATAC')]:
+    inputs=out/f'synthetic-{label}-v5-inputs'
+    results=out/f'synthetic-{label}-v5-results'
+    commands.extend([
+        bench+['fixture','--adapter','methods','--assay',assay,'--out',str(inputs)],
+        compiler+[str(inputs/'experiment.json'),'--out',str(inputs/'production-baseline.json'),'--repetitions','3','--cpus','2'],
+        bench+['run',str(inputs/'production-baseline.json'),'--out',str(results)],
+        bench+['report',str(results),'--plot-python',str(root/'benchmarks/environment/.pixi/envs/default/bin/python')],
+    ])
+for cohort in ['dap-se','dap-pe','atac-arabidopsis']:
+    inputs=out/cohort
+    spec=inputs/'comparison-1m-v5.json'
+    results=out/f'{cohort}-1m-v5-results'
+    commands.extend([
+        compiler+[str(inputs/f'{cohort}-depth-1000000.json'),'--out',str(spec),'--repetitions','3','--cpus','14'],
+        bench+['run',str(spec),'--out',str(results)],
+        bench+['report',str(results),'--plot-python',str(root/'benchmarks/environment/.pixi/envs/default/bin/python')],
+    ])
+receipt_path=out/'final-comparisons-v5-commands.json'
+receipts=json.loads(receipt_path.read_text()) if receipt_path.exists() else []
+for argv in commands:
+    if any(r['argv']==argv and r['exit']==0 for r in receipts):
+        continue
+    start=time.monotonic()
+    receipt={'argv':argv,'utc':datetime.datetime.now(datetime.UTC).isoformat()}
+    print('COMMAND',receipt['utc'],repr(argv),flush=True)
+    r=subprocess.run(argv,env=env,check=False)
+    receipt.update(exit=r.returncode,seconds=time.monotonic()-start)
+    receipts.append(receipt)
+    (out/'final-comparisons-v5-commands.json').write_text(json.dumps(receipts,indent=2)+'\n')
+    if r.returncode: sys.exit(r.returncode)

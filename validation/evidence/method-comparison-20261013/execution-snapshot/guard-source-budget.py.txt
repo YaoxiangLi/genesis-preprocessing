@@ -1,0 +1,34 @@
+"""Preserve the aggregate payload allowance while this study's owned acquisition runs."""
+from pathlib import Path
+import datetime,json,os,signal,time
+root=Path.cwd();base=root/'results/method-benchmark-20261013'
+account=json.loads((base/'download-budget-accounting.json').read_text())
+limit=account['source_payload_guard_bytes']-64000000
+source=str(base/'sources');manifest=str(base/'acquisition.json')
+while True:
+    state=json.loads((base/'sources/acquisition-state.json').read_text())
+    if (base/'sources/assets.lock.json').exists():
+        outcome='COMPLETE';break
+    if state['downloaded_bytes']>limit:
+        # Stop only this study's retry supervisor and its exact acquisition command.
+        parents=[];children=[]
+        for process in Path('/proc').iterdir():
+            if not process.name.isdecimal():continue
+            try:
+                if process.stat().st_uid!=os.getuid():continue
+                argv=(process/'cmdline').read_bytes().decode().split('\0')
+            except (FileNotFoundError,PermissionError,UnicodeDecodeError):continue
+            if (process/'cwd').resolve()==root and any(a in (str(base/'resume-acquisition-5.py'), 'results/method-benchmark-20261013/resume-acquisition-5.py') for a in argv):
+                parents.append((int(process.name),argv))
+            if manifest in argv and source in argv and 'acquire' in argv:
+                children.append((int(process.name),argv))
+        for targets,signum in [(parents,signal.SIGTERM),(children,signal.SIGINT)]:
+            for pid,argv in targets:
+                try:
+                    if (Path('/proc')/str(pid)/'cmdline').read_bytes().decode().split('\0')!=argv:continue
+                    os.kill(pid,signum)
+                except (ProcessLookupError,FileNotFoundError):pass
+        outcome='STOPPED_AT_AGGREGATE_PAYLOAD_GUARD';break
+    time.sleep(5)
+(base/'source-budget-guard-result.json').write_text(json.dumps({'utc':datetime.datetime.now(datetime.UTC).isoformat(),'status':outcome,'source_payload_bytes':state['downloaded_bytes'],'source_guard_bytes':limit,'non_source_reservation_bytes':account['non_source_reservation_bytes'],'scope':account['scope']},indent=2)+'\n')
+print(outcome,state['downloaded_bytes'],flush=True)

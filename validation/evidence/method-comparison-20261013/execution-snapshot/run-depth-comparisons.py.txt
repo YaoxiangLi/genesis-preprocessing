@@ -1,0 +1,61 @@
+"""Continue the approved panel sequentially after its repeated one-million runs."""
+from pathlib import Path
+import datetime
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+
+root=Path.cwd(); base=root/'results/method-benchmark-20261013'
+python=str(root/'genesis_tools/.venv/bin/python')
+plot_python=str(root/'benchmarks/environment/.pixi/envs/default/bin/python')
+recipe=root/'benchmarks/experiments/plant-methods-20261013'
+bench=[python,'-m','genesis_tools.benchmark']
+env=dict(os.environ,PYTHONPATH=str(root/'genesis_tools/src'),PYTHONUNBUFFERED='1')
+receipt=base/'depth-comparisons-commands.json'; commands=[]
+expected=json.loads((base/'synthetic-dap-v5-results/experiment.json').read_text())['source']['recipe_sha256']
+deadline=datetime.datetime(2026,10,15,6,12,46,tzinfo=datetime.UTC).timestamp()
+
+def frozen():
+ for name,digest in expected.items():
+  data=(root/'genesis_tools/src/genesis_tools'/name).read_bytes()
+  if hashlib.sha256(data).hexdigest()!=digest:
+   raise RuntimeError('Comparison recipe changed while the panel was active: '+name)
+
+def run(argv):
+ frozen()
+ if time.time()>deadline-21600: raise RuntimeError('Fewer than six hours remain in the aggregate panel budget')
+ started=time.monotonic(); stamp=datetime.datetime.now(datetime.UTC).isoformat()
+ print('COMMAND',stamp,repr(argv),flush=True)
+ result=subprocess.run(argv,env=env,check=False)
+ commands.append({'argv':argv,'utc':stamp,'seconds':time.monotonic()-started,'exit':result.returncode})
+ receipt.write_text(json.dumps(commands,indent=2)+'\n')
+ if result.returncode: sys.exit(result.returncode)
+
+cohorts=['dap-se','dap-pe','atac-arabidopsis']
+for cohort in cohorts:
+ completed=base/f'{cohort}-1m-v5-results'
+ while True:
+  status=json.loads((completed/'results.json').read_text())['status'] if (completed/'results.json').exists() else None
+  receipts=json.loads((base/'final-comparisons-v5-commands.json').read_text())
+  report_done=any(r['argv']==bench+['report',str(completed),'--plot-python',plot_python] and r['exit']==0 for r in receipts)
+  if status=='COMPLETE' and report_done:break
+  if status not in (None,'COMPLETE'):raise RuntimeError('A repeated campaign failed: '+cohort)
+  if time.time()>deadline-21600:raise RuntimeError('Panel wait exceeded remaining budget')
+  time.sleep(30)
+ if cohort=='dap-se':
+  run(['taskset','-c','14',plot_python,str(recipe/'motifs.py'),str(completed),'--out',str(base/'dap-se-1m-v5-motifs')])
+ run(['taskset','-c','14',python,str(recipe/'archive.py'),str(completed),'--out',str(root/f'validation/evidence/method-comparison-20261013/{cohort}-1m'),'--prune-work'])
+
+for cohort in cohorts:
+ prepared=base/cohort/f'{cohort}-depth-5000000.json'
+ spec=base/cohort/'comparison-5m-v5.json'; result=base/f'{cohort}-5m-v5-results'
+ run([python,str(recipe/'compile_matrix.py'),str(prepared),'--out',str(spec),'--repetitions','1','--cpus','14'])
+ run(bench+['run',str(spec),'--out',str(result)])
+ run(bench+['report',str(result),'--plot-python',plot_python])
+ if cohort=='dap-se':
+  run(['taskset','-c','14',plot_python,str(recipe/'motifs.py'),str(result),'--out',str(base/'dap-se-5m-v5-motifs')])
+ run(['taskset','-c','14',python,str(recipe/'archive.py'),str(result),'--out',str(root/f'validation/evidence/method-comparison-20261013/{cohort}-5m'),'--prune-work'])
+print('COMPLETE Arabidopsis/DAP depths; maize remains a separate recorded campaign',flush=True)

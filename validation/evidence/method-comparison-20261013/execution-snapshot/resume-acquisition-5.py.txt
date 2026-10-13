@@ -1,0 +1,22 @@
+from pathlib import Path
+import datetime
+import json
+import os
+import subprocess
+import sys
+import time
+cpus=sorted(os.sched_getaffinity(0))
+os.sched_setaffinity(0,set(cpus[14:16]))
+root=Path.cwd(); out=root/'results/method-benchmark-20261013'
+argv=[str(root/'genesis_tools/.venv/bin/python'),'-m','genesis_tools.benchmark','acquire',str(out/'acquisition.json'),'--out',str(out/'sources'),'--connections','4']
+receipts=[]
+for attempt in range(1,41):
+ start=time.monotonic(); stamp=datetime.datetime.now(datetime.UTC).isoformat(); print('Attempt',attempt,stamp,flush=True)
+ result=subprocess.run(argv,env=dict(os.environ,PYTHONPATH=str(root/'genesis_tools/src')),capture_output=True,text=True)
+ print(result.stdout,result.stderr,flush=True)
+ receipts.append({'attempt':attempt,'utc':stamp,'argv':argv,'exit':result.returncode,'seconds':time.monotonic()-start,'stdout':result.stdout,'stderr':result.stderr})
+ (out/'acquisition-retries-5.json').write_text(json.dumps(receipts,indent=2)+'\n')
+ if result.returncode==0: sys.exit(0)
+ if not any(message in result.stderr for message in ('timed out', 'Connection refused', 'Connection reset by peer', 'Temporary failure in name resolution', 'Remote end closed connection', 'HTTP Error 502', 'HTTP Error 503', 'HTTP Error 504')): sys.exit(result.returncode)
+ time.sleep(min(120, 15*attempt))
+sys.exit(2)
