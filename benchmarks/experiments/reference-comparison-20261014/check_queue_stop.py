@@ -8,12 +8,24 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
-from run_queue import stop_owned_tree
+from run_queue import require_free_space, stop_owned_tree
 
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as temporary:
+        destination = Path(temporary) / "missing-parent" / "result"
+        with patch("run_queue.shutil.disk_usage", return_value=SimpleNamespace(free=99)):
+            try:
+                require_free_space(destination, 100)
+            except ValueError as error:
+                assert "Insufficient filesystem space" in str(error)
+            else:
+                raise AssertionError("An otherwise empty scratch tree hid a full filesystem")
+        with patch("run_queue.shutil.disk_usage", return_value=SimpleNamespace(free=100)):
+            require_free_space(destination, 100)
         ready = Path(temporary) / "child.pid"
         child_code = "import time; time.sleep(60)"
         code = (
@@ -42,7 +54,7 @@ def main() -> None:
         finally:
             if process.poll() is None:
                 stop_owned_tree(process)
-    print("PASS queue budget stop terminates separately-sessioned descendant tools")
+    print("PASS filesystem reservation and queue stop of separately-sessioned descendant tools")
 
 
 if __name__ == "__main__":

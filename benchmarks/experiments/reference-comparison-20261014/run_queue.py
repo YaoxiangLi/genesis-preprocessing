@@ -6,11 +6,13 @@ import argparse
 import fcntl
 import json
 import os
+import shutil
 import signal
 import subprocess
 import time
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from genesis_tools.benchmark.spec import sha256, write_json
 
@@ -59,7 +61,7 @@ def stop_owned_tree(process: subprocess.Popen) -> None:
 
 
 def disk_bytes(roots: list[Path]) -> int:
-    unique = sorted(set(p.resolve() for p in roots))
+    unique = sorted({p.resolve() for p in roots})
     selected = [
         p for p in unique if not any(p != other and p.is_relative_to(other) for other in unique)
     ]
@@ -70,6 +72,18 @@ def disk_bytes(roots: list[Path]) -> int:
         for p in root.rglob("*")
         if p.is_file() and not p.is_symlink()
     )
+
+
+def require_free_space(destination: Path, reserve_bytes: int) -> None:
+    """Account for other files on the filesystem, including acquired inputs."""
+    parent = destination.parent
+    while not parent.exists():
+        parent = parent.parent
+    free = shutil.disk_usage(parent).free
+    if free < reserve_bytes:
+        raise ValueError(
+            f"Insufficient filesystem space: {free} bytes free; {reserve_bytes} required"
+        )
 
 
 def run(
@@ -95,7 +109,7 @@ def run(
             source / "genesis_tools/atac/fragments.py"
         )
         state_path = work / "queue-progress.json"
-        state = (
+        state: dict[str, Any] = (
             json.loads(state_path.read_text())
             if state_path.exists()
             else {"schema_version": 1, "jobs": {}}
@@ -151,6 +165,7 @@ def run(
                 )
             if destination.exists():
                 raise ValueError("Queue will not overwrite or implicitly resume existing results")
+            require_free_space(destination, spec["limits"]["disk_bytes"])
             roots = scratch + [Path(j["results"]) for j in jobs]
             current_bytes = disk_bytes(roots)
             if current_bytes + spec["limits"]["disk_bytes"] > 150_000_000_000:
@@ -192,6 +207,10 @@ def run(
                         )
                         if used > 150_000_000_000 or time.time() >= deadline:
                             budget_error = "Scratch or seven-day execution budget exceeded"
+                            stop_owned_tree(process)
+                            break
+                        if shutil.disk_usage(destination).free < 1_000_000_000:
+                            budget_error = "Filesystem space fell below the 1 GB safety reserve"
                             stop_owned_tree(process)
                             break
                         write_json(state_path, state)

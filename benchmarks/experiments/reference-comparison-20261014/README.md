@@ -136,6 +136,17 @@ any additional `--scratch` roots, and a persistent seven-day deadline. Supply
 every temporary root. Original downloads have a separate budget. These local
 checks do not reserve resources from other users or replace a site scheduler.
 
+Choose a filesystem with enough free space for downloaded inputs and temporary
+work together. The queue checks free space against each experiment's disk budget
+before launch and stops its processes if less than 1 GB remains. A scratch-size
+limit alone cannot detect space consumed by other files on the same filesystem.
+
+Assembly mapping accepts explicit 8, 10 or 48 GiB limits through
+`align_assemblies.py --memory-gib`. If a mapping exceeds its limit, retain the
+failed attempt and use a new output directory for the revised resource request.
+Run a 48 GiB mapping separately from an 80 GiB processing job to stay within the
+96 GiB total budget; the alignment parameters remain unchanged.
+
 The recorded total budget is 16 CPUs, 96 GiB RAM, 250 GB of additional downloads
 and 150 GB temporary work. Preparation uses CPUs 14–15 and processing uses 0–13.
 Publisher-verified originals remain available; completed reference indexes can

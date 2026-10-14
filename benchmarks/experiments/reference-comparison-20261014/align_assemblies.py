@@ -16,8 +16,8 @@ def align(panel: Path, left: str, right: str, tool: Path, out: Path, memory_gib:
         raise FileExistsError("Choose a new assembly alignment directory")
     if len(os.sched_getaffinity(0)) > 2:
         raise ValueError("Run assembly preparation with an explicit two-CPU affinity")
-    if memory_gib not in {8, 10}:
-        raise ValueError("This panel permits an explicit 8 or 10 GiB assembly-mapping budget")
+    if memory_gib not in {8, 10, 48}:
+        raise ValueError("Choose an explicit 8, 10 or 48 GiB assembly-mapping budget")
     document = json.loads(panel.read_text())
     if document["schema_version"] != 1:
         raise ValueError("Unsupported reference panel")
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     parser.add_argument("--right", required=True)
     parser.add_argument("--minimap2", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--memory-gib", type=int, choices=(8, 10), default=8)
+    parser.add_argument("--memory-gib", type=int, choices=(8, 10, 48), default=8)
     args = parser.parse_args()
     align(
         args.panel.resolve(),
