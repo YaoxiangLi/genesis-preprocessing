@@ -10,10 +10,16 @@ study, choose the evaluation data and scientific questions before looking at
 results. More mapped reads, higher FRiP or more peaks alone does not establish
 better biological accuracy.
 
-See the [October 2026 comparison report](../validation/reports/pipeline-method-comparison.md)
+See the [expanded plant comparison report](../validation/reports/expanded-plant-comparison.md)
 for measured results, figures, failures and the current limits of the evidence.
 The [public plant recipe](experiments/plant-methods-20261013/README.md) reproduces
 the data selection and method matrix.
+
+The [reference comparison recipe](experiments/reference-comparison-20261014/README.md)
+covers four species, versioned assemblies, annotation sensitivity and reciprocal
+coordinate conversion. Use `genesis benchmark reference inspect` to scan a FASTA
+and `genesis benchmark reference prepare` to validate and compile an explicit
+reference bundle. Assembly names alone do not establish identical reference files.
 
 ## Run a small comparison
 

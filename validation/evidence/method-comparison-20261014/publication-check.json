@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "checked_utc": "2026-10-14T09:18:59.079552+00:00",
+  "files_reviewed": 168,
+  "verified_archives": 10,
+  "verified_members": 4758,
+  "findings": [],
+  "scope": "New and changed publication files: exact tar/member hashes and sizes, sequencing-file exclusion, explicit local path prefixes, private config paths and common credential patterns. Pattern scan is not a guarantee against every possible secret."
+}

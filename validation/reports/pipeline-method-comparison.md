@@ -3,8 +3,10 @@
 The completed public SE DAP comparison supports keeping BWA-MEM2/MACS3 for that
 cohort. BWA produced identical peaks, while Bowtie2's higher ABI5 read retention
 did not improve the selected peak windows' independent motif-hit fraction.
-The broader PE DAP, ATAC and depth comparisons are still running; the results do
-not yet justify changing a pipeline default across assays.
+The [expanded plant report](expanded-plant-comparison.md) adds the completed PE DAP,
+ATAC and depth comparisons, plus reference/annotation results and the status of
+the four-species extension. The evidence does not justify changing a pipeline
+default across assays.
 
 The [recipe](../../benchmarks/experiments/plant-methods-20261013/README.md) and
 [compact evidence](../evidence/method-comparison-20261013/README.md) contain the
@@ -149,7 +151,7 @@ including indexing and assessment, took 3,262.80 s.
 
 The observations support retaining BWA-MEM2/MACS3 for this cohort. The modest
 MACS2 timing difference and changed boundaries do not establish a biological
-advantage. Deeper subsets and the PE/ATAC cohorts remain separate checks.
+advantage. Deeper subsets and PE/ATAC results are in the expanded report.
 See [quality summaries](../evidence/method-comparison-20261013/dap-se-1m-summary/quality-summary.tsv),
 [all cost observations](../evidence/method-comparison-20261013/dap-se-1m-summary/cost-observations.tsv),
 [index costs](../evidence/method-comparison-20261013/dap-se-1m-summary/index-observations.tsv)
@@ -221,7 +223,9 @@ At `74163ef`, the full suite passed after adding the native/production compariso
 helper and strengthening track-specific assertions. Separate binary bigWig tests
 passed for corruption, NaN, integer raw counts and fractional normalized coverage
 using the pinned track reader. [Follow-up records](../evidence/method-comparison-20261013/followup-validation/)
-distinguish those executed checks from the pending public ATAC equivalence check.
+retain those executed checks. The subsequent public native/production ATAC
+comparison reports equal recorded scientific observations in the
+[comparison record](../evidence/method-comparison-20261013/atac-native-production.json).
 
 The evidence includes failures and corrections. An initial MACS2 Bioconda build
 failed to import, so the comparison uses its pinned source release in a separate

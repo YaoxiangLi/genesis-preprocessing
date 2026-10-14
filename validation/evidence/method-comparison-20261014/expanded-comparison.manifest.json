@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "sources": {
+    "expanded-plant-comparison.md": "26cd88c40fe83b9ba2a86907bf70a163f2dd2bb9dceef75c902d031feece9ce8",
+    "../evidence/method-comparison-20261014/figures/method-quality.svg": "6a5aea01451a48381b9aace4cc291b6528122e997c3632249c1f9d879c002ecc",
+    "../evidence/method-comparison-20261014/figures/method-cost.svg": "c5960c3b6fb63d70077dba00aaca4657799ec14e1112d9bd86ef7ce35f1deb66",
+    "../evidence/method-comparison-20261014/figures/atac-depth.svg": "346e3d852ffb1a6544317eaab9636aab5f17639c88046bdf329107debc3bb567",
+    "../evidence/method-comparison-20261014/figures/reference-concordance.svg": "eb7a08244423c1cbd2fd1add545415359e26f40d0f560e367df93c5e5798a353"
+  },
+  "pdf_sha256": "11aa8a1ae798f97ec418b220853b91910c8ad2e78233f1f154c136a1c25716d5",
+  "renderer_sha256": "9950d66da3a5f9e39138d75c75a60dabd3e56cc812b5f901a4198a713f67eb38",
+  "matplotlib": "3.11.2",
+  "scope": "Same report text and tables; measured PNG figures embedded; source links in footer"
+}

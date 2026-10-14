@@ -159,11 +159,14 @@ definitions, results and reproduction commands. It distinguishes package compari
 from parameter sensitivity and software tests. A higher mapping rate or more peaks
 alone is not evidence that one method is better.
 
-Repeated measurements and independent TF motif evidence support the BWA-MEM2/MACS3
-defaults for the tested Arabidopsis SE DAP cohort. That finding applies to the recorded
-libraries, read depth and settings. The [comparison report](validation/reports/pipeline-method-comparison.md)
-provides the measurements, figures and limitations, along with Genesis/nf-core
-ATAC results scored using common definitions.
+The [plant comparison report](validation/reports/expanded-plant-comparison.md)
+contains 64 completed Arabidopsis method/depth cases, independent TF motif evidence,
+biological ATAC replicate measurements, and comparisons of reference assemblies
+and annotation releases. Tables distinguish completed results from the ongoing
+A. lyrata, sorghum and maize runs. The current evidence does not establish a better
+replacement for the BWA-MEM2/MACS3 defaults across assays.
+The [complete-workflow comparison](validation/reports/pipeline-method-comparison.md)
+scores Genesis and nf-core ATAC using common metric definitions.
 
 ## Troubleshooting
 

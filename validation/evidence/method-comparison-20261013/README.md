@@ -8,6 +8,8 @@ Each archive has a `manifest.json` with the SHA256 and size of every member.
 Archive contents were read back and verified. FASTQs, BAMs, indexes and installed
 environments remain outside Git. Paths in archived commands identify the test
 server; use the recipe to prepare paths on another server.
+The later public derivatives for PE DAP, 5M SE DAP and native ATAC replace local
+path prefixes. Their manifests distinguish original and published hashes.
 
 | Directory | Scope |
 | --- | --- |
@@ -15,6 +17,12 @@ server; use the recipe to prepare paths on another server.
 | [synthetic-atac](synthetic-atac/) | Verified production baseline, eight methods × three technical repetitions; 24 completed cases |
 | [dap-se-1m](dap-se-1m/) | Public FUS3/ABI5/control comparison at one million templates per library; 12 completed cases, archived before temporary work was pruned |
 | [dap-se-1m-summary](dap-se-1m-summary/) | Per-library measurements, timing observations and independent PBM motif support |
+| [dap-se-5m](dap-se-5m/) | Four completed method cases at the deeper cap; actual low-yield control count retained |
+| [dap-pe-1m](dap-pe-1m/) | Four treatments and an assigned control; four methods × three technical repetitions |
+| [dap-pe-5m](dap-pe-5m/) | Four completed deeper method cases; two treatments remain below the requested cap |
+| [atac-arabidopsis-1m](atac-arabidopsis-1m/) | Two biological replicates; eight methods × three technical repetitions |
+| [atac-arabidopsis-5m](atac-arabidopsis-5m/) | Eight completed deeper method cases with replicate and held-out measurements |
+| [atac-native-production.json](atac-native-production.json) | Equality check for the recorded scientific observations, distinct from file identity and runtime |
 | [dap-se-1m-motifs](dap-se-1m-motifs/) | All motif selections, individual peak/control windows, matrix provenance and repetition checks |
 | [whole-workflows](whole-workflows/) | Current Genesis and pinned nf-core ATAC on two public Arabidopsis libraries, one million input pairs each; common metric definitions |
 | [workflow-summary](workflow-summary/) | Common workflow table and figure, with renderer and source hashes |
