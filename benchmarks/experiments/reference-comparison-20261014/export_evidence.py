@@ -1,4 +1,4 @@
-"""Publish a verified evidence archive with local path prefixes replaced.
+"""Publish verified evidence with local paths and sensitive log fields sanitized.
 
 Original archive hashes and published member hashes are distinct. Input data,
 measurements and biological identifiers are not edited by this export.
@@ -14,6 +14,8 @@ import json
 import tarfile
 from pathlib import Path, PurePosixPath
 from typing import Any
+
+from genesis_tools.publication import sanitize
 
 
 def digest(data: bytes) -> str:
@@ -45,7 +47,7 @@ def export(source: Path, out: Path, replacements: dict[str, str]) -> None:
             return data
         for old, new in sorted(replacements.items(), key=lambda pair: -len(pair[0])):
             text = text.replace(old, new)
-        return text.encode("utf-8")
+        return sanitize(text.encode("utf-8"))
 
     members: dict[str, dict[str, Any]] = {}
     packed = out / "evidence.tar.gz"
@@ -80,7 +82,8 @@ def export(source: Path, out: Path, replacements: dict[str, str]) -> None:
                         "original_sha256": digest(before),
                         "sha256": digest(after),
                         "bytes": len(after),
-                        "path_redacted": before != after,
+                        "path_redacted": any(old.encode() in before for old in replacements),
+                        "publication_redacted": sanitize(before) != before,
                     }
                     info = tarfile.TarInfo(item.name)
                     info.size, info.mode = len(after), 0o644
@@ -111,7 +114,7 @@ def export(source: Path, out: Path, replacements: dict[str, str]) -> None:
         "path_placeholders": sorted(set(replacements.values())),
         "exporter_sha256": sha256(Path(__file__)),
         "scope": (
-            "Public path-redacted derivative. Original and published bytes have "
+            "Public sanitized derivative. Original and published bytes have "
             "separate hashes. FASTQs, BAMs and reference indexes are excluded. "
             "Reconstruct local paths using the experiment recipe."
         ),

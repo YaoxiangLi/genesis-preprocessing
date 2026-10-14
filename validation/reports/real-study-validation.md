@@ -163,7 +163,10 @@ The [receipt](../evidence/real-study/fresh-clone.json),
 See the [contributor guide](../../docs/development.md) for installation instructions.
 
 All 290 study command stdout/stderr files are retained in a
-[compact archive](../evidence/real-study/study-cli-logs.tar.gz), verified against the
-per-command hashes. Owned temporary checkouts and large scientific work products were
+[compact archive](../evidence/real-study/study-cli-logs.tar.gz) as sanitized publication
+copies. The [publication manifest](../evidence/real-study/publication-manifest.json)
+binds each original per-command hash to its published member hash. Public review-token
+values and command arguments are redacted; scientific measurements are unchanged.
+Owned temporary checkouts and large scientific work products were
 cleaned up after this evidence was saved. Reproduce those products with the documented
 fixture commands; the historical temporary paths are not permanent data locations.

@@ -186,6 +186,22 @@ Use [Nextflow conventions](nextflow-style.md) when editing a workflow. Keep gene
 outputs and machine-specific configuration outside Git. Commit a reviewable change
 with the commands actually tested and any remaining limitations.
 
+Prepare public validation evidence from a separate private source directory:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python -m genesis_tools.publication export /private/evidence /staging/public-evidence
+pixi run uv run --frozen --project genesis_tools python -m genesis_tools.publication check /staging/public-evidence
+```
+
+The exporter sanitizes review-state hashes in logs and command arguments, along with
+recognized credential patterns. It checks archive paths and expansion limits and
+records original and published file/member checksums in `publication-manifest.json`.
+Keep original receipts and their hashes: sanitized copies do not have the same bytes.
+Review the output before committing it. This targeted check is included in
+`pixi run checks`; it complements secret scanning rather than certifying that arbitrary
+binary data or every credential format is safe to publish. Keep private originals,
+environment files and assistant configuration outside Git.
+
 Real-tool acceptance is opt-in. The [study guide](usage/studies.md#real-tool-acceptance-on-synthetic-inputs)
 describes Docker-based scientific acceptance; the [provider](usage/ai-providers.md#opt-in-live-acceptance)
 and [model-service](usage/llm-deployment.md#opt-in-real-local-or-ssh-acceptance) guides describe
