@@ -12,7 +12,7 @@ from typing import Any
 
 from ..contracts.records import dump, fingerprint, identity, load, record, validate
 from ..registry import store
-from . import evidence, workbook
+from . import discovery, evidence, identities, workbook
 
 SPECIES = ("Arabidopsis thaliana", "Sorghum bicolor")
 ACCESSIONS = {
@@ -72,7 +72,7 @@ def import_workbook(
     return {"inventory": value["version"], "candidate_rows": len(rows), "source_sha256": digest}
 
 
-def audit(directory: Path) -> dict[str, Any]:
+def audit(directory: Path, *, resolve_identities: bool = True) -> dict[str, Any]:
     value = validate(load(directory / "inventory.json"), "scatac_inventory")
     data = value["data"]
     issues = []
@@ -86,10 +86,12 @@ def audit(directory: Path) -> dict[str, Any]:
     def issue(row: int, code: str, detail: str) -> None:
         issues.append({"row": row, "code": code, "detail": detail, "review_status": "UNREVIEWED"})
 
-    for source_row in data["rows"]:
+    for source_row in discovery.rows(directory, data["rows"]):
         row = source_row["row"]
         fields = source_row["values"]
-        candidate = identity("scatac-row", data["source_id"], data["sheet"], str(row))
+        candidate = source_row.get("candidate_id") or identity(
+            "scatac-row", data["source_id"], data["sheet"], str(row)
+        )
         study = fields.get("bioproject", "").strip() or fields.get("study_accession", "").strip()
         if not study:
             study = "unresolved:" + candidate
@@ -152,6 +154,7 @@ def audit(directory: Path) -> dict[str, Any]:
                 "biological_replicate_id": "",
                 "identity_status": "UNRESOLVED",
                 **fields,
+                "source": source_row.get("source", "workbook"),
             }
         )
     for (kind, accession), members in relationships.items():
@@ -170,6 +173,22 @@ def audit(directory: Path) -> dict[str, Any]:
                             "CONFLICTING_RELATIONSHIP",
                             f"{accession}: {field} has conflicting source values",
                         )
+    if resolve_identities:
+        identities.apply(directory, libraries, issues)
+        for accession, sample in samples.items():
+            resolved = {
+                (r["biological_sample_id"], r["biological_replicate_id"])
+                for r in libraries
+                if r.get("biosample", "").strip() == accession
+                and r["identity_status"] == "DOCUMENTED"
+            }
+            if len(resolved) == 1:
+                sample["biological_sample_id"], sample["biological_replicate_id"] = next(
+                    iter(resolved)
+                )
+                sample["identity_status"] = "DOCUMENTED"
+            elif len(resolved) > 1:
+                raise ValueError("Conflicting biological identities for one BioSample")
     readiness = []
     for key, study in sorted(studies.items()):
         rows = [r for r in libraries if r["study_key"] == key]
@@ -206,7 +225,23 @@ def audit(directory: Path) -> dict[str, Any]:
             "confirmed_biological_samples": 0,
             "confirmed_biological_replicates": 0,
             "confirmed_libraries": 0,
-            "identity_status": "UNRESOLVED",
+            **{
+                "documented_" + label: len(
+                    {
+                        (r["study_key"], r[field])
+                        for r in rows
+                        if r["identity_status"] == "DOCUMENTED"
+                    }
+                )
+                for label, field in (
+                    ("biological_samples", "biological_sample_id"),
+                    ("biological_replicates", "biological_replicate_id"),
+                    ("libraries", "library_id"),
+                )
+            },
+            "identity_status": "DOCUMENTED_WITHOUT_RELEASE_REVIEW"
+            if any(r["identity_status"] == "DOCUMENTED" for r in rows)
+            else "UNRESOLVED",
         }
     return {
         "inventory_version": value["version"],
@@ -233,6 +268,10 @@ def export(directory: Path, output: Path) -> dict[str, Any]:
     dump(output / "summary.json", result["summary"])
     original = validate(load(directory / "inventory.json"), "scatac_inventory")
     dump(output / "original-values.json", original)
+    for name in ("discovery", "identities", "evidence"):
+        path = directory / (name + ".json")
+        if path.exists():
+            dump(output / (name + ".json"), load(path))
     return {
         "output": str(output),
         "summary": result["summary"],
