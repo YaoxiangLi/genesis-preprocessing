@@ -91,7 +91,8 @@ def compile_panel(catalog: Path, sampling: Path, panel: Path, environment: Path,
     for job in jobs:
         job["experiment"] = str(out / job["id"] / "experiment.json")
         job["results"] = str(out / (job["id"] + "-results"))
-        job["archive_indexes"] = True
+        job["archive_indexes"] = len(job["methods"]) == 1
+        job["archive_work"] = len(job["methods"]) > 1
     write_json(out / "queue.json", jobs)
     deadline = time.monotonic() + 7 * 86400
     pending = list(jobs)

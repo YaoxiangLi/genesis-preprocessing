@@ -214,7 +214,9 @@ def run(
             print(job["id"], row["status"], flush=True)
             if budget_error:
                 raise RuntimeError(budget_error)
-            if row["status"] == "COMPLETE" and job.get("archive_indexes"):
+            if row["status"] == "COMPLETE" and (
+                job.get("archive_indexes") or job.get("archive_work")
+            ):
                 archive = Path(__file__).parent.parent / "plant-methods-20261013/archive.py"
                 subprocess.run(
                     [
@@ -223,7 +225,7 @@ def run(
                         str(destination),
                         "--out",
                         str(work / (job["id"] + "-evidence")),
-                        "--prune-indexes",
+                        "--prune-work" if job.get("archive_work") else "--prune-indexes",
                     ],
                     check=True,
                     cwd=checkout,

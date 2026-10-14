@@ -149,6 +149,9 @@ pixi run uv run --frozen --project genesis_tools python \
 
 Pruning prevents execution resume for that result directory. To rerun, regenerate
 the work in a new directory from the pinned inputs.
+The panel queue retains BAMs for reference comparisons. Method matrices already
+contain their common assessments; after a successful archive verification, their
+reproducible work is pruned to keep subsequent experiments within the disk budget.
 
 After every assessment that needs those BAMs has finished, remove the remaining
 reproducible work with a second verified archive. The previous archive and its
