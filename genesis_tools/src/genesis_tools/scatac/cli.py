@@ -43,6 +43,15 @@ def configure(parser: argparse.ArgumentParser) -> None:
             child.add_argument("--output", type=Path, required=True)
             child.add_argument("--resume", action="store_true")
         child.set_defaults(curation_handler=execute)
+    child = model_actions.add_parser("inspect", help="Read-only, bounded model handoff report")
+    child.add_argument("--input", type=Path, required=True)
+    child.add_argument("--format", choices=("json", "markdown"), default="json")
+    child.add_argument("--output", type=Path)
+    child.add_argument("--max-bytes", type=int, default=64 * 1024 * 1024)
+    child.add_argument("--max-records", type=int, default=100_000)
+    child.add_argument("--max-seconds", type=float, default=30)
+    child.add_argument("--bigwig-python", type=Path)
+    child.set_defaults(curation_handler=execute, operation="scatac-model-inspect")
     actions = commands.add_parser("inventory").add_subparsers(dest="operation", required=True)
     for name in ("import", "audit", "export", "evidence"):
         child = actions.add_parser(name)
@@ -76,6 +85,10 @@ def execute(args: argparse.Namespace) -> tuple[Any, int]:
     if args.scatac_command == "products":
         return products.run(args.input, args.output, resume=args.resume), 0
     if args.scatac_command == "model":
+        if args.model_action == "inspect":
+            from .inspection import command
+
+            return command(args)
         if args.model_action == "validate":
             return model.validate(args.input), 0
         return model.export(args.input, args.config, args.output, resume=args.resume), 0

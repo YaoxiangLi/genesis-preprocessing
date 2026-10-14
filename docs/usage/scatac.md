@@ -76,6 +76,7 @@ retain diagnostics; complete outputs are published atomically.
 ```bash
 genesis scatac model export --input products/TASK_ID --config model.json --output models/TASK_ID
 genesis scatac model validate --input models/TASK_ID
+genesis scatac model inspect --input models/TASK_ID --format markdown
 ```
 
 Adapters target Cherimoya `8ecf7f791ec07c05a701076cc58a0f845bf97609` and ChromBPNet

@@ -229,3 +229,19 @@ Keep provider credentials and site-specific configurations outside the checkout.
 Test SSH, schedulers and GPUs in the environment where they will run; local checks
 do not establish remote compatibility. [Validation records](../validation/README.md)
 show which scientific and installation checks have been performed.
+
+## Model-handoff inspection checks
+
+The default suite includes `tests/verify_scatac_inspection.py`: pinned adapters,
+bounded scans, invalid region windows/folds, stale evidence, rendering and input
+immutability. To include binary readability with an existing track environment:
+
+```bash
+pixi run uv run --frozen --project genesis_tools python tests/verify_scatac_inspection.py --bigwig-python /path/to/existing/track-env/bin/python
+```
+
+No reader is installed automatically. The [offline inspection example](usage/scatac-model-handoff.md#offline-inspection-example)
+is synthetic and cannot establish loader or training acceptance. Keep meeting
+notes, local audit receipts and candidate handoff decisions under the ignored
+`workspace/meeting-prep/` directory. Public documentation describes scientific
+interfaces and evidence, not internal meeting logistics.

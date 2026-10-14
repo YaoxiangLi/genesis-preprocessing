@@ -1,7 +1,9 @@
 # Genesis documentation
 
 If you are new to Genesis, start with [installation and a first analysis](../README.md#install-and-check-your-environment).
-Choose the guide for the task you want to complete.
+Choose the guide for the task you want to complete. For the scientific question,
+measurement definitions and evidence boundaries, read the
+[scientific overview](scientific-overview.md).
 
 ## Process sequencing data
 
