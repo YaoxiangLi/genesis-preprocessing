@@ -14,6 +14,7 @@ for reproduction commands.
 | [annotation-sensitivity-1m.json](annotation-sensitivity-1m.json) | Full TSS profiles, common gene set and annotation-specific denominators |
 | [caller-diagnostics-tair10-1m.json](caller-diagnostics-tair10-1m.json) | TAIR10 Genrich operating-point comparison and exploratory biological-pair IDR |
 | [caller-diagnostics-colcen-1m.json](caller-diagnostics-colcen-1m.json) | The corresponding Col-CEN assessment |
+| [caller-diagnostics-colcen-5m.json](caller-diagnostics-colcen-5m.json) | Deeper Col-CEN Genrich operating points and biological-pair IDR |
 | [dap-se-5m-motifs](dap-se-5m-motifs/) | Independent PBM motif hits, GC-matched controls, individual windows and exclusions |
 | [sources](sources/) | Complete FASTA scans, publisher acquisition receipts and explicit reference derivations |
 | [Maize coordinate mappings](sources/maize-mapping/) | Both publisher-checked chains, explicit contig aliases and block/length validation |

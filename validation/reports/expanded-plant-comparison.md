@@ -17,7 +17,7 @@ is counted as evidence for a package choice.
 | A. thaliana SE DAP: FUS3, ABI5, assigned control | 1M and 5M templates | Four methods on TAIR10 | 16 completed method/repetition cases; independent PBM motifs at both depths |
 | A. thaliana PE DAP: four treatments, assigned control | 1M and 5M pairs | Four methods on TAIR10 | 16 completed cases; these protocol-optimization libraries are not biological replicates |
 | A. thaliana bulk ATAC: two biological replicates | 1M and 5M pairs | Eight methods on TAIR10 | 32 completed cases; common metrics, replicate overlap and held-out FRiP |
-| A. thaliana reference comparison | 1M and 5M pairs | TAIR10 / Col-CEN v1.2 | Completed ATAC baselines at both depths; reciprocal-coordinate comparison and pairwise IDR at 1M |
+| A. thaliana reference comparison | 1M and 5M pairs | TAIR10 / Col-CEN v1.2 | Completed ATAC baselines at both depths; reciprocal-coordinate comparison at 1M; IDR at 1M and Col-CEN 5M |
 | A. thaliana annotation comparison | 1M pairs | TAIR10 / Araport11 annotations on Col-CEN | Completed using the same aligned reads |
 | A. thaliana additional reference/depth cases | 1M and 5M | DAP SE/PE and ATAC reference baselines | Running; only completed result manifests enter the report |
 | A. lyrata DAP | 1M and 5M caps | Four selected TF families; legacy and study reference distributions | References acquired and fully scanned; read preparation and method runs pending |
@@ -212,13 +212,20 @@ See the [caller evidence](../evidence/method-comparison-20261014/caller-diagnost
 Pairwise IDR is evaluated separately using permissive MACS3 p=0.01 calls, ranked
 by signal value, with IDR 2.0.4.2 and seed 60141:
 
-| Assembly, 1M pairs | Input peaks, replicate 1 / 2 | Merged output regions | Global IDR ≤0.05 regions |
+| Assembly and depth | Input peaks, replicate 1 / 2 | Merged output regions | Global IDR ≤0.05 regions |
 | --- | ---: | ---: | ---: |
-| TAIR10 | 11,385 / 8,985 | 6,158 | 4,205 |
-| Col-CEN v1.2 | 13,610 / 10,588 | 7,357 | 2,325 |
+| TAIR10, 1M | 11,385 / 8,985 | 6,158 | 4,205 |
+| Col-CEN v1.2, 1M | 13,610 / 10,588 | 7,357 | 2,325 |
+| Col-CEN v1.2, 5M | 19,046 / 15,857 | 13,545 | 10,530 |
+
+The deeper Col-CEN run increases the number of reproducible ranked regions.
+Its [complete diagnostic record](../evidence/method-comparison-20261014/caller-diagnostics-colcen-5m.json)
+also retains the separate Genrich operating points: q=0.01 yields zero peaks,
+while native p=0.01 yields 5,292 and 2,168. TAIR10's matched 5M IDR assessment
+remains pending.
 
 The IDR model fits and input rank distributions differ, even where the stricter
-baseline peak sets agree strongly. These are exploratory low-depth pairwise
+baseline peak sets agree strongly. These are exploratory depth-limited pairwise
 results, not an assembly ranking or an ENCODE-style acceptance decision. Pooled
 and pseudoreplicate rescue/self-consistency ratios have not been computed.
 

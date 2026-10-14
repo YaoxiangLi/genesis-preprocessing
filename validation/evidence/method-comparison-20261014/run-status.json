@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "snapshot_utc": "2026-10-14T09:20:51.094681+00:00",
+  "snapshot_utc": "2026-10-14T09:30:46.776742+00:00",
   "completed_original_method_cases": 64,
   "sra_assets_verified": 11,
   "sra_transfer_bytes": 65732447878,
@@ -101,13 +101,16 @@
   },
   "assessments": {
     "atac-colcen-5m-diagnostics": {
+      "ended_utc": "2026-10-14T09:25:34.470006+00:00",
       "inputs": {
         "<CHECKOUT>/results/reference-comparison-20261014/atac-arabidopsis-colcen-5m-frozen-results/experiment.json": "6bc67d5fdb4cf57b11aabfc0350fa909eaaaedad517082ff9336f32fa91c5cc3",
         "<CHECKOUT>/results/reference-comparison-20261014/atac-arabidopsis-colcen-5m-frozen-results/results.json": "ecad627cee952286b5f30976f83095244e05fd87ec1e3d90c3b9cd9f2cd4f22a",
         "<ANALYSIS_CHECKOUT>/benchmarks/experiments/reference-comparison-20261014/caller_diagnostics.py": "1d6044d142ead9da0363329ac26f0717d7797d761f63b1301dc00af35f777dd2"
       },
+      "result": "<CHECKOUT>/results/reference-comparison-20261014/expanded-panel/assessments/atac-colcen-5m-diagnostics/result/diagnostics.json",
+      "result_sha256": "3c6fa4afaaa068823398966209e95c59bb97d40cbb871041c6548d4db4996eee",
       "started_utc": "2026-10-14T08:53:35.918475+00:00",
-      "status": "RUNNING"
+      "status": "COMPLETE"
     }
   },
   "pending_assessments": [

@@ -141,6 +141,11 @@
       "original_sha256": "f2a15fe5b557ef28529b7971d269c99d0b4efc0a8c221f5c360854b87148c0ef",
       "published_sha256": "5f4902b7e0d0f7e0b9183d66ab74880edff15f5f8a6470bd75ac2593b07446cb",
       "bytes": 140928
+    },
+    "caller-diagnostics-colcen-5m.json": {
+      "original_sha256": "3c6fa4afaaa068823398966209e95c59bb97d40cbb871041c6548d4db4996eee",
+      "published_sha256": "3c6fa4afaaa068823398966209e95c59bb97d40cbb871041c6548d4db4996eee",
+      "bytes": 6511704
     }
   }
 }
