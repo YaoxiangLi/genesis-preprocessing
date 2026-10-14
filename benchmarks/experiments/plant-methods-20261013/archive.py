@@ -20,22 +20,74 @@ from typing import Any
 from genesis_tools.benchmark.spec import identifier, sha256
 
 
-def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, Any]:
+def verify_archive(packed: Path, manifest: dict[str, Any]) -> None:
+    """Verify every regular member, without extracting filesystem paths."""
+    verified = set()
+    with tarfile.open(packed, "r:gz") as tar:
+        for item in tar:
+            if not item.isfile() or item.name not in manifest or item.name in verified:
+                raise ValueError("Archive contains an unexpected or repeated member")
+            stream = tar.extractfile(item)
+            if stream is None or item.size != manifest[item.name]["bytes"]:
+                raise ValueError("Archive member size differs")
+            with stream:
+                digest = hashlib.file_digest(stream, "sha256").hexdigest()
+            if digest != manifest[item.name]["sha256"]:
+                raise ValueError("Archive verification failed")
+            verified.add(item.name)
+    if verified != set(manifest):
+        raise ValueError("Archive omitted evidence")
+
+
+def archive(
+    source: Path,
+    out: Path,
+    *,
+    prune_work: bool = False,
+    prune_indexes: bool = False,
+    previous_archive: Path | None = None,
+) -> dict[str, Any]:
     source, out = source.resolve(), out.resolve()
     if out.is_relative_to(source) or out.exists():
         raise ValueError("Choose a new archive directory outside the experiment")
-    if (source / "retention.json").exists():
-        raise ValueError("Work has a retention record; use its existing verified archive")
+    if (source / "retention.json").exists() and previous_archive is None:
+        raise ValueError(
+            "Work has a retention record; supply its --previous-archive to extend pruning"
+        )
     lock = source / ".running"
     descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     try:
         with os.fdopen(descriptor, "w") as stream:
             stream.write(f"archive pid={os.getpid()}\n")
+        previous = None
+        if previous_archive is not None:
+            previous_archive = previous_archive.resolve()
+            if previous_archive.is_relative_to(source):
+                raise ValueError("Previous archive must be outside the experiment")
+            previous_manifest = previous_archive / "manifest.json"
+            prior = json.loads(previous_manifest.read_text())
+            retention = source / "retention.json"
+            if (
+                prior != json.loads(retention.read_text())
+                or prior["prune_status"] != "PRUNED"
+                or sha256(previous_archive / "evidence.tar.gz") != prior["archive_sha256"]
+            ):
+                raise ValueError("Previous archive/retention identity or completion differs")
+            verify_archive(previous_archive / "evidence.tar.gz", prior["members"])
+            for name in ("experiment.json", "results.json"):
+                if sha256(source / name) != prior["members"][name]["sha256"]:
+                    raise ValueError("Experiment changed since the previous archive")
+            previous = {
+                "archive_sha256": prior["archive_sha256"],
+                "manifest_sha256": sha256(previous_manifest),
+                "retention_sha256": sha256(retention),
+                "pruned_work": prior["pruned_work"],
+            }
         plan = json.loads((source / "experiment.json").read_text())
         result = json.loads((source / "results.json").read_text())
         if plan["spec"]["adapter"] != "methods":
             raise ValueError("This archive recipe is for native method experiments")
-        if prune_work and result["status"] != "COMPLETE":
+        if (prune_work or prune_indexes) and result["status"] != "COMPLETE":
             raise ValueError("Keep work from incomplete experiments for diagnosis")
         work = {source / "indexes"}
         for case in result.get("results", []):
@@ -43,7 +95,8 @@ def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, A
             rep = case["repetition"]
             if type(rep) is not int or rep < 1:
                 raise ValueError("Invalid repetition")
-            work.add(source / f"{case['arm']}-r{rep}")
+            if not prune_indexes or prune_work:
+                work.add(source / f"{case['arm']}-r{rep}")
         for folder in work:
             if folder.is_symlink():
                 raise ValueError("Work must not be a symlink")
@@ -74,7 +127,10 @@ def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, A
         }
         out.mkdir(parents=True)
         packed = out / "evidence.tar.gz"
-        with packed.open("wb") as raw, gzip.GzipFile(fileobj=raw, mode="wb", mtime=0) as compressed:
+        with (
+            packed.open("wb") as raw,
+            gzip.GzipFile(fileobj=raw, mode="wb", mtime=0) as compressed,
+        ):
             with tarfile.open(fileobj=compressed, mode="w|") as tar:
                 for path in selected:
                     info = tar.gettarinfo(str(path), arcname=str(path.relative_to(source)))
@@ -83,24 +139,14 @@ def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, A
                     with path.open("rb") as stream:
                         tar.addfile(info, stream)
         # Verify all archived bytes before any removal, without extracting paths.
-        verified = set()
-        with tarfile.open(packed, "r:gz") as tar:
-            for item in tar:
-                stream = tar.extractfile(item)
-                if stream is None or item.name not in manifest:
-                    raise ValueError("Archive contains an unexpected member")
-                with stream:
-                    digest = hashlib.sha256()
-                    while block := stream.read(1024 * 1024):
-                        digest.update(block)
-                    checksum = digest.hexdigest()
-                if checksum != manifest[item.name]["sha256"]:
-                    raise ValueError("Archive verification failed")
-                verified.add(item.name)
-        if verified != set(manifest):
-            raise ValueError("Archive omitted evidence")
+        verify_archive(packed, manifest)
         missing_tables = []
-        for name in ("metrics.tsv", "processing.tsv", "resources.tsv", "library-qc.tsv"):
+        for name in (
+            "metrics.tsv",
+            "processing.tsv",
+            "resources.tsv",
+            "library-qc.tsv",
+        ):
             if (source / name).is_file():
                 shutil.copyfile(source / name, out / name)
             else:
@@ -119,6 +165,7 @@ def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, A
             "pruned_work": [],
             "prune_status": "NOT_REQUESTED",
             "missing_tables": missing_tables,
+            "previous_archive": previous,
             "retention": (
                 "Inputs stay at their original locations; BAMs/indexes are not in this archive"
             ),
@@ -130,7 +177,7 @@ def archive(source: Path, out: Path, *, prune_work: bool = False) -> dict[str, A
                 partial.write_text(json.dumps(record, indent=2) + "\n")
                 partial.replace(path)
 
-        if prune_work:
+        if prune_work or prune_indexes:
             # The runner uses this same exclusive lock. Recheck identities before
             # pruning, even though cooperating execution cannot write meanwhile.
             for name in ("experiment.json", "results.json"):
@@ -163,6 +210,22 @@ if __name__ == "__main__":
     parser.add_argument("source", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--prune-work", action="store_true")
+    parser.add_argument(
+        "--previous-archive",
+        type=Path,
+        help="Verify a prior completed archive before removing additional work",
+    )
+    parser.add_argument(
+        "--prune-indexes",
+        action="store_true",
+        help="Retain BAMs for further assessments; remove only completed indexes",
+    )
     args = parser.parse_args()
-    record = archive(args.source, args.out, prune_work=args.prune_work)
+    record = archive(
+        args.source,
+        args.out,
+        prune_work=args.prune_work,
+        prune_indexes=args.prune_indexes,
+        previous_archive=args.previous_archive,
+    )
     print(record["archive_sha256"], record["archive_bytes"], "bytes")

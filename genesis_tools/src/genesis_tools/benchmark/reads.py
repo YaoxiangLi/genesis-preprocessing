@@ -7,28 +7,41 @@ import hashlib
 import heapq
 import itertools
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import ExitStack
 from pathlib import Path
+from typing import Protocol
+
+
+class LineReader(Protocol):
+    def readline(self, size: int = -1, /) -> bytes: ...
 
 
 def fastq(path: Path) -> Iterator[tuple[bytes, bytes]]:
     opener = gzip.open if path.suffix == ".gz" else open
     with opener(path, "rb") as stream:
-        while header := stream.readline():
-            sequence, plus, quality = stream.readline(), stream.readline(), stream.readline()
-            if (
-                not header.startswith(b"@")
-                or not plus.startswith(b"+")
-                or not quality.endswith(b"\n")
-                or not sequence.strip()
-                or len(sequence.rstrip(b"\r\n")) != len(quality.rstrip(b"\r\n"))
-            ):
-                raise ValueError("Corrupt or truncated FASTQ record")
-            name = header[1:].split()[0]
-            if name.endswith((b"/1", b"/2")):
-                name = name[:-2]
-            yield name, header + sequence + plus + quality
+        yield from fastq_stream(stream)
+
+
+def fastq_stream(stream: LineReader) -> Iterator[tuple[bytes, bytes]]:
+    """Validate complete records from a binary FASTQ stream."""
+    while header := stream.readline():
+        sequence, plus, quality = stream.readline(), stream.readline(), stream.readline()
+        if (
+            not header.startswith(b"@")
+            or not header[1:].split()
+            or not plus.startswith(b"+")
+            or not quality.endswith(b"\n")
+            or not sequence.strip()
+            or len(sequence.rstrip(b"\r\n")) != len(quality.rstrip(b"\r\n"))
+        ):
+            raise ValueError("Corrupt or truncated FASTQ record")
+        name = header[1:].split()[0]
+        if name.endswith((b"/1", b"/2")):
+            name = name[:-2]
+        if not name:
+            raise ValueError("FASTQ template name is empty")
+        yield name, header + sequence + plus + quality
 
 
 def paired(read1: Path, read2: Path) -> Iterator[tuple[bytes, bytes, bytes]]:
@@ -96,7 +109,7 @@ def sample(
     reads: list[Path], out: Path, *, depths: list[int], seed: int, seconds: int = 172800
 ) -> Path:
     """Count/validate a library and create nested seeded SE or PE depth samples."""
-    from .spec import sha256, write_json
+    from .spec import sha256
 
     if len(reads) not in {1, 2} or not depths or any(type(n) is not int or n <= 0 for n in depths):
         raise ValueError("Supply one or two FASTQs and positive depths")
@@ -106,8 +119,6 @@ def sample(
     out.mkdir(parents=True, exist_ok=False)
     start = time.monotonic()
     sources = {str(p.resolve()): sha256(p) for p in reads}
-    depths = sorted(set(depths))
-    heap: list[tuple[int, int]] = []
 
     def records() -> Iterator[tuple[bytes, list[bytes]]]:
         if len(reads) == 2:
@@ -117,13 +128,73 @@ def sample(
             for name, record in fastq(reads[0]):
                 yield name, [record]
 
+    def verify() -> None:
+        if sources != {str(p.resolve()): sha256(p) for p in reads}:
+            raise ValueError("Input changed during sampling")
+
+    return sample_records(
+        records,
+        out,
+        mate_count=len(reads),
+        depths=depths,
+        seed=seed,
+        sources=sources,
+        verify=verify,
+        seconds=seconds,
+        start=start,
+    )
+
+
+def sample_records(
+    records: Callable[[], Iterator[tuple[bytes, list[bytes]]]],
+    out: Path,
+    *,
+    mate_count: int,
+    depths: list[int],
+    seed: int,
+    sources: dict[str, str],
+    verify: Callable[[], None],
+    seconds: int = 172800,
+    start: float | None = None,
+    expected_templates: int | None = None,
+) -> Path:
+    """Sample two reproducible full streams into an existing empty directory.
+
+    Callers supply validated records and an immutable-source check. A complete
+    second pass must reproduce the first pass's decoded bytes and template count.
+    This permits SRA decoding without materializing a full uncompressed library.
+    """
+    from .spec import sha256, write_json
+
+    if mate_count not in {1, 2} or not depths or any(type(n) is not int or n <= 0 for n in depths):
+        raise ValueError("Supply one or two mates and positive depths")
+    if (
+        seconds <= 0
+        or type(seed) is not int
+        or (
+            expected_templates is not None
+            and (type(expected_templates) is not int or expected_templates <= 0)
+        )
+    ):
+        raise ValueError("Invalid sampling budget, seed or expected template count")
+    if not out.is_dir() or (out / "sampling.json").exists():
+        raise ValueError("Choose a fresh sampling directory")
+    start = time.monotonic() if start is None else start
+    depths = sorted(set(depths))
+    heap: list[tuple[int, int]] = []
+
     def check(index: int) -> None:
         if index % 10000 == 0 and time.monotonic() - start > seconds:
             raise ValueError("Sampling time budget exceeded; partial outputs retained")
 
     count = 0
-    for index, (name, _) in enumerate(records()):
+    decoded = hashlib.sha256()
+    for index, (name, mates) in enumerate(records()):
         check(index)
+        if len(mates) != mate_count:
+            raise ValueError("Unexpected number of biological reads in a template")
+        for record in mates:
+            decoded.update(record)
         score = int.from_bytes(hashlib.sha256(f"{seed}:{index}:".encode() + name).digest(), "big")
         item = (-score, -index)
         if len(heap) < depths[-1]:
@@ -133,13 +204,15 @@ def sample(
         count += 1
     if count == 0:
         raise ValueError("Empty FASTQ library")
+    if expected_templates is not None and count != expected_templates:
+        raise ValueError("Declared template count disagrees with decoded records")
     ranked = sorted(heap, reverse=True)
     del heap
     # Rank lookup is shared by all nested samples; do not store complete FASTQs.
     rank = {-index: position for position, (_, index) in enumerate(ranked)}
     del ranked
     outputs: dict[int, list[Path]] = {
-        n: [out / f"depth-{n}.R{mate + 1}.fastq.gz" for mate in range(len(reads))] for n in depths
+        n: [out / f"depth-{n}.R{mate + 1}.fastq.gz" for mate in range(mate_count)] for n in depths
     }
     with ExitStack() as stack:
         writers = {
@@ -157,16 +230,23 @@ def sample(
             ]
             for n, paths in outputs.items()
         }
+        replayed, replay_count = hashlib.sha256(), 0
         for index, (_, mates) in enumerate(records()):
             check(index)
+            if len(mates) != mate_count:
+                raise ValueError("Unexpected number of biological reads in a template")
+            for record in mates:
+                replayed.update(record)
+            replay_count += 1
             position = rank.get(index)
             if position is not None:
                 for n in depths:
                     if position < n:
                         for writer, record in zip(writers[n], mates, strict=True):
                             writer.write(record)
-    if sources != {str(p.resolve()): sha256(p) for p in reads}:
-        raise ValueError("Input changed during sampling")
+    if replay_count != count or replayed.digest() != decoded.digest():
+        raise ValueError("Decoded stream changed between sampling passes")
+    verify()
     result = out / "sampling.json"
     write_json(
         result,
@@ -174,6 +254,7 @@ def sample(
             "schema_version": 1,
             "sources": sources,
             "input_templates": count,
+            "decoded_fastq_sha256": decoded.hexdigest(),
             "seed": seed,
             "gzip_level": 1,
             "method": (

@@ -12,6 +12,20 @@ from .spec import load
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    reference = commands.add_parser(
+        "reference", help="Inspect sequence identity or prepare a checksummed reference bundle"
+    )
+    reference_commands = reference.add_subparsers(dest="reference_command", required=True)
+    inspect = reference_commands.add_parser(
+        "inspect", help="Scan every FASTA base and hash contig sequences"
+    )
+    inspect.add_argument("fasta", type=Path)
+    prepare = reference_commands.add_parser(
+        "prepare", help="Verify a versioned reference panel entry"
+    )
+    prepare.add_argument("panel", type=Path)
+    prepare.add_argument("--id", required=True)
+    prepare.add_argument("--out", type=Path, required=True)
     sampling = commands.add_parser(
         "sample", help="Validate and count FASTQs; make nested seeded depth samples"
     )
@@ -55,7 +69,16 @@ def main() -> None:
             )
     args = parser.parse_args()
     try:
-        if args.command == "sample":
+        if args.command == "reference":
+            from .references import inspect_fasta, prepare_reference
+
+            value = (
+                inspect_fasta(args.fasta)
+                if args.reference_command == "inspect"
+                else prepare_reference(args.panel, args.id, args.out)
+            )
+            print(json.dumps(value, indent=2))
+        elif args.command == "sample":
             from .reads import sample
 
             print(

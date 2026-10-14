@@ -43,6 +43,46 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
         source = fixture(root)
+        record = archive(source, root / "indexes-only", prune_indexes=True)
+        if (source / "indexes").exists() or not (
+            source / "baseline-r1/library/usable.bam"
+        ).exists():
+            raise AssertionError("Index-only pruning must retain BAMs")
+        if record["pruned_work"] != [str(source / "indexes")]:
+            raise AssertionError("Unexpected index-only pruning scope")
+        original = (root / "indexes-only/manifest.json").read_bytes()
+        (root / "indexes-only/evidence.tar.gz").write_bytes(b"damaged archive")
+        try:
+            archive(
+                source,
+                root / "must-not-prune",
+                prune_work=True,
+                previous_archive=root / "indexes-only",
+            )
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Damaged prior archive allowed further removal")
+        assert (source / "baseline-r1/library/usable.bam").exists()
+        assert (root / "indexes-only/manifest.json").read_bytes() == original
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        source = fixture(root)
+        prior = archive(source, root / "indexes-only", prune_indexes=True)
+        original = (root / "indexes-only/manifest.json").read_bytes()
+        final = archive(
+            source,
+            root / "all-work",
+            prune_work=True,
+            previous_archive=root / "indexes-only",
+        )
+        assert final["previous_archive"]["archive_sha256"] == prior["archive_sha256"]
+        assert (root / "indexes-only/manifest.json").read_bytes() == original
+        assert not (source / "baseline-r1").exists()
+        assert (root / "reads.fastq.gz").read_bytes() == b"original-input"
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        source = fixture(root)
         record = archive(source, root / "evidence")
         if record["pruned_work"] or not (source / "baseline-r1/library/usable.bam").exists():
             raise AssertionError("Archiving alone must preserve work")

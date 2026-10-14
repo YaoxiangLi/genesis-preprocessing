@@ -140,6 +140,10 @@ def execute(action: str, arguments: list[str]) -> None:
         else:
             module = "atac.run" if action == "pipeline-atac" else "benchmark"
             argv = [sys.executable, "-m", f"genesis_tools.{module}", *arguments]
+    elif action == "benchmark" and arguments and arguments[0] == "reference":
+        # FASTA/annotation validation is pure Python and ships in the wheel.
+        # It does not launch scientific tools or require Nextflow resources.
+        argv = [sys.executable, "-m", "genesis_tools.benchmark", *arguments]
     else:
         argv = command(action, arguments)
         env = environment(checkout())

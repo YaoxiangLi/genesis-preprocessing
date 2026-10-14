@@ -17,6 +17,9 @@ uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_pipel
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_benchmark.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_benchmark_spec.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_benchmark_methods.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_benchmark_references.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/benchmarks/experiments/reference-comparison-20261014/check_reference_comparison.py"
+uv run --frozen --project "$root/genesis_tools" python "$root/benchmarks/experiments/reference-comparison-20261014/check_sra_sampling.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_atac.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_metro.py"
 

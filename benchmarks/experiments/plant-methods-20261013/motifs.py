@@ -144,7 +144,7 @@ def background(
     return None
 
 
-def evaluate(results: Path, out: Path) -> None:
+def evaluate(results: Path, out: Path, peak_root: Path | None = None) -> None:
     plan = json.loads((results / "experiment.json").read_text())
     measured = json.loads((results / "results.json").read_text())
     if measured["status"] != "COMPLETE" or plan["dataset"]["assay"] != "DAP-seq":
@@ -169,12 +169,17 @@ def evaluate(results: Path, out: Path) -> None:
     for record in measured["results"]:
         for library in MOTIFS.keys() & record["peaks"].keys():
             key = (record["arm"], record["repetition"], library)
-            peaks = Path(record["peaks"][library])
+            original_peaks = Path(record["peaks"][library])
+            peaks = (
+                peak_root / original_peaks.relative_to(results)
+                if peak_root is not None
+                else original_peaks
+            )
             actual = digest(peaks)
-            expected = record["libraries"][library]["artifacts"][str(peaks)]
+            expected = record["libraries"][library]["artifacts"][str(original_peaks)]
             if actual != expected:
                 raise ValueError("Peak file changed after evaluation")
-            peak_hashes[str(peaks)] = actual
+            peak_hashes[str(original_peaks.relative_to(results))] = actual
             all_rows[key] = peak_windows(peaks, genome)
     if not all_rows:
         raise ValueError("No library has an independently declared PBM motif")
@@ -262,6 +267,7 @@ def evaluate(results: Path, out: Path) -> None:
                 "result_sha256": digest(results / "results.json"),
                 "reference_sha256": reference["sha256"],
                 "peaks": peak_hashes,
+                "peak_location": "verified archive projection" if peak_root else "original result",
                 "motifs": motif_records,
                 "window": "200 bp centered on summit; interval midpoint if summit is absent",
                 "background": "one seeded same-chromosome window per peak, GC within 2 bases, "
@@ -280,5 +286,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("results", type=Path)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--peak-root",
+        type=Path,
+        help="Optional extracted archive root; original result hashes still verify every peak file",
+    )
     args = parser.parse_args()
-    evaluate(args.results.resolve(), args.out.resolve())
+    evaluate(
+        args.results.resolve(),
+        args.out.resolve(),
+        args.peak_root.resolve() if args.peak_root else None,
+    )

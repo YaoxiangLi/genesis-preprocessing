@@ -230,6 +230,12 @@ def check_offline_and_runtime(work: Path) -> None:
     run([str(CLI), "registry", "init", str(work / "catalog")], work, bare_env)
     run([str(CLI), "pipeline-atac", "--help"], work, bare_env)
     run([str(CLI), "benchmark", "run", "--help"], work, bare_env)
+    reference = work / "offline-reference.fa"
+    reference.write_text(">synthetic\nACGTacgtNN\n")
+    inspected = run([str(CLI), "benchmark", "reference", "inspect", str(reference)], work, bare_env)
+    assert json.loads(inspected.stdout)["contigs"]["synthetic"]["length"] == 10
+    reference.write_text(">synthetic\nINVALID!\n")
+    run([str(CLI), "benchmark", "reference", "inspect", str(reference)], work, bare_env, 2)
     run([str(CLI), "pipeline", "input.tsv"], work, bare_env, 2)
     # Installed Pixi must preserve argv/cwd too, not only the test double.
     if shutil.which("pixi"):
