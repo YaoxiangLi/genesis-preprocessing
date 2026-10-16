@@ -21,6 +21,10 @@ coordinate conversion. Use `genesis benchmark reference inspect` to scan a FASTA
 and `genesis benchmark reference prepare` to validate and compile an explicit
 reference bundle. Assembly names alone do not establish identical reference files.
 
+The [optimized MACS3 comparison](../validation/reports/macs3-optimization.md)
+compares released 3.0.5 with a pinned upstream source build on identical BAMs
+at 1, 2 and 8 CPUs. It separates numerical agreement, runtime and memory use.
+
 ## Run a small comparison
 
 Install Genesis first using the [project instructions](../README.md#install-and-check-your-environment).

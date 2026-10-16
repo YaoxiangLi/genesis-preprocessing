@@ -8,6 +8,45 @@ metadata and QC, and export a selected dataset collection.
 Start with the standalone pipeline for your assay. Study management, the catalog
 and AI assistance are optional.
 
+<a id="architecture-and-current-capabilities"></a>
+
+## Scientific purpose and current evidence
+
+Genesis supplies traceable preprocessing and curated data for **plant
+sequence-to-function prediction and experimentally testable sequence design**.
+The chain is data → declared measurement → model input → downstream test.
+It is not a validated plant foundation model or an MPRA platform.
+
+Nextflow runs the supported scientific workflows. Optional LLMs assist metadata
+curation and explanation; they do not grant scientific approval.
+
+| Implemented capability | Evidence scope | Evidence revision/source | Remaining acceptance |
+| --- | --- | --- | --- |
+| DAP and bulk ATAC workflows | Real tools on synthetic inputs; selected public subsets | [Study acceptance](validation/reports/real-study-validation.md); [public comparisons](validation/reports/expanded-plant-comparison.md), archived in `b9d0cf7` | Full-depth biological and task-specific acceptance |
+| scATAC fragment ingestion, pseudobulks and model exports | Synthetic contracts and real tools/loaders on synthetic inputs | [scATAC record](validation/reports/scatac-delivery-validation.md), dated 2026-10-10 with baseline and implementation revisions | Reviewed real-data bundles, plant bias evidence and exact-bundle loader acceptance; no scATAC FASTQ processing |
+| Read-only model-bundle inspection | Bounded artifact, convention and context-window checks | [Inspection guide](docs/usage/scatac-model-handoff.md#inspect-a-bundle); report records inspector and bundle hashes | Structural checks do not approve training |
+| Registry/review and optional workers/AI services | Offline/local-worker fixtures and mock HTTP/lifecycle tests | [Validation records](validation/README.md), each with its own tested revision | Site-specific SSH/scheduler/API/GPU acceptance and biological curation accuracy |
+
+Read the [scientific overview](docs/scientific-overview.md) for measurement
+semantics, three evidence-backed observations, and what remains between files,
+model training and experimental validation. Use the
+[offline inspection example](docs/usage/scatac-model-handoff.md#offline-inspection-example)
+to examine a clearly labelled synthetic bundle.
+
+## Pipeline workflow maps
+
+### DAP-seq workflow
+
+![Genesis DAP-seq pipeline metro map](docs/images/genesis_metro_map.svg)
+
+[View full size](docs/images/genesis_metro_map.svg) · [DAP-seq guide](docs/usage/dapseq-reference.md)
+
+### Bulk ATAC-seq workflow
+
+![Genesis bulk ATAC-seq pipeline metro map](docs/images/genesis_atac_metro_map.svg)
+
+[View full size](docs/images/genesis_atac_metro_map.svg) · [Bulk ATAC-seq guide](docs/usage/bulk-atac.md)
+
 <a id="install-and-run"></a>
 <a id="environments-and-docker-builds"></a>
 
@@ -66,6 +105,8 @@ genesis pipeline -w /scratch/genesis -n study-A dap.tsv --references /data/refer
 Results appear in `/scratch/genesis/study-A/output/`, grouped by species and
 sample. Treatments receive peaks and peak scores; controls receive QC and tracks.
 Keep the run's `work/` directory to allow resume.
+
+For the source-pinned optimized caller on Linux, see [MACS3 builds and resources](docs/usage/macs3.md). Published container pins and source builds have separate version identities.
 
 Read the [DAP-seq guide](docs/usage/dapseq-reference.md) for complete sample-sheet
 rules, reference setup, analysis choices and output definitions.
@@ -134,24 +175,6 @@ without AI, a GPU or an API account.
 
 <a id="verification"></a>
 
-## Architecture and current capabilities
-
-Nextflow runs the scientific analysis. The `genesis` CLI supplies input checks,
-study management, result validation and review. Independent workers use local or
-SSH execution; they do not need a shared filesystem. Optional AI services propose
-metadata and explanations for review.
-
-| Capability | Supported use | Validation scope |
-| --- | --- | --- |
-| DAP and bulk ATAC processing | Standalone and managed-study commands | [Real tools on synthetic inputs](validation/reports/real-study-validation.md); [small public ATAC subsets](validation/reports/supported-atac-execution-validation.md) |
-| Single-cell ATAC | Existing fragment ingestion, pseudobulks and model exports | [Fixture and loader tests](validation/reports/scatac-delivery-validation.md); exports require independent scientific review before training |
-| Catalog, validation and review | Local registry, metadata/QC decisions, reviewed export | [Offline and installed-package tests](validation/reports/hybrid-llm-validation.md) |
-| Independent workers and clusters | Local/SSH transport and scheduler profiles | Local workers tested; test scheduler and SSH access at your site before use |
-| AI assistance and private model services | Optional providers and service lifecycle commands | Mock/HTTP/lifecycle tests; live GPU deployment and biological metadata accuracy are unvalidated |
-
-The [validation records](validation/README.md) list tested revisions, environments
-and limitations.
-
 ## Benchmarks and tool choices
 
 Use [the benchmark guide](benchmarks/README.md) for the experiment matrix, metric
@@ -165,6 +188,8 @@ biological ATAC replicate measurements, and comparisons of reference assemblies
 and annotation releases. Tables distinguish completed results from the ongoing
 A. lyrata, sorghum and maize runs. The current evidence does not establish a better
 replacement for the BWA-MEM2/MACS3 defaults across assays.
+The [optimized MACS3 comparison](validation/reports/macs3-optimization.md) measures
+caller speed, memory use and output equivalence at matched CPU allocations.
 The [complete-workflow comparison](validation/reports/pipeline-method-comparison.md)
 scores Genesis and nf-core ATAC using common metric definitions.
 

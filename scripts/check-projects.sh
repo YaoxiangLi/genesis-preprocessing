@@ -43,3 +43,7 @@ uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scata
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_fragments.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_pseudobulk.py"
 uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_exports.py"
+
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_scatac_inspection.py"
+
+uv run --frozen --project "$root/genesis_tools" python "$root/tests/verify_macs3_launcher.py"

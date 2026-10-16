@@ -635,7 +635,9 @@ def check_outputs(work: Path, *, docker: bool) -> None:
                 "Matplotlib created a temporary cache directory"
                 not in (command.parent / ".command.err").read_text()
             )
-        if "macs3 callpeak" in source:
+        if "macs3 callpeak" in source or (
+            "macs3.runtime.json" in source and "-- callpeak" in source
+        ):
             assert "_control.primary.bam" in source
         if "Rscript" in source:
             assert "-s=-0:2:400" in source and "qc-bin/awk" in source

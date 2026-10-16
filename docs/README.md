@@ -1,11 +1,14 @@
 # Genesis documentation
 
 If you are new to Genesis, start with [installation and a first analysis](../README.md#install-and-check-your-environment).
-Choose the guide for the task you want to complete.
+Choose the guide for the task you want to complete. For the scientific question,
+measurement definitions and evidence boundaries, read the
+[scientific overview](scientific-overview.md).
 
 ## Process sequencing data
 
 - [DAP-seq](usage/dapseq-reference.md): sample sheets, controls, references, execution and scientific settings.
+- [MACS3 builds and resources](usage/macs3.md): select the optimized source build and inspect caller provenance.
 - [Bulk ATAC-seq](usage/bulk-atac.md): paired lanes, adapter/duplicate policies, fragments, peaks and QC.
 - [Single-cell ATAC](usage/scatac.md): import existing fragments and make replicate-specific pseudobulks.
 - [Model handoff](usage/scatac-model-handoff.md): load an scATAC export and check its conventions.

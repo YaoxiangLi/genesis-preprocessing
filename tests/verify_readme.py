@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = [
     ROOT / "README.md",
     ROOT / "docs/README.md",
+    ROOT / "docs/scientific-overview.md",
     ROOT / "docs/development.md",
     ROOT / "docs/nextflow-style.md",
     ROOT / "docs/diagrams/README.md",

@@ -7,6 +7,7 @@ measurements and limits; an earlier successful test is not a test of later code.
 
 | Evidence | What it covers |
 | --- | --- |
+| [Optimized MACS3](reports/macs3-optimization.md) | Source-pinned caller comparison, exact scientific outputs, CPU budgets and memory tradeoffs |
 | [Pipeline package comparison](reports/pipeline-method-comparison.md) | Measured package/workflow comparisons, metric definitions, tables and figures; completed and pending work distinguished |
 | [Documentation review](reports/documentation-review.md) | User-guide changes, preserved scientific information, command and link checks |
 | [Real study acceptance](reports/real-study-validation.md) | DAP/ATAC processing through registration, collection, validation and reviewed export on synthetic inputs |
