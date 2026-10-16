@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from ..contracts.records import dump, fingerprint, load
-from .common import complete, publication, software, text_file, verify_output
+from .common import complete, digest, publication, software, text_file, verify_output
 
 IMAGES = {
     "peaks": "kundajelab/dap_seq_peaks@sha256:"
@@ -60,6 +60,11 @@ def command(image: str, argv: list[str], directory: Path, label: str) -> None:
         image,
         *argv,
     ]
+    if argv[:2] == ["macs3", "callpeak"]:
+        launcher = Path(__file__).parents[1] / "macs3_launch.py"
+        position = args.index(image)
+        args[position:position] = ["-v", f"{launcher}:/genesis-macs3.py:ro"]
+        args = args[: -len(argv)] + ["python", "/genesis-macs3.py", "--cpus", "2", "--", *argv[1:]]
     started = time.monotonic()
     with (
         (directory / (label + ".stdout")).open("w") as out,
@@ -130,7 +135,14 @@ def run(core: Path, output: Path, *, resume: bool = False) -> dict[str, Any]:
     previous = verify_output(core, "scatac-group-core")
     data = previous["data"]
     group, policy = data["group"], data["policy"]
-    signature = fingerprint({"core": previous["version"], "images": IMAGES, "software": software()})
+    signature = fingerprint(
+        {
+            "core": previous["version"],
+            "images": IMAGES,
+            "software": software(),
+            "macs3_launcher": digest(Path(__file__).parents[1] / "macs3_launch.py"),
+        }
+    )
     if output.exists() and resume:
         saved = verify_output(output, "scatac-group")
         if saved["data"]["signature"] != signature:

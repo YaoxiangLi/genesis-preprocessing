@@ -12,15 +12,21 @@ process CALL_PEAKS {
         pattern: '*.macs3*'
     input:
     tuple val(meta), path(bam), path(bai), path(control_bam), path(control_bai)
+    path launcher
     output:
     path "*.genesis-task.json", emit: receipt
     tuple val(meta), path("${meta.id}.macs3_peaks.narrowPeak.gz"), emit: peaks
     tuple val(meta), path("${meta.id}.macs3*"), emit: results
     script:
     def format = meta.layout == 'PE' ? 'BAMPE' : 'BAM'
+    def revision = task.ext.macs3_revision ?: ''
+    if (revision && !(revision ==~ /[0-9a-f]{40}/)) {
+        error 'MACS3 source revision must be a full Git SHA'
+    }
+    def sourceOption = revision ? "--require-source ${revision}" : ''
     """
     ${dapReceipt(task, 'CALL_PEAKS', [meta.id], workflow.containerEngine, false)}
-    macs3 callpeak -t '${bam}' -c '${control_bam}' \
+    python '${launcher}' --cpus ${task.cpus} --receipt '${meta.id}.macs3.runtime.json' ${sourceOption} -- callpeak -t '${bam}' -c '${control_bam}' \
         -f ${format} -g ${meta.genome_size} -n '${meta.id}.macs3'
     gzip -f '${meta.id}.macs3_peaks.narrowPeak'
     """

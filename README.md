@@ -106,6 +106,8 @@ Results appear in `/scratch/genesis/study-A/output/`, grouped by species and
 sample. Treatments receive peaks and peak scores; controls receive QC and tracks.
 Keep the run's `work/` directory to allow resume.
 
+For the source-pinned optimized caller on Linux, see [MACS3 builds and resources](docs/usage/macs3.md). Published container pins and source builds have separate version identities.
+
 Read the [DAP-seq guide](docs/usage/dapseq-reference.md) for complete sample-sheet
 rules, reference setup, analysis choices and output definitions.
 
@@ -186,6 +188,8 @@ biological ATAC replicate measurements, and comparisons of reference assemblies
 and annotation releases. Tables distinguish completed results from the ongoing
 A. lyrata, sorghum and maize runs. The current evidence does not establish a better
 replacement for the BWA-MEM2/MACS3 defaults across assays.
+The [optimized MACS3 comparison](validation/reports/macs3-optimization.md) measures
+caller speed, memory use and output equivalence at matched CPU allocations.
 The [complete-workflow comparison](validation/reports/pipeline-method-comparison.md)
 scores Genesis and nf-core ATAC using common metric definitions.
 

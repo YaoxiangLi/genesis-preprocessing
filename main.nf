@@ -175,7 +175,7 @@ workflow {
         .map { _controlId, meta, bam, bai, controlBam, controlBai ->
             tuple(meta, bam, bai, controlBam, controlBai)
         }
-    CALL_PEAKS(peakInputs)
+    CALL_PEAKS(peakInputs, file("${projectDir}/genesis_tools/src/genesis_tools/macs3_launch.py"))
     peaksBySample = CALL_PEAKS.out.peaks.map { meta, peaks -> tuple(meta.id, meta, peaks) }
     bamsBySample = mainBams.map { meta, bam, bai -> tuple(meta.id, bam, bai) }
     coverageBySample = TRACKS.out.rpkm.map { meta, coverage -> tuple(meta.id, coverage) }

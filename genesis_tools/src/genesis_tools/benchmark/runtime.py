@@ -156,6 +156,22 @@ class Runtime:
         log = log / f"attempt-{attempt}"
         log.mkdir(parents=True)
         command = argv
+        if Path(argv[0]).name == "macs3" and len(argv) > 1 and argv[1] == "callpeak":
+            launcher = Path(__file__).parents[1] / "macs3_launch.py"
+            python = (
+                str(Path(argv[0]).parent / "python") if Path(argv[0]).is_absolute() else "python"
+            )
+            command = [
+                python,
+                str(launcher),
+                "--cpus",
+                str(self.limits["cpus"]),
+                "--receipt",
+                str(log / "macs3.runtime.json"),
+                "--",
+                *argv[1:],
+            ]
+        tool_command = command
         container_name = f"genesis-bench-{os.getpid()}-{label}"[:120]
         if image:
             image_ref = self.plan["spec"]["images"][image]
@@ -203,7 +219,7 @@ class Runtime:
                 '"$@"; result=$?; cat /sys/fs/cgroup/memory.peak > "$BENCH_MEMORY" 2>/dev/null; '
                 'cat /sys/fs/cgroup/io.stat > "$BENCH_IO" 2>/dev/null; exit "$result"',
                 "benchmark",
-                *argv,
+                *tool_command,
             ]
             # Add only explicit non-secret runtime variables before the image name.
             position = command.index(image_ref)
