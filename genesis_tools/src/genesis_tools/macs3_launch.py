@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Run MACS3 within a Linux CPU allocation; usable without installing Genesis."""
+"""Run MACS3 within a CPU allocation; usable without installing Genesis.
+
+Linux applies CPU affinity. MACS3 builds with a CPU budget (MACS3_NUM_THREADS / --threads,
+added upstream in macs3-project/MACS#787) also bound their own pools, on any OS.
+"""
 
 from __future__ import annotations
 
 import argparse
 import hashlib
 import importlib.metadata
+import importlib.util
 import json
 import os
 import sys
@@ -22,6 +27,8 @@ THREAD_VARIABLES = (
     "VECLIB_MAXIMUM_THREADS",
     "BLIS_NUM_THREADS",
 )
+# Present in MACS3 builds whose pools honor one CPU budget per invocation.
+BUDGET_MODULE = "MACS3.Utilities.Execution"
 
 
 def constrain(cpus: int) -> list[int]:
@@ -40,6 +47,46 @@ def constrain(cpus: int) -> list[int]:
     for name in THREAD_VARIABLES:
         os.environ[name] = "1"
     return selected
+
+
+def thread_budget() -> bool:
+    """Whether the installed MACS3 enforces a CPU budget itself."""
+    try:
+        return importlib.util.find_spec(BUDGET_MODULE) is not None
+    except ModuleNotFoundError:
+        return False
+
+
+def explicit_threads(arguments: list[str]) -> int | None:
+    """Return an explicit CPU budget from MACS3 arguments, if any.
+
+    callvar also spells it -m/--multiple-processing; elsewhere -m means something else
+    (e.g. callpeak --mfold). MACS3's argparse accepts abbreviated long options and keeps the
+    last of repeated ones, so every spelling counts, and more than one is refused rather than
+    validating a value MACS3 would not use.
+    """
+    options = ["--threads"]
+    if arguments[:1] == ["callvar"]:
+        options.append("--multiple-processing")
+    values = []
+    for index, argument in enumerate(arguments):
+        name, equals, value = argument.partition("=")
+        if name.startswith("--") and len(name) > 2 and any(o.startswith(name) for o in options):
+            # An abbreviation is either the budget option or ambiguous, which MACS3 rejects.
+            if not equals:
+                value = arguments[index + 1] if index + 1 < len(arguments) else ""
+            values.append(value)
+        elif options[1:] and argument.startswith("-m") and not argument.startswith("--"):
+            values.append(
+                argument[2:] or (arguments[index + 1] if index + 1 < len(arguments) else "")
+            )
+    if len(values) > 1:
+        raise ValueError("MACS3 CPU budget (--threads) may be given only once")
+    if not values:
+        return None
+    if not values[0].isdecimal():
+        raise ValueError("MACS3 --threads must be a positive integer")
+    return int(values[0])
 
 
 def executable() -> str:
@@ -79,22 +126,38 @@ def main() -> int:
         observed = identity()
         if args.require_source and observed["source_revision"] != args.require_source:
             raise ValueError("Installed MACS3 source revision does not match the required revision")
-        if not hasattr(os, "sched_getaffinity") and observed["source_revision"] is None:
-            # Preserve released-package execution on non-Linux hosts. This does not
-            # certify bounded execution of the new threaded source build there.
+        budget = thread_budget()
+        if hasattr(os, "sched_getaffinity"):
+            selected = constrain(args.cpus)
+        elif budget or observed["source_revision"] is None:
+            # Without affinity, a budget-aware MACS3 bounds its own pools. Released packages
+            # without one keep running unbounded, as before, and are recorded as unassessed.
             if args.cpus < 1:
                 raise ValueError("CPU allocation must be positive")
             selected = []
+            if budget:
+                for name in THREAD_VARIABLES:
+                    os.environ[name] = "1"
         else:
-            selected = constrain(args.cpus)
+            raise ValueError(
+                "This MACS3 source build has no CPU budget; bounded execution requires "
+                "Linux CPU affinity"
+            )
+        if budget:
+            requested = explicit_threads(arguments)
+            if requested is not None and not 1 <= requested <= args.cpus:
+                raise ValueError("MACS3 --threads must be between 1 and the CPU allocation")
+            # An explicit --threads takes precedence over this; otherwise it is MACS3's budget.
+            os.environ["MACS3_NUM_THREADS"] = str(args.cpus)
         with args.receipt.open("x") as stream:
             json.dump(
                 observed
                 | {
                     "requested_cpus": args.cpus,
                     "affinity": selected,
-                    "native_library_threads": 1 if selected else None,
-                    "resource_enforcement": "PASS" if selected else "NOT_ASSESSED",
+                    "macs3_thread_budget": args.cpus if budget else None,
+                    "native_library_threads": 1 if selected or budget else None,
+                    "resource_enforcement": "PASS" if selected or budget else "NOT_ASSESSED",
                 },
                 stream,
                 indent=2,
