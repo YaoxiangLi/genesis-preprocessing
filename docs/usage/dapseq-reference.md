@@ -9,16 +9,12 @@ calls MACS3 peaks against each treatment's assigned control, and quantifies peak
 
 [Diagram source and interpretation](../../docs/diagrams/README.md)
 
-| Sample sheet | Layout | Libraries | Treatments |
-| --- | --- | ---: | ---: |
-| `samplesheets/Arabidopsis_thaliana/dap-seq-GSE60141.tsv` | SE | 936 | 934 |
-| `samplesheets/Arabidopsis_lyrata/dap-seq-PRJNA1177479.tsv` | PE | 405 | 378 |
-| `samplesheets/Arabidopsis_thaliana/dap-seq-PRJNA1177481.tsv` | PE | 800 | 748 |
-| `samplesheets/Sorghum_bicolor/dap-seq-PRJNA1177471.tsv` | PE | 142 | 134 |
-
-These six-column sheets contain the source sample IDs, read URLs and assigned
-controls. Use one sheet per analysis. [samplesheets/README.md](../../samplesheets/README.md)
-lists every sheet, its source and the references it needs.
+The DAP sheets curated so far, O'Malley 2016 (GSE60141, A. thaliana, SE) and multiDAP
+(PRJNA1177479, PRJNA1177481 and PRJNA1177471: A. lyrata, A. thaliana and Sorghum, PE), are in the
+[Stanford-Genesis Hugging Face bucket](https://huggingface.co/buckets/Stanford-Genesis/genesis-curation).
+[`samplesheets/dap-seq-test.tsv`](../../samplesheets/dap-seq-test.tsv) has 8 of their libraries
+for testing. Use one sheet per analysis; [samplesheets/README.md](../../samplesheets/README.md)
+describes the references each needs.
 
 ## Install and run
 
@@ -59,7 +55,7 @@ pixi run submit-pipeline -- -R /path/references /path/dap.tsv
 pixi run submit-pipeline -- -R /path/references /path/dap.tsv -resume
 
 # Debug locally with Docker on the small test sheet.
-pixi run pipeline samplesheets/Sorghum_bicolor/dap-seq-PRJNA1177471-test.tsv
+pixi run pipeline samplesheets/dap-seq-test.tsv
 ```
 
 You can also call `scripts/run-pipeline.sh` directly, from any folder; relative paths
