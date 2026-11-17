@@ -549,7 +549,7 @@ def main() -> None:
                 assert "executor.pollInterval = '5 min'" in output
                 assert "--constraint=cpu --qos=${params.queue ?: 'shared'}" in output
                 assert "toMega() + 512}M" in output
-                assert "podman.runOptions = '--user 0:0'" in output
+                assert "podman.runOptions = '--user 0:0 --group-add keep-groups'" in output
                 assert "podman.registry = 'docker.io'" in output
                 assert "podman.temp" not in output
                 assert "process.resourceLimits.cpus = 128" in output
