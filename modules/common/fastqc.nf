@@ -10,7 +10,6 @@ process FASTQC {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_FASTQC.yaml"
     container "${dotenv('GENESIS_FASTQC_IMAGE')}"
     tag "${meta.id}:${mate}"
     publishDir { "${params.publish_base}/output/${meta.species}/${meta.id}/qc/fastqc" },

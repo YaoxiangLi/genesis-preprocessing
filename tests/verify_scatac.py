@@ -147,9 +147,6 @@ def run_scatac(
                 "docker.runOptions = '-u $(id -u):$(id -g) "
                 "--add-host=host.docker.internal:host-gateway'\n"
             )
-        if engine == "conda":
-            # Keep the environments built for earlier runs.
-            text += f"conda.cacheDir = '{work.parent / 'conda_cache'}'\n"
         limits.write_text(text)
     command = [
         "nextflow",
@@ -413,18 +410,14 @@ def check_failures(work: Path, sheet: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    engines = parser.add_mutually_exclusive_group()
-    engines.add_argument(
+    parser.add_argument(
         "--docker", action="store_true", help="Use real tools in the pinned Docker images"
-    )
-    engines.add_argument(
-        "--conda", action="store_true", help="Use real tools from the environments/*.yaml files"
     )
     parser.add_argument(
         "--keep", action="store_true", help="Retain fixtures, logs, and work directories"
     )
     args = parser.parse_args()
-    engine = "docker" if args.docker else "conda" if args.conda else None
+    engine = "docker" if args.docker else None
     runs = ROOT / "tests" / ".runs"
     runs.mkdir(exist_ok=True)
     work = Path(tempfile.mkdtemp(prefix=f"scatac-{engine or 'regression'}-", dir=runs))

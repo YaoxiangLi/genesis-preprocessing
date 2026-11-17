@@ -11,7 +11,6 @@ process QC {
     // On Perlmutter, 63 Sorghum samples took at most 0.254 hours per GB of SPP's BAM (the largest,
     // 2.9 GB, 0.74 hours), with no fixed cost to speak of. Allow twice 0.26, plus 10 minutes.
     time { retryTimeOf(task, 10.min + 2 * 0.26.h * spp_bam.size() / 1e9) }
-    conda "${moduleDir}/../../environments/GENESIS_SPP.yaml"
     container "${dotenv('GENESIS_SPP_IMAGE')}"
     tag "${meta.id}"
     publishDir { "${params.publish_base}/output/${meta.species}/${meta.id}" }, mode: 'copy',

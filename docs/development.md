@@ -153,9 +153,9 @@ with the commands actually tested and any remaining limitations.
 Keep benchmark results, environment files and assistant configuration outside Git.
 
 Real-tool acceptance is opt-in: `pixi run validate-docker` runs DAP-seq with its pinned
-containers on synthetic inputs. For bulk ATAC, scATAC and RNA-seq, run
-`tests/verify_atac.py`, `tests/verify_scatac.py` or `tests/verify_rna.py` with `--docker`,
-or `--conda` to build the tools from `environments/*.yaml` where Docker is unavailable.
+containers on synthetic inputs. For the other workflows, run `tests/verify_atac.py`,
+`tests/verify_rna.py`, `tests/verify_tss.py`, `tests/verify_scatac.py` or
+`tests/verify_scatac_reads.py` with `--docker`.
 
 ## Data and configuration
 

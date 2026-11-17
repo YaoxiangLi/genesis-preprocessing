@@ -470,7 +470,7 @@ def check_resource_summary(work: Path) -> None:
     )  # fmt: skip
     assert missing.returncode != 0 and "No work folder for 12/345678" in missing.stderr, missing
 
-    # A local conda run: the trace records the requests, so neither the .command.run (which has
+    # A local run: the trace records the requests, so neither the .command.run (which has
     # none) nor a work folder is needed, and Slurm accounting is not consulted.
     local, local_work = work / "runs/local", work / "workspace/local/work"
     (local / "trace").mkdir(parents=True)

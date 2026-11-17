@@ -67,7 +67,6 @@ process DOWNLOAD {
     cpus 8
     memory '2 GB'
     time { downloadTime(samples, task.attempt) }
-    conda "${moduleDir}/../../environments/GENESIS_SRA.yaml"
     container "${dotenv('GENESIS_SRA_IMAGE')}"
     tag "${samples.size() == 1 ? samples[0].id : "${samples[0].id} +${samples.size() - 1} more"}"
     publishDir "${params.publish_base}/output", mode: 'copy', pattern: '*.fastq.lines',

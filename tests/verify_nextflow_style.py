@@ -211,7 +211,6 @@ def check_builds(work: Path, bash: str) -> None:
     (repo / "dockers" / ".dockerignore").write_text(".venv/\n")
     (repo / "environments").mkdir()
     (repo / "environments" / "GENESIS_ALIGNMENT.yaml").write_text("name: genesis_alignment\n")
-    (repo / "environments" / "GENESIS_TOOLS.yaml").write_text("name: genesis_tools\n")
     project = repo / "genesis_tools"
     project.mkdir()
     for name in ("pyproject.toml", "uv.lock"):
@@ -392,7 +391,9 @@ def main() -> None:
             continue
         assert "include { dotenv } from 'plugin/nf-dotenv'" in source, path
         assert "    cpus " in source and "    memory " in source and "    time " in source, path
-        assert source.count("    conda ") == 1, path
+        # Each process runs in exactly one pinned image; there are no conda environments.
+        assert "    conda " not in source, path
+        assert source.count("    container \"${dotenv('") == 1, path
     check_workflow_configs()
     interpreters = list(dict.fromkeys(["/bin/bash", shutil.which("bash") or "/bin/bash"]))
     with tempfile.TemporaryDirectory(prefix="genesis-style-") as temporary:

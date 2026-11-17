@@ -127,7 +127,7 @@ itself, and relative paths resolve from your current folder:
 
 `pixi run pipeline --help` lists the options. The profile follows the host: `nersc` on
 Perlmutter, `sherlock` on Sherlock and `local,docker` elsewhere; choose another with `-p`
-(for example `-p local,conda`). See [running on Perlmutter and Sherlock](docs/usage/clusters.md)
+(for example `-p local,apptainer`). See [running on Perlmutter and Sherlock](docs/usage/clusters.md)
 for references, results, accounts and images there. The pipeline checks the whole sheet
 before starting any task.
 

@@ -31,7 +31,6 @@ process RNA_INDEX {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_STAR.yaml"
     container "${dotenv('GENESIS_STAR_IMAGE')}"
     tag "${ref.id}"
     // GET_STAR_INDEX reuses a published index only while its record matches; stub runs never

@@ -14,7 +14,6 @@ process QUANTIFY {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_TOOLS.yaml"
     container "${dotenv('GENESIS_TOOLS_IMAGE')}"
     publishDir { "${params.publish_base}/output/${meta.species}/${meta.id}" }, mode: 'copy',
         pattern: '*.peaks.*.tsv'

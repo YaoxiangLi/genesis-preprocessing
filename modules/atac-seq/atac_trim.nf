@@ -10,7 +10,6 @@ process ATAC_TRIM {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_CUTADAPT.yaml"
     container "${dotenv('GENESIS_CUTADAPT_IMAGE')}"
     tag "${meta.id}"
     publishDir { "${params.publish_base}/output/${meta.species}/${meta.id}/qc" }, mode: 'copy',

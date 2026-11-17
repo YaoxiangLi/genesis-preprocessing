@@ -54,9 +54,6 @@ pixi run pipeline --help
 # Run test data with default profile: local Docker.
 pixi run pipeline samplesheets/Sorghum_bicolor/dap-seq-PRJNA1177471-test.tsv
 
-# Local execution with micromamba/conda environments.
-pixi run pipeline -p local,conda samplesheets/Arabidopsis_lyrata/dap-seq-PRJNA1177479.tsv
-
 # Continue a previous run using Nextflow's task cache.
 pixi run pipeline samplesheets/Arabidopsis_lyrata/dap-seq-PRJNA1177479.tsv -resume
 
@@ -66,7 +63,7 @@ pixi run pipeline -R /path/references samplesheets/Arabidopsis_lyrata/dap-seq-PR
 
 You can also call `scripts/run-pipeline.sh` directly, from any folder; relative paths
 then resolve from your current folder. Either way, Nextflow runs in the checkout's
-Pixi environment, so it can find micromamba. Choose the profile with `-p`/`--profile`
+Pixi environment. Choose the profile with `-p`/`--profile`
 rather than Nextflow's `-profile`, which the script already sets. Without `-p`,
 `scripts/get-default-profile.sh` chooses `nersc` on Perlmutter, `sherlock` on Sherlock and
 `local,docker` elsewhere. A profile names an executor and a software environment together:
@@ -268,10 +265,9 @@ retains generation metadata. A stable resume caches the complete report/data set
 Each run writes two records to its output folder when it starts:
 
 - `genesis-images.lock`: a copy of `conf/genesis-images.lock`, the container image pins
-  (by digest) used by container profiles. Conda runs use the locked
-  `environments/*.yaml` instead.
+  (by digest) used by container profiles.
 - `git-status.txt`: the pipeline checkout's branch and commit, the container
-  engine (`docker`, `apptainer`, … or `none` for Conda), and every uncommitted or
+  engine (`docker`, `apptainer`, … or `none` for stub runs without one), and every uncommitted or
   untracked file reported by `git status --porcelain` (`dirty files: none` for a
   clean checkout).
 
@@ -321,9 +317,8 @@ allocated compute nodes within your site's resource limits.
 
 Pure tool environments are defined in `environments/*.yaml`; their matching
 Pixi manifests and locks support container builds. `genesis_tools/` is a typed
-Python 3.14.5 uv project that reads BAMs with pysam. Its conda equivalent installs the local
-Python project; containers use the dedicated uv Dockerfile. Each Nextflow module
-declares its environment and reads its image from `conf/genesis-images.lock` using nf-dotenv.
+Python 3.14.5 uv project that reads BAMs with pysam, built with the dedicated uv Dockerfile.
+Each Nextflow module reads its image from `conf/genesis-images.lock` using nf-dotenv.
 
 Build tool images through Pixi:
 
@@ -341,7 +336,7 @@ The Dockerfiles specify pinned base images.
 FastQC and MultiQC use separate environments. Docker defaults pin publicly
 available Biocontainers images by registry digest: FastQC 0.12.1 and MultiQC 1.35.
 They can be pulled on a fresh Linux server without rebuilding or publishing an
-image. Use the committed environment locks for local builds or the conda profile.
+image. Use the committed environment locks for local builds.
 The FastQC/MultiQC integration has been validated with Linux amd64 Docker.
 
 ## Verification
@@ -409,7 +404,7 @@ assigned controls and DAP scientific defaults are compatible with that revision.
 
 | Area | What to check |
 | --- | --- |
-| Default execution | Omitting a profile selects `nersc` on Perlmutter, `sherlock` on Sherlock (Slurm with Apptainer) and `local,docker` elsewhere, including other Slurm clusters. Select another with `-p`, e.g. `-p local,conda`. |
+| Default execution | Omitting a profile selects `nersc` on Perlmutter, `sherlock` on Sherlock (Slurm with Apptainer) and `local,docker` elsewhere, including other Slurm clusters. Select another with `-p`, e.g. `-p local,apptainer`. |
 | Reference caches | Derived products are reused only while `<fasta>.sha256` matches the compressed FASTA and records every product's current size. Products from earlier revisions have no such record, so the first run rebuilds them once. Provenance sidecars written by earlier revisions are ignored. |
 | Read QC | Raw-mate FastQC and one run-level MultiQC report require the images pinned in `conf/genesis-images.lock`; the runtime may need to pull them. Quality WARN/FAIL labels are advisory. |
 | Resume | Keep the run folder and work directory. Switching to published reference paths or changing process definitions can rerun affected tasks. Use a new run name and workspace if you need to keep an earlier result unchanged. |

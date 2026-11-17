@@ -1,8 +1,8 @@
 """Regression checks for scATAC from raw 10x reads (workflows/scatac-reads.nf).
 
-Without options: stub runs of the whole workflow and its sheet checks. With --conda: real chromap
-and cell calling on simulated 10x reads (tests/scatac_reads_harness.nf); the SRA download needs
-NCBI and is checked on real data instead.
+Without options: stub runs of the whole workflow and its sheet checks. With --docker: real chromap
+and cell calling, in the pinned images, on simulated 10x reads (tests/scatac_reads_harness.nf);
+the SRA download needs NCBI and is checked on real data instead.
 """
 
 from __future__ import annotations
@@ -88,7 +88,7 @@ def nextflow(
         cwd=work,
         env=environment,
         log=work / f"output-{suffix}.log",
-        timeout=3600 if "local,test,conda" in full else 300,
+        timeout=3600 if "local,test,docker" in full else 300,
         expect_failure=expect_failure,
     )
 
@@ -437,9 +437,7 @@ def check_real_tools(work: Path) -> None:
     (work / "inputs").mkdir()
     expected = simulate(work, random.Random(1555))
     limits = work / "limits.config"
-    limits.write_text(
-        executor_limits(docker=False) + f"conda.cacheDir = '{work.parent / 'conda_cache'}'\n"
-    )
+    limits.write_text(executor_limits(docker=True))
 
     def harness(suffix: str) -> list[str]:
         # The FASTA's folder is the references folder, where the chromap index is published.
@@ -452,7 +450,7 @@ def check_real_tools(work: Path) -> None:
                     "-c",
                     str(ROOT / "conf/scatac-reads.config"),
                     "-profile",
-                    "local,test,conda",
+                    "local,test,docker",
                     "-c",
                     str(limits),
                     "--inputs",
@@ -513,7 +511,9 @@ def check_real_tools(work: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--conda", action="store_true", help="Also run chromap and cell calling with real tools"
+        "--docker",
+        action="store_true",
+        help="Also run chromap and cell calling in the pinned images",
     )
     parser.add_argument(
         "--keep", action="store_true", help="Retain fixtures, logs, and work directories"
@@ -530,11 +530,11 @@ def main() -> None:
         check_index_reuse(work, sheet)
         check_read_selection(work)
         check_failures(work, sheet)
-        if args.conda:
+        if args.docker:
             real = work / "real"
             real.mkdir()
             check_real_tools(real)
-        label = "scATAC reads regression" + (" and real-tool chromap" if args.conda else "")
+        label = "scATAC reads regression" + (" and real-tool chromap" if args.docker else "")
         print(f"PASS: {label}", flush=True)
         passed = True
     finally:

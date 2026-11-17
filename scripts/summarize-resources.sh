@@ -20,9 +20,9 @@ Write PERSIST_RUN/resources.tsv: one line per field, its name and value (%.3f) t
     avg-%mem            Σ(peak_rss ÷ memory × 100 × mem-gb-hours) ÷ Σ mem-gb-hours
 GB is 2^30 bytes, as in Nextflow. Every task attempt with a measured realtime counts, from every
 PERSIST_RUN/trace/execution_trace_*.txt; cached rows repeat earlier attempts and are skipped.
-Requests come from the trace's cpus and memory columns, with any executor (Slurm, or local with
-conda or a container). Traces without them, from older runs, need the tasks' work folders: the
-requests are then Slurm's directives or the container's limits in each .command.run. Only
+Requests come from the trace's cpus and memory columns, with any executor (Slurm or local).
+Traces without them, from older runs, need the tasks' work folders: the requests are then
+Slurm's directives or the container's limits in each .command.run. Only
 scripts/submit-pipeline.sh runs this when a run finishes; run it yourself after other runs.
 
 PERSIST_RUN: the run's folder of published output and trace files (PERSIST_DIR/RUN_NAME).
