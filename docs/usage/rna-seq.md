@@ -10,13 +10,16 @@ layout, reference folder and image pins, with `workflows/rna-seq.nf` as the work
 [Diagram source and interpretation](../../docs/diagrams/README.md)
 
 ```bash
-pixi run pipeline-rna -w /scratch/genesis -n rna-A -R /data/references /data/rna.tsv
-# Continue the same analysis after an interruption.
-pixi run pipeline-rna -w /scratch/genesis -n rna-A -R /data/references /data/rna.tsv -resume
+# On Perlmutter or Sherlock: submit the run as a Slurm job.
+pixi run submit-pipeline -- --workflow rna-seq -n rna-A /path/rna.tsv
+# To debug locally with Docker, on a small sheet.
+pixi run pipeline-rna -w /tmp/genesis -n rna-A -R /data/references /data/rna.tsv
 ```
 
-`pixi run pipeline-rna` is `scripts/run-pipeline.sh --workflow rna-seq`; run either with
-`--help` for the options. Pixi runs from the checkout folder, so give absolute paths.
+Add `-resume` to either command to continue a run that stopped. `pixi run pipeline-rna` is
+`scripts/run-pipeline.sh --workflow rna-seq`; run either script with `--help` for the options, and see
+[running on Perlmutter and Sherlock](clusters.md). Pixi runs from the checkout folder, so give
+absolute paths.
 
 ## Sample sheet
 

@@ -20,18 +20,17 @@ measurement definitions and evidence boundaries, read the
 [genesis-curation](https://github.com/kundajelab/genesis-curation) has metadata
 discovery, curation and review.
 
-## Understand the methods
+## Earlier work
 
-- [Benchmarks](https://github.com/kundajelab/genesis-curation/blob/12bb02cb9ec98fe8c4c0ec660adcfdeb7384f20e/benchmarks/README.md) (archived): datasets, method comparisons, metric definitions and measured results.
-- [Historical DAP documentation](history/dapseq-readme-fb60096.md): commands and behavior at revision `fb60096`.
+These links are pinned to the revision they describe; their commands may differ from the current
+ones.
+
+- [Method benchmarks](https://github.com/kundajelab/genesis-curation/blob/12bb02cb9ec98fe8c4c0ec660adcfdeb7384f20e/benchmarks/README.md): datasets, method comparisons, metric definitions and measured results.
+- [DAP-only README](https://github.com/kundajelab/genesis-preprocessing/blob/fb600968b3abf5d79756aaf7e6d1e4ff43a1b41d/README.md) at revision `fb60096`.
+- [Validation reports and evidence](https://github.com/kundajelab/genesis-preprocessing/tree/e2e2aa92252a3ff8c53f5a4787816d2c80b27401/validation) at revision `e2e2aa9`, including the MACS3 build comparison and the 2026-10-14 method comparison.
 
 ## Develop Genesis
 
 - [Contributor guide](development.md): install a development environment, run checks and test changes.
 - [Nextflow conventions](nextflow-style.md): module structure and pipeline changes.
 - [Diagram maintenance](diagrams/README.md): update the maintained workflow maps.
-
-Current guides describe the installed commands. The historical DAP documentation
-describes its own revision; its commands may differ from a current installation.
-Earlier validation reports and evidence were removed; see `validation/` at commit
-e2e2aa9.

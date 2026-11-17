@@ -110,8 +110,8 @@ copying explicitly. Neither warning is a failed scientific check.
 
 Keep scientific settings explicit. A change to alignment, filtering, peak calling or
 count definitions needs a comparison of the affected outputs, not just a successful
-exit code. The archived [benchmark
-guide](https://github.com/kundajelab/genesis-curation/blob/12bb02cb9ec98fe8c4c0ec660adcfdeb7384f20e/benchmarks/README.md) shows how earlier comparisons were designed.
+exit code. The [earlier method benchmarks](README.md#earlier-work) show how such comparisons
+were designed.
 
 | Area | Implementation | Focused check |
 | --- | --- | --- |
@@ -171,4 +171,3 @@ before committing.
 
 Keep site-specific configuration outside the checkout. Test schedulers in the
 environment where they will run; local checks do not establish cluster compatibility.
-Earlier validation records were removed; see `validation/` at commit e2e2aa9.

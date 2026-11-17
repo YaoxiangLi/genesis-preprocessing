@@ -14,13 +14,16 @@ It starts from published single-cell fragment files, such as the 10x Cell Ranger
 for example one per cell type, and each pseudobulk gets peaks, a cut-site track and QC.
 
 ```bash
-pixi run pipeline-scatac -w /scratch/genesis -n scatac-A -R /data/references /data/scatac.tsv
-# Continue the same analysis after an interruption.
-pixi run pipeline-scatac -w /scratch/genesis -n scatac-A -R /data/references /data/scatac.tsv -resume
+# On Perlmutter or Sherlock: submit the run as a Slurm job.
+pixi run submit-pipeline -- --workflow scatac-seq -n scatac-A /path/scatac.tsv
+# To debug locally with Docker, on a small sheet.
+pixi run pipeline-scatac -w /tmp/genesis -n scatac-A -R /data/references /data/scatac.tsv
 ```
 
-`pixi run pipeline-scatac` is `scripts/run-pipeline.sh --workflow scatac-seq`; run either
-with `--help` for the options. Pixi runs from the checkout folder, so give absolute paths.
+Add `-resume` to either command to continue a run that stopped. `pixi run pipeline-scatac` is
+`scripts/run-pipeline.sh --workflow scatac-seq`; run either script with `--help` for the options, and see
+[running on Perlmutter and Sherlock](clusters.md). Pixi runs from the checkout folder, so give
+absolute paths.
 
 ## Sample sheet
 
@@ -121,7 +124,7 @@ pipeline-scatac-reads`, `conf/scatac-reads.config`) makes each library's fragmen
 ![Genesis scATAC from 10x reads workflow metro map](../../docs/images/genesis_scatac_reads_metro_map.svg)
 
 ```bash
-pixi run pipeline-scatac-reads -w /scratch/genesis -n scatac-B -R /data/references /data/scatac-reads.tsv
+pixi run submit-pipeline -- --workflow scatac-reads -n scatac-B /path/scatac-reads.tsv
 ```
 
 ```tsv

@@ -43,22 +43,23 @@ must not collapse to the same reference ID after removing their suffix. The firs
 resume after generating references can rerun downstream tasks as inputs move to
 published paths; subsequent resumes reuse computation.
 
-Run exactly one sheet per invocation. These examples run from the checkout, where
-the bundled sheets live; `pixi run pipeline` always runs from the checkout folder, so
-give sheets elsewhere as absolute paths:
+Run exactly one sheet per invocation. On Perlmutter or Sherlock, submit the run as a Slurm job
+([running on Perlmutter and Sherlock](clusters.md)); locally, `pixi run pipeline` runs it with
+Docker, which suits debugging on a small sheet. Pixi always runs from the checkout folder, so give
+sheets elsewhere as absolute paths:
 
 ```bash
 # Show wrapper options.
 pixi run pipeline --help
 
-# Run test data with default profile: local Docker.
-pixi run pipeline samplesheets/Sorghum_bicolor/dap-seq-PRJNA1177471-test.tsv
+# Submit a run on Perlmutter or Sherlock; the cluster profile is chosen automatically.
+pixi run submit-pipeline -- -R /path/references /path/dap.tsv
 
 # Continue a previous run using Nextflow's task cache.
-pixi run pipeline samplesheets/Arabidopsis_lyrata/dap-seq-PRJNA1177479.tsv -resume
+pixi run submit-pipeline -- -R /path/references /path/dap.tsv -resume
 
-# On Perlmutter or Sherlock the cluster profile is chosen automatically.
-pixi run pipeline -R /path/references samplesheets/Arabidopsis_lyrata/dap-seq-PRJNA1177479.tsv
+# Debug locally with Docker on the small test sheet.
+pixi run pipeline samplesheets/Sorghum_bicolor/dap-seq-PRJNA1177471-test.tsv
 ```
 
 You can also call `scripts/run-pipeline.sh` directly, from any folder; relative paths
@@ -387,28 +388,3 @@ on full public datasets.
 Native macOS stub traces do not include task runtime metrics; Docker traces do.
 
 See [docs/nextflow-style.md](../../docs/nextflow-style.md) for module conventions.
-
-## Method benchmarks
-
-The archived [benchmark guide](https://github.com/kundajelab/genesis-curation/blob/12bb02cb9ec98fe8c4c0ec660adcfdeb7384f20e/benchmarks/README.md) in genesis-curation has
-the commands, metric definitions, measured results and limitations of the earlier
-comparisons. None of them changed a production default.
-
-<a id="upgrade-from-the-dap-only-release"></a>
-
-## Compatibility with older DAP installations
-
-When upgrading from DAP-only revision `fb60096`, check your execution profile and
-reference cache before resuming an analysis. The six-column sample-sheet format,
-assigned controls and DAP scientific defaults are compatible with that revision.
-
-| Area | What to check |
-| --- | --- |
-| Default execution | Omitting a profile selects `nersc` on Perlmutter, `sherlock` on Sherlock (Slurm with Apptainer) and `local,docker` elsewhere, including other Slurm clusters. Select another with `-p`, e.g. `-p local,apptainer`. |
-| Reference caches | Derived products are reused only while `<fasta>.sha256` matches the compressed FASTA and records every product's current size. Products from earlier revisions have no such record, so the first run rebuilds them once. Provenance sidecars written by earlier revisions are ignored. |
-| Read QC | Raw-mate FastQC and one run-level MultiQC report require the images pinned in `conf/genesis-images.lock`; the runtime may need to pull them. Quality WARN/FAIL labels are advisory. |
-| Resume | Keep the run folder and work directory. Switching to published reference paths or changing process definitions can rerun affected tasks. Use a new run name and workspace if you need to keep an earlier result unchanged. |
-
-Rerun `pixi run install-all` after updating the checkout
-([setup](../development.md#set-up-a-fresh-checkout)) to update the environment. Keep
-references and run data separately from Git.

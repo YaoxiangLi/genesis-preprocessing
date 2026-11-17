@@ -9,13 +9,16 @@ reference cache and image pins, with `workflows/atac-seq.nf` as the workflow and
 [Diagram source and interpretation](../../docs/diagrams/README.md)
 
 ```bash
-pixi run pipeline-atac -w /scratch/genesis -n atac-A -R /data/references /data/atac.tsv
-# Continue the same analysis after an interruption.
-pixi run pipeline-atac -w /scratch/genesis -n atac-A -R /data/references /data/atac.tsv -resume
+# On Perlmutter or Sherlock: submit the run as a Slurm job.
+pixi run submit-pipeline -- --workflow atac-seq -n atac-A /path/atac.tsv
+# To debug locally with Docker, on a small sheet.
+pixi run pipeline-atac -w /tmp/genesis -n atac-A -R /data/references /data/atac.tsv
 ```
 
-`pixi run pipeline-atac` is `scripts/run-pipeline.sh --workflow atac-seq`; run either with
-`--help` for the options. Pixi runs from the checkout folder, so give absolute paths.
+Add `-resume` to either command to continue a run that stopped. `pixi run pipeline-atac` is
+`scripts/run-pipeline.sh --workflow atac-seq`; run either script with `--help` for the options, and see
+[running on Perlmutter and Sherlock](clusters.md). Pixi runs from the checkout folder, so give
+absolute paths.
 
 ## Sample sheet
 
