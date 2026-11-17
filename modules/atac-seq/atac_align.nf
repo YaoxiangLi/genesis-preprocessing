@@ -1,14 +1,16 @@
 include { dotenv } from 'plugin/nf-dotenv'
-include { oomMemoryOf ; oomErrorStrategy } from '../common/retry'
+include { oomMemoryOf ; retryTimeOf ; retryErrorStrategy } from '../common/retry'
 
 process ATAC_ALIGN {
     cpus 8
     // bwa-mem3 loads ~3.5 bytes per reference base (it reads no .0123); 7 leaves headroom. samtools
     // sort uses 512 MB per thread, and each bwa-mem3 thread adds a little more.
     memory { oomMemoryOf(task, 1.5.GB + 7.B * meta.genome_size + (512.MB + 256.MB) * task.cpus) }
-    time { 1.h * (1 + reads.sum { read -> read.size() } / 1e9) * task.attempt }
-    // Retry with twice the memory only when an attempt ran out of memory (modules/common/retry.nf).
-    errorStrategy { oomErrorStrategy(task) }
+    // On Perlmutter, 44 Sorghum runs (0.9-39 GB of trimmed reads) peaked at 9.2 GB of 12.2 and
+    // took at most 0.14 hours per GB (2.3 hours for the largest). Allow 15 minutes plus 0.2 per GB.
+    time { retryTimeOf(task, 15.min + 0.2.h * reads.sum { read -> read.size() } / 1e9) }
+    // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
+    errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
     conda "${moduleDir}/../../environments/GENESIS_ALIGNMENT.yaml"
     container "${dotenv('GENESIS_ALIGNMENT_IMAGE')}"

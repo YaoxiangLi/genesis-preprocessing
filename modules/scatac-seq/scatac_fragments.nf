@@ -1,12 +1,12 @@
 include { dotenv } from 'plugin/nf-dotenv'
-include { oomMemoryOf ; oomErrorStrategy } from '../common/retry'
+include { oomMemoryOf ; retryTimeOf ; retryErrorStrategy } from '../common/retry'
 
 process SCATAC_FRAGMENTS {
     cpus 2
     memory { oomMemoryOf(task, 2.GB) }
-    time { 1.h * (1 + fragments.size() / 1e9) * task.attempt }
-    // Retry with twice the memory only when an attempt ran out of memory (modules/common/retry.nf).
-    errorStrategy { oomErrorStrategy(task) }
+    time { retryTimeOf(task, 1.h * (1 + fragments.size() / 1e9)) }
+    // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
+    errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
     conda "${moduleDir}/../../environments/GENESIS_ALIGNMENT.yaml"
     container "${dotenv('GENESIS_ALIGNMENT_IMAGE')}"
@@ -28,6 +28,9 @@ process SCATAC_FRAGMENTS {
     // Fragments are kept exactly as the producer wrote them (10x: BED0 half-open, Tn5 offsets
     // already applied); only rows for listed cells on nuclear contigs continue.
     """
+    # GNU sort: the images' Ubuntu 26.04 sort is uutils', whose -S bounds memory only loosely (a
+    # 512M buffer held 4.4 GB); Ubuntu keeps GNU's as gnusort.
+    sort=\$(command -v gnusort || echo sort)
     # A misspelled organelle contig would silently count organelle fragments as nuclear.
     for contig in \$(printf '%s' '${organelles}' | tr ',' ' '); do
         awk -v contig="\$contig" '\$1 == contig {found = 1} END {exit !found}' '${chrom_sizes}' || {
@@ -71,7 +74,7 @@ process SCATAC_FRAGMENTS {
         END {
             printf "%d\\t%d\\t%d\\n", rows, unlisted, organelle_total > "counts.tsv"
             for (barcode in organelle_rows) print barcode, organelle_rows[barcode] > "organelle.tsv"
-        }' | LC_ALL=C sort -S 1G -T . -t \$'\\t' -k1,1 -k2,2n -k3,3n -k4,4 > kept.tsv
+        }' | LC_ALL=C "\$sort" -S 1G -T . -t \$'\\t' -k1,1 -k2,2n -k3,3n -k4,4 > kept.tsv
     touch organelle.tsv
     bgzip --threads ${task.cpus} -c kept.tsv > '${meta.id}.fragments.tsv.gz'
     tabix -p bed '${meta.id}.fragments.tsv.gz'

@@ -1,5 +1,5 @@
 include { dotenv } from 'plugin/nf-dotenv'
-include { oomMemoryOf ; oomErrorStrategy } from '../common/retry'
+include { oomMemoryOf ; retryTimeOf ; retryErrorStrategy } from '../common/retry'
 
 // Shell that writes <index>.sha256 in the format GET_STAR_INDEX checks: the FASTA and generated GTF
 // hashes, STAR's version, the index parameters, then every index file's size in bytes. Run after
@@ -23,12 +23,13 @@ def recordIndex(ref) {
 
 process RNA_INDEX {
     cpus 8
-    // STAR builds its suffix array in about 14 bytes per reference base (about 36 GB for a 2.3 Gb
-    // maize genome). ref.length is the summed chrom sizes.
-    memory { oomMemoryOf(task, 4.GB + 14.B * ref.length) }
-    time { 1.h * (1 + ref.length / 1e9) * task.attempt }
-    // Retry with twice the memory only when an attempt ran out of memory (modules/common/retry.nf).
-    errorStrategy { oomErrorStrategy(task) }
+    // On Perlmutter, STAR peaked at 12.6 GB building the 0.72 Gbp Sorghum index (7.3 GB on disk):
+    // about 13 bytes per reference base beyond 4 GB. Allow 16 (about 38 GB for a 2.3 Gbp maize
+    // genome). ref.length is the summed chrom sizes.
+    memory { oomMemoryOf(task, 4.GB + 16.B * ref.length) }
+    time { retryTimeOf(task, 1.h * (1 + ref.length / 1e9)) }
+    // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
+    errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
     conda "${moduleDir}/../../environments/GENESIS_STAR.yaml"
     container "${dotenv('GENESIS_STAR_IMAGE')}"

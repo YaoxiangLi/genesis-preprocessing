@@ -1,12 +1,14 @@
 include { dotenv } from 'plugin/nf-dotenv'
-include { oomMemoryOf ; oomErrorStrategy } from '../common/retry'
+include { oomMemoryOf ; retryTimeOf ; retryErrorStrategy } from '../common/retry'
 
 process ATAC_TRIM {
     cpus 4
-    memory { oomMemoryOf(task, 2.GB) }
-    time { 1.h * (1 + reads.sum { read -> read.size() } / 1e9) * task.attempt }
-    // Retry with twice the memory only when an attempt ran out of memory (modules/common/retry.nf).
-    errorStrategy { oomErrorStrategy(task) }
+    // On Perlmutter, 48 Sorghum runs (0.8-38.7 GB of gzipped reads) peaked at 0.30 GB and took
+    // at most 0.017 hours per GB (22 minutes for the longest). Allow 15 minutes plus 0.03 per GB.
+    memory { oomMemoryOf(task, 1.GB) }
+    time { retryTimeOf(task, 15.min + 0.03.h * reads.sum { read -> read.size() } / 1e9) }
+    // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
+    errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
     conda "${moduleDir}/../../environments/GENESIS_CUTADAPT.yaml"
     container "${dotenv('GENESIS_CUTADAPT_IMAGE')}"

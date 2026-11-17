@@ -106,6 +106,10 @@ so each task's `.command.log` records the commands it ran.
 pixi run get-latest-report
 # Follow a task's log by the hash Nextflow prints, hiding `set -x` lines.
 pixi run watch-log ab/123456
+# Totals for a run (hours, disk, utilization) in PERSIST_DIR/RUN_NAME/resources.tsv, with any
+# executor, from its trace files and work folder. Only scripts/submit-pipeline.sh runs it
+# automatically, when a run finishes; run it yourself after run-pipeline.sh runs.
+pixi run summarize-resources PERSIST_DIR/RUN_NAME
 ```
 
 ## Sample sheet
@@ -298,17 +302,18 @@ gzipped FASTA directly on four CPUs (more barely help), with 1 GB plus 16 bytes 
 reference base (it peaks near 14.5) and one hour plus an hour per Gbp. It writes no
 `.0123`, so a record from bwa-mem2, which listed it, makes the index rebuild once.
 Alignment uses 16 CPUs, memory from the genome size and CPUs, and time from the size
-of the compressed reads. Both retry, with twice the memory, only when they run out
-of memory. QC uses two CPUs, and memory and time from the size of SPP's BAM. Tracks use
+of the compressed reads. Like every DAP-seq task, both retry only when they run out of
+memory or of time, with twice what ran out, or when the system cancels them, with the same
+resources. QC uses two CPUs, and memory and time from the size of SPP's BAM. Tracks use
 four CPUs (1.7 times as fast as two), 2.0 GB, and time from the genome size and the size
 of the BAMs they cover. bamCoverage writes its temporary files in the task's folder,
 since a compute node's `/tmp` may be held in memory. It waits for
 workers killed for memory until the time limit, so a task that times out after Slurm
-logged an out-of-memory kill also retries with twice the memory. `--cpus`, `--memory` and `--time`
-do not apply to DAP-seq. Other modules declare their own resources. The `local` profile caps
-requests at the machine's CPUs and memory.
+logged an out-of-memory kill retries with twice the memory, not the time. Every module
+declares its own resources. The `local` profile caps requests at the machine's CPUs and
+memory.
 
-The `test` profile caps every task at two CPUs, 2 GB, and five minutes; it does
+The `test` profile caps every task at one CPU, 2 GB, and five minutes; it does
 not select a sample subset or replace tools. On clusters, run computation on
 allocated compute nodes within your site's resource limits.
 
