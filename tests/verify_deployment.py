@@ -221,7 +221,12 @@ def check_submit_pipeline(work: Path) -> None:
     )
     recorded = work / "pixi.txt"
     sbatch = f"#!/bin/sh\nprintf '%s\\n' \"$@\" > '{sbatch_arguments}'\ncat > '{script}'\necho 42\n"
-    podman = f"#!/bin/sh\necho \"$@\" >> '{pulls}'\n"
+    # podman-hpc lists the images in squashed.txt as squashed and records every pull.
+    squashed = work / "squashed.txt"
+    podman = (
+        f"#!/bin/sh\nif [ \"$1\" = images ]; then cat '{squashed}' 2>/dev/null; exit 0; fi\n"
+        f"echo \"$@\" >> '{pulls}'\n"
+    )
     # pixi records what it would run and the environment it would run it in.
     pixi = (
         "#!/bin/sh\n{ printf '%s\\n' \"$@\"; env | "
@@ -301,6 +306,19 @@ def check_submit_pipeline(work: Path) -> None:
     assert "NXF_ANSI_LOG=false" in lines, lines
     assert any(line.startswith("NXF_OPTS=-Xmx3g") for line in lines), lines
     assert len(pulls.read_text().splitlines()) == images, "the job pulled images again"
+    # Images already squashed are not pulled again; one only pulled (not squashed) is.
+    pinned = [
+        line.strip().split("=", 1)[1]
+        for line in (ROOT / "conf/genesis-images.lock").open()
+        if "_IMAGE=" in line
+    ]
+    squashed.write_text(
+        "".join(f"docker.io/{image} true\n" for image in pinned[1:])
+        + f"docker.io/{pinned[0]} false\n"
+    )
+    pulls.unlink()
+    assert submit(nersc, *run).returncode == 0
+    assert pulls.read_text().splitlines() == [f"pull docker.io/{pinned[0]}"], pulls.read_text()
     # NERSC's workflow QOS runs on its own nodes.
     assert submit(nersc, "-Q", "workflow", *run).returncode == 0
     assert "--qos=workflow" in options() and "--constraint=cron" in options(), options()
