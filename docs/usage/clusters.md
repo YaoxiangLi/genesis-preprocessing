@@ -1,7 +1,23 @@
 # Running on Perlmutter and Sherlock
 
-`pixi run pipeline` (and the other `pipeline-*` tasks) chooses a profile for the host it runs
-on, unless `-p` names one:
+Submit each run from a login node, in a checkout that compute nodes can read. To run the tss-seq
+workflow:
+
+```bash
+pixi run submit-pipeline --workflow tss-seq /path/tss.tsv
+```
+
+`scripts/submit-pipeline.sh` submits the Nextflow manager as a Slurm job and returns once it is
+queued; the manager then submits each task as its own job. It takes its own options first
+(`--help` lists them), then passes everything else to `scripts/run-pipeline.sh` unchanged. The
+manager job runs from the current folder with 2 CPUs and 8 GB by default, and its log goes to
+`~/logs/genesis/` (`-L` to change). `-Q` chooses where the manager runs, not the tasks: the
+`shared` QOS on Perlmutter (at most 48 hours; `-Q workflow` for NERSC's `workflow` QOS, up to 90
+days, once your project has access), the `normal` partition on Sherlock. Its walltime (`-T`) caps
+the whole run. Two minutes before it, Nextflow is told to stop and cancels its task jobs; submit
+again (the config makes resuming the default) to continue the run.
+
+The scripts choose a profile for the host they run on, unless `-p` names one:
 
 | Host | Default profile | Executor | Containers |
 | --- | --- | --- | --- |
@@ -9,7 +25,8 @@ on, unless `-p` names one:
 | Sherlock (Slurm with `apptainer`) | `sherlock` | Slurm | Apptainer |
 | Anything else | `local,docker` | local | Docker |
 
-`--queue` chooses where the jobs go, and means what each site calls it:
+Any other Slurm cluster is assigned `local,docker`, with a note on stderr. Specify the executor and
+container system with `-p` (e.g. `slurm,apptainer`). `--queue` chooses where the task jobs go, and means what each site calls it:
 
 | Profile | `--queue` is | Default |
 | --- | --- | --- |
@@ -17,24 +34,8 @@ on, unless `-p` names one:
 | `sherlock` | a partition | `normal` |
 | `slurm` | a partition | `regular` |
 
-Another Slurm cluster also gets `local,docker`, with a note on stderr; choose its profile with
-`-p`. Run the command on a login node from a checkout that compute nodes can read. The
-Nextflow manager stays on that login node and submits each task as a Slurm job, so keep it
-running for the whole run, for example under `tmux` or `nohup`.
-
-To run the manager in the queue too, submit the run instead; it returns once the job is queued:
-
-```bash
-pixi run submit-pipeline -T 2-00:00:00 -- --workflow tss-seq -R /path/references /path/tss.tsv
-```
-
-`scripts/submit-pipeline.sh` takes its own options first (`--help` lists them), then passes
-everything else to `scripts/run-pipeline.sh` unchanged. The manager job runs from the current
-folder with 2 CPUs and 8 GB by default, and its log goes to `~/logs/genesis/` (`-L` to change).
-`-Q` chooses where the manager runs, not the tasks: the `shared` QOS on Perlmutter (at most 48
-hours; `-Q workflow` for NERSC's `workflow` QOS, up to 90 days, once your project has access),
-the `normal` partition on Sherlock. Its walltime (`-T`) caps the whole run. Two minutes before
-it, Nextflow is told to stop and cancels its task jobs; submit again to resume the run.
+For a short run you can instead keep the manager on the login node with `pixi run pipeline`
+(or another `pipeline-*` task) under `tmux` or `nohup`; it takes the same arguments.
 
 Each run lives in `WORKSPACE/RUN_NAME/`. On both clusters the default workspace is
 `$SCRATCH/workspace`, which the site purges, so the outputs to keep, `output/` and `trace/`, go
@@ -58,7 +59,7 @@ in `conf/sites/` show these settings; copy one outside the checkout and pass it 
 
 ```bash
 cd ~/genesis-preprocessing
-pixi run pipeline /path/samples.tsv
+pixi run submit-pipeline --workflow dap-seq /path/samples.tsv
 ```
 
 **Images.** Compute nodes only run images that podman-hpc has pulled and squashed into
@@ -93,20 +94,21 @@ work folder, as ATAC_FILTER does.
 profile checks Slurm every 5 minutes and submits at most 20 jobs a minute, 15 at a time. Each
 pipeline stage therefore waits up to 5 minutes, which matters only for short tasks; the `test`
 profile (`-p nersc,test`) checks every minute and caps tasks at 1 CPU, 2 GB and 5 minutes. A
-login node suits campaigns of a few days; NERSC's `workflow` QOS (`pixi run submit-pipeline -Q
-workflow`) is meant for longer ones. `submit-pipeline` pulls the images on the login node
-before submitting, since pulls inside jobs run out of memory.
+`shared`-QOS manager suits campaigns of up to 48 hours; NERSC's `workflow` QOS (`pixi run
+submit-pipeline -Q workflow`) is meant for longer ones. `submit-pipeline` pulls the images on the
+login node before submitting, since pulls inside jobs run out of memory.
 
-**Checking a setup.** A stub run starts every task in its container without running the tools:
+**Checking a setup.** A stub run starts every task in its container without running the tools.
+The scheduler may start it sooner with a shorter walltime:
 
 ```bash
-pixi run pipeline -p nersc,test -R /path/references /path/samples.tsv -stub-run
+pixi run submit-pipeline -T 00:30:00 -p nersc,test --workflow tss-seq /path/samples.tsv -stub-run
 ```
 
 ## Sherlock (Stanford)
 
 ```bash
-pixi run pipeline /path/samples.tsv
+pixi run submit-pipeline --workflow rna-seq /path/samples.tsv
 ```
 
 The `sherlock` profile submits to the `normal` partition (`--queue`, a partition here, selects

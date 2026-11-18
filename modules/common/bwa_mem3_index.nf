@@ -31,7 +31,6 @@ process BWA_MEM3_INDEX {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_ALIGNMENT.yaml"
     container "${dotenv('GENESIS_ALIGNMENT_IMAGE')}"
     tag "${ref.id}"
     // <fasta>.sha256 records the FASTA hash and every product's size; GET_REFERENCES reuses products

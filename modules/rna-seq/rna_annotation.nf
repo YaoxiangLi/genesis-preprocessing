@@ -9,7 +9,6 @@ process RNA_ANNOTATION {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_RNA_COUNTS.yaml"
     container "${dotenv('GENESIS_RNA_COUNTS_IMAGE')}"
     tag "${ref.id}"
     input:

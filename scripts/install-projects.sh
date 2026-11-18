@@ -14,4 +14,4 @@ pixi install --manifest-path "$root/pixi.toml" --locked
 # version so a managed free-threaded build of the same version is never chosen instead.
 uv python install "$(sed 's/+gil$//' "$root/genesis_tools/.python-version")"
 uv sync --project "$root/genesis_tools" --locked
-# YAML environments are created by Nextflow's conda profile, or by Docker builds.
+# YAML environments are built into Docker images (scripts/build-dockers.sh).

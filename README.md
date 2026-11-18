@@ -1,34 +1,16 @@
-# Genesis: plant DAP-seq and ATAC-seq processing
+# Genesis: plant sequencing data preprocessing
 
-Genesis turns plant DAP-seq and paired-end bulk ATAC-seq reads, and published
-single-cell ATAC fragments, into peaks, signal tracks and quality-control reports,
-and plant RNA-seq reads into gene counts and tracks. It runs on a single server or
-through Nextflow on a cluster.
+Genesis turns public plant sequencing data into model-ready outputs: DAP-seq and bulk and
+single-cell ATAC-seq into peaks, signal tracks and QC; RNA-seq into gene counts and tracks; and
+TSS mapping (CAGE, TSS-seq, csRNA-seq, RAMPAGE, Smar2C2) into TSS tags and clusters. It is built to
+run on NERSC Perlmutter: `pixi run submit-pipeline` submits the Nextflow manager as a Slurm job,
+which then submits each task as its own job. Local runs are for quick debugging.
 
-Metadata discovery, curation and review are in
-[genesis-curation](https://github.com/kundajelab/genesis-curation).
-
-<a id="architecture-and-current-capabilities"></a>
-
-## Scientific purpose and current evidence
-
-Genesis supplies traceable preprocessing and curated data for **plant
-sequence-to-function prediction and experimentally testable sequence design**.
-The chain is data → declared measurement → model input → downstream test.
-It is not a validated plant foundation model or an MPRA platform.
-
-Nextflow runs the supported scientific workflows.
-
-| Implemented capability | Evidence scope | Remaining acceptance |
-| --- | --- | --- |
-| DAP and bulk ATAC workflows | Real tools on synthetic inputs; selected public subsets | Full-depth biological and task-specific acceptance |
-
-Earlier validation reports and evidence were removed from this repository; see
-`validation/` at commit e2e2aa9.
-
-Read the [scientific overview](docs/scientific-overview.md) for measurement
-semantics, three evidence-backed observations, and what remains between files,
-model training and experimental validation.
+Metadata discovery and curation are in
+[genesis-curation](https://github.com/kundajelab/genesis-curation). Curated sample sheets for
+every workflow are in the [Stanford-Genesis Hugging Face
+bucket](https://huggingface.co/buckets/Stanford-Genesis/genesis-curation), and the
+[scientific overview](docs/scientific-overview.md) explains what each signal measures.
 
 ## Pipeline workflow maps
 
@@ -68,13 +50,9 @@ From raw 10x reads on NCBI SRA, the same steps follow download, chromap and cell
 
 [TSS mapping guide](docs/usage/tss-seq.md)
 
-<a id="install-and-run"></a>
-<a id="environments-and-docker-builds"></a>
-
 ## Install and check your environment
 
-Install [Pixi](https://pixi.sh/). For the default execution mode, Docker must
-already be available to your user. Run:
+On a Perlmutter login node, install [Pixi](https://pixi.sh/), then:
 
 ```bash
 git clone https://github.com/kundajelab/genesis-preprocessing.git
@@ -82,21 +60,34 @@ cd genesis-preprocessing
 pixi run install-all
 ```
 
-This installs everything the pipelines need: run DAP-seq with `pixi run pipeline`,
-bulk ATAC with `pixi run pipeline-atac`, scATAC with `pixi run pipeline-scatac` and
-RNA-seq with `pixi run pipeline-rna` (see below).
+Runs use the pinned container images in `conf/genesis-images.lock`. On Perlmutter they run with
+podman-hpc and on Sherlock with Apptainer; elsewhere Docker must be available to your user.
 
-## Run your first analysis
+## Run on Perlmutter
 
-Run the examples below from the checkout, substituting your input paths. Both
-pipelines need an explicitly selected reference genome; Genesis does not choose
-or download an assembly for you.
+Each workflow takes one tab-separated sample sheet (examples below) and an explicitly chosen
+reference genome: put the FASTA and annotation named in the sheet in your references folder,
+`$CFS/PROJECT/$USER/references` by default. Then submit the run from the checkout:
+
+```bash
+pixi run submit-pipeline --workflow atac-seq -n atac-A /path/atac.tsv
+# To continue a run that stopped, submit it again with -resume.
+pixi run submit-pipeline --workflow atac-seq -n atac-A /path/atac.tsv -resume
+```
+
+The command returns once the manager job is queued; its log goes to `~/logs/genesis/`. `--workflow`
+is `dap-seq` (the default), `atac-seq`, `scatac-seq`, `scatac-reads`, `rna-seq` or `tss-seq`.
+Each run works in `$SCRATCH/workspace/RUN_NAME/` and keeps its outputs and traces in
+`$CFS/PROJECT/$USER/runs/RUN_NAME/`, where a resource summary (`resources.tsv`) is written when it
+finishes. `pixi run submit-pipeline --help` lists the manager's options (walltime, QOS, log
+folder); [running on Perlmutter and Sherlock](docs/usage/clusters.md) covers references, images,
+accounts and QOS. The pipeline checks the whole sheet before starting any task.
+
+Small test sheets for every workflow are in [samplesheets/](samplesheets/README.md).
 
 <a id="sample-sheet"></a>
 
 ### DAP-seq
-
-Prepare a tab-separated sample sheet with this exact header:
 
 ```tsv
 sample_id	species	read1_url	read2_url	control_sample	reference_fasta
@@ -104,121 +95,85 @@ treatment	Arabidopsis_thaliana	https://example.org/treatment.fastq.gz	-	control	
 control	Arabidopsis_thaliana	https://example.org/control.fastq.gz	-	-	TAIR10.fa.gz
 ```
 
-Replace the example URLs. Use `-` for an absent mate or control. Put the named
-gzipped FASTA in your reference directory. Each treatment's control must occur
-in the same sheet and match its species, reference and read layout.
-
-Run the pipeline from the checkout with `pixi run pipeline`. Pixi runs it from the
-checkout folder, so give the sheet and other paths as absolute paths:
-
-```bash
-pixi run pipeline -w /scratch/genesis -n study-A -R /data/references /data/dap.tsv
-# Continue the same analysis after an interruption.
-pixi run pipeline -w /scratch/genesis -n study-A -R /data/references /data/dap.tsv -resume
-```
-
-Alternatively, call the script directly; it uses the checkout's Pixi environment
-itself, and relative paths resolve from your current folder:
-
-```bash
-/path/to/genesis-preprocessing/scripts/run-pipeline.sh -w /scratch/genesis -n study-A \
-  -R /data/references dap.tsv
-```
-
-`pixi run pipeline --help` lists the options. The profile follows the host: `nersc` on
-Perlmutter, `sherlock` on Sherlock and `local,docker` elsewhere; choose another with `-p`
-(for example `-p local,conda`). See [running on Perlmutter and Sherlock](docs/usage/clusters.md)
-for references, results, accounts and images there. The pipeline checks the whole sheet
-before starting any task.
-
-Results appear in `/scratch/genesis/study-A/output/`, grouped by species and
-sample. Treatments receive peaks and peak scores; controls receive QC and tracks.
-Keep the run's `work/` directory to allow resume.
-
-Peak calling uses MACS3 built from a pinned upstream revision; see
-[MACS3 builds and resources](docs/usage/macs3.md).
-
-Read the [DAP-seq guide](docs/usage/dapseq-reference.md) for complete sample-sheet
-rules, reference setup, analysis choices and output definitions.
+Use `-` for an absent mate or control. Each treatment's control must occur in the same sheet and
+match its species, reference and read layout. Treatments receive peaks and peak scores; controls
+receive QC and tracks. Peak calling uses MACS3 built from a pinned upstream revision; see
+[MACS3 builds and resources](docs/usage/macs3.md). The [DAP-seq guide](docs/usage/dapseq-reference.md)
+has the complete sheet rules, reference setup, analysis choices and output definitions.
 
 ### Bulk ATAC-seq
 
-Bulk ATAC uses the same launcher, references folder and workspace as DAP-seq. Its
-sample sheet has one row per paired-end library:
+One row per paired-end library:
 
 ```tsv
 sample_id	species	read1_url	read2_url	reference_fasta	reference_genes	organelle_contigs
 leaf_rep1	Arabidopsis_thaliana	https://example.org/rep1_1.fastq.gz	https://example.org/rep1_2.fastq.gz	TAIR10.fa.gz	TAIR10.genes.bed	ChrC,ChrM
 ```
 
-```bash
-pixi run pipeline-atac -w /scratch/genesis -n atac-A -R /data/references /data/atac.tsv
-```
-
-Results appear in `/scratch/genesis/atac-A/output/`: fragments, peaks, Tn5 cut-count
-tracks and QC for each library. The [ATAC guide](docs/usage/bulk-atac.md) explains
-the columns, filters and metrics.
+Each library gets fragments, peaks, Tn5 cut-count tracks and QC. The
+[ATAC guide](docs/usage/bulk-atac.md) explains the columns, filters and metrics.
 
 ### scATAC pseudobulks
 
-scATAC starts from published single-cell fragment files, such as 10x
-`fragments.tsv.gz`, and a cell list per library that assigns each barcode to a group:
+From published single-cell fragment files, such as 10x `fragments.tsv.gz`, and a cell list per
+library that assigns each barcode to a group (`--workflow scatac-seq`):
 
 ```tsv
 sample_id	species	fragments_url	cells_url	reference_fasta	reference_genes	organelle_contigs
 root_rep1	Arabidopsis_thaliana	https://example.org/rep1.fragments.tsv.gz	https://example.org/rep1.cells.tsv	TAIR10.fa.gz	TAIR10.genes.bed	Mt,Pt
 ```
 
-```bash
-pixi run pipeline-scatac -w /scratch/genesis -n scatac-A -R /data/references /data/scatac.tsv
-```
-
-Each library's groups become separate pseudobulks with peaks, Tn5 cut-count tracks and
-QC. The [scATAC guide](docs/usage/scatac-seq.md) explains the cell list and metrics.
-
-When only raw 10x reads are published, `pixi run pipeline-scatac-reads` downloads them from
-NCBI SRA, makes the fragments with chromap and calls cells, then runs the same steps; see
-[From raw 10x reads](docs/usage/scatac-seq.md#from-raw-10x-reads).
+When only raw 10x reads are published, `--workflow scatac-reads` downloads them from NCBI SRA,
+makes the fragments with chromap and calls cells first; see
+[From raw 10x reads](docs/usage/scatac-seq.md#from-raw-10x-reads). Each library's groups become
+separate pseudobulks with peaks, Tn5 cut-count tracks and QC. The
+[scATAC guide](docs/usage/scatac-seq.md) explains the cell list and metrics.
 
 ### RNA-seq
 
-RNA-seq takes single- or paired-end libraries, their strandedness, and the reference's
-annotation as published, GFF3 or GTF:
+Single- or paired-end libraries, their strandedness, and the reference's annotation as published,
+GFF3 or GTF:
 
 ```tsv
 sample_id	species	read1_url	read2_url	strandedness	reference_fasta	reference_annotation	organelle_contigs
 leaf_rep1	Arabidopsis_thaliana	https://example.org/rep1_1.fastq.gz	https://example.org/rep1_2.fastq.gz	reverse	TAIR10.fa.gz	Araport11.gff3	ChrC,ChrM
 ```
 
-```bash
-pixi run pipeline-rna -w /scratch/genesis -n rna-A -R /data/references /data/rna.tsv
-```
-
-Each library gets STAR alignments, featureCounts gene counts, a CPM track and QC,
-including strandedness, rRNA and organelle fractions. The
-[RNA-seq guide](docs/usage/rna-seq.md) explains the plant-specific settings.
-
-<a id="analysis-choices"></a>
-<a id="outputs-and-resources"></a>
-
+Each library gets STAR alignments, featureCounts gene counts, a CPM track and QC, including
+strandedness, rRNA and organelle fractions. The [RNA-seq guide](docs/usage/rna-seq.md) explains
+the plant-specific settings.
 
 ### TSS mapping
 
-TSS mapping takes CAGE, TSS-seq, csRNA-seq, RAMPAGE or Smar2C2 libraries, with the
-fixed bases to trim from each read's start and the 3' adapter:
+CAGE, nAnT-iCAGE, TSS-seq, oligo-capping, csRNA-seq, RAMPAGE or Smar2C2 libraries, with the fixed
+bases to trim from each read's start and the 3' adapter:
 
 ```tsv
 sample_id	species	read1_url	read2_url	method	trim_5p	adapter_3p	reference_fasta	reference_annotation	organelle_contigs
 wt_rep1	Arabidopsis_thaliana	https://example.org/wt1.fastq.gz	-	CAGE	9	TCGTATGCCGTCTTCTGCTTG	TAIR10.fa.gz	Araport11.gff3	ChrC,ChrM
 ```
 
+Each library gets per-base TSS tags on each strand, paraclu TSS clusters and QC. The
+[TSS mapping guide](docs/usage/tss-seq.md) explains the methods, trimming, paired-end layouts and
+metrics.
+
+## Debug locally
+
+Local runs use Docker and the same images, on one machine. Use them to try a sheet or a change on
+a small input before submitting; `pixi run pipeline` runs DAP-seq, and `pipeline-atac`,
+`pipeline-scatac`, `pipeline-scatac-reads`, `pipeline-rna` and `pipeline-tss` the others. Pixi runs
+from the checkout folder, so give absolute paths:
+
 ```bash
-pixi run pipeline-tss -w /scratch/genesis -n tss-A -R /data/references /data/tss.tsv
+# Check a sheet and the whole task graph without running the tools.
+pixi run pipeline-atac -p local,test -w /tmp/genesis -R /data/references /data/atac.tsv -stub-run
+# A real local run.
+pixi run pipeline-atac -w /tmp/genesis -n atac-A -R /data/references /data/atac.tsv
 ```
 
-Each library gets per-base TSS tags on each strand, paraclu TSS clusters and QC. The
-[TSS mapping guide](docs/usage/tss-seq.md) explains the methods, trimming, paired-end
-layouts and metrics.
+On Perlmutter, `-p nersc,test` does the same stub check through Slurm. Keep a run's `work/`
+folder to allow `-resume`.
+
 ## Find and interpret your results
 
 Start with the MultiQC report, then inspect the library-level QC and signal
@@ -235,18 +190,18 @@ flags need interpretation, and zero peaks can be a valid result.
 | ATAC fragments and QC table | Usable paired fragments, FRiP, TSS enrichment and library complexity |
 | scATAC pseudobulk QC table | Cells, fragments, insertion FRiP and TSS enrichment per group |
 | RNA-seq gene counts and QC table | Unique-alignment gene counts; strandedness, rRNA, organelle and multi-mapping fractions |
+| TSS tags, clusters and QC table | Per-base TSS counts on each strand, paraclu clusters, and the fraction of tags near annotated TSSs |
 | Provenance and Nextflow reports | Inputs, analysis settings, software identity and execution records |
 
 See the [DAP output definitions](docs/usage/dapseq-reference.md#outputs-and-resources)
 and [ATAC outputs](docs/usage/bulk-atac.md#outputs) before comparing measurements
 between tools or studies.
 
-<a id="reference-compatibility-and-development"></a>
-
 ## Choose your next task
 
 | I want to… | Start here |
 | --- | --- |
+| Configure runs on Perlmutter or Sherlock | [Cluster guide](docs/usage/clusters.md) |
 | Run DAP-seq or understand its scientific settings | [DAP-seq guide](docs/usage/dapseq-reference.md) |
 | Run paired-end bulk ATAC | [Bulk ATAC guide](docs/usage/bulk-atac.md) |
 | Make pseudobulks from single-cell ATAC fragments | [scATAC guide](docs/usage/scatac-seq.md) |
@@ -257,30 +212,13 @@ between tools or studies.
 
 The [documentation index](docs/README.md) also links to reference material.
 
-<a id="verification"></a>
-
-## Benchmarks and tool choices
-
-The [benchmark
-guide](https://github.com/kundajelab/genesis-curation/blob/12bb02cb9ec98fe8c4c0ec660adcfdeb7384f20e/benchmarks/README.md)
-(archived in genesis-curation) has the experiment matrix, metric definitions and reproduction
-commands. It distinguishes package comparisons from parameter sensitivity and software
-tests. A higher mapping rate or more peaks alone is not evidence that one method is
-better.
-
-Earlier comparisons covered 64 Arabidopsis method/depth cases with independent TF
-motif evidence, biological ATAC replicates, reference assemblies and annotation
-releases. They did not establish a better replacement for the BWA-MEM2/MACS3
-defaults across assays. Optimized MACS3 builds were compared for speed, memory use
-and output equivalence at matched CPU allocations, and complete workflows were
-scored against nf-core ATAC with common metric definitions.
-
 ## Troubleshooting
 
 | Problem | First step |
 | --- | --- |
 | `Missing input TSV` from `pixi run pipeline` | Pixi runs from the checkout folder: give absolute paths, or call `scripts/run-pipeline.sh` directly. |
-| Docker or Nextflow is unavailable | Rerun `pixi run install-all` and check that Docker works for your user. |
+| A submitted run stops at its walltime | Submit it again with `-resume`; pass `-T` for a longer manager walltime. |
+| Images fail to pull on Perlmutter | Pulls run on the login node before submitting; check that Docker Hub is reachable and rerun. |
 | Reference or input checksum differs | Check which file changed. Preserve the old run and use a new input/run version. |
 | A resumed run repeats some tasks | Check changed inputs, code and reference-cache paths in the Nextflow trace. |
 | No peaks or unexpected QC values | Inspect depth, reference, assay settings and control assignment before changing parameters. |

@@ -1,9 +1,9 @@
 """Regression checks for TSS mapping (workflows/tss-seq.nf).
 
-Without options: stub runs and sheet checks. With --conda: real tools on a synthetic genome, with
-CAGE reads (barcode, the cap's non-templated G, 3' adapter), TSS-seq reads (start at the TSS),
-RAMPAGE reads (template-switch Gs) and Smar2C2 read pairs (primer, UMI and Gs in either mate,
-PCR duplicates, oligo-dT reads), checking the exact tag positions, clusters and QC.
+Without options: stub runs and sheet checks. With --docker: real tools in the pinned images on a
+synthetic genome, with CAGE reads (barcode, the cap's non-templated G, 3' adapter), TSS-seq reads
+(start at the TSS), RAMPAGE reads (template-switch Gs) and Smar2C2 read pairs (primer, UMI and Gs
+in either mate, PCR duplicates, oligo-dT reads), checking the exact tag positions, clusters and QC.
 """
 
 from __future__ import annotations
@@ -78,7 +78,7 @@ def write_sheet(path: Path, rows: list[dict[str, str]]) -> None:
         writer.writerows(rows)
 
 
-def create_fixture(work: Path, base_url: str, *, conda: bool) -> tuple[Path, dict[str, Counter]]:
+def create_fixture(work: Path, base_url: str, *, docker: bool) -> tuple[Path, dict[str, Counter]]:
     """References, reads and a sheet; returns each library's expected tags."""
     generator = random.Random(6031)
     chromosome = list("".join(generator.choices("ACGT", k=300000)))
@@ -127,7 +127,7 @@ def create_fixture(work: Path, base_url: str, *, conda: bool) -> tuple[Path, dic
     expected: dict[str, Counter] = {}
     rows = []
     libraries = list(LIBRARIES)
-    if conda:
+    if docker:
         # The CAGE reads trimmed past the cap's G and the first transcribed base: every TSS moves
         # 1 base downstream. (Trimming just the cap's G, 10, changes nothing: it is not templated.)
         libraries.append(("overtrimmed", "CAGE", "11"))
@@ -193,15 +193,19 @@ def create_fixture(work: Path, base_url: str, *, conda: bool) -> tuple[Path, dic
         )
     sheet = work / "samples.tsv"
     write_sheet(sheet, rows)
-    limits = executor_limits(docker=False)
-    if conda:
-        limits += f"conda.cacheDir = '{work.parent / 'conda_cache'}'\n"
+    limits = executor_limits(docker=docker)
+    if docker:
+        # Linux Docker only resolves host.docker.internal with an explicit host-gateway mapping.
+        limits += (
+            "docker.runOptions = '-u $(id -u):$(id -g) "
+            "--add-host=host.docker.internal:host-gateway'\n"
+        )
     (work / "limits.config").write_text(limits)
     return sheet, expected
 
 
 def run_tss(
-    work: Path, sheet: Path, *, conda: bool = False, expect_failure: bool = False
+    work: Path, sheet: Path, *, docker: bool = False, expect_failure: bool = False
 ) -> subprocess.CompletedProcess[str]:
     command = [
         "nextflow",
@@ -212,7 +216,7 @@ def run_tss(
         "-c",
         str(ROOT / "conf/tss-seq.config"),
         "-profile",
-        "local,test,conda" if conda else "local,test",
+        "local,test,docker" if docker else "local,test",
         "--input",
         str(sheet),
         "--references",
@@ -228,9 +232,9 @@ def run_tss(
         "-ansi-log",
         "false",
     ]
-    if not conda:
+    if not docker:
         command.append("-stub-run")
-    print(f"Running {'conda' if conda else 'stub'} TSS mapping in {work}", flush=True)
+    print(f"Running {'Docker' if docker else 'stub'} TSS mapping in {work}", flush=True)
     environment = {
         **os.environ,
         "PATH": f"{Path(sys.executable).parent}:{os.environ['PATH']}",
@@ -242,7 +246,7 @@ def run_tss(
         cwd=work,
         env=environment,
         log=work / "output-run.log",
-        timeout=3600 if conda else 300,
+        timeout=3600 if docker else 300,
         expect_failure=expect_failure,
     )
 
@@ -355,7 +359,9 @@ def check_failures(work: Path, sheet: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--conda", action="store_true", help="Use real tools from environments/")
+    parser.add_argument(
+        "--docker", action="store_true", help="Use real tools in the pinned Docker images"
+    )
     parser.add_argument(
         "--keep", action="store_true", help="Retain fixtures, logs, and work directories"
     )
@@ -363,17 +369,17 @@ def main() -> None:
     runs = ROOT / "tests" / ".runs"
     runs.mkdir(exist_ok=True)
     work = Path(
-        tempfile.mkdtemp(prefix=f"tss-{'conda' if args.conda else 'regression'}-", dir=runs)
+        tempfile.mkdtemp(prefix=f"tss-{'docker' if args.docker else 'regression'}-", dir=runs)
     )
     passed = False
     try:
         (work / "inputs").mkdir()
-        with serve(work / "inputs", docker=False) as base_url:
-            sheet, expected = create_fixture(work, base_url, conda=args.conda)
-            assert run_tss(work, sheet, conda=args.conda).returncode == 0
+        with serve(work / "inputs", docker=args.docker) as base_url:
+            sheet, expected = create_fixture(work, base_url, docker=args.docker)
+            assert run_tss(work, sheet, docker=args.docker).returncode == 0
             # The real-tool run adds a library with a wrong trim_5p.
-            check_trace(work, len(LIBRARIES) + 1 if args.conda else len(LIBRARIES))
-            if args.conda:
+            check_trace(work, len(LIBRARIES) + 1 if args.docker else len(LIBRARIES))
+            if args.docker:
                 check_results(work, expected)
             else:
                 check_failures(work, sheet)
@@ -382,7 +388,7 @@ def main() -> None:
                     "plant.fa.gz",
                     "plant.gff3",
                 ]
-        label = "Real-tool (conda) TSS mapping" if args.conda else "TSS Nextflow regression"
+        label = "Real-tool (docker) TSS mapping" if args.docker else "TSS Nextflow regression"
         print(f"PASS: {label}", flush=True)
         passed = True
     finally:

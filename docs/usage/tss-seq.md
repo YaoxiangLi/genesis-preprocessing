@@ -15,13 +15,16 @@ methods RAMPAGE and Smar2C2. Each library gets per-base TSS tag counts (CTSSs), 
 clusters and QC. TIF-seq, nanoCAGE and nanoPARE are not supported yet.
 
 ```bash
-pixi run pipeline-tss -w /scratch/genesis -n tss-A -R /data/references /data/tss.tsv
-# Continue the same analysis after an interruption.
-pixi run pipeline-tss -w /scratch/genesis -n tss-A -R /data/references /data/tss.tsv -resume
+# On Perlmutter or Sherlock: submit the run as a Slurm job.
+pixi run submit-pipeline --workflow tss-seq -n tss-A /path/tss.tsv
+# To debug locally with Docker, on a small sheet.
+pixi run pipeline-tss -w /tmp/genesis -n tss-A -R /data/references /data/tss.tsv
 ```
 
-`pixi run pipeline-tss` is `scripts/run-pipeline.sh --workflow tss-seq`; run either with
-`--help` for the options. Pixi runs from the checkout folder, so give absolute paths.
+Add `-resume` to either command to continue a run that stopped. `pixi run pipeline-tss` is
+`scripts/run-pipeline.sh --workflow tss-seq`; run either script with `--help` for the options, and see
+[running on Perlmutter and Sherlock](clusters.md). Pixi runs from the checkout folder, so give
+absolute paths.
 
 ## Sample sheet
 

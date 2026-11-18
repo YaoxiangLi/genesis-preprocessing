@@ -8,7 +8,6 @@ process CHROM_SIZES {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_ALIGNMENT.yaml"
     container "${dotenv('GENESIS_ALIGNMENT_IMAGE')}"
     tag "${ref.id}"
     // Stub runs never publish into the shared references folder: their fake products would be reused.

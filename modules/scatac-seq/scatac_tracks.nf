@@ -4,7 +4,6 @@ process SCATAC_TRACKS {
     cpus 2
     memory 8.GB
     time 4.h
-    conda "${moduleDir}/../../environments/GENESIS_DEEPTOOLS.yaml"
     container "${dotenv('GENESIS_DEEPTOOLS_IMAGE')}"
     tag "${meta.id}"
     publishDir {

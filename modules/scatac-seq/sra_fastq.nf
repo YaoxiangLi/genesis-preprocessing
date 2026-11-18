@@ -12,7 +12,6 @@ process SRA_FASTQ {
     // (e.g. a run without the expected reads, which converting again cannot fix) stops the run.
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_SRA.yaml"
     container "${dotenv('GENESIS_SRA_IMAGE')}"
     tag "${meta.id}:${run}"
     input:

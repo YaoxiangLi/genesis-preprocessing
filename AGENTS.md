@@ -6,12 +6,14 @@ A nextflow pipeline to process and analyze plant transcription factors.
 ### Environments
 The main project environment is managed by pixi. There are subprojects:
 - genesis_tools is a Python project managed by uv. It has software tools needed for some Processes in the main pipeline.
-- environments/GENESIS_ALIGNMENT.yaml defines a conda environment used for alignment and indexing.
-- environments/GENESIS_MACS3.yaml defines a conda environment used for peak calling and intersection.
-- environments/GENESIS_SPP.yaml defines a conda environment used for QC.
+- environments/GENESIS_ALIGNMENT.yaml defines the tool environment (built into an image) for alignment and indexing.
+- environments/GENESIS_MACS3.yaml defines the tool environment (built into an image) for peak calling and intersection.
+- environments/GENESIS_SPP.yaml defines the tool environment (built into an image) for QC.
 
 ### Compute resources
-The project runs locally on macOS or Linux and on supported scheduler profiles.
+Production runs use NERSC Perlmutter: `pixi run submit-pipeline` submits the Nextflow manager as
+a Slurm job. Local runs (macOS or Linux, Docker) are for debugging and tests. We keep the
+ability to run on Sherlock in case we need extra compute.
 - Use existing SSH authentication. If authentication fails, report the issue;
   do not create or modify credentials, keys, or SSH configuration.
 - Use only accounts, queues and allocations authorized for the task. Keep local

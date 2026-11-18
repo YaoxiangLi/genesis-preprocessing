@@ -12,7 +12,6 @@ process SRA_PREFETCH {
     // A transfer can stall or fail; fetch the run again, and on a timeout with more time.
     errorStrategy 'retry'
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_SRA.yaml"
     container "${dotenv('GENESIS_SRA_IMAGE')}"
     tag "${meta.id}:${run}"
     input:

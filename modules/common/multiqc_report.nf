@@ -10,7 +10,6 @@ process MULTIQC_REPORT {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_MULTIQC.yaml"
     container "${dotenv('GENESIS_MULTIQC_IMAGE')}"
     publishDir "${params.publish_base}/output/multiqc", mode: 'copy', pattern: 'multiqc*'
     input:

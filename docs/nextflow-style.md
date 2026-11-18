@@ -17,7 +17,7 @@ Each workflow has a script, a config and a parameter schema:
 
 The DAP scaffold follows igvf_pseudobulking_pipeline:
 
-- Each process declares its resources, conda YAML, and nf-dotenv container image.
+- Each process declares its resources and its nf-dotenv container image.
 - DAP-seq's QC, tracks, and bwa-mem3 indexing and alignment size their own resources from the
   genome, BAM and read sizes; QC still takes a resources input, unused, to keep its cache keys.
 - BWA options and the pinned SPP script are also explicit inputs.
@@ -33,7 +33,7 @@ The DAP scaffold follows igvf_pseudobulking_pipeline:
   3.14.5+gil so uv never selects an installed free-threaded build; uv cannot download
   for +gil, so install-projects.sh and the Dockerfile install plain 3.14.5 first. It is
   containerized with
-  dockers/uv-project.Dockerfile. Its conda equivalent is GENESIS_TOOLS.yaml.
+  dockers/uv-project.Dockerfile.
 - Run Docker build/discovery scripts through Pixi, whose Nextflow dependency
   supplies GNU coreutils on macOS, including mktemp.
 - The Dockerfiles use pinned base images. The uv recipe copies
@@ -51,7 +51,6 @@ pixi run install-all
 pixi run build-dockers --no-push
 pixi run build-dockers --no-push -- genesis_alignment genesis_tools
 pixi run pipeline /path/INPUT.tsv
-pixi run pipeline -p local,conda /path/INPUT.tsv
 ```
 
 Every Docker build targets both linux/amd64 and linux/arm64. The build scripts

@@ -15,7 +15,6 @@ uv_sub_projects = ["genesis_tools"]
 nextflow = ">=26.10.4,<27"
 uv = ">=0.11.15,<0.12"
 shellcheck = ">=0.11,<0.12"
-micromamba = ">=2.5,<2.6"
 python = "3.14.5.*"
 
 [tasks]

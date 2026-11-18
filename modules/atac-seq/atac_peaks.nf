@@ -14,7 +14,6 @@ process ATAC_PEAKS {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_MACS3.yaml"
     container "${dotenv('GENESIS_MACS3_IMAGE')}"
     tag "${meta.id}"
     publishDir { "${params.publish_base}/output/${meta.species}/${meta.id}" }, mode: 'copy',

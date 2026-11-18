@@ -6,7 +6,6 @@ process SCATAC_DOWNLOAD {
     cpus 2
     memory '1 GB'
     time '4h'
-    conda "${moduleDir}/../../environments/GENESIS_ALIGNMENT.yaml"
     container "${dotenv('GENESIS_ALIGNMENT_IMAGE')}"
     tag "${meta.id}"
     input:

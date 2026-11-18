@@ -10,7 +10,6 @@ process GET_WHITELIST {
     // A transfer can stall or fail; fetch it again.
     errorStrategy 'retry'
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_ALIGNMENT.yaml"
     container "${dotenv('GENESIS_ALIGNMENT_IMAGE')}"
     tag "${name}"
     // Stub runs never publish into the shared references folder: their fake list would be reused.

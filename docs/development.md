@@ -110,8 +110,8 @@ copying explicitly. Neither warning is a failed scientific check.
 
 Keep scientific settings explicit. A change to alignment, filtering, peak calling or
 count definitions needs a comparison of the affected outputs, not just a successful
-exit code. The archived [benchmark
-guide](https://github.com/kundajelab/genesis-curation/blob/12bb02cb9ec98fe8c4c0ec660adcfdeb7384f20e/benchmarks/README.md) shows how earlier comparisons were designed.
+exit code. The [earlier method benchmarks](README.md#earlier-work) show how such comparisons
+were designed.
 
 | Area | Implementation | Focused check |
 | --- | --- | --- |
@@ -153,9 +153,9 @@ with the commands actually tested and any remaining limitations.
 Keep benchmark results, environment files and assistant configuration outside Git.
 
 Real-tool acceptance is opt-in: `pixi run validate-docker` runs DAP-seq with its pinned
-containers on synthetic inputs. For bulk ATAC, scATAC and RNA-seq, run
-`tests/verify_atac.py`, `tests/verify_scatac.py` or `tests/verify_rna.py` with `--docker`,
-or `--conda` to build the tools from `environments/*.yaml` where Docker is unavailable.
+containers on synthetic inputs. For the other workflows, run `tests/verify_atac.py`,
+`tests/verify_rna.py`, `tests/verify_tss.py`, `tests/verify_scatac.py` or
+`tests/verify_scatac_reads.py` with `--docker`.
 
 ## Data and configuration
 
@@ -171,4 +171,3 @@ before committing.
 
 Keep site-specific configuration outside the checkout. Test schedulers in the
 environment where they will run; local checks do not establish cluster compatibility.
-Earlier validation records were removed; see `validation/` at commit e2e2aa9.

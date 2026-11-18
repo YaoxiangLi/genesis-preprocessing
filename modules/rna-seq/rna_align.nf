@@ -14,7 +14,6 @@ process RNA_ALIGN {
     // Retry with twice the memory or time when an attempt ran out of it (modules/common/retry.nf).
     errorStrategy { retryErrorStrategy(task) }
     maxRetries 2
-    conda "${moduleDir}/../../environments/GENESIS_STAR.yaml"
     container "${dotenv('GENESIS_STAR_IMAGE')}"
     tag "${meta.id}"
     publishDir { "${params.publish_base}/output/${meta.species}/${meta.id}/qc" }, mode: 'copy',
