@@ -55,7 +55,7 @@ pixi run submit-pipeline --workflow dap-seq -R /path/references /path/dap.tsv
 pixi run submit-pipeline --workflow dap-seq -R /path/references /path/dap.tsv -resume
 
 # Debug locally with Docker on the small test sheet.
-pixi run pipeline samplesheets/dap-seq-test.tsv
+pixi run pipeline --workflow dap-seq samplesheets/dap-seq-test.tsv
 ```
 
 You can also call `scripts/run-pipeline.sh` directly, from any folder; relative paths
