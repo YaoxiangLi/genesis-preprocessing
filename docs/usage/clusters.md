@@ -65,9 +65,10 @@ pixi run submit-pipeline --workflow dap-seq /path/samples.tsv
 **Images.** Compute nodes only run images that podman-hpc has pulled and squashed into
 `$SCRATCH/storage`; a task that pulls for itself runs out of memory. So, for the `nersc`
 profile, `scripts/run-pipeline.sh` first runs `podman-hpc pull` for every image pinned in
-`conf/genesis-images.lock`, on the login node. That takes about 3 minutes the first time and
-about a minute when the images are already there, and completes any pull that was interrupted
-earlier. A launch therefore needs Docker Hub to be reachable. The pins carry no registry and
+`conf/genesis-images.lock`, on the login node. That takes about 3 minutes the first time; images
+already squashed are skipped, since every pull counts against Docker Hub's unauthenticated
+limit, and a pull that was interrupted earlier is completed. A first launch therefore needs
+Docker Hub to be reachable. The pins carry no registry and
 Perlmutter's Podman only searches `registry.suse.com`, so `podman.registry` is `docker.io`.
 
 **Podman.** Nextflow runs containers with `podman`, but on Perlmutter that must be podman-hpc.
@@ -75,7 +76,9 @@ Perlmutter's Podman only searches `registry.suse.com`, so `podman.registry` is `
 `podman-hpc`; Slurm passes `PATH` on to the jobs. Containers run as root (`--user 0:0`), which
 podman-hpc maps to you, so task files are yours. `--userns=keep-id` would do the same, but
 podman-hpc then copies the whole image into the node's `/tmp`, which is held in memory and
-counts against the job (1.7 GB for the SPP image).
+counts against the job (1.7 GB for the SPP image). Rootless containers also drop your
+supplementary groups, so `--group-add keep-groups` keeps them: without it, a task cannot read a
+file that only your project group may read, such as another member's shared references.
 
 **Account and QOS.** Jobs are charged to your default NERSC project. For another project, or
 another QOS for one run, set `SBATCH_ACCOUNT` or `SBATCH_QOS` in your shell; `sbatch` reads them
