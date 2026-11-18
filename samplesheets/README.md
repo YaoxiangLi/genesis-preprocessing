@@ -21,12 +21,12 @@ workflow's exact header (see the [DAP-seq](../docs/usage/dapseq-reference.md),
 [bulk ATAC](../docs/usage/bulk-atac.md), [RNA-seq](../docs/usage/rna-seq.md),
 [TSS mapping](../docs/usage/tss-seq.md) and [scATAC](../docs/usage/scatac-seq.md) guides).
 Reference files are named in the sheet and looked up in the folder given by
-`-R`/`--references`; they are not downloaded automatically. On Perlmutter, project gen0035 keeps
-both references in `/global/cfs/cdirs/gen0035/references`.
+`-R`/`--references`; they are not downloaded automatically. On Perlmutter, point it at the
+project's shared references folder.
 
 ```bash
 pixi run submit-pipeline -- --workflow rna-seq -n rna-test \
-    -R /global/cfs/cdirs/gen0035/references samplesheets/rna-seq-test.tsv
+    -R /path/to/references samplesheets/rna-seq-test.tsv
 ```
 
 ## Arabidopsis thaliana
