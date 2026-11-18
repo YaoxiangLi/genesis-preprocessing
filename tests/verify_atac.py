@@ -55,7 +55,7 @@ def reverse_complement(sequence: str) -> str:
     return sequence.translate(str.maketrans("ACGT", "TGCA"))[::-1]
 
 
-def create_fixture(work: Path, base_url: str, *, engine: str | None) -> Path:
+def create_fixture(work: Path, base_url: str, *, docker: bool) -> Path:
     """Paired libraries with planted peaks, organelle reads, duplicates, repeats and adapters."""
     generator = random.Random(4105)
     chromosome = "".join(generator.choices("ACGT", k=1000000))
@@ -125,8 +125,8 @@ def create_fixture(work: Path, base_url: str, *, engine: str | None) -> Path:
         )
     sheet = work / "samples.tsv"
     write_sheet(sheet, rows)
-    limits = executor_limits(docker=engine == "docker")
-    if engine == "docker":
+    limits = executor_limits(docker=docker)
+    if docker:
         # Linux Docker only resolves host.docker.internal with an explicit host-gateway mapping.
         limits += (
             "docker.runOptions = '-u $(id -u):$(id -g) "
@@ -140,7 +140,7 @@ def run_atac(
     work: Path,
     sheet: Path,
     *,
-    engine: str | None = None,
+    docker: bool = False,
     resume: bool = False,
     suffix: str | None = None,
     expect_failure: bool = False,
@@ -156,7 +156,7 @@ def run_atac(
         "-c",
         str(ROOT / "conf/atac-seq.config"),
         "-profile",
-        f"local,test,{engine}" if engine else "local,test",
+        "local,test,docker" if docker else "local,test",
         "--input",
         str(sheet),
         "--references",
@@ -174,11 +174,11 @@ def run_atac(
         "-ansi-log",
         "false",
     ]
-    if not engine:
+    if not docker:
         command.append("-stub-run")
     if resume:
         command.append("-resume")
-    print(f"Running {engine or 'stub'} bulk ATAC ({suffix}) in {work}", flush=True)
+    print(f"Running {'docker' if docker else 'stub'} bulk ATAC ({suffix}) in {work}", flush=True)
     environment = {
         **os.environ,
         "PATH": f"{Path(sys.executable).parent}:{os.environ['PATH']}",
@@ -190,7 +190,7 @@ def run_atac(
         cwd=work,
         env=environment,
         log=work / f"output-{suffix}.log",
-        timeout=3600 if engine else 300,
+        timeout=3600 if docker else 300,
         expect_failure=expect_failure,
     )
 
@@ -203,7 +203,7 @@ def task_folder(work: Path, row: dict[str, str]) -> Path:
     return folders[0]
 
 
-def check_outputs(work: Path, *, engine: str | None) -> None:
+def check_outputs(work: Path, *, docker: bool) -> None:
     """Assert the process wiring, publication and recorded provenance."""
     rows = trace_rows(work)
     assert all(row["status"] == "COMPLETED" for row in rows), rows
@@ -246,10 +246,10 @@ def check_outputs(work: Path, *, engine: str | None) -> None:
     ).read_bytes()
     status = (published / "git-status.txt").read_text().splitlines()
     assert status[0].startswith("branch: ") and status[1].startswith("commit: "), status
-    assert status[2] == f"container engine: {engine if engine == 'docker' else 'none'}", status
+    assert status[2] == f"container engine: {'docker' if docker else 'none'}", status
     log = (work / "output-run.log").read_text()
     assert "PIPELINE SUCCEEDED" in log, log[-2000:]
-    if engine:
+    if docker:
         check_results(work, published)
 
 
@@ -305,16 +305,16 @@ def check_results(work: Path, published: Path) -> None:
         assert names and set(names.values()) == {2}, Counter(names.values())
 
 
-def check_resume(work: Path, sheet: Path, *, engine: str | None) -> None:
+def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
     """Resumed runs reuse the downloads, and then every task."""
-    assert run_atac(work, sheet, engine=engine, resume=True).returncode == 0
+    assert run_atac(work, sheet, docker=docker, resume=True).returncode == 0
     rows = trace_rows(work, "resume")
     for process in ("DOWNLOAD", "FASTQC", "ATAC_TRIM"):
         tasks = [row for row in rows if row["name"].split(" ")[0] == process]
         assert tasks and all(row["status"] == "CACHED" for row in tasks), tasks
     # Newly published references change staged input paths on the first resume.
     # A second resume must cache all downstream computation at those stable paths.
-    assert run_atac(work, sheet, engine=engine, resume=True, suffix="stable").returncode == 0
+    assert run_atac(work, sheet, docker=docker, resume=True, suffix="stable").returncode == 0
     rows = trace_rows(work, "stable")
     assert rows and all(row["status"] == "CACHED" for row in rows), rows
 
@@ -357,24 +357,24 @@ def main() -> None:
         "--keep", action="store_true", help="Retain fixtures, logs, and work directories"
     )
     args = parser.parse_args()
-    engine = "docker" if args.docker else None
+    docker = args.docker
     runs = ROOT / "tests" / ".runs"
     runs.mkdir(exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix=f"atac-{engine or 'regression'}-", dir=runs))
+    work = Path(tempfile.mkdtemp(prefix=f"atac-{'docker' if docker else 'regression'}-", dir=runs))
     passed = False
     try:
         (work / "inputs").mkdir()
-        with serve(work / "inputs", docker=engine == "docker") as base_url:
-            sheet = create_fixture(work, base_url, engine=engine)
-            assert run_atac(work, sheet, engine=engine).returncode == 0
-            check_outputs(work, engine=engine)
-            if engine:
-                check_resume(work, sheet, engine=engine)
+        with serve(work / "inputs", docker=docker) as base_url:
+            sheet = create_fixture(work, base_url, docker=docker)
+            assert run_atac(work, sheet, docker=docker).returncode == 0
+            check_outputs(work, docker=docker)
+            if docker:
+                check_resume(work, sheet, docker=docker)
             else:
                 # Independent of each other, each in its own launch folder.
                 in_parallel(
                     [
-                        functools.partial(check_resume, work, sheet, engine=engine),
+                        functools.partial(check_resume, work, sheet, docker=docker),
                         functools.partial(check_failures, work, sheet),
                     ]
                 )
@@ -384,7 +384,7 @@ def main() -> None:
                     "bare.fa.gz",
                     "genes.bed",
                 ]
-        label = f"Real-tool ({engine}) bulk ATAC" if engine else "Bulk ATAC Nextflow regression"
+        label = "Real-tool (docker) bulk ATAC" if docker else "Bulk ATAC Nextflow regression"
         print(f"{label} validation passed.", flush=True)
         passed = True
     finally:
