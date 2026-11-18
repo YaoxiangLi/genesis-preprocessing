@@ -15,7 +15,7 @@ for example one per cell type, and each pseudobulk gets peaks, a cut-site track 
 
 ```bash
 # On Perlmutter or Sherlock: submit the run as a Slurm job.
-pixi run submit-pipeline -- --workflow scatac-seq -n scatac-A /path/scatac.tsv
+pixi run submit-pipeline --workflow scatac-seq -n scatac-A /path/scatac.tsv
 # To debug locally with Docker, on a small sheet.
 pixi run pipeline-scatac -w /tmp/genesis -n scatac-A -R /data/references /data/scatac.tsv
 ```
@@ -124,7 +124,7 @@ pipeline-scatac-reads`, `conf/scatac-reads.config`) makes each library's fragmen
 ![Genesis scATAC from 10x reads workflow metro map](../../docs/images/genesis_scatac_reads_metro_map.svg)
 
 ```bash
-pixi run submit-pipeline -- --workflow scatac-reads -n scatac-B /path/scatac-reads.tsv
+pixi run submit-pipeline --workflow scatac-reads -n scatac-B /path/scatac-reads.tsv
 ```
 
 ```tsv

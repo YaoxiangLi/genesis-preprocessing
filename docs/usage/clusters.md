@@ -1,9 +1,10 @@
 # Running on Perlmutter and Sherlock
 
-Submit each run from a login node, in a checkout that compute nodes can read:
+Submit each run from a login node, in a checkout that compute nodes can read. To run the tss-seq
+workflow:
 
 ```bash
-pixi run submit-pipeline -T 2-00:00:00 -- --workflow tss-seq -R /path/references /path/tss.tsv
+pixi run submit-pipeline --workflow tss-seq /path/tss.tsv
 ```
 
 `scripts/submit-pipeline.sh` submits the Nextflow manager as a Slurm job and returns once it is
@@ -14,7 +15,7 @@ manager job runs from the current folder with 2 CPUs and 8 GB by default, and it
 `shared` QOS on Perlmutter (at most 48 hours; `-Q workflow` for NERSC's `workflow` QOS, up to 90
 days, once your project has access), the `normal` partition on Sherlock. Its walltime (`-T`) caps
 the whole run. Two minutes before it, Nextflow is told to stop and cancels its task jobs; submit
-again with `-resume` to continue the run.
+again (the config makes resuming the default) to continue the run.
 
 The scripts choose a profile for the host they run on, unless `-p` names one:
 
@@ -24,8 +25,8 @@ The scripts choose a profile for the host they run on, unless `-p` names one:
 | Sherlock (Slurm with `apptainer`) | `sherlock` | Slurm | Apptainer |
 | Anything else | `local,docker` | local | Docker |
 
-Another Slurm cluster also gets `local,docker`, with a note on stderr; choose its profile (`slurm`)
-with `-p`. `--queue` chooses where the task jobs go, and means what each site calls it:
+Any other Slurm cluster is assigned `local,docker`, with a note on stderr. Specify the executor and
+container system with `-p` (e.g. `slurm,apptainer`). `--queue` chooses where the task jobs go, and means what each site calls it:
 
 | Profile | `--queue` is | Default |
 | --- | --- | --- |
@@ -58,7 +59,7 @@ in `conf/sites/` show these settings; copy one outside the checkout and pass it 
 
 ```bash
 cd ~/genesis-preprocessing
-pixi run submit-pipeline -- /path/samples.tsv
+pixi run submit-pipeline --workflow dap-seq /path/samples.tsv
 ```
 
 **Images.** Compute nodes only run images that podman-hpc has pulled and squashed into
@@ -97,16 +98,17 @@ profile (`-p nersc,test`) checks every minute and caps tasks at 1 CPU, 2 GB and 
 submit-pipeline -Q workflow`) is meant for longer ones. `submit-pipeline` pulls the images on the
 login node before submitting, since pulls inside jobs run out of memory.
 
-**Checking a setup.** A stub run starts every task in its container without running the tools:
+**Checking a setup.** A stub run starts every task in its container without running the tools.
+The scheduler may start it sooner with a shorter walltime:
 
 ```bash
-pixi run submit-pipeline -- -p nersc,test -R /path/references /path/samples.tsv -stub-run
+pixi run submit-pipeline -T 00:30:00 -p nersc,test --workflow tss-seq /path/samples.tsv -stub-run
 ```
 
 ## Sherlock (Stanford)
 
 ```bash
-pixi run submit-pipeline -- /path/samples.tsv
+pixi run submit-pipeline --workflow rna-seq /path/samples.tsv
 ```
 
 The `sherlock` profile submits to the `normal` partition (`--queue`, a partition here, selects

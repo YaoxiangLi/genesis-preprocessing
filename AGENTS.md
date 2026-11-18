@@ -12,7 +12,8 @@ The main project environment is managed by pixi. There are subprojects:
 
 ### Compute resources
 Production runs use NERSC Perlmutter: `pixi run submit-pipeline` submits the Nextflow manager as
-a Slurm job. Local runs (macOS or Linux, Docker) are for debugging and tests.
+a Slurm job. Local runs (macOS or Linux, Docker) are for debugging and tests. We keep the
+ability to run on Sherlock in case we need extra compute.
 - Use existing SSH authentication. If authentication fails, report the issue;
   do not create or modify credentials, keys, or SSH configuration.
 - Use only accounts, queues and allocations authorized for the task. Keep local

@@ -16,7 +16,7 @@ clusters and QC. TIF-seq, nanoCAGE and nanoPARE are not supported yet.
 
 ```bash
 # On Perlmutter or Sherlock: submit the run as a Slurm job.
-pixi run submit-pipeline -- --workflow tss-seq -n tss-A /path/tss.tsv
+pixi run submit-pipeline --workflow tss-seq -n tss-A /path/tss.tsv
 # To debug locally with Docker, on a small sheet.
 pixi run pipeline-tss -w /tmp/genesis -n tss-A -R /data/references /data/tss.tsv
 ```

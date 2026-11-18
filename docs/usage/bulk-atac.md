@@ -10,7 +10,7 @@ reference cache and image pins, with `workflows/atac-seq.nf` as the workflow and
 
 ```bash
 # On Perlmutter or Sherlock: submit the run as a Slurm job.
-pixi run submit-pipeline -- --workflow atac-seq -n atac-A /path/atac.tsv
+pixi run submit-pipeline --workflow atac-seq -n atac-A /path/atac.tsv
 # To debug locally with Docker, on a small sheet.
 pixi run pipeline-atac -w /tmp/genesis -n atac-A -R /data/references /data/atac.tsv
 ```

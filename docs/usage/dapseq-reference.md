@@ -53,10 +53,10 @@ sheets elsewhere as absolute paths:
 pixi run pipeline --help
 
 # Submit a run on Perlmutter or Sherlock; the cluster profile is chosen automatically.
-pixi run submit-pipeline -- -R /path/references /path/dap.tsv
+pixi run submit-pipeline --workflow dap-seq -R /path/references /path/dap.tsv
 
 # Continue a previous run using Nextflow's task cache.
-pixi run submit-pipeline -- -R /path/references /path/dap.tsv -resume
+pixi run submit-pipeline --workflow dap-seq -R /path/references /path/dap.tsv -resume
 
 # Debug locally with Docker on the small test sheet.
 pixi run pipeline samplesheets/Sorghum_bicolor/dap-seq-PRJNA1177471-test.tsv

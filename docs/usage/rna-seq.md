@@ -11,7 +11,7 @@ layout, reference folder and image pins, with `workflows/rna-seq.nf` as the work
 
 ```bash
 # On Perlmutter or Sherlock: submit the run as a Slurm job.
-pixi run submit-pipeline -- --workflow rna-seq -n rna-A /path/rna.tsv
+pixi run submit-pipeline --workflow rna-seq -n rna-A /path/rna.tsv
 # To debug locally with Docker, on a small sheet.
 pixi run pipeline-rna -w /tmp/genesis -n rna-A -R /data/references /data/rna.tsv
 ```
