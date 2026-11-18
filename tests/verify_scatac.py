@@ -131,7 +131,7 @@ def run_scatac(
     work: Path,
     sheet: Path,
     *,
-    engine: str | None = None,
+    docker: bool = False,
     resume: bool = False,
     suffix: str | None = None,
     expect_failure: bool = False,
@@ -140,8 +140,8 @@ def run_scatac(
     suffix = suffix or ("resume" if resume else "run")
     limits = work / "limits.config"
     if not limits.exists():
-        text = executor_limits(docker=engine == "docker")
-        if engine == "docker":
+        text = executor_limits(docker=docker)
+        if docker:
             # Linux Docker only resolves host.docker.internal with an explicit host-gateway mapping.
             text += (
                 "docker.runOptions = '-u $(id -u):$(id -g) "
@@ -157,7 +157,7 @@ def run_scatac(
         "-c",
         str(ROOT / "conf/scatac-seq.config"),
         "-profile",
-        f"local,test,{engine}" if engine else "local,test",
+        "local,test,docker" if docker else "local,test",
         "--input",
         str(sheet),
         "--references",
@@ -173,11 +173,11 @@ def run_scatac(
         "-ansi-log",
         "false",
     ]
-    if not engine:
+    if not docker:
         command.append("-stub-run")
     if resume:
         command.append("-resume")
-    print(f"Running {engine or 'stub'} scATAC ({suffix}) in {work}", flush=True)
+    print(f"Running {'docker' if docker else 'stub'} scATAC ({suffix}) in {work}", flush=True)
     environment = {
         **os.environ,
         "PATH": f"{Path(sys.executable).parent}:{os.environ['PATH']}",
@@ -189,7 +189,7 @@ def run_scatac(
         cwd=work,
         env=environment,
         log=work / f"output-{suffix}.log",
-        timeout=3600 if engine else 300,
+        timeout=3600 if docker else 300,
         expect_failure=expect_failure,
     )
 
@@ -199,13 +199,13 @@ def read_table(path: Path) -> list[dict[str, str]]:
     return list(csv.DictReader(lines, delimiter="\t"))
 
 
-def check_outputs(work: Path, *, engine: str | None) -> None:
+def check_outputs(work: Path, *, docker: bool) -> None:
     """Assert the process wiring, publication and recorded provenance."""
     rows = trace_rows(work)
     assert all(row["status"] == "COMPLETED" for row in rows), rows
     counts = Counter(row["name"].split(" ")[0] for row in rows)
     # Stub libraries have a single group; real ones have A and B.
-    groups = 4 if engine else 2
+    groups = 4 if docker else 2
     assert counts == {
         "GET_REFERENCES:CHROM_SIZES": 1,
         "GET_REFERENCES:BWA_MEM3_INDEX": 1,
@@ -228,7 +228,7 @@ def check_outputs(work: Path, *, engine: str | None) -> None:
             f"qc/{sample}.scatac_library_mqc.tsv",
         ):
             assert (folder / name).is_file(), folder / name
-        for group in ("A", "B") if engine else ("all",):
+        for group in ("A", "B") if docker else ("all",):
             pseudobulk = folder / "groups" / group
             for name in (
                 f"{sample}.{group}.macs3_peaks.narrowPeak.gz",
@@ -242,10 +242,10 @@ def check_outputs(work: Path, *, engine: str | None) -> None:
     ).read_bytes()
     status = (published / "git-status.txt").read_text().splitlines()
     assert status[0].startswith("branch: ") and status[1].startswith("commit: "), status
-    assert status[2] == f"container engine: {engine if engine == 'docker' else 'none'}", status
+    assert status[2] == f"container engine: {'docker' if docker else 'none'}", status
     log = (work / "output-run.log").read_text()
     assert "PIPELINE SUCCEEDED" in log, log[-2000:]
-    if engine:
+    if docker:
         check_results(work, published)
 
 
@@ -331,20 +331,20 @@ def check_cut_sites(work: Path) -> None:
         assert cuts == expected, row["name"]
 
 
-def check_resume(work: Path, sheet: Path, *, engine: str | None) -> None:
+def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
     """Resumed runs reuse the downloads, and then every task."""
-    assert run_scatac(work, sheet, engine=engine, resume=True).returncode == 0
+    assert run_scatac(work, sheet, docker=docker, resume=True).returncode == 0
     rows = trace_rows(work, "resume")
     tasks = [row for row in rows if row["name"].split(" ")[0] == "SCATAC_DOWNLOAD"]
     assert tasks and all(row["status"] == "CACHED" for row in tasks), tasks
     # Newly published chromosome sizes change staged input paths on the first resume.
     # A second resume must cache all downstream computation at those stable paths.
-    assert run_scatac(work, sheet, engine=engine, resume=True, suffix="stable").returncode == 0
+    assert run_scatac(work, sheet, docker=docker, resume=True, suffix="stable").returncode == 0
     rows = trace_rows(work, "stable")
     assert rows and all(row["status"] == "CACHED" for row in rows), rows
 
 
-def check_rejected_fragments(work: Path, sheet: Path, base_url: str, *, engine: str) -> None:
+def check_rejected_fragments(work: Path, sheet: Path, base_url: str, *, docker: bool) -> None:
     """Cell barcodes that match no fragment, e.g. without the -1 suffix, stop the library."""
     inputs = work / "inputs"
     cells = (inputs / "rep1.cells.tsv").read_text()
@@ -355,13 +355,13 @@ def check_rejected_fragments(work: Path, sheet: Path, base_url: str, *, engine: 
     changed = {"cells_url": f"{base_url}/suffix.cells.tsv", "sample_id": "suffix"}
     write_sheet(candidate, [{**row, **changed}])
     case = launch_folder(work, "suffix")
-    result = run_scatac(case, candidate, engine=engine, expect_failure=True)
+    result = run_scatac(case, candidate, docker=docker, expect_failure=True)
     assert result.returncode != 0
     errors = failed_task_errors(case / "work")
     assert "No fragments for any listed barcode" in errors, errors[-3000:]
 
 
-def check_duplicate_barcodes(work: Path, sheet: Path, base_url: str, *, engine: str) -> None:
+def check_duplicate_barcodes(work: Path, sheet: Path, base_url: str, *, docker: bool) -> None:
     """A barcode listed twice, even in two groups, stops the library."""
     inputs = work / "inputs"
     lines = (inputs / "rep1.cells.tsv").read_text().splitlines(keepends=True)
@@ -373,7 +373,7 @@ def check_duplicate_barcodes(work: Path, sheet: Path, base_url: str, *, engine: 
     changed = {"cells_url": f"{base_url}/twice.cells.tsv", "sample_id": "twice"}
     write_sheet(candidate, [{**row, **changed}])
     case = launch_folder(work, "twice")
-    result = run_scatac(case, candidate, engine=engine, expect_failure=True)
+    result = run_scatac(case, candidate, docker=docker, expect_failure=True)
     assert result.returncode != 0
     message = f"barcode {barcode} is listed again (first on line 2)"
     errors = failed_task_errors(case / "work")
@@ -417,42 +417,44 @@ def main() -> None:
         "--keep", action="store_true", help="Retain fixtures, logs, and work directories"
     )
     args = parser.parse_args()
-    engine = "docker" if args.docker else None
+    docker = args.docker
     runs = ROOT / "tests" / ".runs"
     runs.mkdir(exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix=f"scatac-{engine or 'regression'}-", dir=runs))
+    work = Path(
+        tempfile.mkdtemp(prefix=f"scatac-{'docker' if docker else 'regression'}-", dir=runs)
+    )
     passed = False
     try:
         (work / "inputs").mkdir()
-        with serve(work / "inputs", docker=engine == "docker") as base_url:
+        with serve(work / "inputs", docker=docker) as base_url:
             sheet = create_fixture(work, base_url)
-            assert run_scatac(work, sheet, engine=engine).returncode == 0
-            check_outputs(work, engine=engine)
-            if engine:
+            assert run_scatac(work, sheet, docker=docker).returncode == 0
+            check_outputs(work, docker=docker)
+            if docker:
                 check_cut_sites(work)
             # Independent of each other, each in its own launch folder, so they run at once.
             phases: list[Callable[[], object]] = [
-                functools.partial(check_resume, work, sheet, engine=engine)
+                functools.partial(check_resume, work, sheet, docker=docker)
             ]
-            if engine:
+            if docker:
                 phases += [
                     functools.partial(
-                        check_rejected_fragments, work, sheet, base_url, engine=engine
+                        check_rejected_fragments, work, sheet, base_url, docker=docker
                     ),
                     functools.partial(
-                        check_duplicate_barcodes, work, sheet, base_url, engine=engine
+                        check_duplicate_barcodes, work, sheet, base_url, docker=docker
                     ),
                 ]
             else:
                 phases.append(functools.partial(check_failures, work, sheet))
             in_parallel(phases)
-            if not engine:
+            if not docker:
                 # Stub runs never publish into the references folder.
                 assert sorted(p.name for p in (work / "references").iterdir()) == [
                     "genes.bed",
                     "sc.fa.gz",
                 ]
-        label = f"Real-tool ({engine}) scATAC" if engine else "scATAC Nextflow regression"
+        label = "Real-tool (docker) scATAC" if docker else "scATAC Nextflow regression"
         print(f"{label} validation passed.", flush=True)
         passed = True
     finally:

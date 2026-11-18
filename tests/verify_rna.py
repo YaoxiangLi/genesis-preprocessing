@@ -141,7 +141,7 @@ def transcripts(contigs: dict[str, str]) -> dict[str, list[str]]:
     return result
 
 
-def create_fixture(work: Path, base_url: str, *, engine: str | None) -> Path:
+def create_fixture(work: Path, base_url: str, *, docker: bool) -> Path:
     generator = random.Random(2718)
     chromosome = list("".join(generator.choices("ACGT", k=300000)))
     start, end = GENES[4][2][0]
@@ -198,8 +198,8 @@ def create_fixture(work: Path, base_url: str, *, engine: str | None) -> Path:
         )
     sheet = work / "samples.tsv"
     write_sheet(sheet, rows)
-    limits = executor_limits(docker=engine == "docker")
-    if engine == "docker":
+    limits = executor_limits(docker=docker)
+    if docker:
         # Linux Docker only resolves host.docker.internal with an explicit host-gateway mapping.
         limits += (
             "docker.runOptions = '-u $(id -u):$(id -g) "
@@ -213,7 +213,7 @@ def run_rna(
     work: Path,
     sheet: Path,
     *,
-    engine: str | None = None,
+    docker: bool = False,
     resume: bool = False,
     suffix: str | None = None,
     expect_failure: bool = False,
@@ -229,7 +229,7 @@ def run_rna(
         "-c",
         str(ROOT / "conf/rna-seq.config"),
         "-profile",
-        f"local,test,{engine}" if engine else "local,test",
+        "local,test,docker" if docker else "local,test",
         "--input",
         str(sheet),
         "--references",
@@ -247,11 +247,11 @@ def run_rna(
         "-ansi-log",
         "false",
     ]
-    if not engine:
+    if not docker:
         command.append("-stub-run")
     if resume:
         command.append("-resume")
-    print(f"Running {engine or 'stub'} RNA-seq ({suffix}) in {work}", flush=True)
+    print(f"Running {'docker' if docker else 'stub'} RNA-seq ({suffix}) in {work}", flush=True)
     environment = {
         **os.environ,
         "PATH": f"{Path(sys.executable).parent}:{os.environ['PATH']}",
@@ -263,7 +263,7 @@ def run_rna(
         cwd=work,
         env=environment,
         log=work / f"output-{suffix}.log",
-        timeout=3600 if engine else 300,
+        timeout=3600 if docker else 300,
         expect_failure=expect_failure,
     )
 
@@ -273,7 +273,7 @@ def read_table(path: Path) -> list[dict[str, str]]:
     return list(csv.DictReader(lines, delimiter="\t"))
 
 
-def check_outputs(work: Path, *, engine: str | None) -> None:
+def check_outputs(work: Path, *, docker: bool) -> None:
     """Assert the process wiring, publication and recorded provenance."""
     rows = trace_rows(work)
     assert all(row["status"] == "COMPLETED" for row in rows), rows
@@ -314,7 +314,7 @@ def check_outputs(work: Path, *, engine: str | None) -> None:
     assert status[0].startswith("branch: ") and status[1].startswith("commit: "), status
     log = (work / "output-run.log").read_text()
     assert "PIPELINE SUCCEEDED" in log, log[-2000:]
-    if engine:
+    if docker:
         check_results(published)
 
 
@@ -359,14 +359,14 @@ def check_results(published: Path) -> None:
         assert qc["max_intron"] == "3000", qc
 
 
-def check_resume(work: Path, sheet: Path, *, engine: str | None) -> None:
+def check_resume(work: Path, sheet: Path, *, docker: bool) -> None:
     """Resumed runs reuse the downloads, and then every task."""
-    assert run_rna(work, sheet, engine=engine, resume=True).returncode == 0
+    assert run_rna(work, sheet, docker=docker, resume=True).returncode == 0
     rows = trace_rows(work, "resume")
     tasks = [row for row in rows if row["name"].split(" ")[0] == "DOWNLOAD"]
     assert tasks and all(row["status"] == "CACHED" for row in tasks), tasks
     indexes = [row for row in rows if row["name"].split(" ")[0] == "GET_STAR_INDEX:RNA_INDEX"]
-    if engine:
+    if docker:
         # Published STAR indexes are reused from disk without any index task.
         assert not indexes, indexes
     else:
@@ -375,7 +375,7 @@ def check_resume(work: Path, sheet: Path, *, engine: str | None) -> None:
     # Newly published chromosome sizes and STAR indexes change staged input paths on the first
     # resume.
     # A second resume must cache all downstream computation at those stable paths.
-    assert run_rna(work, sheet, engine=engine, resume=True, suffix="stable").returncode == 0
+    assert run_rna(work, sheet, docker=docker, resume=True, suffix="stable").returncode == 0
     rows = trace_rows(work, "stable")
     assert rows and all(row["status"] == "CACHED" for row in rows), rows
 
@@ -460,7 +460,7 @@ def reference_products(references: Path, ref_id: str, built: Path | None, gtf: P
     (references / f"{index.name}.sha256").write_text("\n".join(record) + "\n")
 
 
-def check_star_rebuild(work: Path, sheet: Path, *, engine: str | None) -> None:
+def check_star_rebuild(work: Path, sheet: Path, *, docker: bool) -> None:
     """Rebuild a STAR index only when its record no longer matches its inputs and files.
 
     Each scenario is its own copy of the plant reference and annotation with one library, so a
@@ -468,7 +468,7 @@ def check_star_rebuild(work: Path, sheet: Path, *, engine: str | None) -> None:
     """
     built = work / "references"
     plant_gtf = task_dir(work, "RNA_ANNOTATION (plant)") / "plant.genes.gtf"
-    if engine:
+    if docker:
         # The real run published indexes and records the reader must accept.
         expected = published_record(built, "plant", "plant.gff3", plant_gtf)
         assert read_star_record(built / "plant.plant.gff3.star.sha256") == expected
@@ -531,8 +531,8 @@ def check_star_rebuild(work: Path, sheet: Path, *, engine: str | None) -> None:
         shutil.copy2(built / "plant.fa.gz", references / f"{ref_id}.fa.gz")
         shutil.copy2(built / "plant.gff3", references / f"{ref_id}.gff3")
         # Stub annotation tasks pass the annotation through as the GTF.
-        gtf = plant_gtf if engine else references / f"{ref_id}.gff3"
-        reference_products(references, ref_id, built if engine else None, gtf)
+        gtf = plant_gtf if docker else references / f"{ref_id}.gff3"
+        reference_products(references, ref_id, built if docker else None, gtf)
         if change:
             change(references, ref_id)
         annotations[ref_id] = (
@@ -549,7 +549,7 @@ def check_star_rebuild(work: Path, sheet: Path, *, engine: str | None) -> None:
     candidate = case / "samples.tsv"
     write_sheet(candidate, rows)
     before = {path: path.read_bytes() for path in sorted(references.rglob("*")) if path.is_file()}
-    assert run_rna(case, candidate, engine=engine).returncode == 0
+    assert run_rna(case, candidate, docker=docker).returncode == 0
     names = [row["name"] for row in trace_rows(case)]
     prefix = "GET_STAR_INDEX:RNA_INDEX ("
     tags = {
@@ -558,7 +558,7 @@ def check_star_rebuild(work: Path, sheet: Path, *, engine: str | None) -> None:
     rebuilt = {ref_id for ref_id, change in cases.items() if change}
     assert tags == rebuilt, sorted(tags)
     after = {path: path.read_bytes() for path in sorted(references.rglob("*")) if path.is_file()}
-    if engine:
+    if docker:
         # A rebuild publishes a fresh index and a record matching it.
         for ref_id in rebuilt:
             gtf = task_dir(case, f"RNA_ANNOTATION ({ref_id})") / f"{ref_id}.genes.gtf"
@@ -622,26 +622,26 @@ def main() -> None:
         help="Retain fixtures, logs, and work directories",
     )
     args = parser.parse_args()
-    engine = "docker" if args.docker else None
+    docker = args.docker
     runs = ROOT / "tests" / ".runs"
     runs.mkdir(exist_ok=True)
-    work = Path(tempfile.mkdtemp(prefix=f"rna-{engine or 'regression'}-", dir=runs))
+    work = Path(tempfile.mkdtemp(prefix=f"rna-{'docker' if docker else 'regression'}-", dir=runs))
     passed = False
     try:
         (work / "inputs").mkdir()
-        with serve(work / "inputs", docker=engine == "docker") as base_url:
-            sheet = create_fixture(work, base_url, engine=engine)
-            assert run_rna(work, sheet, engine=engine).returncode == 0
-            check_outputs(work, engine=engine)
+        with serve(work / "inputs", docker=docker) as base_url:
+            sheet = create_fixture(work, base_url, docker=docker)
+            assert run_rna(work, sheet, docker=docker).returncode == 0
+            check_outputs(work, docker=docker)
             # Independent of each other, each in its own launch folder, so they run at once.
             phases: list[Callable[[], object]] = [
-                functools.partial(check_resume, work, sheet, engine=engine),
-                functools.partial(check_star_rebuild, work, sheet, engine=engine),
+                functools.partial(check_resume, work, sheet, docker=docker),
+                functools.partial(check_star_rebuild, work, sheet, docker=docker),
             ]
-            if not engine:
+            if not docker:
                 phases.append(functools.partial(check_failures, work, sheet))
             in_parallel(phases)
-        label = f"Real-tool ({engine}) RNA-seq" if engine else "RNA-seq Nextflow regression"
+        label = "Real-tool (docker) RNA-seq" if docker else "RNA-seq Nextflow regression"
         print(f"{label} validation passed.", flush=True)
         passed = True
     finally:

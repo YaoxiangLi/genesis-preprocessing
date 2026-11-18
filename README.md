@@ -70,9 +70,9 @@ reference genome: put the FASTA and annotation named in the sheet in your refere
 `$CFS/PROJECT/$USER/references` by default. Then submit the run from the checkout:
 
 ```bash
-pixi run submit-pipeline -- --workflow atac-seq -n atac-A /path/atac.tsv
+pixi run submit-pipeline --workflow atac-seq -n atac-A /path/atac.tsv
 # To continue a run that stopped, submit it again with -resume.
-pixi run submit-pipeline -- --workflow atac-seq -n atac-A /path/atac.tsv -resume
+pixi run submit-pipeline --workflow atac-seq -n atac-A /path/atac.tsv -resume
 ```
 
 The command returns once the manager job is queued; its log goes to `~/logs/genesis/`. `--workflow`
