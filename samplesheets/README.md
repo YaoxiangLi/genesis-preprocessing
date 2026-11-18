@@ -25,8 +25,7 @@ Reference files are named in the sheet and looked up in the folder given by
 project's shared references folder.
 
 ```bash
-pixi run submit-pipeline -- --workflow rna-seq -n rna-test \
-    -R /path/to/references samplesheets/rna-seq-test.tsv
+pixi run submit-pipeline --workflow rna-seq -R /path/to/references samplesheets/rna-seq-test.tsv
 ```
 
 ## Arabidopsis thaliana
