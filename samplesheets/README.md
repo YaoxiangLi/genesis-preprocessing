@@ -9,7 +9,7 @@ HTTPS, or to GSA (China) for CRA studies.
 | Sheet | Libraries | FASTQ | What it covers |
 | --- | ---: | ---: | --- |
 | `dap-seq-test.tsv` | 8 | 28 GB | A. thaliana SE treatment and control (GSE60141, O'Malley 2016); Sorghum PE multiDAP (PRJNA1177471): 5 treatments, from 5M to 64M pairs, sharing one control |
-| `atac-seq-test.tsv` | 5 | 5 GB | A. thaliana seedling and leaf, Sorghum leaf; two libraries download from GSA |
+| `atac-seq-test.tsv` | 4 | 9 GB | A. thaliana seedling and leaf, Sorghum leaf; one library downloads from GSA |
 | `rna-seq-test.tsv` | 6 | 6 GB | Both species; SE and PE; `reverse`, `forward` and `unstranded` libraries |
 | `tss-seq-test.tsv` | 6 | 21 GB | A. thaliana CAGE, nAnT-iCAGE, TSS-seq and csRNA-seq (SE); Sorghum RAMPAGE (SE, the TSS mate) and Smar2C2 (PE, 126M pairs, the largest library) |
 | `scatac-reads-test.tsv` | 3 | 30 GB | A. thaliana 10x ATAC v1, root nuclei (GSE155304, 2 runs each); Sorghum 10x multiome ATAC, 0 h de-etiolation (SRP474955, 4 lane runs) |
